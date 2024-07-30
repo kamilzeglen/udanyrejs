@@ -12,7 +12,7 @@ services:
         ports:
             - "3006:3006"
         networks:
-            - evpanel_default
+            - udanyrejs_default
 
     udanyrejs-backend:
         build:
@@ -25,8 +25,8 @@ services:
         ports:
             - "5006:5006"
         networks:
-            - evpanel_default
+            - udanyrejs_default
 
 networks:
-    evpanel_default:
+    udanyrejs_default:
         external: true
