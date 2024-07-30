@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+    udanyrejs-frontend:
+        build:
+            context: ./web
+            dockerfile: Dockerfile
+        container_name: udanyrejs-frontend
+        env_file:
+            - web/.env
+        restart: always
+        ports:
+            - "3006:3006"
+        networks:
+            - evpanel_default
+
+    udanyrejs-backend:
+        build:
+            context: ./api
+            dockerfile: Dockerfile
+        container_name: udanyrejs-backend
+        env_file:
+            - api/.env
+        restart: always
+        ports:
+            - "5006:5006"
+        networks:
+            - evpanel_default
+
+networks:
+    evpanel_default:
+        external: true

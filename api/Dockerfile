@@ -20,4 +20,4 @@ COPY . .
 EXPOSE 6001
 
 # Run app
-CMD ["gunicorn", "--bind", "0.0.0.0:5001", "src.__init__:create_app('Production')"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5006", "src.__init__:create_app('Production')"]
