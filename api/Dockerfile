@@ -4,6 +4,7 @@ FROM python:3.12-alpine
 WORKDIR /backend
 
 # System deps:
+RUN pip install setuptools
 RUN pip install --no-cache-dir "poetry==1.4.0"
 
 # Copy only requirements to cache them in docker layer
