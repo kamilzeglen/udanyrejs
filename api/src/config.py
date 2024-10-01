@@ -27,8 +27,6 @@ class Config(object):
     # CORS
     CORS_HEADERS = "Content-Type"
 
-
-
     # Email
     MAIL_SERVER = "smtp.gmail.com"
     MAIL_PORT = 465
