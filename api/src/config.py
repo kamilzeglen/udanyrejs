@@ -24,6 +24,8 @@ class Config(object):
     JWT_COOKIE_SECURE = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
 
+
+
     # CORS
     CORS_HEADERS = "Content-Type"
 
