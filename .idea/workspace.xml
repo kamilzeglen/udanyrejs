@@ -5,118 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a80cb2a1-22cf-4325-a3f9-f042bb3f353f" name="Changes" comment="UdanyRejs 0.8">
-      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/udanyrejs.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/.env.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/.eslintrc.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/.prettierrc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/nest-cli.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/app.controller.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/app.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/app.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/interfaces/Itinerary.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/interfaces/company.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/interfaces/roles.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/main.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/create-offer.dto.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/itinerary-day.dto.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/update-offer.dto.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.controller.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.entity.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.entity.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/create-user.dto.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/update-user.dto.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.controller.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.entity.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.entity.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/typeorm.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/tsconfig.build.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/.editorconfig" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/angular.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/_interfaces/Itinerary.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/_interfaces/company.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/_interfaces/offer.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/_shared/offers.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-add/admin-panel-add.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-add/admin-panel-add.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-add/admin-panel-add.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-edit/admin-panel-edit.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-edit/admin-panel-edit.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel-edit/admin-panel-edit.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel/admin-panel.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel/admin-panel.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/admin-panel/admin-panel.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/app-routing.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/app.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/app.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/app.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/app.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/layout/layout.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/layout/layout.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/layout/layout.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/login/login.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/login/login.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/login/login.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-card/offer-card.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-card/offer-card.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-card/offer-card.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-details/offer-details.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-details/offer-details.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offer-details/offer-details.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offers/offers.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offers/offers.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/app/offers/offers.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/main.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/styles.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/tsconfig.spec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/.env" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/.eslintrc.cjs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/web/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/web/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/postcss.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/cruises-logos/aida.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/cruises-logos/aida.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/cruises-logos/msc.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/cruises-logos/msc.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/msc.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/navbar/wave-left.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/wave-left.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/navbar/wave-right.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/wave-right.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/udanyrejs/icon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/favicon.ico" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/udanyrejs/icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/assets/udanyrejs/logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/public/assets/logo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/contact.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/home.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/navbar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/components/offerCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/interfaces/offerCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/main.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/scss/index.scss" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/vite-env.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tailwind.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tsconfig.app.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/tsconfig.app.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/tsconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/tsconfig.node.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/vite.config.ts" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/app.controller.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/app.module.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/app.service.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/interfaces/company.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/interfaces/roles.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/main.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/migrations/1730581013648-initDB.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/migrations/1730583077962-SeedOffers.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/migrations/1731021610663-deleteUpdateCreateColumn.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/create-offer.dto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/update-offer.dto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.controller.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.module.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.service.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/create-user.dto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/update-user.dto.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.controller.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.module.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.service.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -275,8 +183,17 @@
       <workItem from="1731020536315" duration="3600000" />
       <workItem from="1731056686232" duration="619000" />
       <workItem from="1731191756776" duration="397000" />
-      <workItem from="1731192543249" duration="3480000" />
+      <workItem from="1731192543249" duration="4009000" />
     </task>
+    <task id="LOCAL-00001" summary="UdanyRejs 0.8">
+      <option name="closed" value="true" />
+      <created>1731197517710</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1731197517710</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -303,5 +220,9 @@
         <option value="$PROJECT_DIR$/api/src/modules/user/user.entity.js" />
       </list>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="UdanyRejs 0.8" />
+    <option name="LAST_COMMIT_MESSAGE" value="UdanyRejs 0.8" />
   </component>
 </project>
