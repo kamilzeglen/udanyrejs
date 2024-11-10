@@ -1,24 +1,17 @@
-FROM python:3.12-alpine
+# Używamy obrazu Node.js do budowania i uruchamiania aplikacji NestJS
+FROM node:18
 
-# Create app directory
-WORKDIR /backend
+# Ustawiamy katalog roboczy
+WORKDIR /app
 
-# System deps:
-RUN pip install setuptools
-RUN pip install --no-cache-dir "poetry==1.4.0"
+# Kopiujemy pliki projektu i instalujemy zależności
+COPY package*.json ./
+RUN npm install
 
-# Copy only requirements to cache them in docker layer
-COPY poetry.lock pyproject.toml ./
-
-# Project initialization:
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev
-
-# Copy project
+# Kopiujemy resztę kodu i budujemy aplikację
 COPY . .
+RUN npm run build
 
-# Expose port
-EXPOSE 6001
-
-# Run app
-CMD ["gunicorn", "--bind", "0.0.0.0:5006", "src.__init__:create_app('Production')"]
+# Ustawiamy zmienne środowiskowe dla NestJS
+EXPOSE 5006
+CMD ["npm", "run", "start:prod"]

@@ -5,26 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a80cb2a1-22cf-4325-a3f9-f042bb3f353f" name="Changes" comment="UdanyRejs 0.8">
-      <change afterPath="$PROJECT_DIR$/api/src/app.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/app.module.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/app.service.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/interfaces/company.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/interfaces/roles.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/migrations/1730581013648-initDB.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/migrations/1730583077962-SeedOffers.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/migrations/1731021610663-deleteUpdateCreateColumn.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/create-offer.dto.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/dto/update-offer.dto.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.module.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/offer/offer.service.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/create-user.dto.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/dto/update-user.dto.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.controller.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.module.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api/src/modules/user/user.service.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/api/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +14,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -40,6 +22,13 @@
     &quot;assignee&quot;: &quot;kamyrdol32&quot;
   }
 }</component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="master" />
+      </list>
+    </option>
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/kamyrdol32/udanyrejs.git&quot;,
@@ -183,7 +172,7 @@
       <workItem from="1731020536315" duration="3600000" />
       <workItem from="1731056686232" duration="619000" />
       <workItem from="1731191756776" duration="397000" />
-      <workItem from="1731192543249" duration="4009000" />
+      <workItem from="1731192543249" duration="4294000" />
     </task>
     <task id="LOCAL-00001" summary="UdanyRejs 0.8">
       <option name="closed" value="true" />
@@ -193,7 +182,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731197517710</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="UdanyRejs 0.8">
+      <option name="closed" value="true" />
+      <created>1731198016761</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1731198016761</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
