@@ -1,0 +1,20 @@
+<a class="offer-card" [routerLink]="['/offer-details', id]">
+  <!-- Logo firmy -->
+  <div class="logo-container" *ngIf="company">
+    <img src="{{'assets/cruises-logos/' + company + '.png'}}" alt="Logo firmy" class="company-logo"/>
+  </div>
+
+  <!-- Zdjęcie -->
+  <div class="image-container" *ngIf="image">
+    <img [src]="'data:image/png;base64, ' + image" alt="Zdjęcie statku" class="ship-image"/>
+  </div>
+
+  <!-- Opis oferty -->
+  <div class="offer-details">
+    <h2 class="offer-title">{{ name }}</h2>
+    <p><strong>Statek:</strong> {{ shipName }}</p>
+    <p><strong>Ilość nocy:</strong> {{ nights }} nocy</p>
+    <p><strong>Termin:</strong> {{ startDate }} - {{ endDate }}</p>
+    <p><strong>Cena od:</strong> {{ price }} PLN</p>
+  </div>
+</a>

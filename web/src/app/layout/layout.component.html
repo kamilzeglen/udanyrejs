@@ -1,0 +1,38 @@
+<div class="container">
+  <!-- Nagłówek -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <img src="assets/wave-left.png" class="wave wave-left" alt="Left Wave" />
+
+    <div class="navbar-content">
+      <!-- Link Oferty -->
+      <a routerLink="/" class="nav-link">
+        <span>Oferty</span>
+      </a>
+
+      <!-- Logo na środku -->
+      <div class="logo-container">
+        <img src="assets/logo.png" class="logo" alt="UdanyRejs Logo" />
+      </div>
+
+      <!-- Link Kontakt -->
+      <a routerLink="/contact" class="nav-link">
+        <span>Kontakt</span>
+      </a>
+    </div>
+
+    <img src="assets/wave-right.png" class="wave wave-right" alt="Right Wave" />
+  </div>
+</nav>
+
+
+  <!-- Sekcja główna na kontent -->
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Stopka -->
+  <footer class="footer">
+    Jakis teks
+  </footer>
+</div>

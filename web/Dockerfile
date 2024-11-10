@@ -1,19 +1,21 @@
-FROM node
+# Używamy obrazu Node.js do budowania aplikacji Angular
+FROM node:18 as build
 
-# Create app directory
-WORKDIR /frontend
+# Ustawiamy katalog roboczy
+WORKDIR /app
 
-# Copy package.json
+# Kopiujemy pliki projektu i instalujemy zależności
 COPY package*.json ./
-
-# Install app dependencies
 RUN npm install
 
-# Copy app source code
+# Kopiujemy resztę kodu i budujemy aplikację
 COPY . .
+RUN npm run build --prod
 
-# Expose port 3000
-EXPOSE 3001
+# Używamy serwera NGINX do serwowania aplikacji Angular
+FROM nginx:alpine
+COPY --from=build /app/dist/web /usr/share/nginx/html
 
-# Run app
-CMD [ "npm", "run", "dev" ]
+# Konfiguracja NGINX dla Angulara
+EXPOSE 3006
+CMD ["nginx", "-g", "daemon off;"]
