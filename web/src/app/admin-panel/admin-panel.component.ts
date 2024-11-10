@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {take} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
-import {OffersService} from '../_shared/offers.service';
+import {HttpService} from '../_shared/http.service';
 
 @Component({
   selector: 'app-admin-panel',
@@ -13,7 +13,7 @@ export class AdminPanelComponent implements OnInit {
   public offers: Offer[] | undefined;
 
   constructor(
-    private readonly offersService: OffersService
+    private readonly offersService: HttpService
   ) {
   }
 

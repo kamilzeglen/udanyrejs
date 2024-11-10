@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {OffersService} from '../_shared/offers.service';
+import {HttpService} from '../_shared/http.service';
 import {Offer} from '../_interfaces/offer';
 import * as moment from 'moment';
 import {ReplaySubject, take} from 'rxjs';
@@ -15,7 +15,7 @@ export class OffersComponent implements OnInit, OnDestroy {
   public offers: Offer[] | undefined;
 
   constructor(
-    private readonly offersService: OffersService
+    private readonly offersService: HttpService
   )
   {}
 
