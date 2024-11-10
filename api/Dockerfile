@@ -12,6 +12,9 @@ RUN npm install
 COPY . .
 RUN npm run build
 
+# Migrujemy dane
+CMD ["npm", "run", "migration:run"]
+
 # Ustawiamy zmienne środowiskowe dla NestJS
 EXPOSE 5006
 CMD ["npm", "run", "start:prod"]

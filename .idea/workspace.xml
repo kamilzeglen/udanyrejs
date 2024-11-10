@@ -4,24 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a80cb2a1-22cf-4325-a3f9-f042bb3f353f" name="Changes" comment="UdanyRejs 0.8">
-      <change afterPath="$PROJECT_DIR$/web/src/environments/environment.prod.ts.example" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/web/src/environments/environment.ts.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/api/.env.example" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/main.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/src/typeorm.ts" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/typeorm.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/web/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/web/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/angular.json" beforeDir="false" afterPath="$PROJECT_DIR$/web/angular.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/_shared/offers.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/_shared/http.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/admin-panel-add/admin-panel-add.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/admin-panel-add/admin-panel-add.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/admin-panel-edit/admin-panel-edit.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/admin-panel-edit/admin-panel-edit.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/admin-panel/admin-panel.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/admin-panel/admin-panel.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/offer-details/offer-details.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/offer-details/offer-details.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/src/app/offers/offers.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/web/src/app/offers/offers.component.ts" afterDir="false" />
+    <list default="true" id="a80cb2a1-22cf-4325-a3f9-f042bb3f353f" name="Changes" comment="UdanyRejs 0.8.1">
+      <change beforePath="$PROJECT_DIR$/api/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/api/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -198,7 +182,7 @@
       <workItem from="1731191756776" duration="397000" />
       <workItem from="1731192543249" duration="4294000" />
       <workItem from="1731198573335" duration="2295000" />
-      <workItem from="1731201011337" duration="1925000" />
+      <workItem from="1731201011337" duration="2151000" />
     </task>
     <task id="LOCAL-00001" summary="UdanyRejs 0.8">
       <option name="closed" value="true" />
@@ -224,7 +208,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731198779901</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="UdanyRejs 0.8.1">
+      <option name="closed" value="true" />
+      <created>1731202988283</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1731202988283</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -269,6 +261,7 @@
       <path value="$PROJECT_DIR$/api" />
     </ignored-roots>
     <MESSAGE value="UdanyRejs 0.8" />
-    <option name="LAST_COMMIT_MESSAGE" value="UdanyRejs 0.8" />
+    <MESSAGE value="UdanyRejs 0.8.1" />
+    <option name="LAST_COMMIT_MESSAGE" value="UdanyRejs 0.8.1" />
   </component>
 </project>
