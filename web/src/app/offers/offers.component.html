@@ -1,0 +1,22 @@
+<div class="offers" *ngIf="offers">
+  <div *ngFor="let offer of offers">
+    <app-offer-card
+      id="{{offer.id}}"
+      name="{{offer.name}}"
+      company="{{offer.company}}"
+      price="{{offer.price}}"
+      shipName="{{offer.shipName}}"
+      nights="{{offer.nights}}"
+      startDate="{{offer.startDate | date: 'dd/MM/yyyy'}}"
+      endDate="{{offer.endDate | date: 'dd/MM/yyyy'}}"
+      image="{{offer.image}}"
+      imageFileName="{{offer.imageFileName}}"
+      pdfFileName="{{offer.pdfFileName}}"
+      itinerary="{{offer.itinerary}}">
+    </app-offer-card>
+  </div>
+</div>
+
+<div class="spinner" *ngIf="!offers">
+  <span class="loader"></span>
+</div>

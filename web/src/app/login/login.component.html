@@ -1,0 +1,23 @@
+<div class="login">
+  <div class="login-panel">
+    <img src="assets/logo.png" alt="UdanyRejs Logo" class="logo" />
+    <h2 class="login-title">Zaloguj się</h2>
+    <form [formGroup]="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="Wpisz swój email" />
+        <div *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          <small class="error">Proszę podać poprawny adres e-mail.</small>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Hasło</label>
+        <input id="password" type="password" formControlName="password" placeholder="Wpisz swoje hasło" />
+        <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <small class="error">Hasło jest wymagane i musi mieć co najmniej 6 znaków.</small>
+        </div>
+      </div>
+      <button (click)="submitForm()" [disabled]="loginForm.invalid" class="login-btn">Zaloguj się</button>
+    </form>
+  </div>
+</div>
