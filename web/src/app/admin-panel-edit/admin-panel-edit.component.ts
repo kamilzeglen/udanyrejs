@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Company} from '../_interfaces/company';
-import {OffersService} from '../_shared/offers.service';
+import {HttpService} from '../_shared/http.service';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ReplaySubject, take} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
@@ -20,7 +20,7 @@ export class AdminPanelEditComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly offersService: OffersService,
+    private readonly offersService: HttpService,
     private readonly fb: FormBuilder) {
   }
 

@@ -14,8 +14,8 @@ RUN npm run build --prod
 
 # Używamy serwera NGINX do serwowania aplikacji Angular
 FROM nginx:alpine
-COPY --from=build /app/dist/web /usr/share/nginx/html
+COPY --from=build /app/dist/web/browser /usr/share/nginx/html
 
 # Konfiguracja NGINX dla Angulara
 EXPOSE 3006
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;", "-p", "3006"]

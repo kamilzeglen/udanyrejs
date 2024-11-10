@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Offer} from '../_interfaces/offer';
 import {Company} from '../_interfaces/company';
-import {OffersService} from '../_shared/offers.service';
+import {HttpService} from '../_shared/http.service';
 import {ReplaySubject, take} from 'rxjs';
 
 @Component({
@@ -17,7 +17,7 @@ export class AdminPanelAddComponent implements OnInit, OnDestroy {
   public companies = Object.keys(Company);
 
   constructor(
-    private readonly offersService: OffersService,
+    private readonly offersService: HttpService,
     private readonly fb: FormBuilder) {
   }
 

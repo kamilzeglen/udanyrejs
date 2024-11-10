@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ReplaySubject, take, takeUntil} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
-import {OffersService} from '../_shared/offers.service';
+import {HttpService} from '../_shared/http.service';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
@@ -16,7 +16,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   public offer: Offer;
 
   constructor(
-    private readonly offersService: OffersService,
+    private readonly offersService: HttpService,
     private readonly route: ActivatedRoute
   ) {
   }
