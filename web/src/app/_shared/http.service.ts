@@ -17,7 +17,7 @@ export class HttpService {
   }
 
   public getAllOffers(): Observable<Offer[]> {
-    const url = `${this.API_URL}/offers`;
+    const url = `${this.API_URL}/offers/`;
     return this.http.get<Offer[]>(url);
   }
 
