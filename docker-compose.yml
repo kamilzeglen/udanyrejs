@@ -8,7 +8,7 @@ services:
             - web/.env
         restart: always
         ports:
-            - "3006:3006"
+            - "3006:80"
         networks:
             - nginx-proxy-manager_default
             - udanyrejs_default
