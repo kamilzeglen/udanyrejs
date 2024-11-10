@@ -18,4 +18,3 @@ COPY --from=build /app/dist/web/browser /usr/share/nginx/html
 
 # Konfiguracja NGINX dla Angulara
 EXPOSE 3006
-CMD ["nginx", "-g", "daemon off;", "-p", "3006"]
