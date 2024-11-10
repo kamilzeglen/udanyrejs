@@ -7,8 +7,9 @@ async function bootstrap() {
       origin: process.env.WEB_URL,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       credentials: true,
-      allowedHeaders: 'Content-Type, Authorization',
+      allowedHeaders: ['Content-Type', 'Authorization'],
   })
+  console.log('Allowing origin: ', process.env.WEB_URL);
   await app.listen(process.env.APP_PORT || 3000);
 }
 bootstrap();
