@@ -9,9 +9,6 @@ services:
         restart: always
         ports:
             - "3006:3006"
-        volumes:
-            - /root/Projects/udanyrejs/PDFS:/PDFS
-            - /root/Projects/udanyrejs/PDFS:/IMAGES
         networks:
             - nginx-proxy-manager_default
             - udanyrejs_default
