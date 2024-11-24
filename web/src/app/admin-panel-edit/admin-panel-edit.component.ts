@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Company} from '../_interfaces/company';
-import {HttpService} from '../_shared/http.service';
+import {HttpService} from '../_shared/http/http.service';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ReplaySubject, take} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
@@ -30,7 +30,6 @@ ngOnInit(): void {
     company: ['', Validators.required],
     price: ['', Validators.required],
     shipName: ['', Validators.required],
-    nights: ['', [Validators.required, Validators.min(1)]],
     startDate: ['', Validators.required],
     endDate: ['', Validators.required],
     pdfUrl: ['', [Validators.required, Validators.pattern('https?://.+')]],
@@ -50,7 +49,6 @@ ngOnInit(): void {
         company: data.company,
         price: data.price,
         shipName: data.shipName,
-        nights: data.nights,
         startDate: data.startDate,
         endDate: data.endDate,
         imageFileName: data.imageFileName,

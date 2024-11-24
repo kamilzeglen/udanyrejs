@@ -7,11 +7,10 @@ export interface Offer {
   company: string;
   price: string;
   shipName: string;
-  nights: string;
-  startDate: Date;
-  endDate: Date;
-  image?: string;
+  startDate: string;
+  endDate: string;
   imageFileName: string;
   pdfFileName: string;
   itinerary: Itinerary[];
+  image?: string;
 }
