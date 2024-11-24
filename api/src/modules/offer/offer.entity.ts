@@ -23,9 +23,6 @@ export class Offer {
   @Column()
   shipName: string;
 
-  @Column('int')
-  nights: number;
-
   @Column()
   startDate: Date;
 

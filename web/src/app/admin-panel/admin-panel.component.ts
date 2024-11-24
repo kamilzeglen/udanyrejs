@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {take} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
-import {HttpService} from '../_shared/http.service';
+import {HttpService} from '../_shared/http/http.service';
 
 @Component({
   selector: 'app-admin-panel',
@@ -18,7 +18,6 @@ export class AdminPanelComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('fds')
     this.offersService.getAllOffers().pipe(take(1)).subscribe((data: Offer[]) => {
       this.offers = data;
     })

@@ -22,7 +22,6 @@
           <td>{{ offer.name }}</td>
           <td>{{ offer.shipName }}</td>
           <td>{{ offer.price }} PLN</td>
-          <td>{{ offer.nights }}</td>
           <td>{{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}</td>
           <td>
             <button class="btn edit-btn" [routerLink]="['edit', offer.id]">Edytuj</button>

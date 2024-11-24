@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {HttpService} from '../_shared/http.service';
+import {HttpService} from '../_shared/http/http.service';
 import {Offer} from '../_interfaces/offer';
 import * as moment from 'moment';
 import {ReplaySubject, take} from 'rxjs';

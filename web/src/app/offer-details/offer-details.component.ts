@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ReplaySubject, take, takeUntil} from 'rxjs';
 import {Offer} from '../_interfaces/offer';
-import {HttpService} from '../_shared/http.service';
+import {HttpService} from '../_shared/http/http.service';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
