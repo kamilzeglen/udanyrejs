@@ -38,7 +38,6 @@ import {AdminPanelEditComponent} from '../admin-panel-edit/admin-panel-edit.comp
 import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from '../app-routing.module';
 import {ReactiveFormsModule} from '@angular/forms';
-import {AppComponent} from '../app.component';
 
 const materialModules = [
   MatFormFieldModule,
