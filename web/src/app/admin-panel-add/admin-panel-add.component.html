@@ -3,84 +3,35 @@
 
   <form [formGroup]="offerForm">
     <div class="form-section">
+      <label>Nazwa Rejsu:</label>
+      <input type="text" formControlName="name" placeholder="Wprowadź nazwę rejsu"/>
 
-      <!-- Nazwa Rejsu -->
-      <mat-form-field appearance="fill">
-        <mat-label>Nazwa Rejsu:</mat-label>
-        <input matInput formControlName="name" placeholder="Wprowadź nazwę rejsu"/>
-        <mat-error *ngIf="offerForm.get('name')?.invalid && offerForm.get('name')?.touched">
-          Nazwa rejsu jest wymagana.
-        </mat-error>
-      </mat-form-field>
+      <label>Firma:</label>
+      <select id="company" formControlName="company" required>
+        <option value="">Wybierz firmę</option>
+        <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
+      </select>
 
-      <!-- Firma -->
-      <mat-form-field appearance="fill">
-        <mat-label>Firma:</mat-label>
-        <select matNativeControl formControlName="company" required>
-          <option value="">Wybierz firmę</option>
-          <option *ngFor="let company of companies" [value]="company">{{ company }}</option>
-        </select>
-        <mat-error *ngIf="offerForm.get('company')?.invalid && offerForm.get('company')?.touched">
-          Firma jest wymagana.
-        </mat-error>
-      </mat-form-field>
+      <label>Cena (PLN):</label>
+      <input type="number" formControlName="price" placeholder="Wprowadź cenę"/>
 
-      <!-- Cena -->
-      <mat-form-field appearance="fill">
-        <mat-label>Cena (PLN):</mat-label>
-        <input matInput type="number" formControlName="price" placeholder="Wprowadź cenę"/>
-        <mat-error *ngIf="offerForm.get('price')?.invalid && offerForm.get('price')?.touched">
-          Cena jest wymagana.
-        </mat-error>
-      </mat-form-field>
+      <label>Nazwa Statku:</label>
+      <input type="text" formControlName="shipName" placeholder="Wprowadź nazwę statku"/>
 
-      <!-- Nazwa Statku -->
-      <mat-form-field appearance="fill">
-        <mat-label>Nazwa Statku:</mat-label>
-        <input matInput type="text" formControlName="shipName" placeholder="Wprowadź nazwę statku"/>
-        <mat-error *ngIf="offerForm.get('shipName')?.invalid && offerForm.get('shipName')?.touched">
-          Nazwa statku jest wymagana.
-        </mat-error>
-      </mat-form-field>
+      <label>Ilość Nocy:</label>
+      <input type="number" formControlName="nights" placeholder="Wprowadź ilość nocy" min="1"/>
 
-      <!-- Zakres dat -->
-      <mat-form-field appearance="fill">
-        <mat-label>Wybierz zakres dat</mat-label>
-        <mat-date-range-input [formGroup]="offerForm" [rangePicker]="picker">
-          <input matStartDate matInput formControlName="startDate" placeholder="Data początkowa">
-          <input matEndDate matInput formControlName="endDate" placeholder="Data końcowa">
-        </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker #picker></mat-date-range-picker>
-        <mat-error *ngIf="offerForm.get('startDate')?.invalid && offerForm.get('startDate')?.touched">
-          Data początkowa jest wymagana.
-        </mat-error>
-        <mat-error *ngIf="offerForm.get('endDate')?.invalid && offerForm.get('endDate')?.touched">
-          Data końcowa jest wymagana.
-        </mat-error>
-      </mat-form-field>
+      <label>Data Początkowa:</label>
+      <input type="date" formControlName="startDate"/>
 
-      <!-- Adres URL PDF -->
-      <mat-form-field appearance="fill">
-        <mat-label>Adres URL PDF (Oryginał PDF):</mat-label>
-        <input matInput type="url" formControlName="pdfFileURL" placeholder="Wprowadź adres URL PDF"/>
-        <mat-error *ngIf="offerForm.get('pdfFileURL')?.touched && offerForm.get('pdfFileURL')?.invalid">
-          <span *ngIf="offerForm.get('pdfFileURL')?.errors?.['required']">Adres URL PDF jest wymagany.</span>
-          <span *ngIf="offerForm.get('pdfFileURL')?.errors?.['pattern']">Adres URL musi być poprawny.</span>
-        </mat-error>
-      </mat-form-field>
+      <label>Data Końcowa:</label>
+      <input type="date" formControlName="endDate"/>
 
-      <!-- Upload pliku PNG -->
-      <div class="upload-section">
-        <mat-label>Upload pliku PNG:</mat-label>
-        <button mat-raised-button (click)="fileInput.click()" type="button" class="upload-btn">
-          Wybierz plik
-        </button>
-        <input #fileInput type="file" accept=".png" (change)="onFileChange($event)" style="display: none"/>
-        <mat-hint>Wybierz plik PNG.</mat-hint>
-      </div>
+      <label>Adres URL PDF (Oryginał PDF):</label>
+      <input type="url" formControlName="pdfFileURL" placeholder="Wprowadź adres URL PDF"/>
 
+      <label>Upload pliku PNG:</label>
+      <input type="file" accept=".png" (change)="onFileChange($event)"/>
     </div>
 
     <div class="form-section itinerary-section">
@@ -88,50 +39,24 @@
       <div formArrayName="itinerary">
         <div *ngFor="let day of itineraryArray.controls; let i = index" [formGroupName]="i"
              class="itinerary-item-horizontal">
-          <!-- Data -->
-          <mat-form-field appearance="fill">
-            <mat-label>Dzień {{ i + 1 }}:</mat-label>
-            <input matInput type="date" formControlName="date" placeholder="Data" class="itinerary-input"/>
-            <mat-error *ngIf="day.get('date')?.invalid && day.get('date')?.touched">
-              Data jest wymagana.
-            </mat-error>
-          </mat-form-field>
+          <label>Dzień {{ i + 1 }}:</label>
+          <input type="date" formControlName="date" placeholder="Data" class="itinerary-input"/>
 
-          <!-- Port -->
-          <mat-form-field appearance="fill">
-            <mat-label>Port:</mat-label>
-            <input matInput type="text" formControlName="port" placeholder="Port docelowy" class="itinerary-input"/>
-            <mat-error *ngIf="day.get('port')?.invalid && day.get('port')?.touched">
-              Port jest wymagany.
-            </mat-error>
-          </mat-form-field>
+          <label>Port:</label>
+          <input type="text" formControlName="port" placeholder="Port docelowy" class="itinerary-input"/>
 
-          <!-- Przyjazd -->
-          <mat-form-field appearance="fill">
-            <mat-label>Przyjazd:</mat-label>
-            <input matInput type="time" formControlName="arrivalTime" placeholder="Czas przyjazdu"
-                   class="itinerary-input"/>
-            <mat-error *ngIf="day.get('arrivalTime')?.invalid && day.get('arrivalTime')?.touched">
-              Czas przyjazdu jest wymagany.
-            </mat-error>
-          </mat-form-field>
+          <label>Przyjazd:</label>
+          <input type="time" formControlName="arrivalTime" placeholder="Czas przyjazdu" class="itinerary-input"/>
 
-          <!-- Odjazd -->
-          <mat-form-field appearance="fill">
-            <mat-label>Odjazd:</mat-label>
-            <input matInput type="time" formControlName="departureTime" placeholder="Czas odjazdu"
-                   class="itinerary-input"/>
-            <mat-error *ngIf="day.get('departureTime')?.invalid && day.get('departureTime')?.touched">
-              Czas odjazdu jest wymagany.
-            </mat-error>
-          </mat-form-field>
-
+          <label>Odjazd:</label>
+          <input type="time" formControlName="departureTime" placeholder="Czas odjazdu" class="itinerary-input"/>
         </div>
       </div>
     </div>
 
+
     <div class="button-container">
-      <button mat-raised-button (click)="submitForm()" type="submit" [disabled]="offerForm.invalid" class="save-btn">
+      <button (click)="submitForm()" class="btn save-btn">
         Dodaj Rejs
       </button>
     </div>
