@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, Validators} from '@angular/forms';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Offer} from '../_interfaces/offer';
 import {Company} from '../_interfaces/company';
-import {HttpService} from '../_shared/http/http.service';
 import {ReplaySubject, take} from 'rxjs';
+import {HttpService} from '../_shared/http/http.service';
 
 @Component({
   selector: 'app-admin-panel-add',
@@ -13,27 +13,29 @@ import {ReplaySubject, take} from 'rxjs';
 export class AdminPanelAddComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
+  public offerForm: FormGroup;
   public companies = Object.keys(Company);
 
-  public offerForm = this.fb.group({
-    name: ['', Validators.required],
-    company: ['', Validators.required],
-    price: ['', Validators.required],
-    shipName: ['', Validators.required],
-    startDate: ['', Validators.required],
-    endDate: ['', Validators.required],
-    pdfFileURL: ['', [Validators.required, Validators.pattern('https?://.+')]],
-    imageFileName: [null],
-    image: [null],
-    itinerary: this.fb.array([])
-  });
-
   constructor(
-    private readonly offersService: HttpService,
+    private readonly httpService: HttpService,
     private readonly fb: FormBuilder) {
   }
 
   ngOnInit(): void {
+    this.offerForm = this.fb.group({
+      name: ['', Validators.required],
+      company: ['', Validators.required],
+      price: ['', Validators.required],
+      shipName: ['', Validators.required],
+      nights: ['', [Validators.required, Validators.min(1)]],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+      pdfFileURL: ['', [Validators.required, Validators.pattern('https?://.+')]],
+      imageFileName: [null],
+      image: [null],
+      itinerary: this.fb.array([])
+    });
+
     this.offerForm.get('nights')?.valueChanges.subscribe((nights: number) => {
       this.adjustItineraryDays(nights + 1);
     });
@@ -76,6 +78,7 @@ export class AdminPanelAddComponent implements OnInit, OnDestroy {
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
+    console.log(file)
 
     if (file) {
       const reader = new FileReader();
@@ -87,31 +90,20 @@ export class AdminPanelAddComponent implements OnInit, OnDestroy {
         });
       };
 
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Wczytuje plik jako Base64
     }
   }
 
-submitForm() {
-  if (this.offerForm.valid) {
-    const formValue = this.offerForm.value;
-
-    const offerData: Partial<Offer> = {
-      ...formValue,
-      startDate: new Date(formValue.startDate).toISOString(),
-      endDate: new Date(formValue.endDate).toISOString(),
-      itinerary: formValue.itinerary.map((day: any) => ({
-        day: day.day,
-        date: new Date(day.date).toISOString(),
-        port: day.port,
-        arrivalTime: day.arrivalTime,
-        departureTime: day.departureTime,
-      }))
-    };
-
-    console.log(offerData);
-    this.offersService.createOffer(offerData).pipe(take(1)).subscribe((response) => {
-      console.log(response);
-    });
+  submitForm() {
+    console.log(this.offerForm)
+    if (this.offerForm.valid) {
+      const offerData: Offer = this.offerForm.value;
+      console.log(offerData);
+      this.httpService.createOffer(offerData).pipe(take(1)).subscribe((response) => {
+        console.log(response);
+      })
+    } else {
+      console.log('invalid')
+    }
   }
-}
 }
