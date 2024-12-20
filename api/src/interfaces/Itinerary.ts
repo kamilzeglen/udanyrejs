@@ -1,4 +1,4 @@
-export interface ItineraryDay {
+export interface Itinerary {
   day: number;
   date: string;
   port: string;

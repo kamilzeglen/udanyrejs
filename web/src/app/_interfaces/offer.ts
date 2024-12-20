@@ -1,16 +1,22 @@
-import {Itinerary} from './Itinerary';
+import {Itinerary} from './itinerary';
+import {Company} from './company';
+import {imageFile, pdfFile} from './file';
 
 
 export interface Offer {
   id: string;
   name: string;
-  company: string;
-  price: string;
+  offerUrl: string;
+  syncData: string;
+  company: Company;
+  price: number;
   shipName: string;
   startDate: string;
   endDate: string;
-  imageFileName: string;
-  pdfFileName: string;
+  imageFile: imageFile;
+  pdfFile: pdfFile;
   itinerary: Itinerary[];
-  image?: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  deletedAt: Date | string;
 }

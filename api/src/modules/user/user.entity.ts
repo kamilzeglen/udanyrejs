@@ -1,14 +1,11 @@
-import {Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
-import {Roles} from "../../interfaces/roles";
+import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn} from "typeorm";
+import {Role} from "../role/role.entity";
 
 @Entity()
 export class User {
 
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({type: 'varchar', length: 30})
-  name: string;
 
   @Column({type: 'varchar', length: 40})
   email: string;
@@ -16,8 +13,11 @@ export class User {
   @Column({type: 'varchar'})
   password: string;
 
-  @Column({type: 'enum', enum: Roles})
-  role: Roles;
+  @Column({default: false})
+  isActive: boolean;
+
+  @ManyToOne(() => Role, (role) => role.users, { eager: false, nullable: false })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,5 +1,14 @@
 "use strict";
 import { OfferService } from './offer/offer.service';
+import { RoleModule } from './role/role.module';
+import { PdfFileModule } from './pdf-file/pdf-file.module';
+import { ImageFileModule } from './image-file/image-file.module';
+import { PdfFileModule } from './pdf-file/pdf-file.module';
+import { ImageFileModule } from './image-file/image-file.module';
+import { PdffileModule } from './pdffile/pdffile.module';
+import { FileModule } from './file/file.module';
+import { CompanyModule } from './company/company.module';
+import { RoleModule } from './role/role.module';
 var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
     function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
     var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";

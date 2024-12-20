@@ -1,5 +1,12 @@
-import {IsArray, IsDateString, IsDecimal, IsEnum, IsInt, IsOptional, IsString, ValidateNested} from "class-validator";
-import {Company} from "../../../interfaces/company";
+import {
+  IsArray,
+  IsDateString,
+  IsDecimal,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested
+} from "class-validator";
 import {Type} from "class-transformer";
 import {ItineraryDayDto} from "./itinerary-day.dto";
 
@@ -8,17 +15,15 @@ export class CreateOfferDto {
   @IsString()
   name: string;
 
-  @IsEnum(Company)
-  company: Company;
+  @IsString()
+  @IsOptional()
+  offerUrl?: string;
+
+  @IsUUID()
+  companyId: string;
 
   @IsDecimal()
   price: number;
-
-  @IsString()
-  shipName: string
-
-  @IsInt()
-  nights: number;
 
   @IsDateString()
   startDate: Date;
@@ -27,14 +32,15 @@ export class CreateOfferDto {
   endDate: Date;
 
   @IsString()
-  image: string;
-
-  @IsString()
-  pdfFileURL: string;
+  @IsOptional()
+  imageFile?: string;
 
   @IsArray()
   @IsOptional()
   @ValidateNested({each: true})
   @Type(() => ItineraryDayDto)
   itinerary?: ItineraryDayDto[];
+
+  @IsUUID()
+  createdById?: string
 }
