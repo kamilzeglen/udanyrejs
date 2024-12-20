@@ -35,13 +35,38 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
-              }
+                "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
+                "output": "/assets/"
+              },
+              "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/scss/ngZorro.scss",
+              "src/scss/variables.scss",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "budgets": [
+              {
+                "type": "bundle",
+                "name": "main",
+                "maximumWarning": "2mb",
+                "maximumError": "5mb"
+              },
+              {
+                "type": "initial",
+                "name": "initial",
+                "maximumWarning": "2mb",
+                "maximumError": "5mb"
+              },
+              {
+                "type": "anyComponentStyle",
+                "name": "component-styles",
+                "maximumWarning": "5kb",
+                "maximumError": "8kb"
+              }
+            ]
           },
           "configurations": {
             "production": {

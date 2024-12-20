@@ -1,0 +1,41 @@
+<div class="auth-container">
+	<nz-card nzBordered="false" class="auth-card">
+		<div class="form-header">
+			<h2>Logowanie</h2>
+			<p>
+				Zaloguj się do swojego konta, aby odkrywać świat rejsów.
+			</p>
+		</div>
+		<form nz-form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+			<nz-form-item>
+				<nz-form-control nzErrorTip="Proszę podać poprawny adres email">
+					<nz-input-group>
+						<input nz-input formControlName="email" placeholder="Twój email"/>
+					</nz-input-group>
+				</nz-form-control>
+			</nz-form-item>
+
+			<nz-form-item>
+				<nz-form-control nzErrorTip="Proszę podać hasło">
+					<nz-input-group>
+						<input
+							nz-input
+							type="password"
+							formControlName="password"
+							placeholder="Twoje hasło"
+						/>
+					</nz-input-group>
+				</nz-form-control>
+			</nz-form-item>
+
+			<button
+				nz-button
+				[nzType]="'primary'"
+				[disabled]="authForm.invalid"
+				class="submit-button"
+			>
+				Zaloguj się
+			</button>
+    </form>
+	</nz-card>
+</div>

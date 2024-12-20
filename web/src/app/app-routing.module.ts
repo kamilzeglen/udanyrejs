@@ -1,19 +1,23 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {OffersComponent} from './offers/offers.component';
-import {OfferDetailsComponent} from './offer-details/offer-details.component';
-import {LoginComponent} from './login/login.component';
-import {AdminPanelComponent} from './admin-panel/admin-panel.component';
-import {AdminPanelAddComponent} from './admin-panel-add/admin-panel-add.component';
-import {AdminPanelEditComponent} from './admin-panel-edit/admin-panel-edit.component';
+import {LoginComponent} from '@shared/login/login.component';
+import {OfferListComponent} from './offer/offer-list/offer-list.component';
+
 
 const routes: Routes = [
-  {path: 'login', component: LoginComponent},
-  {path: '', component: OffersComponent},
-  {path: 'offer-details/:id', component: OfferDetailsComponent},
-  {path: 'admin/offers', component: AdminPanelComponent},
-  {path: 'admin/offers/add', component: AdminPanelAddComponent},
-  {path: 'admin/offers/edit/:id', component: AdminPanelEditComponent},
+  {
+    path: '',
+    children: [
+      {path: '', component: OfferListComponent},
+      {path: 'login', component: LoginComponent},
+      {
+        path: 'admin',
+        loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+      },
+      {path: '**', redirectTo: ''},
+    ],
+  },
+
 ];
 
 @NgModule({

@@ -18,21 +18,15 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@migrations/*": [
+        "src/migrations/*"
+      ],
       "@interfaces": [
-        "./src/app/_interfaces"
+        "src/interfaces"
       ],
-      "@state": [
-        "./src/app/_state"
-      ],
-      "@state/*": [
-        "./src/app/_state/*"
-      ],
-      "@shared": [
-        "./src/app/_shared"
-      ],
-      "@shared/*": [
-        "./src/app/_shared/*"
-      ]
     }
   }
 }

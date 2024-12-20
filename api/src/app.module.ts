@@ -1,24 +1,42 @@
 import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
-import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule, ConfigService} from '@nestjs/config';
-import {UserModule} from "./modules/user/user.module";
-import {OfferModule} from './modules/offer/offer.module';
-import typeorm from "./typeorm";
+import {UserModule} from "@modules/user/user.module";
+import {OfferModule} from '@modules/offer/offer.module';
+import {AuthModule} from "@modules/auth/auth.module";
+import {RoleModule} from "@modules/role/role.module";
+import {TypeOrmModule, TypeOrmModuleAsyncOptions} from "@nestjs/typeorm";
+import {CompanyModule} from "@modules/company/company.module";
+import {ImageFileModule} from "@modules/image-file/image-file.module";
+import {PdfFileModule} from "@modules/pdf-file/pdf-file.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [typeorm]
-    }),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => (configService.get('typeorm'))
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: configService.get('DATABASE_HOST'),
+          port: configService.get('DATABASE_PORT'),
+          username: configService.get('DATABASE_USERNAME'),
+          password: configService.get('DATABASE_PASSWORD'),
+          database: configService.get('DATABASE_NAME'),
+          entities: ['dist/**/*.entity.js'],
+          synchronize: configService.get('DB_SYNC') === 'true',
+        } as TypeOrmModuleAsyncOptions;
+      },
     }),
+    RoleModule,
     UserModule,
-    OfferModule
+    AuthModule,
+    OfferModule,
+    CompanyModule,
+    ImageFileModule,
+    PdfFileModule
   ],
   controllers: [AppController],
   providers: [AppService],

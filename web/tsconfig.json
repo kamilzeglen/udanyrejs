@@ -10,6 +10,8 @@
     "strictNullChecks": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
@@ -21,7 +23,30 @@
     "lib": [
       "ES2022",
       "dom"
-    ]
+    ],
+    "paths": {
+      "@interfaces": [
+        "./src/app/_interfaces"
+      ],
+      "@environment": [
+        "./src/environments/environment"
+      ],
+      "@state": [
+        "./src/app/_state"
+      ],
+      "@state/*": [
+        "./src/app/_state/*"
+      ],
+      "@shared": [
+        "./src/app/_shared"
+      ],
+      "@shared/*": [
+        "./src/app/_shared/*"
+      ],
+      "@http": [
+        "./src/app/_http"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

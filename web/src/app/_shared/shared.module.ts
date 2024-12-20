@@ -27,17 +27,24 @@ import {MatStepperModule} from '@angular/material/stepper';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {LayoutComponent} from '../layout/layout.component';
-import {OffersComponent} from '../offers/offers.component';
-import {OfferDetailsComponent} from '../offer-details/offer-details.component';
-import {OfferCardComponent} from '../offer-card/offer-card.component';
-import {LoginComponent} from '../login/login.component';
-import {AdminPanelComponent} from '../admin-panel/admin-panel.component';
-import {AdminPanelAddComponent} from '../admin-panel-add/admin-panel-add.component';
-import {AdminPanelEditComponent} from '../admin-panel-edit/admin-panel-edit.component';
-import {BrowserModule} from '@angular/platform-browser';
-import {AppRoutingModule} from '../app-routing.module';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatDividerModule} from '@angular/material/divider';
+import {NzInputGroupComponent} from 'ng-zorro-antd/input';
+import {NzDatePickerModule} from 'ng-zorro-antd/date-picker';
+import {NzUploadModule} from 'ng-zorro-antd/upload';
+import {NzDividerModule} from 'ng-zorro-antd/divider';
+import {NzTimePickerComponent} from 'ng-zorro-antd/time-picker';
+import {NzSelectModule} from 'ng-zorro-antd/select';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {NzButtonModule} from 'ng-zorro-antd/button';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {NzCardModule} from 'ng-zorro-antd/card';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {LayoutComponent} from '@shared/layout/layout.component';
+import {LoginComponent} from '@shared/login/login.component';
+import {NzTableComponent, NzTableModule} from 'ng-zorro-antd/table';
+import {OfferListComponent} from '../offer/offer-list/offer-list.component';
+import {OfferCardComponent} from '../offer/offer-card/offer-card.component';
 
 const materialModules = [
   MatFormFieldModule,
@@ -66,18 +73,37 @@ const materialModules = [
   MatButtonToggleModule,
   MatCardModule,
   MatSlideToggleModule,
+  MatDividerModule
+];
+
+const ngZorroModules = [
+  NzInputGroupComponent,
+  NzDatePickerModule,
+  NzUploadModule,
+  NzDividerModule,
+  NzTimePickerComponent,
+  NzSelectModule,
+  NzFormModule,
+  NzButtonModule,
+  NzIconModule,
+  NzCardModule,
+  NzTableModule,
+  NzTableComponent
 ];
 
 const components = [
   LayoutComponent,
-  OffersComponent,
-  OfferDetailsComponent,
-  OfferCardComponent,
   LoginComponent,
-  AdminPanelComponent,
-  AdminPanelAddComponent,
-  AdminPanelEditComponent
+  OfferListComponent,
+  OfferCardComponent
 ];
+
+const basicModules = [
+  RouterModule,
+  FormsModule,
+  CommonModule,
+  ReactiveFormsModule
+]
 
 // const modals = [];
 
@@ -89,15 +115,16 @@ const components = [
 @NgModule({
   declarations: [...components],
   imports: [
+    ...basicModules,
     ...materialModules,
-    RouterModule,
-    BrowserModule,
-    AppRoutingModule,
-    ReactiveFormsModule,
+    ...ngZorroModules,
+    NgOptimizedImage,
   ],
   providers: [],
   exports: [
+    ...basicModules,
     ...materialModules,
+    ...ngZorroModules,
     ...components,
     // ...directives,
     // ...pipes,

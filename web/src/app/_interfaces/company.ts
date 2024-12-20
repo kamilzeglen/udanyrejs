@@ -1,6 +1,8 @@
-export enum Company {
-  "MSC"= "MSC",
-  "AIDA"= "AIDA",
-  "COSTA"= "COSTA",
-  "NORWEGIAN"= "NORWEGIAN",
+export interface Company {
+  id: string;
+  name: string;
+  key: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  deletedAt: Date | string;
 }
