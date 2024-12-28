@@ -1,0 +1,35 @@
+services:
+    udanyrejs-frontend:
+        build:
+            context: ./web
+            dockerfile: Dockerfile
+        container_name: udanyrejs-frontend
+        restart: always
+        ports:
+            - "3006:80"
+        networks:
+            - nginx-proxy-manager_default
+            - udanyrejs_default
+
+    udanyrejs-backend:
+        build:
+            context: ./api
+            dockerfile: Dockerfile
+        container_name: udanyrejs-backend
+        env_file:
+            - api/.env
+        restart: always
+        ports:
+            - "5006:5006"
+        volumes:
+            - /root/Projects/udanyrejs/PDFS:/PDFS
+            - /root/Projects/udanyrejs/PDFS:/IMAGES
+        networks:
+            - nginx-proxy-manager_default
+            - udanyrejs_default
+
+networks:
+    nginx-proxy-manager_default:
+        external: true
+    udanyrejs_default:
+        external: true

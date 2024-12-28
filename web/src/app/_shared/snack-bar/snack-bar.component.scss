@@ -1,0 +1,20 @@
+.snack-bar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.snack-bar-text {
+  flex-grow: 1;
+  margin-right: 12px;
+}
+
+.close-button {
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+}

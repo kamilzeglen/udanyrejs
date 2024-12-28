@@ -61,12 +61,27 @@ export class OfferEffects {
     )
   )
 
+  updateOffer = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.updateOffer),
+      switchMap(({payload}) => {
+        return this.http.updateOffer(payload).pipe(
+          map(() => {
+            return offerActions.updateOfferSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(offerActions.updateOfferError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
 
   deleteOffer = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.deleteOffer),
-      switchMap(() => {
-        return this.http.deleteOffer().pipe(
+      switchMap(({payload}) => {
+        return this.http.deleteOffer(payload).pipe(
           map(() => {
             return offerActions.deleteOfferSuccess();
           }),

@@ -1,0 +1,27 @@
+<mat-dialog-content>
+  <div class="close-wrapper">
+    <button mat-icon-button aria-label="Close button" tabindex="-1">
+      <mat-icon (click)="close()">close</mat-icon>
+    </button>
+  </div>
+  <div class="text-wrapper">
+    <p class="text" *ngIf="message">
+      {{ message }}
+    </p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <div class="action-buttons">
+    <button mat-raised-button class="cancel-button" (click)="close()">
+      Anuluj
+    </button>
+    <button
+      mat-raised-button
+      class="confirm-button"
+      color="primary"
+      (click)="save()">
+      Zatwierdz
+    </button>
+  </div>
+</mat-dialog-actions>

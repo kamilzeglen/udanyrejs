@@ -4,7 +4,7 @@ import {LoginDto} from "./dto/login.dto";
 import {Response} from "express";
 import {User} from "../user/user.entity";
 import {RegisterDto} from "./dto/register.dto";
-import {AuthGuard} from "./auth.guard";
+import {AuthGuard} from "./guards/auth.guard";
 
 @Controller('auth')
 export class AuthController {
@@ -45,7 +45,7 @@ export class AuthController {
   ): Promise<any> {
     const loginResponse = await this.authService.login(loginDto);
     res.cookie('access_token', loginResponse.access_token, {
-      expires: new Date(new Date().getTime() + 300 * 1000),
+      expires: new Date(new Date().getTime() + 60 * 60 * 1000),
       domain: "localhost",
       httpOnly: true,
     });

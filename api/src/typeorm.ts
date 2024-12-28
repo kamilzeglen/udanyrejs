@@ -20,6 +20,7 @@ const MyDataSource = new DataSource({
   database: DATABASE_NAME,
   migrations: ['dist/migrations/**/*.js'],
   entities: ['dist/modules/**/*.entity.js'],
+  logging: true,
 })
 
 export default MyDataSource;

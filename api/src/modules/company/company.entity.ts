@@ -8,6 +8,7 @@ import {
   UpdateDateColumn
 } from "typeorm";
 import {Offer} from "@modules/offer/offer.entity";
+import {Ship} from "@modules/ship/ship.entity";
 
 @Entity()
 export class Company {
@@ -22,6 +23,9 @@ export class Company {
 
   @OneToMany(() => Offer, (offer) => offer.company)
   offers: Offer[];
+
+  @OneToMany(() => Ship, (ship) => ship.company)
+  ships: Ship[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -29,4 +29,20 @@ export class CommonEffects {
     )
   );
 
+  getShips$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getShips),
+      switchMap(({companyId}) => {
+        return this.http.getShips({companyId}).pipe(
+          map(ships => {
+            return commonActions.getShipsSuccess({ships});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getShipsError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
 }

@@ -18,6 +18,20 @@ export class SeedAddUsers1733920612876 implements MigrationInterface {
         isActive: true,
         roleId: "632a19ab-8cfb-4977-8532-ea6d5c08d720"
       },
+      {
+        id: "8e2fd22c-508d-4519-86ca-e0725c717cf2",
+        email: "kyno007@gmail.com",
+        password: "$2b$10$ljADmuBcENnlVNT0ZAQmDuSr9VX2IW.CF8BEA05ofolZ.wzpw3K.q",
+        isActive: true,
+        roleId: "632a19ab-8cfb-4977-8532-ea6d5c08d720"
+      },
+      {
+        id: "8e2fd22c-508d-4521-86ca-e0725c717cf3",
+        email: "iwona.imar@interia.pl",
+        password: "$2b$10$ljADmuBcENnlVNT0ZAQmDuSr9VX2IW.CF8BEA05ofolZ.wzpw3K.q",
+        isActive: true,
+        roleId: "632a19ab-8cfb-4977-8532-ea6d5c08d720"
+      },
     ];
 
 

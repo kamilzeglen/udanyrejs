@@ -1,4 +1,12 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn} from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm";
 import {Role} from "../role/role.entity";
 
 @Entity()
@@ -18,6 +26,8 @@ export class User {
 
   @ManyToOne(() => Role, (role) => role.users, { eager: false, nullable: false })
   role: Role;
+  @Column({type: 'uuid', nullable: false})
+  roleId: string;
 
   @CreateDateColumn()
   createdAt: Date;
