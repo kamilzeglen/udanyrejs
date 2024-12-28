@@ -3,7 +3,7 @@ import {AdminComponent} from './admin.component';
 import {AuthGuard} from '../guard/auth-guard.service';
 import {AdminOfferListComponent} from './admin-offer-list/admin-offer-list.component';
 import {NgModule} from '@angular/core';
-import {AdminOfferAddComponent} from './admin-offer-add/admin-offer-add.component';
+import {AdminOfferAddEditComponent} from './admin-offer-add-edit/admin-offer-add-edit.component';
 
 
 const routes: Routes = [
@@ -19,7 +19,11 @@ const routes: Routes = [
       },
       {
         path: 'offers/add',
-        component: AdminOfferAddComponent,
+        component: AdminOfferAddEditComponent,
+      },
+      {
+        path: 'offers/edit/:offerId',
+        component: AdminOfferAddEditComponent,
       },
     ],
   },

@@ -1,5 +1,4 @@
-@import '../../../scss/variables';
-
+@import '../../scss/variables';
 
 .container {
   display: flex;
@@ -9,7 +8,7 @@
 
 // Nagłówek
 .navbar {
-  border-bottom: 4px solid $secondary-color;
+  border-bottom: 4px solid $tertiary-color;
   flex-shrink: 0; // Zapobiega zmniejszaniu nagłówka
   display: flex;
   justify-content: center;

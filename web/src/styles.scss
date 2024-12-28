@@ -1,3 +1,5 @@
+@import 'scss/variables';
+
 body {
   padding: 0;
   margin: 0;
@@ -7,6 +9,54 @@ app-root {
   padding: 0;
   margin: 0;
 }
+
+/* Inputs */
+label {
+  font-size: 14px;
+  font-weight: 500;
+  color: $primary-color;
+  margin-bottom: 8px;
+}
+
+input,
+mat-select {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid $primary-color;
+  border-radius: 8px;
+  background: $white;
+  transition: all 0.3s ease;
+}
+
+/* Buttons */
+.back-button,
+.add-button,
+{
+  margin: 1rem 0;
+  text-align: center;
+
+  button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: $white;
+    background-color: $primary-color;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:disabled {
+      background-color: $disabled-color;
+      cursor: not-allowed;
+    }
+
+    &:hover {
+      background-color: $primary-color
+    }
+  }
+}
+
 
 .info-message {
   font-size: 0.8em;
@@ -24,5 +74,29 @@ app-root {
   font-size: 0.8em;
   font-weight: bolder;
   color: red;
+}
+
+.snack-notify {
+  border-radius: 4px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.info-snack {
+  background-color: #2196f3;
+  color: #ffffff;
+}
+
+.warning-snack {
+  background-color: #ff9800;
+  color: #ffffff;
+}
+
+.error-snack {
+  background-color: #f44336;
+  color: #ffffff;
 }
 

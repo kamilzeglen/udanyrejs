@@ -16,4 +16,8 @@ export class CompanyService {
     return this.companyRepository.find();
   }
 
+  findOneByID(id: string): Promise<Company> {
+    return this.companyRepository.findOneBy({ id });
+  }
+
 }

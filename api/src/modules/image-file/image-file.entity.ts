@@ -2,7 +2,9 @@ import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
-  Entity, JoinColumn, ManyToOne,
+  Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm";
@@ -17,9 +19,12 @@ export class ImageFile {
   name: string;
 
   @Column({ type: 'varchar', length: 255 })
+  originalName: string;
+
+  @Column({ type: 'varchar', length: 255 })
   path: string;
 
-  @ManyToOne(() => Offer, (offer) => offer.imageFile, { nullable: false })
+  @OneToOne(() => Offer, (offer) => offer.imageFile, { nullable: false })
   @JoinColumn()
   offer: Offer;
 

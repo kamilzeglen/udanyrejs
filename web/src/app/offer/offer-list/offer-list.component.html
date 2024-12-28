@@ -1,17 +1,7 @@
 <div class="offers" *ngIf="offers$ | async as offers">
   <div *ngFor="let offer of offers">
     <app-offer-card
-      id="{{offer.id}}"
-      name="{{offer.name}}"
-      company="{{offer.company}}"
-      price="{{offer.price}}"
-      shipName="{{offer.shipName}}"
-      startDate="{{offer.startDate | date: 'dd/MM/yyyy'}}"
-      endDate="{{offer.endDate | date: 'dd/MM/yyyy'}}"
-      image="{{offer.imageFile}}"
-      imageFileName="{{offer.imageFile.name}}"
-      pdfFileName="{{offer.pdfFile.name}}"
-      itinerary="{{offer.itinerary}}">
+      [offer]="offer">
     </app-offer-card>
   </div>
 </div>

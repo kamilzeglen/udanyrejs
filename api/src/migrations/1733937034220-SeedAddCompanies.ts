@@ -14,6 +14,26 @@ export class SeedAddCompanies1733937034220 implements MigrationInterface {
       name: "AIDA Cruises",
       key: "AIDA",
     },
+    {
+      id: "521a42ab-8cfb-4977-8532-ea6d5c08d953",
+      name: "Costa Cruises",
+      key: "COSTA",
+    },
+    {
+      id: "521a42ab-8cfb-4357-8532-ea6d5c08d123",
+      name: "Norwegian Cruise Line",
+      key: "NCL",
+    },
+    {
+      id: "531a42ab-9cfb-4217-8532-ea6d5d08d123",
+      name: "Royal Caribbean",
+      key: "ROYAL_CARIBBEAN",
+    },
+    {
+      id: "123a45ab-7cfb-4217-8532-ea6d5d08d123",
+      name: "TUI Cruises",
+      key: "TUI",
+    },
   ];
 
 

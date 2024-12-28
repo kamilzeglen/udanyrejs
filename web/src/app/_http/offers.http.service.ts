@@ -9,16 +9,12 @@ import { environment } from '@environment';
 })
 export class OffersHttpService {
 
-  public API_URL = environment.API_URL;
+  private API_URL = environment.API_URL;
+  private defaultOpts = { withCredentials: true };
 
   constructor(
     private http: HttpClient
   ) {
-  }
-
-  public createOffer(payload: Partial<Offer>): Observable<Offer> {
-    const url = `${this.API_URL}/offers/`;
-    return this.http.post<Offer>(url, payload);
   }
 
   public getOffers(): Observable<Offer[]> {
@@ -31,8 +27,18 @@ export class OffersHttpService {
     return this.http.get<Offer>(url);
   }
 
-  public deleteOffer(): Observable<Offer[]> {
+  public createOffer(payload: { formData: FormData }): Observable<Offer> {
     const url = `${this.API_URL}/offers/`;
-    return this.http.delete<Offer[]>(url);
+    return this.http.post<Offer>(url, payload.formData, this.defaultOpts);
+  }
+
+  public updateOffer(payload: { id: string, formData: FormData }): Observable<Offer> {
+    const url = `${this.API_URL}/offers/` + payload.id;
+    return this.http.post<Offer>(url, payload.formData, this.defaultOpts);
+  }
+
+  public deleteOffer(payload: {id: string}): Observable<boolean> {
+    const url = `${this.API_URL}/offers/` + payload.id;
+    return this.http.delete<boolean>(url, this.defaultOpts);
   }
 }

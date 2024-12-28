@@ -10,6 +10,8 @@ import {TypeOrmModule, TypeOrmModuleAsyncOptions} from "@nestjs/typeorm";
 import {CompanyModule} from "@modules/company/company.module";
 import {ImageFileModule} from "@modules/image-file/image-file.module";
 import {PdfFileModule} from "@modules/pdf-file/pdf-file.module";
+import {ShipModule} from "@modules/ship/ship.module";
+import {ServeStaticModule} from "@nestjs/serve-static";
 
 @Module({
   imports: [
@@ -30,13 +32,18 @@ import {PdfFileModule} from "@modules/pdf-file/pdf-file.module";
         } as TypeOrmModuleAsyncOptions;
       },
     }),
+    ServeStaticModule.forRoot({
+      rootPath: process.env.IMAGES_PATH,
+      serveRoot: '/images',
+    }),
     RoleModule,
     UserModule,
     AuthModule,
     OfferModule,
     CompanyModule,
     ImageFileModule,
-    PdfFileModule
+  PdfFileModule,
+  ShipModule
   ],
   controllers: [AppController],
   providers: [AppService],

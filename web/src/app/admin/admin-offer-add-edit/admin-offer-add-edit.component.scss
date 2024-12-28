@@ -1,0 +1,132 @@
+@import '../../../scss/variables';
+
+.admin-offer-add-edit {
+  .title {
+    margin: 10px 0;
+    justify-self: center;
+    font-weight: 600;
+  }
+
+  form {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* Section Titles */
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    padding-left: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* Form Sections */
+  .section {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+  /* Form Fields */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+
+    input:focus,
+    mat-select:focus {
+      outline: none;
+    }
+  }
+
+  .import-button {
+    margin-top: 5px;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Import Section */
+  .import-section {
+    border: none;
+    color: $primary-color;
+
+    label {
+      color: $primary-color;
+    }
+  }
+
+  /* Itinerary Section */
+  .itinerary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+
+    .itinerary-input {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      margin-right: 10px;
+
+      label {
+        color: $primary-color;
+      }
+
+      input {
+        border: 1px solid $primary-color;
+        border-radius: 6px;
+        background: $white;
+
+        &:focus {
+          border-color: $primary-color;
+          box-shadow: 0 0 8px rgba(#0288d1, 0.3);
+        }
+      }
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  /* File Inputs */
+  input[type='file'] {
+    padding: 5px;
+    font-size: 14px;
+    background: $white;
+    border: 1px solid $primary-color;
+    border-radius: 6px;
+
+    &:hover {
+      border-color: #005b96;
+    }
+  }
+
+  /* Submit Button */
+  button[type='submit'] {
+    display: flex;
+    background: $primary-color;
+    font-size: 18px;
+    padding: 12px 30px;
+    justify-self: center;
+
+    &:disabled {
+      background-color: #b0bec5;
+      cursor: not-allowed;
+    }
+  }
+}

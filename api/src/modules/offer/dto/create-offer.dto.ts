@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsDecimal,
   IsOptional,
@@ -19,11 +20,18 @@ export class CreateOfferDto {
   @IsOptional()
   offerUrl?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  syncData?: boolean;
+
   @IsUUID()
   companyId: string;
 
   @IsDecimal()
   price: number;
+
+  @IsString()
+  shipId: string
 
   @IsDateString()
   startDate: Date;
@@ -33,14 +41,11 @@ export class CreateOfferDto {
 
   @IsString()
   @IsOptional()
-  imageFile?: string;
+  image?: any;
 
   @IsArray()
   @IsOptional()
   @ValidateNested({each: true})
   @Type(() => ItineraryDayDto)
   itinerary?: ItineraryDayDto[];
-
-  @IsUUID()
-  createdById?: string
 }

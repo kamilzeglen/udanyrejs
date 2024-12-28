@@ -42,9 +42,11 @@
             ],
             "styles": [
               "src/styles.scss",
-              "src/scss/ngZorro.scss",
               "src/scss/variables.scss",
-              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"
+              "src/scss/ngZorro.scss",
+              "src/scss/materialUI.scss",
+              "node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
+              "https://cdn.jsdelivr.net/npm/@angular/material/prebuilt-themes/indigo-pink.css"
             ],
             "scripts": [],
             "budgets": [

@@ -1,7 +1,8 @@
 import {Itinerary} from './itinerary';
 import {Company} from './company';
 import {imageFile, pdfFile} from './file';
-
+import {FileUpload} from './fileUpload';
+import {Ship} from './ship';
 
 export interface Offer {
   id: string;
@@ -9,12 +10,16 @@ export interface Offer {
   offerUrl: string;
   syncData: string;
   company: Company;
+  companyId: string;
   price: number;
-  shipName: string;
+  ship: Ship;
+  shipId: string;
   startDate: string;
   endDate: string;
-  imageFile: imageFile;
-  pdfFile: pdfFile;
+  imageFile: imageFile | FileUpload;
+  imageFileId: string;
+  pdfFile: pdfFile | FileUpload;
+  pdfFileId: string;
   itinerary: Itinerary[];
   createdAt: Date | string;
   updatedAt: Date | string;

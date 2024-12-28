@@ -30,7 +30,6 @@ export class AuthFacade {
   public getMyself$(redirect: string | null): Observable<User> {
     return this.store.select(authSelectors.selectMyself).pipe(
       tap(myself => {
-        console.log(myself)
         if (!myself) {
           this.getMyself(redirect);
         }
