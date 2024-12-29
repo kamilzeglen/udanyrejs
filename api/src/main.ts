@@ -1,10 +1,9 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
-import { NestApplicationOptions} from "@nestjs/common";
+import {NestApplicationOptions} from "@nestjs/common";
 import {NestExpressApplication} from "@nestjs/platform-express";
 import {json, urlencoded} from "express";
 import * as cookieParser from 'cookie-parser';
-import {readFileSync} from 'fs';
 
 const parsedConfig = require('dotenv').config();
 
@@ -31,11 +30,11 @@ async function bootstrap() {
     ...appOptions,
   });
   app.enableCors({
-    origin: WEB_URL,
-    credentials: true,
+    origin: process.env.WEB_URL,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  })
   app.use(cookieParser());
   app.use(json({limit: '50mb'}));
   app.use(
