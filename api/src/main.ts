@@ -15,7 +15,7 @@ if (!parsedConfig.parsed || parsedConfig.error) {
 const config = parsedConfig.parsed;
 
 async function bootstrap() {
-  const {APP_PORT, HTTPS_ENABLED, HTTPS_CERTS_DIR, DOMAINS_WHITELIST} = config;
+  const {APP_PORT, HTTPS_ENABLED, HTTPS_CERTS_DIR, WEB_URL} = config;
   const appOptions: NestApplicationOptions = {};
 
   if (HTTPS_ENABLED === 'ENABLED' && HTTPS_CERTS_DIR) {
@@ -25,31 +25,13 @@ async function bootstrap() {
     };
   }
 
-  const whitelist = DOMAINS_WHITELIST?.split(',') || [];
-  if (!whitelist?.length) {
-    console.error('\n\n \t !!! Whitelist is empty or undefined !!! \n\n');
-  }
-
-  let origin: any = (origin: string, callback: (error: Error, isOriginAllowed: boolean) => {}) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-      return;
-    }
-    callback({ message: `NOT_ALLOWED`, name: 'CORS', stack: 'CORS' }, false);
-    return;
-  };
-
-  console.log('Allowing domains: ', process.env.DOMAINS_WHITELIST)
+  console.log('Allowing Cors: ', WEB_URL)
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     ...appOptions,
   });
   app.enableCors({
-    origin,
+    origin: WEB_URL,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
