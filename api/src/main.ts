@@ -18,12 +18,12 @@ async function bootstrap() {
   const {APP_PORT, HTTPS_ENABLED, HTTPS_CERTS_DIR, WEB_URL} = config;
   const appOptions: NestApplicationOptions = {};
 
-  if (HTTPS_ENABLED === 'ENABLED' && HTTPS_CERTS_DIR) {
-    appOptions.httpsOptions = {
-      key: readFileSync(`${HTTPS_CERTS_DIR}/privkey.pem`),
-      cert: readFileSync(`${HTTPS_CERTS_DIR}/cert.pem`),
-    };
-  }
+  // if (HTTPS_ENABLED === 'ENABLED' && HTTPS_CERTS_DIR) {
+  //   appOptions.httpsOptions = {
+  //     key: readFileSync(`${HTTPS_CERTS_DIR}/privkey.pem`),
+  //     cert: readFileSync(`${HTTPS_CERTS_DIR}/cert.pem`),
+  //   };
+  // }
 
   console.log('Allowing Cors: ', WEB_URL)
 
