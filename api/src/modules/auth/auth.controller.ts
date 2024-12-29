@@ -26,6 +26,7 @@ export class AuthController {
       expires: new Date(new Date().getTime() + 3600 * 1000),
       sameSite: 'strict',
       httpOnly: true,
+      secure: process.env.SECURE,
     });
 
     return req.user;
