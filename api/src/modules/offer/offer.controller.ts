@@ -39,6 +39,7 @@ export class OfferController {
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
+    console.log(createOfferDto)
     const imageFile = files.find((file) => file.fieldname === 'image');
     const pdfFile = files.find((file) => file.fieldname === 'pdf');
 
