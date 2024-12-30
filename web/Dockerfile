@@ -1,19 +1,29 @@
+# Etap budowania aplikacji
 FROM node:18 as build
 
-# Ustawiamy katalog roboczy
-WORKDIR /app
+# Ustawienie katalogu roboczego
+WORKDIR /web
 
-# Kopiujemy pliki projektu i instalujemy zależności
+# Kopiowanie pliku package.json i package-lock.json
 COPY package*.json ./
+
+# Instalowanie zależności
 RUN npm install
 
-# Kopiujemy resztę kodu i budujemy aplikację
+# Kopiowanie reszty plików aplikacji
 COPY . .
+
+# Budowanie aplikacji Angular
 RUN npm run build --prod
 
-# Używamy serwera NGINX do serwowania aplikacji Angular
+# Etap uruchamiania aplikacji
 FROM nginx:alpine
-COPY --from=build /app/dist/web/browser /usr/share/nginx/html
 
-# Konfiguracja NGINX dla Angulara
+# Ustawienie katalogu roboczego
+WORKDIR /web
+
+# Port, na którym działa aplikacja
 EXPOSE 3006
+
+# Kopiowanie zbudowanej aplikacji z etapu build
+COPY --from=build /web/dist /usr/share/nginx/html
