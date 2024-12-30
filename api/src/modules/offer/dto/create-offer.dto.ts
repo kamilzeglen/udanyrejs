@@ -2,7 +2,7 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
-  IsDecimal,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -27,7 +27,7 @@ export class CreateOfferDto {
   @IsUUID()
   companyId: string;
 
-  @IsDecimal()
+  @IsNumber()
   price: number;
 
   @IsString()

@@ -23,6 +23,12 @@ async function bootstrap() {
 
   app.use(bodyParser.json({limit: '50mb'}));
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+  app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    console.log(`Body:`, req.body);
+    next();
+  });
+
 
   await app.listen(APP_PORT || 3000);
 }
