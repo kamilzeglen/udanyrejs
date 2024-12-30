@@ -20,29 +20,14 @@ async function bootstrap() {
       cert: readFileSync(`${HTTPS_CERTS_DIR}/cert.pem`),
     };
   }
-  const whitelist = DOMAINS_WHITELIST?.split(',') || [];
-  if (!whitelist?.length) {
-    console.error('\n\n \t !!! Whitelist is empty or undefined !!! \n\n');
-  }
-  let origin: any = (origin: string, callback: (error: Error, isOriginAllowed: boolean) => {}) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-      return;
-    }
-    callback({ message: `NOT_ALLOWED`, name: 'CORS', stack: 'CORS' }, false);
-    return;
-  };
+
   console.log('Allowing Web URL: ', WEB_URL)
   console.log('Allowing domains: ', DOMAINS_WHITELIST)
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     ...appOptions,
   });
   app.enableCors({
-    origin,
+    origin: WEB_URL,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
