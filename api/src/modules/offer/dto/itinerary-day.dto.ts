@@ -1,18 +1,21 @@
-import { IsString, IsNumber } from 'class-validator';
+import {IsString, IsNumber, IsOptional, IsDateString} from 'class-validator';
 
 export class ItineraryDayDto {
   @IsNumber()
   day: number;
 
-  @IsString()
+  @IsDateString()
   date: string;
 
   @IsString()
-  port: string;
+  @IsOptional()
+  port?: string;
 
   @IsString()
-  arrivalTime: string;
+  @IsOptional()
+  arrivalTime?: string;
 
   @IsString()
-  departureTime: string;
+  @IsOptional()
+  departureTime?: string;
 }

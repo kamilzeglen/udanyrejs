@@ -242,8 +242,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       formData.append('pdf', formValue.pdf); // Dodajemy plik do FormData
     }
 
-    if (formValue.itinerary) {
-      formData.append('itinerary', JSON.stringify(formValue.itinerary)); // Plan podróży
+    if (formValue.itinerary && Array.isArray(formValue.itinerary)) {
+      formData.append('itinerary', JSON.stringify(formValue.itinerary));
     }
 
     // Teraz wywołujemy metodę do wysyłania danych
