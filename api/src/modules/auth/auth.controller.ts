@@ -23,10 +23,11 @@ export class AuthController {
     }
 
     res.cookie('access_token', result.access_token, {
-      expires: new Date(new Date().getTime() + 3600 * 1000),
-      sameSite: 'strict',
+      expires: new Date(new Date().getTime() + 120 * 60 * 1000),  // 2 godziny
+      sameSite: 'none',
       httpOnly: true,
-      secure: process.env.SECURE,
+      secure: true,
+      domain: '.udanyrejs.pl',
     });
 
     return req.user;
@@ -46,9 +47,11 @@ export class AuthController {
   ): Promise<any> {
     const loginResponse = await this.authService.login(loginDto);
     res.cookie('access_token', loginResponse.access_token, {
-      expires: new Date(new Date().getTime() + 60 * 60 * 1000),
-      domain: "localhost",
+      expires: new Date(new Date().getTime() + 120 * 60 * 1000),  // 2 godziny
+      sameSite: 'none',
       httpOnly: true,
+      secure: true,
+      domain: '.udanyrejs.pl',
     });
 
     return res.send({access_token: loginResponse.access_token});
