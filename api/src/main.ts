@@ -41,7 +41,12 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     ...appOptions,
   });
-  app.enableCors({origin, credentials: true});
+  app.enableCors({
+    origin,
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+  });
   app.use(json({limit: '50mb'}));
   app.use(
     urlencoded({
