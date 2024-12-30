@@ -26,10 +26,13 @@ services:
             - /root/Projects/udanyrejs/PDFS:/IMAGES
         networks:
             - nginx-proxy-manager_default
+            - postgres_default
             - udanyrejs_default
 
 networks:
     nginx-proxy-manager_default:
+        external: true
+    postgres_default:
         external: true
     udanyrejs_default:
         external: true
