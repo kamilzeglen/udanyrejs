@@ -1,20 +1,40 @@
-# Używamy obrazu Node.js do budowania i uruchamiania aplikacji NestJS
-FROM node:18
+# Etap budowania
+FROM node:18-alpine AS builder
 
-# Ustawiamy katalog roboczy
-WORKDIR /app
+# Ustawienie katalogu roboczego
+WORKDIR /api
 
-# Kopiujemy pliki projektu i instalujemy zależności
+# Kopiowanie plików konfiguracyjnych i zależności
 COPY package*.json ./
-RUN npm install
+COPY tsconfig*.json ./
 
-# Kopiujemy resztę kodu i budujemy aplikację
+# Instalacja zależności
+RUN npm install --legacy-peer-deps
+
+# Kopiowanie całej aplikacji
 COPY . .
+
+# Kompilacja aplikacji NestJS
 RUN npm run build
 
-# Migrujemy dane
-CMD ["npm", "run", "migration:run"]
+# --- Etap uruchomienia ---
+FROM node:18-alpine AS runner
 
-# Ustawiamy zmienne środowiskowe dla NestJS
+# Ustawienie katalogu roboczego
+WORKDIR /api
+
+# Instalacja tylko produkcyjnych zależności
+COPY package*.json ./
+RUN npm install --production --legacy-peer-deps
+
+# Kopiowanie zbudowanej aplikacji z poprzedniego etapu
+COPY --from=builder /api/dist ./dist
+
+# Kopiowanie pliku .env
+COPY .env ./
+
+# Port, na którym działa aplikacja
 EXPOSE 5006
-CMD ["npm", "run", "start:prod"]
+
+# Uruchamianie aplikacji
+CMD ["sh", "-c", "node dist/main"]

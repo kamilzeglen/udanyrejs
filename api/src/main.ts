@@ -10,7 +10,7 @@ if (!parsedConfig.parsed || parsedConfig.error) {
 const config = parsedConfig.parsed;
 
 async function bootstrap() {
-  const {APP_PORT, WEB_URL} = config;
+  const {API_PORT, WEB_URL} = config;
 
   const app = await NestFactory.create(AppModule);
     app.enableCors({
@@ -19,11 +19,18 @@ async function bootstrap() {
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization'],
   })
+  console.log('API port: ', API_PORT);
   console.log('Allowing origin: ', WEB_URL);
 
   app.use(bodyParser.json({limit: '50mb'}));
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+  app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    console.log(`Body:`, req.body);
+    next();
+  });
 
-  await app.listen(APP_PORT || 3000);
+
+  await app.listen(API_PORT || 3000);
 }
 bootstrap();
