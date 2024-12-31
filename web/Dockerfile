@@ -1,5 +1,5 @@
-# Etap budowania aplikacji
-FROM node:18 as build
+# Etap budowania
+FROM node:18-alpine AS builder
 
 # Ustawienie katalogu roboczego
 WORKDIR /web
@@ -19,14 +19,14 @@ RUN npm run build --prod
 # Etap uruchamiania aplikacji
 FROM nginx:alpine
 
-# Ustawienie katalogu roboczego
-WORKDIR /web
+# Instalacja Nginx
+RUN apk add --no-cache bash curl
 
-# Usuwamy domyślną stronę Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Skopiowanie pliku konfiguracyjnego Nginx
+COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Kopiowanie zbudowanej aplikacji z etapu build
-COPY --from=build /web/dist/web/browser /usr/share/nginx/html
+# Kopiowanie zbudowanej aplikacji z etapu build do katalogu Nginx
+COPY --from=builder /web/dist/web/browser /usr/share/nginx/html
 
 # Port, na którym działa aplikacja
 EXPOSE 80
