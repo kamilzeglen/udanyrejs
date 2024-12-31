@@ -7,6 +7,10 @@ services:
         restart: always
         ports:
             - "3006:80"
+            - "8006:8006"
+        volumes:
+            - ./data:/data  # Volumen z danymi
+            - ./letsencrypt:/etc/letsencrypt:ro
         networks:
             - nginx-proxy-manager_default
             - udanyrejs_default
