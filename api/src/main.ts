@@ -13,11 +13,11 @@ async function bootstrap() {
   const {API_PORT, WEB_URL} = config;
 
   const app = await NestFactory.create(AppModule);
-    app.enableCors({
-      origin: WEB_URL,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization'],
+  app.enableCors({
+    origin: WEB_URL,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
   console.log('API port: ', API_PORT);
   console.log('Allowing origin: ', WEB_URL);
@@ -33,4 +33,5 @@ async function bootstrap() {
 
   await app.listen(API_PORT || 3000);
 }
+
 bootstrap();
