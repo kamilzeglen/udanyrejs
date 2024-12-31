@@ -23,7 +23,7 @@ FROM nginx:alpine
 WORKDIR /web
 
 # Port, na którym działa aplikacja
-EXPOSE 3006
+EXPOSE 80
 
-# Kopiowanie zbudowanej aplikacji z etapu build
-COPY --from=build /web/dist /usr/share/nginx/html
+# Uruchomienie Nginx
+CMD ["nginx", "-g", "daemon off;"]
