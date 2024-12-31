@@ -22,6 +22,12 @@ FROM nginx:alpine
 # Ustawienie katalogu roboczego
 WORKDIR /web
 
+# Usuwamy domyślną stronę Nginx
+RUN rm -rf /usr/share/nginx/html/*
+
+# Kopiowanie zbudowanej aplikacji z etapu build
+COPY --from=build /web/dist /usr/share/nginx/html
+
 # Port, na którym działa aplikacja
 EXPOSE 80
 
