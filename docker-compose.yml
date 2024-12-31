@@ -7,8 +7,6 @@ services:
         restart: always
         ports:
             - "3006:80"
-        volumes:
-            - ./data:/data
         networks:
             - nginx-proxy-manager_default
             - udanyrejs_default

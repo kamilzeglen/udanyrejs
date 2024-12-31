@@ -36,5 +36,5 @@ COPY .env ./
 # Port, na którym działa aplikacja
 EXPOSE 5006
 
-# Uruchamianie aplikacji
-CMD ["sh", "-c", "node dist/main"]
+# Uruchamianie aplikacji z migracjami
+CMD ["sh", "-c", "npm run migration:run && node dist/main"]
