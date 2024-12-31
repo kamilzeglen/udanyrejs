@@ -26,7 +26,7 @@ WORKDIR /web
 RUN rm -rf /usr/share/nginx/html/*
 
 # Kopiowanie zbudowanej aplikacji z etapu build
-COPY --from=build /app/dist/web/browser /usr/share/nginx/html
+COPY --from=build /web/dist/web/browser /usr/share/nginx/html
 
 # Port, na którym działa aplikacja
 EXPOSE 80
