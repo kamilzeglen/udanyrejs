@@ -33,6 +33,7 @@ COPY --from=builder /api/dist ./dist
 # Kopiowanie pliku .env
 COPY .env ./
 COPY tsconfig*.json ./
+COPY /src/typeorm.ts ./src/
 
 # Port, na którym działa aplikacja
 EXPOSE 5006
