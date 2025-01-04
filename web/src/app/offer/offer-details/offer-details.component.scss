@@ -22,11 +22,18 @@
 
   .company-name,
   .ship-name,
-  .data {
+  .data,
+  .price
+  {
     font-size: 1.2rem;
     color: #555;
     margin: 0.5rem 0;
     text-align: center;
+  }
+
+  .price {
+    padding-top: 15px;
+    font-weight: 600;
   }
 
   .image-container {

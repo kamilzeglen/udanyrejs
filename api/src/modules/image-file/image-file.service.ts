@@ -78,6 +78,7 @@ export class ImageFileService {
       }
 
       // Krok 2: Uaktualnienie danych w bazie
+      existingFile.name = fileName; // Aktualizujemy tylko nazwę oryginalną
       existingFile.originalName = file.originalname; // Aktualizujemy tylko nazwę oryginalną
       existingFile.path = filePath; // Aktualizujemy ścieżkę pliku
 

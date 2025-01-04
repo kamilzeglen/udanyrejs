@@ -6,4 +6,5 @@ export * from './itinerary';
 export * from './roles';
 export * from './router';
 export * from './fileUpload';
+export * from './device-info';
 

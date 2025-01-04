@@ -1,8 +1,7 @@
-import {NgModule} from '@angular/core';
+import {LOCALE_ID, NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
 import {provideHttpClient} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
-import {NZ_I18N, pl_PL} from 'ng-zorro-antd/i18n';
 import {registerLocaleData} from '@angular/common';
 import pl from '@angular/common/locales/pl';
 import {EffectsModule} from '@ngrx/effects';
@@ -46,7 +45,7 @@ const guards = [
     SharedModule,
     AdminModule,
   ],
-  providers: [...facades, ...guards, provideHttpClient(), provideAnimationsAsync(), { provide: NZ_I18N, useValue: pl_PL }],
+  providers: [...facades, ...guards, provideHttpClient(), provideAnimationsAsync(), { provide: LOCALE_ID, useValue: 'pl' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

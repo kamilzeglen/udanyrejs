@@ -2,13 +2,13 @@
   <div class="title">
     <h1>{{ offer.name }}</h1>
   </div>
+  <h2 class="data">
+    {{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}
+  </h2>
 
   <div class="company-name">{{ offer.company.name }}</div>
   <div class="ship-name">{{ offer.ship.name }}</div>
-  <div class="data">
-    {{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}
-  </div>
-  <div class="data">{{ offer.price }} Euro</div>
+  <div class="price">Od {{ offer.price }} Euro</div>
 
   <div class="image-container">
     <img [src]="API_URL + '/images/' + offer.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
@@ -29,10 +29,10 @@
       <tbody>
       <tr *ngFor="let stop of itineraryData; let i = index">
         <td>{{ i + 1 }}</td>
-        <td>{{ stop.date | date }}</td>
-        <td>{{ stop.port }}</td>
-        <td>{{ stop.arrivalTime }}</td>
-        <td>{{ stop.departureTime }}</td>
+        <td>{{ (stop.date | date: 'dd.MM.yyyy') || '-'}}</td>
+        <td>{{ stop.port || '-' }}</td>
+        <td>{{ stop.arrivalTime || '-' }}</td>
+        <td>{{ stop.departureTime || '-' }}</td>
       </tr>
       </tbody>
     </table>

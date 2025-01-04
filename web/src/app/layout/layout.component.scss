@@ -1,9 +1,10 @@
 @import '../../scss/variables';
 
 .container {
+  height: 100vh; // Pełna wysokość okna przeglądarki
+  width: 100vw;
   display: flex;
   flex-direction: column;
-  height: 100vh; // Pełna wysokość okna przeglądarki
 }
 
 // Nagłówek

@@ -12,7 +12,7 @@
   <!-- Opis oferty -->
   <div class="offer-details">
     <h2 class="offer-title">{{ offer.name }}</h2>
-    <p><strong>Termin:</strong> {{ offer.startDate }} - {{ offer.endDate }}</p>
+    <p><strong>Termin:</strong> {{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}</p>
     <p><strong>Cena od:</strong> {{ offer.price }} Euro</p>
   </div>
 </a>
