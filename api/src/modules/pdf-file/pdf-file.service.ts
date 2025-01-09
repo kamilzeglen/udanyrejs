@@ -1,11 +1,11 @@
 import {Injectable} from '@nestjs/common';
 import {InjectRepository} from "@nestjs/typeorm";
-import {ImageFile} from "@modules/image-file/image-file.entity";
 import {Repository} from "typeorm";
 import {PdfFile} from "@modules/pdf-file/pdf-file.entity";
 import {Offer} from "@modules/offer/offer.entity";
 import {existsSync, mkdirSync, unlinkSync, writeFileSync} from "fs";
-import * as path from 'path';
+import * as fs from 'fs/promises';
+import * as path from "node:path";
 
 @Injectable()
 export class PdfFileService {
@@ -20,8 +20,10 @@ export class PdfFileService {
     return this.pdfFileRepository.findOneBy({name: name});
   }
 
-  async saveFile(file: Express.Multer.File, offer: Offer): Promise<ImageFile> {
-    const uploadDir = process.env.PDFS_PATH || './uploads/pdfs';
+  async savePdf(file: Express.Multer.File, target: Offer): Promise<PdfFile> {
+
+    let uploadDir = process.env.OFFERS_PDFS_PATH || './uploads/images'
+
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, {recursive: true});
     }
@@ -35,68 +37,93 @@ export class PdfFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${offer.id}${extname}`;
+    const fileName = `${target.id}${extname}`;
     const filePath = path.join(uploadDir, fileName);
 
     writeFileSync(filePath, file.buffer);
 
-    const pdfFileEntity = this.pdfFileRepository.create({
+    const pdfEntity = this.pdfFileRepository.create({
       name: fileName,
       originalName: file.originalname,
       path: filePath,
-      offer
+      offer: target
     });
 
-    return this.pdfFileRepository.save(pdfFileEntity);
+
+    return this.pdfFileRepository.save(pdfEntity);
   }
 
-async updateFile(file: Express.Multer.File, offer: Offer): Promise<PdfFile> {
-  const uploadDir = process.env.PDFS_PATH || './uploads/pdfs';
+  async updatePdf(file: Express.Multer.File, target: Offer): Promise<PdfFile> {
 
-  if (!existsSync(uploadDir)) {
-    mkdirSync(uploadDir, { recursive: true });
-  }
+    let uploadDir = process.env.OFFERS_PDFS_PATH || './uploads/images'
 
-  if (!file) {
-    throw new Error('No file provided for updating');
-  }
-
-  const extname = path.extname(file.originalname).toLowerCase();
-  if (!extname) {
-    throw new Error('Unable to determine file extension');
-  }
-
-  const fileName = `${offer.id}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
-  const filePath = path.join(uploadDir, fileName);
-
-  const existingFile = offer.pdfFile;
-
-  let newImageFile: PdfFile
-  if (existingFile) {
-    // Krok 1: Usunięcie starego pliku z dysku (jeśli istnieje)
-    if (existsSync(existingFile.path)) {
-      unlinkSync(existingFile.path);
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, {recursive: true});
     }
 
-    // Krok 2: Uaktualnienie danych w bazie
-    existingFile.originalName = file.originalname; // Aktualizujemy tylko nazwę oryginalną
-    existingFile.path = filePath; // Aktualizujemy ścieżkę pliku
+    if (!file) {
+      throw new Error('No file provided for updating');
+    }
 
-    // Krok 3: Zapisanie zmienionego rekordu w bazie
-    await this.pdfFileRepository.save(existingFile); // Zamiast 'update', używamy 'save' do zaktualizowania istniejącego rekordu
-  } else {
-    // Jeśli nie istnieje rekord, tworzymy nowy
-     newImageFile = this.pdfFileRepository.create({
-      name: fileName, // Nazwa pliku pozostaje taka sama
-      originalName: file.originalname, // Zmieniamy tylko nazwę oryginalną
-      path: filePath,
-      offer,
-    });
+    const extname = path.extname(file.originalname).toLowerCase();
+    if (!extname) {
+      throw new Error('Unable to determine file extension');
+    }
 
-    await this.pdfFileRepository.save(newImageFile); // Tworzymy nowy rekord
+    const fileName = `${target.id}${extname}`;
+    const filePath = path.join(uploadDir, fileName);
+
+    const existingFile = target.pdfFile;
+
+    let newPdfFile: PdfFile
+    if (existingFile) {
+      if (existsSync(existingFile.path)) {
+        unlinkSync(existingFile.path);
+      }
+
+      existingFile.name = fileName;
+      existingFile.originalName = file.originalname;
+      existingFile.path = filePath;
+
+      // Krok 3: Zapisanie zmienionego rekordu w bazie
+      await this.pdfFileRepository.save(existingFile); // Zamiast 'update', używamy 'save' do zaktualizowania istniejącego rekordu
+    } else {
+
+
+      newPdfFile = this.pdfFileRepository.create({
+        name: fileName,
+        originalName: file.originalname,
+        path: filePath,
+        offer: target,
+      });
+
+      await this.pdfFileRepository.save(newPdfFile); // Tworzymy nowy rekord
+    }
+
+    writeFileSync(filePath, file.buffer);
+
+    return existingFile || newPdfFile;
   }
 
-  // Krok 4: Zwrócenie zaktualizowanego obiektu ImageFile
-  return existingFile || newImageFile;
+  async removePdfFile(filePath: string): Promise<boolean> {
+
+    if (!filePath) {
+      throw new Error('Path not found');
+    }
+
+    try {
+      if (existsSync(filePath)) {
+        await fs.unlink(filePath);
+      } else {
+        console.error(`File does not exist: ${filePath}`);
+      }
+
+    } catch (err) {
+      console.error(`Failed to delete file: ${err.message}`);
+      throw new Error('Failed to delete the physical file');
+    }
+
+    return true;
+  }
 }
-}
+

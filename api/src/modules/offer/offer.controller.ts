@@ -22,11 +22,18 @@ export class OfferController {
   }
 
   @Get('/')
-  async getAllOffers(): Promise<any[]> {
+  async searchOffers(): Promise<Offer[]> {
     return await this.offerService.findAll();
   }
 
-  @Get('/:offerID')
+  @Get('/:category')
+  async searchOffersByCategory(@Param('category') category: string): Promise<Offer[]> {
+    if (category) {
+      return await this.offerService.findOffersByCategory(category);
+    }
+  }
+
+  @Get('/details/:offerID')
   async getOneOffer(@Param('offerID') offerID: string): Promise<any[]> {
     return await this.offerService.findOne(offerID);
   }
@@ -39,7 +46,6 @@ export class OfferController {
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
-    console.log(createOfferDto)
     const imageFile = files.find((file) => file.fieldname === 'image');
     const pdfFile = files.find((file) => file.fieldname === 'pdf');
 
@@ -53,11 +59,12 @@ export class OfferController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('offerID') offerID: string,
     @Body() createOfferDto: CreateOfferDto,
+    @Req() req: { user: any },
   ): Promise<Offer> {
     const imageFile = files.find((file) => file.fieldname === 'image');
     const pdfFile = files.find((file) => file.fieldname === 'pdf');
 
-    return await this.offerService.updateOffer(offerID, createOfferDto, imageFile, pdfFile);
+    return await this.offerService.updateOffer(offerID, createOfferDto, req.user, imageFile, pdfFile);
   }
 
   @UseGuards(AuthGuard)

@@ -2,27 +2,20 @@ import {NgModule} from '@angular/core';
 import {RouterModule} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {LayoutComponent} from '../layout/layout.component';
-import {LoginComponent} from '../login/login.component';
-import {OfferListComponent} from '../offer/offer-list/offer-list.component';
-import {OfferCardComponent} from '../offer/offer-card/offer-card.component';
 import {SnackBarComponent} from '@shared/snack-bar/snack-bar.component';
 import {ConfirmationModalComponent} from '@shared/confirmation-modal/confirmation-modal.component';
 import {NgZorroExportsModule} from '@shared/ngZorroExports.module';
 import {MaterialUIExportsModule} from '@shared/materialUIExports.module';
-import {OfferDetailsComponent} from '../offer/offer-details/offer-details.component';
-import {ContactComponent} from '../contact/contact.component';
+import {SpinnerComponent} from '@shared/spinner/spinner.component';
+import {AutoSpinnerDirective} from '@shared/_directive/auto-spinner.directive';
+import {SubMenuComponent} from '@shared/sub-menu/sub-menu.component';
 
 
 const components = [
-  LayoutComponent,
-  LoginComponent,
-  OfferListComponent,
-  OfferCardComponent,
-  OfferDetailsComponent,
   SnackBarComponent,
   ConfirmationModalComponent,
-  ContactComponent
+  SpinnerComponent,
+  SubMenuComponent
 ];
 
 const basicModules = [
@@ -32,13 +25,18 @@ const basicModules = [
   ReactiveFormsModule
 ]
 
+const directives = [
+  AutoSpinnerDirective
+];
+
 // const modals = [];
+
 
 // const pipes = [];
 
 
 @NgModule({
-  declarations: [...components],
+  declarations: [...components, ...directives],
   imports: [
     ...basicModules,
     NgZorroExportsModule,
@@ -50,7 +48,7 @@ const basicModules = [
     ...basicModules,
     NgZorroExportsModule,
     MaterialUIExportsModule,
-    // ...directives,
+    ...directives,
     // ...pipes,
   ],
 })

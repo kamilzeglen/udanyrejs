@@ -1,0 +1,50 @@
+<div class="admin-company-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+
+  <form [formGroup]="offerForm">
+
+    <!-- Sekcja Dane dotyczące firmy -->
+    <section class="section data-section">
+      <h2>Dane dotyczące firmy</h2>
+
+      <div class="form-group">
+        <label for="name">Nazwa firmy:</label>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa firmy"/>
+      </div>
+
+      <div class="form-group">
+        <label for="key">Klucz firmy:</label>
+        <input id="key" formControlName="key" type="text" placeholder="Klucz firmy"/>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Opis firmy:</label>
+        <textarea id="description" formControlName="description" type="text" placeholder="Opis firmy"
+                  rows="5"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="imageUpload">Załaduj obrazek (png, jpg, jpeg):</label>
+        <input
+          id="imageUpload"
+          type="file"
+          accept=".png, .jpg, .jpeg"
+          (change)="onImageFileChange($event)"
+        />
+      </div>
+
+    </section>
+
+    <button *ngIf="mode === 'EDIT'" (click)="deleteCompany()" mat-raised-button class="deleteCompany">
+      Usuń firmę
+    </button>
+
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid">
+      {{ mode === 'ADD' ? "Dodaj firme" : "Zaktualizuj firme" }}
+    </button>
+  </form>
+</div>

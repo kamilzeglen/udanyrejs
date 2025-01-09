@@ -1,27 +1,22 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {LoginComponent} from './login/login.component';
-import {OfferListComponent} from './offer/offer-list/offer-list.component';
-import {OfferDetailsComponent} from './offer/offer-details/offer-details.component';
-import {ContactComponent} from './contact/contact.component';
 
 
 const routes: Routes = [
   {
     path: '',
     children: [
-      {path: '', component: OfferListComponent},
-      {path: 'login', component: LoginComponent},
-      {path: 'contact', component: ContactComponent},
-      {path: 'offer-details/:offerId', component: OfferDetailsComponent},
+      {
+        path: '',
+        loadChildren: () => import('./layout-user/layout-user.module').then(m => m.LayoutUserModule),
+      },
       {
         path: 'admin',
-        loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+        loadChildren: () => import('./layout-admin/layout-admin.module').then(m => m.LayoutAdminModule),
       },
-      {path: '**', redirectTo: ''},
+      {path: '**', redirectTo: 'offers'},
     ],
   },
-
 ];
 
 @NgModule({

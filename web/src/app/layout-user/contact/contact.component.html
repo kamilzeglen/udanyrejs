@@ -1,0 +1,47 @@
+<div class="contact-container">
+  <header class="contact-header">
+    <h1>Skontaktuj się z nami</h1>
+    <p>Jesteśmy tu, aby odpowiedzieć na Twoje pytania i pomóc w planowaniu niezapomnianych rejsów.</p>
+  </header>
+
+  <section class="contact-form">
+    <h2>Formularz kontaktowy</h2>
+    <form #contactForm="ngForm">
+      <div class="form-group">
+        <label for="name">Imię i nazwisko</label>
+        <input type="text" id="name" name="name" ngModel required>
+      </div>
+      <div class="form-group">
+        <label for="email">Adres e-mail</label>
+        <input type="email" id="email" name="email" ngModel required>
+      </div>
+      <div class="form-group">
+        <label for="message">Wiadomość</label>
+        <textarea id="message" name="message" ngModel required></textarea>
+      </div>
+      <button type="submit" [disabled]="!contactForm.valid">Wyślij</button>
+    </form>
+  </section>
+
+  <section class="contact-info">
+    <h2>Informacje kontaktowe</h2>
+    <p><strong>Telefon:</strong> +48 123 456 789</p>
+    <p><strong>Email:</strong> kontakt&#64;twojafirma.pl</p>
+    <p><strong>Adres:</strong> ul. Przykładowa 1, 00-000 Miasto</p>
+  </section>
+
+  <section class="contact-social">
+    <h2>Znajdź nas na mediach społecznościowych</h2>
+    <div class="social-icons">
+      <a href="https://facebook.com/twojafirma" target="_blank" aria-label="Facebook">
+        <i class="fab fa-facebook"></i>
+      </a>
+      <a href="https://twitter.com/twojafirma" target="_blank" aria-label="Twitter">
+        <i class="fab fa-twitter"></i>
+      </a>
+      <a href="https://instagram.com/twojafirma" target="_blank" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </section>
+</div>

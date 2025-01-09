@@ -1,0 +1,18 @@
+<a class="offer-card" [routerLink]="['/offers/details', offer.id]">
+  <!-- Logo firmy -->
+  <div class="logo-container" *ngIf="offer.company?.imageFile?.name">
+    <img src="{{API_URL + '/companies/images/' + offer.company.imageFile.name}}" alt="Logo firmy" class="company-logo"/>
+  </div>
+
+  <!-- Zdjęcie -->
+  <div class="image-container" *ngIf="offer.imageFile">
+    <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
+  </div>
+
+  <!-- Opis oferty -->
+  <div class="offer-details">
+    <h2 class="offer-title">{{ offer.name }}</h2>
+    <p><strong>Termin:</strong> {{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}</p>
+    <p><strong>Cena od:</strong> {{ offer.price }} &#8364;</p>
+  </div>
+</a>

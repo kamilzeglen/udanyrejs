@@ -4,6 +4,7 @@ import {Store} from '@ngrx/store';
 import {AppState} from '@state';
 import * as offerActions from './offer.actions';
 import * as offerSelectors from './offer.selectors';
+import {OffersPayload} from '@interfaces';
 
 
 @Injectable()
@@ -14,6 +15,7 @@ export class OfferFacade {
   public getOffersSuccess$ = this.actions.pipe(ofType(offerActions.getOffersSuccess));
   public getOfferSuccess$ = this.actions.pipe(ofType(offerActions.getOfferSuccess));
   public createOfferSuccess$ = this.actions.pipe(ofType(offerActions.createOfferSuccess));
+  public updateOfferSuccess$ = this.actions.pipe(ofType(offerActions.updateOfferSuccess));
   public deleteOfferSuccess$ = this.actions.pipe(ofType(offerActions.deleteOfferSuccess));
 
   constructor(
@@ -22,8 +24,8 @@ export class OfferFacade {
   ) {
   }
 
-  public getOffers(): void {
-    this.store.dispatch(offerActions.getOffers());
+  public getOffers(payload?: Partial<OffersPayload>): void {
+    this.store.dispatch(offerActions.getOffers({payload}));
   }
 
   public getOffer(payload: {id: string}): void {

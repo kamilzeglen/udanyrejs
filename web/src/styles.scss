@@ -6,6 +6,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 app-root {
@@ -24,7 +25,9 @@ label {
 }
 
 input,
-mat-select {
+mat-select,
+textarea,
+{
   padding: 10px;
   font-size: 14px;
   border: 1px solid $primary-color;
@@ -62,25 +65,6 @@ mat-select {
   }
 }
 
-
-.info-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: blue;
-}
-
-.success-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: blue;
-}
-
-.error-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: red;
-}
-
 .snack-notify {
   border-radius: 4px;
   font-family: 'Roboto', sans-serif;
@@ -91,17 +75,38 @@ mat-select {
 }
 
 .info-snack {
-  background-color: #2196f3;
+  background-color: $tertiary-color;
   color: #ffffff;
 }
 
 .warning-snack {
-  background-color: #ff9800;
+  background-color: $warn;
   color: #ffffff;
 }
 
 .error-snack {
-  background-color: #f44336;
+  background-color: $negative;
   color: #ffffff;
 }
 
+// Scroll
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $tertiary-color rgba(255, 165, 0, 0);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 165, 0, 0);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: $tertiary-color;
+  border-radius: 20px;
+  border: 3px solid rgba(255, 165, 0, 0);
+}

@@ -12,6 +12,8 @@ import {ImageFileModule} from "@modules/image-file/image-file.module";
 import {PdfFileModule} from "@modules/pdf-file/pdf-file.module";
 import {ShipModule} from "@modules/ship/ship.module";
 import {ServeStaticModule} from "@nestjs/serve-static";
+import {CategoryModule} from "@modules/category/category.module";
+import {DestinationModule} from "@modules/destination/destination.module";
 
 @Module({
   imports: [
@@ -32,9 +34,21 @@ import {ServeStaticModule} from "@nestjs/serve-static";
         } as TypeOrmModuleAsyncOptions;
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: process.env.IMAGES_PATH,
-      serveRoot: '/images',
+    ServeStaticModule.forRootAsync({
+      useFactory: () => [
+        {
+          rootPath: process.env.OFFERS_IMAGES_PATH,
+          serveRoot: '/offers/images',
+        },
+        {
+          rootPath: process.env.SHIPS_IMAGES_PATH,
+          serveRoot: '/ships/images',
+        },
+        {
+          rootPath: process.env.COMPANIES_IMAGES_PATH,
+          serveRoot: '/companies/images',
+        },
+      ],
     }),
     RoleModule,
     UserModule,
@@ -42,6 +56,8 @@ import {ServeStaticModule} from "@nestjs/serve-static";
     OfferModule,
     CompanyModule,
     ImageFileModule,
+    CategoryModule,
+    DestinationModule,
   PdfFileModule,
   ShipModule
   ],

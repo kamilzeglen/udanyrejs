@@ -27,10 +27,18 @@ export class CreateOfferDto {
   @IsUUID()
   companyId: string;
 
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  destinations?: string[];
+
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  categories?: string[];
+
   @IsNumber()
   price: number;
 
-  @IsString()
+  @IsUUID()
   shipId: string
 
   @IsDateString()

@@ -1,68 +1,10 @@
-<div class="container">
-  <!-- Nagłówek -->
-<nav class="navbar">
-  <div class="navbar-container">
-    <!-- Lewa fala -->
-    <img src="/assets/wave-left.png" class="wave wave-left" alt="Left Wave" />
-
-    <!-- Główna zawartość nawigacji -->
-    <div class="navbar-content">
-      <!-- Link Oferty -->
-      <a routerLink="/" class="nav-link">
-        <span>Oferty</span>
-      </a>
-
-      <!-- Logo na środku -->
-      <a routerLink="/" class="logo-container">
-        <img src="/assets/logo.png" class="logo" alt="UdanyRejs Logo" />
-      </a>
-
-      <!-- Link Kontakt -->
-      <a routerLink="/contact" class="nav-link">
-        <span>Kontakt</span>
-      </a>
-    </div>
-
-    <!-- Prawa fala -->
-    <img src="/assets/wave-right.png" class="wave wave-right" alt="Right Wave" />
-  </div>
-</nav>
-
-
+<div class="layout-wrapper">
+  <app-navbar></app-navbar>
 
   <!-- Sekcja główna na kontent -->
   <main class="content">
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Stopka -->
-  <footer class="footer">
-  <div class="footer-content">
-    <!-- Informacje o stronie -->
-    <div class="footer-info">
-      <h3>UdanyRejs.pl</h3>
-      <p>&copy; 2024 UdanyRejs.pl. Wszystkie prawa zastrzeżone.</p>
-      <p>Kontakt: kontakt&#64;udanyrejs.pl | Tel: +48 601 290 334 | Tel: +48 570 444 903</p>
-    </div>
-
-    <!-- Linki w stopce -->
-    <div class="footer-links">
-      <a routerLink="/about-as">O nas</a>
-      <a routerLink="/">Oferta</a>
-      <a routerLink="/contact">Kontakt</a>
-    </div>
-
-    <!-- Ikony społecznościowe -->
-    <div class="footer-socials">
-      <a href="https://www.facebook.com/profile.php?id=100063084557191" aria-label="Facebook">
-        <span class="material-icons">facebook</span>
-      </a>
-      <a href="https://www.instagram.com/udanyrejs/" aria-label="Instagram">
-        <span class="material-icons">instagram</span>
-      </a>
-    </div>
-  </div>
-</footer>
-
-
+  <app-footer></app-footer>
 </div>

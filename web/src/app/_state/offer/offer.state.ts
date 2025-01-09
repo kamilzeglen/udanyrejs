@@ -5,7 +5,6 @@ export type OfferState = Readonly<{
   offers: Offer[];
   loading: boolean;
   errorMessage: string;
-
 }>;
 
 export const initialState: OfferState = {

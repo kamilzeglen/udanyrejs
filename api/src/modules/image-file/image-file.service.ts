@@ -5,6 +5,10 @@ import {existsSync, mkdirSync, unlinkSync, writeFileSync} from 'fs';
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {ImageFile} from "@modules/image-file/image-file.entity";
+import {Company} from "@modules/company/company.entity";
+import {Ship} from "@modules/ship/ship.entity";
+import {SaveTypes, UpdateTypes} from "../../interfaces/save-update-file-types";
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class ImageFileService {
@@ -19,8 +23,21 @@ export class ImageFileService {
     return this.imageFileRepository.findOneBy({name: name});
   }
 
-  async saveFile(file: Express.Multer.File, offer: Offer): Promise<ImageFile> {
-    const uploadDir = process.env.IMAGES_PATH || './uploads/images';
+  async saveImage(file: Express.Multer.File, type: SaveTypes, target: Offer | Company | Ship): Promise<ImageFile> {
+
+    let uploadDir: string = './uploads/images'
+    if (type === SaveTypes.OFFER) {
+      uploadDir = process.env.OFFERS_IMAGES_PATH;
+    }
+
+    if (type === SaveTypes.COMPANY) {
+      uploadDir = process.env.COMPANIES_IMAGES_PATH;
+    }
+
+    if (type === SaveTypes.SHIP) {
+      uploadDir = process.env.SHIPS_IMAGES_PATH;
+    }
+
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, {recursive: true});
     }
@@ -34,23 +51,56 @@ export class ImageFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${offer.id}${extname}`;
+    const fileName = `${target.id}${extname}`;
     const filePath = path.join(uploadDir, fileName);
 
     writeFileSync(filePath, file.buffer);
 
-    const imageFileEntity = this.imageFileRepository.create({
-      name: fileName,
-      originalName: file.originalname,
-      path: filePath,
-      offer
-    });
+    let imageFileEntity: ImageFile
+    if (type === SaveTypes.OFFER) {
+      imageFileEntity = this.imageFileRepository.create({
+        name: fileName,
+        originalName: file.originalname,
+        path: filePath,
+        offer: target
+      });
+    }
+
+    if (type === SaveTypes.COMPANY) {
+      imageFileEntity = this.imageFileRepository.create({
+        name: fileName,
+        originalName: file.originalname,
+        path: filePath,
+        company: target
+      });
+    }
+
+    if (type === SaveTypes.SHIP) {
+      imageFileEntity = this.imageFileRepository.create({
+        name: fileName,
+        originalName: file.originalname,
+        path: filePath,
+        ship: target
+      });
+    }
 
     return this.imageFileRepository.save(imageFileEntity);
   }
 
-  async updateFile(file: Express.Multer.File, offer: Offer): Promise<ImageFile> {
-    const uploadDir = process.env.IMAGES_PATH || './uploads/images';
+  async updateImage(file: Express.Multer.File, type: UpdateTypes, target: Offer | Company | Ship): Promise<ImageFile> {
+
+    let uploadDir: string = './uploads/images'
+    if (type === UpdateTypes.OFFER) {
+      uploadDir = process.env.OFFERS_IMAGES_PATH;
+    }
+
+    if (type === UpdateTypes.COMPANY) {
+      uploadDir = process.env.COMPANIES_IMAGES_PATH;
+    }
+
+    if (type === UpdateTypes.SHIP) {
+      uploadDir = process.env.SHIPS_IMAGES_PATH;
+    }
 
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, {recursive: true});
@@ -65,10 +115,10 @@ export class ImageFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${offer.id}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
+    const fileName = `${target.id}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
     const filePath = path.join(uploadDir, fileName);
 
-    const existingFile = offer.imageFile;
+    const existingFile = target.imageFile;
 
     let newImageFile: ImageFile
     if (existingFile) {
@@ -85,20 +135,60 @@ export class ImageFileService {
       // Krok 3: Zapisanie zmienionego rekordu w bazie
       await this.imageFileRepository.save(existingFile); // Zamiast 'update', używamy 'save' do zaktualizowania istniejącego rekordu
     } else {
-      // Jeśli nie istnieje rekord, tworzymy nowy
-      newImageFile = this.imageFileRepository.create({
-        name: fileName, // Nazwa pliku pozostaje taka sama
-        originalName: file.originalname, // Zmieniamy tylko nazwę oryginalną
-        path: filePath,
-        offer,
-      });
+
+      if (type === UpdateTypes.OFFER) {
+        newImageFile = this.imageFileRepository.create({
+          name: fileName,
+          originalName: file.originalname,
+          path: filePath,
+          offer: target,
+        });
+      }
+
+      if (type === UpdateTypes.COMPANY) {
+        newImageFile = this.imageFileRepository.create({
+          name: fileName,
+          originalName: file.originalname,
+          path: filePath,
+          company: target,
+        });
+      }
+
+      if (type === UpdateTypes.SHIP) {
+        newImageFile = this.imageFileRepository.create({
+          name: fileName,
+          originalName: file.originalname,
+          path: filePath,
+          ship: target,
+        });
+      }
 
       await this.imageFileRepository.save(newImageFile); // Tworzymy nowy rekord
     }
 
     writeFileSync(filePath, file.buffer);
 
-    // Krok 4: Zwrócenie zaktualizowanego obiektu ImageFile
     return existingFile || newImageFile;
+  }
+
+  async removeImageFile(filePath: string): Promise<boolean> {
+
+    if (!filePath) {
+      throw new Error('Path not found');
+    }
+
+    try {
+      if (existsSync(filePath)) {
+        await fs.unlink(filePath);
+      } else {
+        console.error(`File does not exist: ${filePath}`);
+      }
+
+    } catch (err) {
+      console.error(`Failed to delete file: ${err.message}`);
+      throw new Error('Failed to delete the physical file');
+    }
+
+    return true;
   }
 }

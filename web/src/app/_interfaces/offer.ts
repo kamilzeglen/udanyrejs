@@ -1,8 +1,11 @@
 import {Itinerary} from './itinerary';
 import {Company} from './company';
-import {imageFile, pdfFile} from './file';
-import {FileUpload} from './fileUpload';
+import {ImageFile, PdfFile} from './file';
 import {Ship} from './ship';
+import {Category} from './category';
+import {Destination} from './destination';
+import {FileUpload} from './file-upload';
+import {User} from './user';
 
 export interface Offer {
   id: string;
@@ -16,11 +19,17 @@ export interface Offer {
   shipId: string;
   startDate: string;
   endDate: string;
-  imageFile: imageFile | FileUpload;
+  imageFile: ImageFile | FileUpload;
   imageFileId: string;
-  pdfFile: pdfFile | FileUpload;
+  pdfFile: PdfFile | FileUpload;
   pdfFileId: string;
+  destinations: Destination[];
+  categories: Category[]
   itinerary: Itinerary[];
+  createdBy: User,
+  createdById: string
+  updatedBy: User,
+  updatedById: string
   createdAt: Date | string;
   updatedAt: Date | string;
   deletedAt: Date | string;

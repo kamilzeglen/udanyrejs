@@ -1,4 +1,4 @@
-export interface imageFile {
+export interface ImageFile {
   id: string;
   name: string;
   path: string;
@@ -8,7 +8,7 @@ export interface imageFile {
   deletedAt: Date | string;
 }
 
-export interface pdfFile {
+export interface PdfFile {
   id: string;
   name: string;
   path: string;

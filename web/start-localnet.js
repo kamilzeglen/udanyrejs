@@ -17,7 +17,7 @@ function getLocalIp() {
 async function runServer() {
   try {
     const localIp = await getLocalIp();
-    const ngServeCommand = `ng serve --host ${localIp} --disable-host-check --ssl true --ssl-key ./ssl-key.pem --ssl-cert ./ssl-cert.pem --proxy-config proxy.conf.local.js -c local`;
+    const ngServeCommand = `ng serve --host ${localIp} --disable-host-check`;
 
     process.env.FORCE_COLOR = 'true';
 

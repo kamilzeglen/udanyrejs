@@ -3,119 +3,118 @@ import {MigrationInterface, QueryRunner} from "typeorm";
 export class SeedAddShips1735169911932 implements MigrationInterface {
   name = 'SeedAddShips1735169911932'
 
-  public ships = [
-    // MSC Cruises
-    {
-      id: "b9c1f2ab-1c5d-4934-9e1a-1a0a74ebcd01",
-      name: "MSC Bellissima",
-      companyId: "9532e2a2-1ad2-452a-be02-f0a849a6f363",
-    },
-    {
-      id: "c2e4a32b-44c8-4d6d-9c3a-2a1e57ed1234",
-      name: "MSC Meraviglia",
-      companyId: "9532e2a2-1ad2-452a-be02-f0a849a6f363",
-    },
-    {
-      id: "f3e2b4ac-7d3a-4f9b-8e2a-3a2b58dc5678",
-      name: "MSC Seaview",
-      companyId: "9532e2a2-1ad2-452a-be02-f0a849a6f363",
-    },
+    public ships = [
+      { name: 'MSC Armonia', companyName: 'MSC Cruises' },
+      { name: 'MSC Bellissima', companyName: 'MSC Cruises' },
+      { name: 'MSC Divina', companyName: 'MSC Cruises' },
+      { name: 'MSC Euribia', companyName: 'MSC Cruises' },
+      { name: 'MSC Fantasia', companyName: 'MSC Cruises' },
+      { name: 'MSC Grandiosa', companyName: 'MSC Cruises' },
+      { name: 'MSC Lirica', companyName: 'MSC Cruises' },
+      { name: 'MSC Magnifica', companyName: 'MSC Cruises' },
+      { name: 'MSC Meraviglia', companyName: 'MSC Cruises' },
+      { name: 'MSC Musica', companyName: 'MSC Cruises' },
+      { name: 'MSC Opera', companyName: 'MSC Cruises' },
+      { name: 'MSC Orchestra', companyName: 'MSC Cruises' },
+      { name: 'MSC Poesia', companyName: 'MSC Cruises' },
+      { name: 'MSC Preziosa', companyName: 'MSC Cruises' },
+      { name: 'MSC Seascape', companyName: 'MSC Cruises' },
+      { name: 'MSC Seashore', companyName: 'MSC Cruises' },
+      { name: 'MSC Seaside', companyName: 'MSC Cruises' },
+      { name: 'MSC Seaview', companyName: 'MSC Cruises' },
+      { name: 'MSC Sinfonia', companyName: 'MSC Cruises' },
+      { name: 'MSC Splendida', companyName: 'MSC Cruises' },
+      { name: 'MSC Virtuosa', companyName: 'MSC Cruises' },
+      { name: 'MSC World America', companyName: 'MSC Cruises' },
+      { name: 'MSC World Europa', companyName: 'MSC Cruises' },
 
-    // AIDA Cruises
-    {
-      id: "d4a2f1cb-3e5d-4f8a-8d2e-4c3f69fc6789",
-      name: "AIDAperla",
-      companyId: "521a19ab-8cfb-4977-8532-ea6d5c08d953",
-    },
-    {
-      id: "e5b3c2da-2f6c-4e9a-7e3b-5d4e70ed7890",
-      name: "AIDAnova",
-      companyId: "521a19ab-8cfb-4977-8532-ea6d5c08d953",
-    },
-    {
-      id: "f6c4d3eb-1e7b-4d8a-6f4c-6e5f81fe8901",
-      name: "AIDAluna",
-      companyId: "521a19ab-8cfb-4977-8532-ea6d5c08d953",
-    },
+      { name: 'AIDAbella', companyName: 'AIDA Cruises' },
+      { name: 'AIDAblu', companyName: 'AIDA Cruises' },
+      { name: 'AIDAcosma', companyName: 'AIDA Cruises' },
+      { name: 'AIDAdiva', companyName: 'AIDA Cruises' },
+      { name: 'AIDAluna', companyName: 'AIDA Cruises' },
+      { name: 'AIDAmar', companyName: 'AIDA Cruises' },
+      { name: 'AIDAnova', companyName: 'AIDA Cruises' },
+      { name: 'AIDAperla', companyName: 'AIDA Cruises' },
+      { name: 'AIDAprima', companyName: 'AIDA Cruises' },
+      { name: 'AIDAsol', companyName: 'AIDA Cruises' },
+      { name: 'AIDAstella', companyName: 'AIDA Cruises' },
 
-    // Costa Cruises
-    {
-      id: "f6c4d3eb-1e7b-4d2a-5f4c-6e5f81fe8901",
-      name: "Costa Smeralda",
-      companyId: "521a42ab-8cfb-4977-8532-ea6d5c08d953",
-    },
-    {
-      id: "f6c4d3eb-1e7b-4d2a-2f4c-1e5f81fe8901",
-      name: "Costa Toscana",
-      companyId: "521a42ab-8cfb-4977-8532-ea6d5c08d953",
-    },
-    {
-      id: "f3c4d3eb-1e7b-4d2a-5f2c-6e5f81fe8921",
-      name: "Costa Diadema",
-      companyId: "521a42ab-8cfb-4977-8532-ea6d5c08d953",
-    },
+      { name: 'Costa Deliziosa', companyName: 'Costa Cruises' },
+      { name: 'Costa Diadema', companyName: 'Costa Cruises' },
+      { name: 'Costa Fascinosa', companyName: 'Costa Cruises' },
+      { name: 'Costa Favolosa', companyName: 'Costa Cruises' },
+      { name: 'Costa Fortuna', companyName: 'Costa Cruises' },
+      { name: 'Costa Pacifica', companyName: 'Costa Cruises' },
+      { name: 'Costa Serena', companyName: 'Costa Cruises' },
+      { name: 'Costa Smeralda', companyName: 'Costa Cruises' },
+      { name: 'Costa Toscana', companyName: 'Costa Cruises' },
 
-    // Norwegian Cruise Line
-    {
-      id: "f1c4d3eb-1e1b-4d1a-5f2c-6e5f81fe8921",
-      name: "Norwegian Epic",
-      companyId: "521a42ab-8cfb-4357-8532-ea6d5c08d123",
-    },
-    {
-      id: "f1c8d9eb-1e1b-4d1a-5f2c-6e5f52fe8926",
-      name: "Norwegian Bliss",
-      companyId: "521a42ab-8cfb-4357-8532-ea6d5c08d123",
-    },
-    {
-      id: "f2c8d9eb-1e1b-2d1a-5f4c-6e5f43fe8926",
-      name: "Norwegian Prima",
-      companyId: "521a42ab-8cfb-4357-8532-ea6d5c08d123",
-    },
+      { name: 'Norwegian Aqua', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Bliss', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Breakaway', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Dawn', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Encore', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Epic', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Escape', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Gem', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Gateway', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Jade', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Jewel', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Joy', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Luna', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Pearl', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Prima', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Sky', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Spirit', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Star', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Sun', companyName: 'Norwegian Cruise Line' },
+      { name: 'Norwegian Viva', companyName: 'Norwegian Cruise Line' },
+      { name: 'Pride Of America', companyName: 'Norwegian Cruise Line' },
 
-    // Royal Caribbean
-    {
-      id: "f2c8d9eb-8e6b-2d1a-5f4c-6e5f43fe8513",
-      name: "Symphony of the Seas",
-      companyId: "531a42ab-9cfb-4217-8532-ea6d5d08d123",
-    },
-    {
-      id: "f9c8d1eb-8e6b-2d1a-5f2c-6e5f42fe8983",
-      name: "Oasis of the Seas",
-      companyId: "531a42ab-9cfb-4217-8532-ea6d5d08d123",
-    },
-    {
-      id: "f9c8d1eb-8e6b-5d1a-5f2c-6e5f42fe8222",
-      name: "Harmony of the Seas",
-      companyId: "531a42ab-9cfb-4217-8532-ea6d5d08d123",
-    },
+      { name: 'Adventure of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Allure of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Anthem of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Brilliance of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Enchantment of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Explorer of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Freedom of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Grandeur of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Harmony of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Icon of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Independence of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Jewel of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Liberty of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Mariner of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Navigator of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Oasis of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Odyssey of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Ovation of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Quantum of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Radiance of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Rhapsody of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Serenade of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Spectrum of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Symphony of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Vision of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Voyager of the Seas', companyName: 'Royal Caribbean' },
+      { name: 'Wonder of the Seas', companyName: 'Royal Caribbean' },
 
-    // TUI Cruises
-    {
-      id: "f9c8d1eb-8e6b-1d1a-5f3c-6e5f43fe8222",
-      name: "Mein Schiff 1",
-      companyId: "123a45ab-7cfb-4217-8532-ea6d5d08d123",
-    },
-    {
-      id: "f1c8d1eb-8e6b-1d1a-5f3c-6e3f22fe8225",
-      name: "Mein Schiff 2",
-      companyId: "123a45ab-7cfb-4217-8532-ea6d5d08d123",
-    },
-    {
-      id: "f7c8d1eb-8e6b-1d1a-6f3c-213f22fe8225",
-      name: "Mein Schiff 3",
-      companyId: "123a45ab-7cfb-4217-8532-ea6d5d08d123",
-    },
-  ];
+      { name: 'MEIN SCHIFF 1', companyName: 'TUI Cruises' },
+      { name: 'MEIN SCHIFF 5', companyName: 'TUI Cruises' },
+      { name: 'MEIN SCHIFF 6', companyName: 'TUI Cruises' },
+    ];
+
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     for (const ship of this.ships) {
       await queryRunner.query(`
         INSERT INTO "ship" ("id", "name", "companyId")
         VALUES (
-          '${ship.id}',
+          uuid_generate_v4(),
           '${ship.name}',
-          '${ship.companyId}'
-        ) ON CONFLICT ("id") DO NOTHING;
+          (SELECT "id" FROM "company" WHERE "name" = '${ship.companyName}')
+        );
       `);
     }
   }
@@ -123,7 +122,10 @@ export class SeedAddShips1735169911932 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     for (const ship of this.ships) {
       await queryRunner.query(`
-        DELETE FROM "ship" WHERE "id" = '${ship.id}';
+        DELETE FROM "ship"
+        WHERE "name" = '${ship.name}' AND "companyId" = (
+          SELECT "id" FROM "company" WHERE "name" = '${ship.companyName}'
+        );
       `);
     }
   }

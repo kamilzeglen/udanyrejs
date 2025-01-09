@@ -1,7 +1,8 @@
 import {createAction, props} from '@ngrx/store';
 import {Offer} from '@interfaces';
+import {OffersPayload} from '@interfaces';
 
-export const getOffers = createAction('[Offer] Get Offers');
+export const getOffers = createAction('[Offer] Get Offers', props<{ payload: Partial<OffersPayload> }>());
 export const getOffersSuccess = createAction('[Offer] Get Offers Success', props<{ offers: Offer[] }>());
 export const getOffersError = createAction('[Offers] Get Offers Error', props<{ errorMessage: string }>());
 

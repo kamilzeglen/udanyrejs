@@ -8,13 +8,29 @@ import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {effects, facades, reducers} from '@state';
 import {JwtModule} from '@auth0/angular-jwt';
-import {AuthGuard} from './guard/auth-guard.service';
+import {AuthGuard} from '@shared/_guard/auth-guard.service';
 import {SharedModule} from '@shared/shared.module';
 import {AppRoutingModule} from './app-routing.module';
 import {BrowserModule} from '@angular/platform-browser';
-import {AdminModule} from './admin/admin.module';
+import {LayoutAdminModule} from './layout-admin/layout-admin.module';
+import {MAT_DATE_FORMATS} from '@angular/material/core';
+import {LayoutComponent} from './layout/layout.component';
+import {NavbarComponent} from './layout/navbar/navbar.component';
+import {FooterComponent} from './layout/footer/footer.component';
 
 registerLocaleData(pl);
+
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'DD.MM.YYYY', // Format do parsowania
+  },
+  display: {
+    dateInput: 'DD.MM.YYYY', // Format wyświetlania w polu
+    monthYearLabel: 'MMMM YYYY', // Format w nagłówku miesiąca
+    dateA11yLabel: 'LL', // Dostępność
+    monthYearA11yLabel: 'MMMM YYYY', // Dostępność
+  },
+};
 
 export function tokenGetter() {
   return localStorage.getItem("access_token");
@@ -22,6 +38,9 @@ export function tokenGetter() {
 
 const components = [
   AppComponent,
+  LayoutComponent,
+  NavbarComponent,
+  FooterComponent
 ];
 
 const guards = [
@@ -43,9 +62,15 @@ const guards = [
     BrowserModule,
     AppRoutingModule,
     SharedModule,
-    AdminModule,
+    LayoutAdminModule,
   ],
-  providers: [...facades, ...guards, provideHttpClient(), provideAnimationsAsync(), { provide: LOCALE_ID, useValue: 'pl' }],
+  providers: [
+    ...facades,
+    ...guards,
+    provideHttpClient(),
+    provideAnimationsAsync(),
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+    { provide: LOCALE_ID, useValue: 'pl' }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

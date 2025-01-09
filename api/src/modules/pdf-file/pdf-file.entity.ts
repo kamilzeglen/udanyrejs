@@ -3,7 +3,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
@@ -24,8 +23,7 @@ export class PdfFile {
   @Column({ type: 'varchar', length: 255 })
   path: string;
 
-  @OneToOne(() => Offer, (offer) => offer.pdfFile, {nullable: false})
-  @JoinColumn()
+  @OneToOne(() => Offer, (offer) => offer.pdfFile, {nullable: false })
   offer: Offer;
 
   @CreateDateColumn()

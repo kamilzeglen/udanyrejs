@@ -1,0 +1,19 @@
+@import '../../../scss/variables.scss';
+
+.submenu {
+  display: flex;
+  height: auto;
+  background-image: linear-gradient($tertiary-color, #002b4f);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 0;
+  justify-content: center;
+
+  .submenu-item {
+    padding: 0 25px;
+  }
+
+  a:link, a:visited {
+    color: $white;
+  }
+}

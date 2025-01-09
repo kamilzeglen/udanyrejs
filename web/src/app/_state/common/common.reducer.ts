@@ -43,6 +43,44 @@ const reducer = createReducer(
     errorMessage,
     ships: [],
   })),
+
+  on(commonActions.getCategories, state => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+    categories: [],
+  })),
+  on(commonActions.getCategoriesSuccess, (state, {categories}) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+    categories
+  })),
+  on(commonActions.getCategoriesError, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+    categories: [],
+  })),
+
+  on(commonActions.getDestinations, state => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+    destinations: [],
+  })),
+  on(commonActions.getDestinationsSuccess, (state, {destinations}) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+    destinations
+  })),
+  on(commonActions.getDestinationsError, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+    destinations: [],
+  })),
 )
 
 export function commonReducer(state: CommonState | undefined, action: Action): CommonState {

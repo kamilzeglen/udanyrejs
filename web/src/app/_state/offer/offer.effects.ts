@@ -16,8 +16,8 @@ export class OfferEffects {
   getOffers$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.getOffers),
-      switchMap(() => {
-        return this.http.getOffers().pipe(
+      switchMap(({payload}) => {
+        return this.http.getOffers(payload).pipe(
           map(offers => {
             return offerActions.getOffersSuccess({offers});
           }),
@@ -45,7 +45,7 @@ export class OfferEffects {
     )
   );
 
-  createOffer = createEffect(() =>
+  createOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.createOffer),
       switchMap(({payload}) => {
@@ -61,7 +61,7 @@ export class OfferEffects {
     )
   )
 
-  updateOffer = createEffect(() =>
+  updateOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.updateOffer),
       switchMap(({payload}) => {
@@ -77,7 +77,7 @@ export class OfferEffects {
     )
   )
 
-  deleteOffer = createEffect(() =>
+  deleteOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.deleteOffer),
       switchMap(({payload}) => {
