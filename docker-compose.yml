@@ -22,8 +22,10 @@ services:
         ports:
             - "5006:5006"
         volumes:
-            - /root/Projects/udanyrejs/PDFS:/PDFS
-            - /root/Projects/udanyrejs/PDFS:/IMAGES
+            - /root/Projects/udanyrejs/files/OFFERS_IMAGES:/app/files/OFFERS_IMAGES
+            - /root/Projects/udanyrejs/files/SHIPS_IMAGES:/app/files/SHIPS_IMAGES
+            - /root/Projects/udanyrejs/files/COMPANIES_IMAGES:/app/files/COMPANIES_IMAGES
+            - /root/Projects/udanyrejs/files/OFFERS_PDFS:/app/files/OFFERS_PDFS
         networks:
             - nginx-proxy-manager_default
             - postgres_default

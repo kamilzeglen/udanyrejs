@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree} from '@angular/router';
 import {Observable, of, take} from "rxjs";
-import {catchError, map, switchMap} from "rxjs/operators";
+import {catchError, switchMap} from "rxjs/operators";
 import {AuthFacade} from '@state/auth';
 
 @Injectable()
