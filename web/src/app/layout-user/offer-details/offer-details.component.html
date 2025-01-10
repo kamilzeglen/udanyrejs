@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="image-container offer" *ngIf="offer.imageFile?.name">
+  <div class="image-container-offer" *ngIf="offer.imageFile?.name">
     <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie oferty" class="offer-image"/>
   </div>
 
@@ -62,7 +62,7 @@
   <div class="company-description" *ngIf="offer.company?.description" [innerHTML]="offer.company.description"></div>
   <div class="ship-description" *ngIf="offer.ship?.description" [innerHTML]="offer.ship.description"></div>
 
-  <div class="image-container ship" *ngIf="offer.ship?.imageFile?.name">
+  <div class="image-container-ship" *ngIf="offer.ship?.imageFile?.name">
     <img [src]="API_URL + '/ships/images/' + offer.ship.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
   </div>
 
@@ -89,7 +89,7 @@
       </div>
       <div class="element">
         <div class="element-label">Tonaż:</div>
-        <div class="element-value">{{ offer.ship.tonnage ? offer.ship.tonnage + ' t' : '-' }}</div>
+        <div class="element-value">{{ offer.ship.tonnage ? offer.ship.tonnage + ' ton' : '-' }}</div>
       </div>
       <div class="element">
         <div class="element-label">Pokłady pasażerskie:</div>
