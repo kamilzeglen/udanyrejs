@@ -1,4 +1,5 @@
 @import '../../../scss/variables';
+@import '../../../scss/breakpoints';
 
 .navbar {
   border-bottom: 4px solid $tertiary-color;
@@ -47,7 +48,8 @@
   .nav-link {
     font-size: 18px;
     font-weight: 600;
-    color: $secondary-color;
+    color: $text-color;
+    text-shadow: grey 1px 1px;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -76,6 +78,10 @@
     margin: 0 40px;
     padding: 10px 0;
     position: relative;
+
+    @include media("<=phone") {
+      margin: 0 20px;
+    }
 
     .logo {
       height: 60px;
