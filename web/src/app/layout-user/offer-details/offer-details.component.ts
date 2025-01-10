@@ -2,9 +2,10 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {of, ReplaySubject, takeUntil} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import {OfferFacade} from '@state/offer';
-import {Itinerary, Offer} from '@interfaces';
+import {AllDeviceInfo, Itinerary, Offer} from '@interfaces';
 import {environment} from '@environment';
-import { Location } from '@angular/common';
+import {Location} from '@angular/common';
+import {DeviceInfoService} from '@shared/device-info/device-info.service';
 
 @Component({
   selector: 'app-offer-details',
@@ -13,6 +14,8 @@ import { Location } from '@angular/common';
 })
 export class OfferDetailsComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+
+  public deviceInfo: AllDeviceInfo;
 
   public API_URL = environment.API_URL;
 
@@ -23,11 +26,17 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly activatedRoute: ActivatedRoute,
     private readonly offerFacade: OfferFacade,
-    private readonly location: Location
+    private readonly location: Location,
+    private readonly deviceInfoService: DeviceInfoService
   ) {
   }
 
   ngOnInit() {
+    this.deviceInfo = this.deviceInfoService.getInfo();
+
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+      this.deviceInfo = info;
+    });
 
     this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe((offer) => {
       this.offer = offer.offer;
