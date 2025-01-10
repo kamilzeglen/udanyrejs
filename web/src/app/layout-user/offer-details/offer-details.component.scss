@@ -151,10 +151,6 @@
     margin: 1.5rem auto;
     text-align: center;
 
-    &.ship {
-      margin-bottom: 0;
-    }
-
     img {
       max-width: 100%;
       border-radius: 8px;
@@ -165,6 +161,10 @@
         transform: scale(1.05);
       }
     }
+  }
+
+  .image-container-ship {
+    margin-bottom: 0;
   }
 
   .itinerary-section {
