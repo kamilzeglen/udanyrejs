@@ -19,7 +19,7 @@
         <td mat-cell *matCellDef="let element">{{ element.name }}</td>
       </ng-container>
 
-      <!-- Name Column -->
+      <!-- Key Column -->
       <ng-container matColumnDef="key">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Klucz</th>
         <td mat-cell *matCellDef="let element">{{ element.key }}</td>
@@ -37,7 +37,8 @@
       <!-- Description Column -->
       <ng-container matColumnDef="description">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Opis</th>
-        <td mat-cell *matCellDef="let element">{{ element.description || '-' }}</td>
+        <td mat-cell *matCellDef="let element" [innerHTML]="element.description">{{ element.description ? '' : '-' }}</td>
+
       </ng-container>
 
       <!-- Actions Column -->
