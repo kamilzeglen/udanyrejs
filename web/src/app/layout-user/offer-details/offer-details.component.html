@@ -80,15 +80,15 @@
     </div>
     <div class="element">
       <div class="element-label">Długość:</div>
-      <div class="element-value">{{ offer.ship.length || '-' }} m</div>
+      <div class="element-value">{{ offer.ship.length ? offer.ship.length + ' m' : '-' }}</div>
     </div>
     <div class="element">
       <div class="element-label">Szerokość:</div>
-      <div class="element-value">{{ offer.ship.width || '-' }} m</div>
+      <div class="element-value">{{ offer.ship.width ? offer.ship.width + ' m' : '-' }}</div>
     </div>
     <div class="element">
       <div class="element-label">Tonaż:</div>
-      <div class="element-value">{{ offer.ship.tonnage || '-' }} t</div>
+      <div class="element-value">{{ offer.ship.tonnage ? offer.ship.tonnage + ' t' : '-' }}</div>
     </div>
     <div class="element">
       <div class="element-label">Pokłady pasażerskie:</div>
