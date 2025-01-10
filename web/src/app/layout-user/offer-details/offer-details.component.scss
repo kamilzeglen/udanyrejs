@@ -67,6 +67,15 @@
     }
   }
 
+  .ship-details-title {
+    h2 {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin: 20px 0;
+      text-align: center;
+    }
+  }
+
   .ship-details {
     display: grid;
     grid-template-columns: 1fr 1fr;
