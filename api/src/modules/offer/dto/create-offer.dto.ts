@@ -9,7 +9,7 @@ import {
   ValidateNested
 } from "class-validator";
 import {Type} from "class-transformer";
-import {ItineraryDayDto} from "./itinerary-day.dto";
+import {CreateItineraryDto} from "@modules/itinerary/dto/create-itinerary.dto";
 
 export class CreateOfferDto {
 
@@ -47,13 +47,8 @@ export class CreateOfferDto {
   @IsDateString()
   endDate: Date;
 
-  @IsString()
-  @IsOptional()
-  image?: any;
-
   @IsArray()
-  @IsOptional()
-  @ValidateNested({each: true})
-  @Type(() => ItineraryDayDto)
-  itinerary?: ItineraryDayDto[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateItineraryDto)
+  itinerary?: CreateItineraryDto[];
 }

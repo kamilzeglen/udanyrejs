@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {environment} from '@environment';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {City} from '../../_interfaces/city';
+import {environment} from '@environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,6 @@ import {Category, Company, Destination, Ship} from '@interfaces';
 export class CommonHttpService {
 
   private API_URL = environment.API_URL;
-  private defaultOpts = {withCredentials: true};
 
   constructor(
     private http: HttpClient
@@ -29,17 +29,17 @@ export class CommonHttpService {
 
   public createCompany(payload: { formData: FormData }): Observable<Company> {
     const url = `${this.API_URL}/company/`;
-    return this.http.post<Company>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Company>(url, payload.formData);
   }
 
   public updateCompany(payload: { id: string, formData: FormData }): Observable<Company> {
     const url = `${this.API_URL}/company/` + payload.id;
-    return this.http.post<Company>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Company>(url, payload.formData);
   }
 
   public deleteOffer(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/company/` + payload.id;
-    return this.http.delete<boolean>(url, this.defaultOpts);
+    return this.http.delete<boolean>(url);
   }
 
   public getShips(payload: {companyId: string}): Observable<Ship[]> {
@@ -52,19 +52,29 @@ export class CommonHttpService {
     return this.http.get<Ship>(url);
   }
 
-  public createShip(payload: { formData: FormData }): Observable<Ship> {
+  public createShip(payload: { formData: Partial<Ship> }): Observable<Ship> {
     const url = `${this.API_URL}/ship/`;
-    return this.http.post<Ship>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Ship>(url, payload.formData);
   }
 
-  public updateShip(payload: { id: string, formData: FormData }): Observable<Ship> {
+  public updateShip(payload: { id: string, formData: Partial<Ship> }): Observable<Ship> {
     const url = `${this.API_URL}/ship/` + payload.id;
-    return this.http.post<Ship>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Ship>(url, payload.formData);
   }
 
   public deleteShip(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/ship/` + payload.id;
-    return this.http.delete<boolean>(url, this.defaultOpts);
+    return this.http.delete<boolean>(url);
+  }
+
+  public getCities(): Observable<City[]> {
+    const url = `${this.API_URL}/city`;
+    return this.http.get<City[]>(url);
+  }
+
+  public createCity(payload: { formData: Partial<City> }): Observable<City> {
+    const url = `${this.API_URL}/city/`;
+    return this.http.post<City>(url, payload.formData);
   }
 
   public getCategories(): Observable<Category[]> {

@@ -1,6 +1,6 @@
 import {RouterModule, Routes} from '@angular/router';
 import {LayoutAdminComponent} from './layout-admin.component';
-import {AuthGuard} from '@shared/_guard/auth-guard.service';
+import {AuthGuard} from '../_core/guard/auth-guard.service';
 import {AdminOfferListComponent} from './admin-offer-list/admin-offer-list.component';
 import {NgModule} from '@angular/core';
 import {AdminOfferAddEditComponent} from './admin-offer-add-edit/admin-offer-add-edit.component';
@@ -18,7 +18,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        component: LayoutAdminComponent,
+        component: AdminOfferListComponent,
       },
       {
         path: 'offers',

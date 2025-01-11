@@ -10,6 +10,8 @@ import {
 import {Offer} from "@modules/offer/offer.entity";
 import {Ship} from "@modules/ship/ship.entity";
 import {Company} from "@modules/company/company.entity";
+import {City} from "@modules/city/city.entity";
+import {Attraction} from "@modules/attraction/attraction.entity";
 
 @Entity()
 export class ImageFile {
@@ -33,6 +35,12 @@ export class ImageFile {
 
   @OneToOne(() => Company, (company) => company.imageFile, { nullable: true })
   company: Company;
+
+  @OneToOne(() => City, (city) => city.imageFile, { nullable: true })
+  city: City;
+
+  @OneToOne(() => Attraction, (attraction) => attraction.imageFile, { nullable: true })
+  attraction: City;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {of} from 'rxjs';
 import * as commonActions from '@state/common/common.actions';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {CommonHttpService} from '../../_http/common.http.service';
+import {CommonHttpService} from '@core/http/common.http.service';
 
 @Injectable()
 export class CommonEffects {
@@ -168,6 +168,38 @@ export class CommonEffects {
           }),
           catchError(errorMessage => {
             return of(commonActions.deleteShipError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  getCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCities),
+      switchMap(() => {
+        return this.http.getCities().pipe(
+          map(cities => {
+            return commonActions.getCitiesSuccess({cities});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getCitiesError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  createCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCity),
+      switchMap(({payload}) => {
+        return this.http.createCity(payload).pipe(
+          map((city) => {
+            return commonActions.createCitySuccess({city});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createCityError({errorMessage}));
           })
         );
       })

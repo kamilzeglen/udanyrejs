@@ -1,15 +1,16 @@
-import {IsString, IsNumber, IsOptional, IsDateString} from 'class-validator';
+import {IsDateString, IsNumber, IsOptional, IsString, IsUUID} from "class-validator";
 
-export class ItineraryDayDto {
+export class CreateItineraryDto {
   @IsNumber()
   day: number;
 
+  @IsString()
   @IsDateString()
   date: string;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
-  port?: string;
+  port: string;
 
   @IsString()
   @IsOptional()
@@ -19,3 +20,6 @@ export class ItineraryDayDto {
   @IsOptional()
   departureTime?: string;
 }
+
+
+

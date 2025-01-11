@@ -11,8 +11,8 @@ import {PdfFileService} from "@modules/pdf-file/pdf-file.service";
 import {DestinationService} from "@modules/destination/destination.service";
 import {CategoryService} from "@modules/category/category.service";
 import {UpdateOfferDto} from "@modules/offer/dto/update-offer.dto";
-import {SaveTypes, UpdateTypes} from "../../interfaces/save-update-file-types";
 import {User} from "@modules/user/user.entity";
+import {ItineraryService} from "@modules/itinerary/itinerary.service";
 
 @Injectable()
 export class OfferService {
@@ -26,6 +26,7 @@ export class OfferService {
     private readonly shipService: ShipService,
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
+    private readonly itineraryService: ItineraryService,
   ) {
   }
 
@@ -33,8 +34,8 @@ export class OfferService {
     return await this.offerRepository.find();
   }
 
-  async findOne(id: string): Promise<any> {
-    return  this.offerRepository.findOneBy({id});
+  findOneById(id: string): Promise<Offer> {
+    return this.offerRepository.findOneBy({id});
   }
 
   async findOffersByCategory(category?: string): Promise<Offer[]> {
@@ -55,12 +56,11 @@ export class OfferService {
   async createOffer(
     createOfferDto: CreateOfferDto,
     reqCreatedBy: User,
-    imageFile: Express.Multer.File,
-    pdfFile: Express.Multer.File,
   ): Promise<Offer> {
-    const {companyId, shipId, destinations, categories, ...createUserData} = createOfferDto;
+    const {companyId, shipId, destinations, categories, itinerary, ...createUserData} = createOfferDto;
 
     const createdBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
     const company = await this.companyService.findOneByID(companyId);
     const ship = await this.shipService.findOneByID(shipId);
 
@@ -69,16 +69,13 @@ export class OfferService {
       company,
       ship,
       createdBy,
+      updatedBy
     });
 
     const savedOffer = await this.offerRepository.save(offer);
 
-    if (imageFile) {
-      savedOffer.imageFile = await this.imageFileService.saveImage(imageFile, SaveTypes.OFFER, savedOffer);
-    }
-
-    if (pdfFile) {
-      savedOffer.pdfFile = await this.pdfFileService.savePdf(pdfFile, savedOffer);
+    if (itinerary && itinerary.length > 0) {
+      await this.itineraryService.createItineraries(itinerary, savedOffer, reqCreatedBy.id);
     }
 
     if (categories && categories.length > 0) {
@@ -89,6 +86,7 @@ export class OfferService {
       savedOffer.destinations = await this.destinationService.findByIds(destinations);
     }
 
+    console.log(savedOffer)
     return this.offerRepository.save(savedOffer);
   }
 
@@ -96,24 +94,25 @@ async updateOffer(
   id: string,
   updateOfferDto: UpdateOfferDto,
   reqCreatedBy: User,
-  imageFile: Express.Multer.File | null,
-  pdfFile: Express.Multer.File | null,
 ): Promise<Offer> {
-  const {companyId, shipId, destinations, categories, ...updateOfferData} = updateOfferDto;
+  const {companyId, shipId, destinations, categories, itinerary, ...updateOfferData} = updateOfferDto;
 
+  // Pobierz istniejącą ofertę z relacjami
   const existingOffer = await this.offerRepository.findOne({
     where: { id },
-    relations: ['company', 'ship'],
+    relations: ['company', 'ship', 'itinerary', 'categories', 'destinations'],
   });
 
   if (!existingOffer) {
     throw new NotFoundException(`Offer with ID ${id} not found`);
   }
 
+  // Ustawienie użytkownika aktualizującego
   const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
   const company = await this.companyService.findOneByID(companyId);
   const ship = await this.shipService.findOneByID(shipId);
 
+  // Zaktualizowanie podstawowych danych oferty
   Object.assign(existingOffer, {
     ...updateOfferData,
     updatedBy,
@@ -122,24 +121,25 @@ async updateOffer(
     updatedAt: new Date(),
   });
 
-  if (imageFile) {
-    existingOffer.imageFile = await this.imageFileService.updateImage(imageFile, UpdateTypes.OFFER, existingOffer);
+  if (existingOffer.itinerary && existingOffer.itinerary.length > 0) {
+    await this.itineraryService.deleteItineraries(existingOffer);
   }
 
-  if (pdfFile) {
-    existingOffer.pdfFile = await this.pdfFileService.updatePdf(pdfFile, existingOffer);
+  if (itinerary && itinerary.length > 0) {
+    // await this.itineraryService.updateItineraries(itinerary, existingOffer, reqCreatedBy.id);
   }
 
+  // Aktualizacja kategorii
   if (categories && categories.length > 0) {
     existingOffer.categories = await this.categoryService.findByIds(categories);
   }
 
+  // Aktualizacja destynacji
   if (destinations && destinations.length > 0) {
     existingOffer.destinations = await this.destinationService.findByIds(destinations);
   }
 
-  // Zapisz zmiany w bazie danych
-  return this.offerRepository.save(existingOffer);
+  return await this.offerRepository.save(existingOffer);
 }
 
 async removeOffer(offerID: string): Promise<boolean> {

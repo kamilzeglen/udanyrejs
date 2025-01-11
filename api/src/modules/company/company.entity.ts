@@ -32,6 +32,12 @@ export class Company {
   @OneToMany(() => Offer, (offer) => offer.company)
   offers: Offer[];
 
+  @Column({type: 'json', nullable: true})
+  priceIncludes: string[];
+
+  @Column({type: 'json', nullable: true})
+  priceExcludes: string[];
+
   @OneToMany(() => Ship, (ship) => ship.company)
   ships: Ship[];
 

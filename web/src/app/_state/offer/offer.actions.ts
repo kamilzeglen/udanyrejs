@@ -10,12 +10,12 @@ export const getOffer = createAction('[Offer] Get Offer', props<{ payload: { id:
 export const getOfferSuccess = createAction('[Offer] Get Offer Success', props<{ offer: Offer }>());
 export const getOfferError = createAction('[Offer] Get Offer Error', props<{ errorMessage: string }>());
 
-export const createOffer = createAction('[Offer] Create Offer', props<{ payload: { formData: FormData } }>());
-export const createOfferSuccess = createAction('[Offer] Create Offer Success');
+export const createOffer = createAction('[Offer] Create Offer', props<{ payload: { formData: Partial<Offer> } }>());
+export const createOfferSuccess = createAction('[Offer] Create Offer Success', props<{ offer: Offer }>());
 export const createOfferError = createAction('[Offer] Create Offer Error', props<{ errorMessage: string }>());
 
 export const updateOffer = createAction('[Offer] Update Offer', props<{
-  payload: { id: string, formData: FormData }
+  payload: { id: string, formData: Partial<Offer> }
 }>());
 export const updateOfferSuccess = createAction('[Offer] Update Offer Success');
 export const updateOfferError = createAction('[Offer] Update Offer Error', props<{ errorMessage: string }>());

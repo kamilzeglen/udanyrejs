@@ -44,6 +44,25 @@ const reducer = createReducer(
     ships: [],
   })),
 
+  on(commonActions.getCities, state => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+    cities: [],
+  })),
+  on(commonActions.getCitiesSuccess, (state, {cities}) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+    cities
+  })),
+  on(commonActions.getCitiesError, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+    cities: [],
+  })),
+
   on(commonActions.getCategories, state => ({
     ...state,
     loading: true,

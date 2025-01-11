@@ -14,6 +14,9 @@ import {ShipModule} from "@modules/ship/ship.module";
 import {ServeStaticModule} from "@nestjs/serve-static";
 import {CategoryModule} from "@modules/category/category.module";
 import {DestinationModule} from "@modules/destination/destination.module";
+import {AttractionModule} from "@modules/attraction/attraction.module";
+import {CityModule} from "@modules/city/city.module";
+import {ItineraryModule} from "@modules/itinerary/itinerary.module";
 
 @Module({
   imports: [
@@ -58,6 +61,9 @@ import {DestinationModule} from "@modules/destination/destination.module";
     ImageFileModule,
     CategoryModule,
     DestinationModule,
+    ItineraryModule,
+    CityModule,
+    AttractionModule,
   PdfFileModule,
   ShipModule
   ],

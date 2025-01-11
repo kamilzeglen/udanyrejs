@@ -37,6 +37,12 @@
       "@state/*": [
         "./src/app/_state/*"
       ],
+      "@core": [
+        "./src/app/_core"
+      ],
+      "@core/*": [
+        "./src/app/_core/*"
+      ],
       "@shared": [
         "./src/app/_shared"
       ],
@@ -44,7 +50,7 @@
         "./src/app/_shared/*"
       ],
       "@http": [
-        "./src/app/_http"
+        "./src/app/_core/http"
       ]
     }
   },

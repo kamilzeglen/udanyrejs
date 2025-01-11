@@ -3,12 +3,14 @@ import {UsersEffects, UsersFacade, usersReducer, UsersState} from '@state/users'
 import {AuthEffects, AuthFacade, authReducer, AuthState} from '@state/auth';
 import {RouterEffects, RouterFacade, RouterStateUrl} from '@state/router';
 import {OfferEffects, OfferFacade, offerReducer, OfferState} from 'src/app/_state/offer';
+import {ImageFileEffects, ImageFileFacade, imageFileReducer, ImageFileState} from '@state/imageFile';
 
 export const reducers = {
   users: usersReducer,
   offer: offerReducer,
   auth: authReducer,
   common: commonReducer,
+  imageFile: imageFileReducer,
 }
 
 export const effects = [
@@ -17,6 +19,7 @@ export const effects = [
   RouterEffects,
   AuthEffects,
   CommonEffects,
+  ImageFileEffects,
 ]
 
 export const facades = [
@@ -25,6 +28,7 @@ export const facades = [
   AuthFacade,
   RouterFacade,
   CommonFacade,
+  ImageFileFacade,
 ]
 
 export interface AppState {
@@ -33,4 +37,5 @@ export interface AppState {
   auth: AuthState,
   router: RouterStateUrl,
   common: CommonState,
+  imageFile: ImageFileState,
 }

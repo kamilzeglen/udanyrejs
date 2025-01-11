@@ -1,6 +1,7 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import * as bodyParser from 'body-parser';
+import {ValidationPipe} from "@nestjs/common";
 
 const parsedConfig = require('dotenv').config();
 if (!parsedConfig.parsed || parsedConfig.error) {
@@ -24,6 +25,15 @@ async function bootstrap() {
 
   app.use(bodyParser.json({limit: '50mb'}));
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: false,
+      forbidNonWhitelisted: true,
+      forbidUnknownValues: true,
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
 
   await app.listen(API_PORT || 3000);

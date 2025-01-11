@@ -47,15 +47,15 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         : this.offer.itinerary;
 
       if (Array.isArray(itineraryData)) {
-        this.itineraryData = itineraryData.map((day: any) => {
-          return {
-            day: day.day,
-            date: day.date,
-            port: day.port,
-            arrivalTime: day.arrivalTime,
-            departureTime: day.departureTime
-          };
-        });
+        // this.itineraryData = itineraryData.map((day: any) => {
+        //   return {
+        //     day: day.day,
+        //     date: day.date,
+        //     port: day.port,
+        //     arrivalTime: day.arrivalTime,
+        //     departureTime: day.departureTime
+        //   };
+        // });
       } else {
         console.error('Itinerary is not a valid array:', this.offer.itinerary);
       }

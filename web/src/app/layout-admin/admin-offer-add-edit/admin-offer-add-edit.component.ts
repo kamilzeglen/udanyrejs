@@ -8,6 +8,8 @@ import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 import {ActivatedRoute} from '@angular/router';
 import {Offer} from '@interfaces';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
+import {City} from '../../_interfaces/city';
+import {ImageFileFacade} from '@state/imageFile';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -24,10 +26,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public companies$ = this.commonFacade.companies$
   public ships$ = this.commonFacade.ships$
+  public cities$ = this.commonFacade.cities$
   public destinations$ = this.commonFacade.destinations$
   public categories$ = this.commonFacade.categories$
 
   public offerForm: FormGroup;
+  public imageFile: File
+  public pdfFile: File
 
   constructor(
     private readonly fb: FormBuilder,
@@ -37,6 +42,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
+    private readonly imageFileFacade: ImageFileFacade,
   ) {
   }
 
@@ -47,15 +53,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       offerUrl: ['', [Validators.pattern('https?://.+')]],
       syncData: [true],
       name: ['', Validators.required],
-      price: ['', Validators.required],
+      price: [null, Validators.required],
       companyId: ['', Validators.required],
       destinations: ['', Validators.required],
       categories: [''],
       shipId: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      image: [null],
-      pdf: [null],
       itinerary: this.fb.array([]),
     });
 
@@ -72,7 +76,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           offerUrl: this.editingOffer?.offerUrl,
           syncData: this.editingOffer?.syncData,
           name: this.editingOffer?.name,
-          price: this.editingOffer?.price,
+          price: Number(this.editingOffer?.price),
           companyId: this.editingOffer?.companyId,
           destinations: this.editingOffer?.destinations?.map((destinations: any) => destinations.id),
           categories: this.editingOffer?.categories?.map((categories: any) => categories.id),
@@ -81,7 +85,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           endDate: this.editingOffer?.endDate,
         });
 
-        // Dodanie itinerary, jeśli istnieje
         if (this.editingOffer?.itinerary) {
           const itineraryData = typeof this.editingOffer.itinerary === 'string'
             ? JSON.parse(this.editingOffer.itinerary)
@@ -91,10 +94,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
             itineraryData.forEach((day, index) => {
               const dayGroup = this.fb.group({
                 day: [day.day || index + 1],
-                date: [day.date || ''],
-                port: [day.port || ''],
-                arrivalTime: [day.arrivalTime || ''],
-                departureTime: [day.departureTime || '']
+                date: [day.date || null],
+                port: [day.cityId || null],
+                arrivalTime: [day.arrivalTime || null],
+                departureTime: [day.departureTime || null],
               });
               this.itineraryArray.push(dayGroup);
             });
@@ -102,7 +105,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.isInitializing = false; // Inicjalizacja zakończona
+      this.isInitializing = false;
     })
 
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
@@ -111,7 +114,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         this.mode = 'EDIT';
         this.offerFacade.getOffer({id: offerId});
       } else {
-        this.isInitializing = false; // W przypadku braku edycji
+        this.isInitializing = false;
       }
     });
 
@@ -135,9 +138,23 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.offerFacade.createOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie dodano ofertę')
-      this.router.changeRoute({linkParams: ['/admin/offers']});
+    this.offerFacade.createOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      if (this.imageFile || this.pdfFile) {
+        const formData = new FormData();
+
+        if (this.imageFile) {
+          formData.append('imageFile', this.imageFile);
+          this.imageFileFacade.createImageFile({imageFileType: "offer", targetId: result.offer.id, formData});
+        }
+        if (this.pdfFile) {
+
+        }
+      } else {
+        this.snackService.showInfo('Pomyślnie dodano ofertę')
+        this.router.changeRoute({linkParams: ['/admin/offers']});
+      }
+
+
     })
 
     this.offerFacade.updateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -151,6 +168,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     })
 
     this.commonFacade.getCompanies();
+    this.commonFacade.getCities();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
   }
@@ -164,14 +182,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     return this.offerForm.get('itinerary') as FormArray;
   }
 
-  // Obliczanie liczby dni i aktualizacja itinerary
   public updateItineraryDays(): void {
     const startDate = new Date(this.offerForm.get('startDate')?.value);
     const endDate = new Date(this.offerForm.get('endDate')?.value);
 
     if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
       const timeDifference = endDate.getTime() - startDate.getTime();
-      const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0); // Liczba dni (z 1 jako minimum)
+      const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0);
       this.adjustItineraryDays(nights, startDate);
     }
   }
@@ -193,10 +210,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public addItineraryDay(dayNumber: number, startDate: Date): void {
     const dayGroup = this.fb.group({
       day: [dayNumber],
-      date: [this.getDateForItinerary(startDate, dayNumber)], // Ustalamy datę na podstawie startDate
-      port: [''],
-      arrivalTime: [''],
-      departureTime: ['']
+      date: [this.getDateForItinerary(startDate, dayNumber)],
+      port: [null],
+      arrivalTime: [null],
+      departureTime: [null]
     });
     this.itineraryArray.push(dayGroup);
   }
@@ -210,24 +227,20 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public onImageFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        image: file
-      });
+      this.imageFile = file;
+      this.snackService.showInfo('Pomyślnie dodano plik');
     }
   }
 
   public onPDFFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        pdf: file
-      });
+      this.pdfFile = file;
+      this.snackService.showInfo('Pomyślnie dodano plik');
     }
   }
 
@@ -237,52 +250,24 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   }
 
   public submitForm(): void {
-    const formValue = this.offerForm.value;
-    const formData = new FormData();
-
-    // Dodaj dane formularza do FormData
-    formData.append('name', formValue.name);
-    formData.append('offerUrl', formValue.offerUrl);
-    formData.append('syncData', formValue.syncData);
-    formData.append('price', formValue.price.toString());
-    formData.append('companyId', formValue.companyId);
-    formData.append('shipId', formValue.shipId);
-    formData.append('startDate', formValue.startDate);
-    formData.append('endDate', formValue.endDate);
-
-    if (formValue.image instanceof File) {
-      formData.append('image', formValue.image); // Dodajemy plik do FormData
+    if (this.offerForm.invalid) {
+      return;
     }
 
-    if (formValue.pdf instanceof File) {
-      formData.append('pdf', formValue.pdf); // Dodajemy plik do FormData
+    const payload = {...this.offerForm.value};
+    for (const key in payload) {
+      if (payload[key] === '' || payload[key] === null) {
+        delete payload[key];
+      }
     }
 
-    if (formValue.itinerary && Array.isArray(formValue.itinerary)) {
-      formData.append('itinerary', JSON.stringify(formValue.itinerary));
-    }
-
-    if (formValue.destinations && Array.isArray(formValue.destinations)) {
-      formValue.destinations.forEach((destinationsId: string | Blob) => {
-        formData.append('destinations[]', destinationsId);
-      });
-    }
-
-    if (formValue.categories && Array.isArray(formValue.categories)) {
-      formValue.categories.forEach((categoryId: string | Blob) => {
-        formData.append('categories[]', categoryId);
-      });
-    }
-
-
-    // Teraz wywołujemy metodę do wysyłania danych
     if (this.mode === "ADD") {
-      this.offerFacade.createOffer({formData});
+      this.offerFacade.createOffer({formData: payload});
     }
 
     if (this.mode === "EDIT") {
       const id = this.editingOffer.id
-      this.offerFacade.updateOffer({id, formData});
+      this.offerFacade.updateOffer({id, formData: payload});
     }
   }
 
@@ -304,7 +289,31 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
+  public createCity(city: City, index: number) {
+    if (!city.id) {
+      this.commonFacade.createCitySuccess$.pipe(take(1), takeUntil(this.destroy$)).subscribe((result) => {
+        this.snackService.showInfo('Pomyślnie dodano miasto: ' + result.city.name);
+        this.commonFacade.getCities();
 
+        this.updateCityValue(result.city, index);
+      })
+
+      this.commonFacade.createCity({formData: city});
+    }
+  }
+
+  public updateCityValue(city: City, index: number): void {
+    const itinerary = this.offerForm.get('itinerary') as FormArray;
+
+    if (itinerary.controls[index]) {
+      const dayControl = itinerary.controls[index];
+      const portControl = dayControl.get('port');
+
+      if (portControl) {
+        portControl.setValue(city.id);
+      }
+    }
+  }
   public goBack(): void {
     this.router.changeRoute({linkParams: ['/admin/offers']});
   }

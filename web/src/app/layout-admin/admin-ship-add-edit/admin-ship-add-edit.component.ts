@@ -21,7 +21,7 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
 
   public isInitializing: boolean = false;
 
-  public offerForm: FormGroup;
+  public shipForm: FormGroup;
 
   public companies$ = this.commonFacade.companies$
 
@@ -38,7 +38,7 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     this.isInitializing = true;
 
-    this.offerForm = this.fb.group({
+    this.shipForm = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
       yearBuilt: ['', Validators.required],
@@ -62,7 +62,7 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       }
 
       if (this.editingShip) {
-        this.offerForm.patchValue({
+        this.shipForm.patchValue({
           name: this.editingShip?.name,
           description: this.editingShip?.description,
           yearBuilt: this.editingShip?.yearBuilt,
@@ -119,40 +119,32 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
     this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
+      this.shipForm.patchValue({
         image: file
       });
     }
   }
 
   public submitForm(): void {
-    const formValue = this.offerForm.value;
-    const formData = new FormData();
 
-    formData.append('name', formValue.name);
-    formData.append('description', formValue.description);
-    formData.append('yearBuilt', formValue.yearBuilt);
-    formData.append('length', formValue.length);
-    formData.append('width', formValue.width);
-    formData.append('tonnage', formValue.tonnage);
-    formData.append('passengersDecks', formValue.passengersDecks);
-    formData.append('passengers', formValue.passengers);
-    formData.append('crew', formValue.crew);
-    formData.append('currency', formValue.currency);
-    formData.append('companyId', formValue.companyId);
-
-    if (formValue.image instanceof File) {
-      formData.append('image', formValue.image);
+    if (this.shipForm.invalid) {
+      return;
     }
 
+    const payload = {...this.shipForm.value};
+    for (const key in payload) {
+      if (payload[key] === '' || payload[key] === null) {
+        delete payload[key];
+      }
+    }
 
     if (this.mode === "ADD") {
-      this.commonFacade.createShip({formData});
+      this.commonFacade.createShip({formData: payload});
     }
 
     if (this.mode === "EDIT") {
       const id = this.editingShip.id
-      this.commonFacade.updateShip({id, formData});
+      this.commonFacade.updateShip({id, formData: payload});
     }
   }
 

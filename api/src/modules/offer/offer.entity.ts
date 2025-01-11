@@ -7,18 +7,19 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
 import {Company} from "@modules/company/company.entity";
 import {User} from "@modules/user/user.entity";
-import {Itinerary} from "../../interfaces/Itinerary";
 import {PdfFile} from "@modules/pdf-file/pdf-file.entity";
 import {ImageFile} from "@modules/image-file/image-file.entity";
 import {Ship} from "@modules/ship/ship.entity";
 import {Destination} from "@modules/destination/destination.entity";
 import {Category} from "@modules/category/category.entity";
+import {Itinerary} from "@modules/itinerary/itinerary.entity";
 
 @Entity()
 export class Offer {
@@ -79,7 +80,7 @@ export class Offer {
   })
   categories: Category[];
 
-  @Column({type: 'json', nullable: true})
+  @OneToMany(() => Itinerary, (itinerary) => itinerary.offer, {eager: true, nullable: true, onDelete: 'CASCADE'})
   itinerary: Itinerary[];
 
   @ManyToOne(() => User, {nullable: true})

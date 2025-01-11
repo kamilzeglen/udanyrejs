@@ -6,7 +6,7 @@ import {
   Param,
   Post,
   Req,
-  UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -14,11 +14,16 @@ import {OfferService} from './offer.service';
 import {CreateOfferDto} from "@modules/offer/dto/create-offer.dto";
 import {Offer} from "@modules/offer/offer.entity";
 import {AuthGuard} from "@modules/auth/guards/auth.guard";
-import {AnyFilesInterceptor} from "@nestjs/platform-express";
+import {FileInterceptor} from "@nestjs/platform-express";
+import {SaveTypes} from "../../interfaces/save-update-file-types";
+import {ImageFileService} from "@modules/image-file/image-file.service";
 
 @Controller('offers')
 export class OfferController {
-  constructor(private readonly offerService: OfferService) {
+  constructor(
+    private readonly offerService: OfferService,
+    private readonly imageFileService: ImageFileService
+  ) {
   }
 
   @Get('/')
@@ -34,42 +39,49 @@ export class OfferController {
   }
 
   @Get('/details/:offerID')
-  async getOneOffer(@Param('offerID') offerID: string): Promise<any[]> {
-    return await this.offerService.findOne(offerID);
+  async getOneOffer(@Param('offerID') offerID: string): Promise<Offer> {
+    return await this.offerService.findOneById(offerID);
   }
 
   @UseGuards(AuthGuard)
   @Post('/')
-  @UseInterceptors(AnyFilesInterceptor())
   async createOffer(
-    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-    const pdfFile = files.find((file) => file.fieldname === 'pdf');
-
-    return await this.offerService.createOffer(createOfferDto, req.user, imageFile, pdfFile);
+    return await this.offerService.createOffer(createOfferDto, req.user);
   }
 
   @UseGuards(AuthGuard)
   @Post('/:offerID')
-  @UseInterceptors(AnyFilesInterceptor())
   async updateOffer(
-    @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('offerID') offerID: string,
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-    const pdfFile = files.find((file) => file.fieldname === 'pdf');
-
-    return await this.offerService.updateOffer(offerID, createOfferDto, req.user, imageFile, pdfFile);
+    return await this.offerService.updateOffer(offerID, createOfferDto, req.user);
   }
 
   @UseGuards(AuthGuard)
   @Delete('/:offerID')
   async removeOffer(@Param('offerID') offerID: string): Promise<boolean> {
     return await this.offerService.removeOffer(offerID);
+  }
+
+  @Post('/imageFile/:targetID')
+  @UseInterceptors(FileInterceptor('imageFile'))
+  async findAll(
+    @Param('imageFileType') imageFileType: string,
+    @Param('targetId') targetId: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new Error('Brak pliku w żądaniu');
+    }
+
+    if (imageFileType === 'offer') {
+      const offer = await this.offerService.findOneById(targetId);
+      return this.imageFileService.createFile(file, SaveTypes.OFFER, offer)
+    }
   }
 }

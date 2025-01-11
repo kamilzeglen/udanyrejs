@@ -18,11 +18,11 @@ export class AuthHttpService {
 
   public getMyself(): Observable<User> {
     const url = `${this.API_URL}/auth/myself`;
-    return this.http.get<User>(url, {withCredentials: true});
+    return this.http.get<User>(url);
   }
 
   public login(payload: { email: string, password: string }): Observable<User> {
     const url = `${this.API_URL}/auth/login`;
-    return this.http.post<User>(url, payload, {withCredentials: true});
+    return this.http.post<User>(url, payload);
   }
 }

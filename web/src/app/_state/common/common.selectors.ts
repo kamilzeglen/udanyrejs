@@ -8,5 +8,6 @@ export const selectLoading = createSelector(selectCommonState, state => state.lo
 
 export const selectCompanies = createSelector(selectCommonState, state => state.companies);
 export const selectShips = createSelector(selectCommonState, state => state.ships);
+export const selectCities = createSelector(selectCommonState, state => state.cities);
 export const selectCategories = createSelector(selectCommonState, state => state.categories);
 export const selectDestinations = createSelector(selectCommonState, state => state.destinations);

@@ -23,7 +23,7 @@ export class ImageFileService {
     return this.imageFileRepository.findOneBy({name: name});
   }
 
-  async saveImage(file: Express.Multer.File, type: SaveTypes, target: Offer | Company | Ship): Promise<ImageFile> {
+  async createFile(file: Express.Multer.File, type: SaveTypes, target: Offer | Company | Ship): Promise<ImageFile> {
 
     let uploadDir: string = './uploads/images'
     if (type === SaveTypes.OFFER) {

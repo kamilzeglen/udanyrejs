@@ -137,8 +137,20 @@
 
           <div class="itinerary-input">
             <label>Port:</label>
-            <input type="text" formControlName="port" placeholder="Port docelowy"/>
+            <ng-select
+              [id]="'port-' + i"
+              [addTag]="true"
+              [addTagText]="'Dodaj nowe miasto'"
+              formControlName="port"
+              [items]="cities$ | async"
+              bindLabel="name"
+              bindValue="id"
+              placeholder="Wybierz port docelowy"
+              (change)="createCity($event, i)"
+            >
+            </ng-select>
           </div>
+
 
           <div class="itinerary-input">
             <label>Przyjazd:</label>

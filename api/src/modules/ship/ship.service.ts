@@ -47,7 +47,7 @@ export class ShipService {
     const savedShip = await this.shipRepository.save(ship);
 
     if (imageFile) {
-      savedShip.imageFile = await this.imageFileService.saveImage(imageFile, SaveTypes.SHIP, savedShip);
+      savedShip.imageFile = await this.imageFileService.createFile(imageFile, SaveTypes.SHIP, savedShip);
     }
 
     return this.shipRepository.save(savedShip);

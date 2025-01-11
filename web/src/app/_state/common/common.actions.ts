@@ -1,5 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {City} from '../../_interfaces/city';
 
 export const getCompanies = createAction('[Common] Get Companies');
 export const getCompaniesSuccess = createAction('[Common] Get Companies Success', props<{ companies: Company[] }>());
@@ -31,12 +32,20 @@ export const getShip = createAction('[Common] Get Ship', props<{ payload: { id: 
 export const getShipSuccess = createAction('[Common] Get Ship Success', props<{ ship: Ship }>());
 export const getShipError = createAction('[Common] Get Ship Error', props<{ errorMessage: string }>());
 
-export const createShip = createAction('[Common] Create Ship', props<{ payload: { formData: FormData } }>());
+export const createShip = createAction('[Common] Create Ship', props<{ payload: { formData: Partial<Ship> } }>());
 export const createShipSuccess = createAction('[Common] Create Ship Success', props<{ ship: Ship }>());
 export const createShipError = createAction('[Common] Ship Company Error', props<{ errorMessage: string }>());
 
+export const getCities = createAction('[Common] Get Cities')
+export const getCitiesSuccess = createAction('[Common] Get Cities Success', props<{ cities: City[] }>());
+export const getCitiesError = createAction('[Common] Get Cities Error', props<{ errorMessage: string }>());
+
+export const createCity = createAction('[Common] Create City', props<{ payload: { formData: Partial<City> } }>());
+export const createCitySuccess = createAction('[Common] Create City Success', props<{ city: City }>());
+export const createCityError = createAction('[Common] Ship City Error', props<{ errorMessage: string }>());
+
 export const updateShip = createAction('[Common] Update Ship', props<{
-  payload: { id: string, formData: FormData }
+  payload: { id: string, formData: Partial<Ship> }
 }>());
 export const updateShipSuccess = createAction('[Common] Update Ship Success', props<{ ship: Ship }>());
 export const updateShipError = createAction('[Common] Update Ship Error', props<{ errorMessage: string }>());

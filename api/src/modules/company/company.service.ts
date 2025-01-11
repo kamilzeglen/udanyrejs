@@ -44,7 +44,7 @@ export class CompanyService {
     const savedCompany = await this.companyRepository.save(company);
 
     if (imageFile) {
-      savedCompany.imageFile = await this.imageFileService.saveImage(imageFile, SaveTypes.COMPANY, savedCompany);
+      savedCompany.imageFile = await this.imageFileService.createFile(imageFile, SaveTypes.COMPANY, savedCompany);
     }
 
     return this.companyRepository.save(savedCompany);
