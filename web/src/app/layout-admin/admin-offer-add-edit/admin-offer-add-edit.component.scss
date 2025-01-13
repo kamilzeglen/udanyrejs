@@ -144,4 +144,14 @@
     margin: 10px;
     justify-self: center;
   }
+
+  .current-file {
+    display: flex;
+    padding: 5px;
+
+    mat-icon {
+      margin-left: 10px;
+      color: $positive;
+    }
+  }
 }

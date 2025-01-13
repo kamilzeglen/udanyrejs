@@ -1,12 +1,14 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
+import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {combineLatest, filter, merge, of, ReplaySubject, take, takeUntil} from 'rxjs';
 import {Company} from '@interfaces';
 import {CommonFacade} from '@state/common';
 import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 import {RouterFacade} from '@state/router';
 import {ActivatedRoute} from '@angular/router';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
+import {ImageFileFacade} from '@state/imageFile';
+import {map, switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-company-add-edit',
@@ -21,7 +23,8 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
 
   public isInitializing: boolean = false;
 
-  public offerForm: FormGroup;
+  public imageFile: File
+  public companyForm: FormGroup;
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -30,17 +33,19 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
     private readonly router: RouterFacade,
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
+    private readonly imageFileFacade: ImageFileFacade,
   ) {
   }
 
   public ngOnInit(): void {
     this.isInitializing = true;
 
-    this.offerForm = this.fb.group({
+    this.companyForm = this.fb.group({
       name: ['', Validators.required],
       key: ['', Validators.required],
       description: ['', Validators.required],
-      image: [null],
+      priceIncludes: this.fb.array([], Validators.required),
+      priceExcludes: this.fb.array([], Validators.required),
     });
 
     this.commonFacade.getCompanySuccess$.pipe(take(1)).subscribe((company) => {
@@ -52,10 +57,14 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       }
 
       if (this.editingCompany) {
-        this.offerForm.patchValue({
-          name: this.editingCompany?.name,
-          key: this.editingCompany?.key,
-          description: this.editingCompany?.description,
+        this.companyForm.patchValue(this.editingCompany);
+
+        this.editingCompany.priceIncludes.forEach(include => {
+          this.priceIncludesArray.push(this.fb.control(include, Validators.required));
+        });
+
+        this.editingCompany.priceExcludes.forEach(exclude => {
+          this.priceExcludesArray.push(this.fb.control(exclude, Validators.required));
         });
       }
 
@@ -73,10 +82,68 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.commonFacade.createCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie zaktualizowano firme')
-      this.router.changeRoute({linkParams: ['/admin/companies']});
+    this.commonFacade.createCompanyError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
     })
+
+    this.commonFacade.updateCompanyError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas aktualizowania oferty');
+    })
+
+    this.commonFacade.createCompanySuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({company}) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.createImageFile(company.id);
+
+          const createImageSuccess$ = this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true));
+          const createImageError$ = this.imageFileFacade.createImageFileError$.pipe(map(() => false));
+
+          return combineLatest([merge(createImageSuccess$, createImageError$)]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined)
+      )
+      .subscribe(([imageResult]) => {
+        if (imageResult) {
+          this.snackService.showInfo('Pomyślnie dodano firmę');
+        } else {
+          this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/companies']});
+      });
+
+    this.commonFacade.updateCompanySuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({company}) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.updateImageFile(company.id);
+
+          const updateImageSuccess$ = this.imageFileFacade.updateImageFileSuccess$.pipe(map(() => true));
+          const updateImageError$ = this.imageFileFacade.updateImageFileError$.pipe(map(() => false));
+
+          return combineLatest([merge(updateImageSuccess$, updateImageError$)]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined)
+      )
+      .subscribe(([imageResult]) => {
+        if (imageResult) {
+          this.snackService.showInfo('Pomyślnie zaktualizowano firmę');
+        } else {
+          this.snackService.showError('Firma została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/companies']});
+      })
+
 
     this.commonFacade.updateCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie zaktualizowano firmę')
@@ -97,37 +164,44 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
   public onImageFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        image: file
-      });
+      this.imageFile = file;
     }
   }
 
   public submitForm(): void {
-    const formValue = this.offerForm.value;
-    const formData = new FormData();
-
-    // Dodaj dane formularza do FormData
-    formData.append('name', formValue.name);
-    formData.append('key', formValue.key);
-    formData.append('description', formValue.description);
-
-    if (formValue.image instanceof File) {
-      formData.append('image', formValue.image);
+    if (this.companyForm.invalid) {
+      return;
     }
 
+    const payload = {...this.companyForm.value};
+    for (const key in payload) {
+      if (payload[key] === '' || payload[key] === null) {
+        delete payload[key];
+      }
+    }
 
     if (this.mode === "ADD") {
-      this.commonFacade.createCompany({formData});
+      this.commonFacade.createCompany({formData: payload});
     }
 
     if (this.mode === "EDIT") {
       const id = this.editingCompany.id
-      this.commonFacade.updateCompany({id, formData});
+      this.commonFacade.updateCompany({id, formData: payload});
     }
+  }
+
+  public createImageFile(companyId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.createImageFile({imageFileType: 'company', targetId: companyId, formData})
+  }
+
+  public updateImageFile(companyId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.updateImageFile({imageFileType: 'company', targetId: companyId, formData})
   }
 
   public deleteCompany(): void {
@@ -146,6 +220,31 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
           this.commonFacade.deleteCompany({id: this.editingCompany.id})
         });
     }
+  }
+
+
+  get priceIncludesArray(): FormArray {
+    return this.companyForm.get('priceIncludes') as FormArray;
+  }
+
+  get priceExcludesArray(): FormArray {
+    return this.companyForm.get('priceExcludes') as FormArray;
+  }
+
+  addPriceInclude(): void {
+    this.priceIncludesArray.push(this.fb.control(''));
+  }
+
+  removePriceInclude(index: number): void {
+    this.priceIncludesArray.removeAt(index);
+  }
+
+  addPriceExclude(): void {
+    this.priceExcludesArray.push(this.fb.control(''));
+  }
+
+  removePriceExclude(index: number): void {
+    this.priceExcludesArray.removeAt(index);
   }
 
 

@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import * as usersActions from '@state/users/users.actions';
 import {of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {UsersHttpService} from '../../_http/users.http.service';
+import {UsersHttpService} from '@core/_http/users.http.service';
 
 
 @Injectable()

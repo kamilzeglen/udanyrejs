@@ -5,7 +5,7 @@
 
   <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
 
-  <form [formGroup]="offerForm">
+  <form [formGroup]="shipForm">
 
     <!-- Sekcja Dane dotyczące firmy -->
     <section class="section data-section">
@@ -78,6 +78,7 @@
           accept=".png, .jpg, .jpeg"
           (change)="onImageFileChange($event)"
         />
+        <div class="current-file" *ngIf="editingShip?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingShip.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
       </div>
 
     </section>
@@ -86,7 +87,7 @@
       Usuń statek
     </button>
 
-    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid">
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="shipForm.invalid">
       {{ mode === 'ADD' ? "Dodaj statek" : "Zaktualizuj statek" }}
     </button>
   </form>

@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
+import {combineLatest, filter, merge, Observable, of, ReplaySubject, take, takeUntil} from 'rxjs';
 import {CommonFacade} from '@state/common';
 import {OfferFacade} from 'src/app/_state/offer';
 import {RouterFacade} from '@state/router';
@@ -8,6 +8,9 @@ import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 import {ActivatedRoute} from '@angular/router';
 import {Offer} from '@interfaces';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
+import {ImageFileFacade} from '@state/imageFile';
+import {PdfFileFacade} from '@state/pdfFile';
+import {map, switchMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -28,11 +31,15 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public categories$ = this.commonFacade.categories$
 
   public offerForm: FormGroup;
+  public imageFile: File
+  public pdfFile: File
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly commonFacade: CommonFacade,
     private readonly offerFacade: OfferFacade,
+    private readonly imageFileFacade: ImageFileFacade,
+    private readonly pdfFileFacade: PdfFileFacade,
     private readonly router: RouterFacade,
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
@@ -47,20 +54,18 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       offerUrl: ['', [Validators.pattern('https?://.+')]],
       syncData: [true],
       name: ['', Validators.required],
-      price: ['', Validators.required],
+      price: [null, Validators.required],
       companyId: ['', Validators.required],
       destinations: ['', Validators.required],
       categories: [''],
       shipId: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      image: [null],
-      pdf: [null],
       itinerary: this.fb.array([]),
     });
 
-    this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe((offer) => {
-      this.editingOffer = offer.offer;
+    this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({offer}) => {
+      this.editingOffer = offer;
 
       if (!this.editingOffer) {
         this.snackService.showError('Nie znaleziono oferty')
@@ -69,16 +74,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
       if (this.editingOffer) {
         this.offerForm.patchValue({
-          offerUrl: this.editingOffer?.offerUrl,
-          syncData: this.editingOffer?.syncData,
-          name: this.editingOffer?.name,
-          price: this.editingOffer?.price,
-          companyId: this.editingOffer?.companyId,
+          ...this.editingOffer,
+          price: Number(this.editingOffer.price),
           destinations: this.editingOffer?.destinations?.map((destinations: any) => destinations.id),
           categories: this.editingOffer?.categories?.map((categories: any) => categories.id),
-          shipId: this.editingOffer?.ship.id,
-          startDate: this.editingOffer?.startDate,
-          endDate: this.editingOffer?.endDate,
         });
 
         // Dodanie itinerary, jeśli istnieje
@@ -91,10 +90,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
             itineraryData.forEach((day, index) => {
               const dayGroup = this.fb.group({
                 day: [day.day || index + 1],
-                date: [day.date || ''],
-                port: [day.port || ''],
-                arrivalTime: [day.arrivalTime || ''],
-                departureTime: [day.departureTime || '']
+                date: [day.date || null],
+                port: [day.port || null],
+                arrivalTime: [day.arrivalTime || null],
+                departureTime: [day.departureTime || null],
               });
               this.itineraryArray.push(dayGroup);
             });
@@ -102,7 +101,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         }
       }
 
-      this.isInitializing = false; // Inicjalizacja zakończona
+      this.isInitializing = false;
     })
 
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
@@ -111,7 +110,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         this.mode = 'EDIT';
         this.offerFacade.getOffer({id: offerId});
       } else {
-        this.isInitializing = false; // W przypadku braku edycji
+        this.isInitializing = false;
       }
     });
 
@@ -135,15 +134,90 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.offerFacade.createOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie dodano ofertę')
-      this.router.changeRoute({linkParams: ['/admin/offers']});
+    this.offerFacade.createOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
     })
 
-    this.offerFacade.updateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie zaktualizowano ofertę')
-      this.router.changeRoute({linkParams: ['/admin/offers']});
+    this.offerFacade.updateOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas aktualizowania oferty');
     })
+
+    this.offerFacade.createOfferSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({offer}) => {
+          const observables: Observable<boolean>[] = [];
+
+          if (this.imageFile) {
+            this.createImageFile(offer.id);
+            const createImageSuccess$ = this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true));
+            const createImageError$ = this.imageFileFacade.createImageFileError$.pipe(map(() => false));
+            observables.push(merge(createImageSuccess$, createImageError$));
+          }
+
+          if (this.pdfFile) {
+            this.createPdfFile(offer.id);
+            const createPdfSuccess$ = this.pdfFileFacade.createPdfFileSuccess$.pipe(map(() => true));
+            const createPdfError$ = this.pdfFileFacade.createPdfFileError$.pipe(map(() => false));
+            observables.push(merge(createPdfSuccess$, createPdfError$));
+          }
+
+          if (observables.length === 0) {
+            return of([true]);
+          }
+
+          return combineLatest(observables);
+        }),
+        filter((results) => results.every((result) => result !== undefined))
+      )
+      .subscribe((results) => {
+        if (results.every((result) => result)) {
+          this.snackService.showInfo('Pomyślnie dodano ofertę');
+        } else {
+          this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/offers']});
+      });
+
+
+    this.offerFacade.updateOfferSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({offer}) => {
+          const observables: Observable<boolean>[] = [];
+
+          if (this.imageFile) {
+            this.updateImageFile(offer.id);
+            const updateImageSuccess$ = this.imageFileFacade.updateImageFileSuccess$.pipe(map(() => true));
+            const updateImageError$ = this.imageFileFacade.updateImageFileError$.pipe(map(() => false));
+            observables.push(merge(updateImageSuccess$, updateImageError$));
+          }
+
+          if (this.pdfFile) {
+            this.updatePdfFile(offer.id);
+            const updatePdfSuccess$ = this.pdfFileFacade.updatePdfFileSuccess$.pipe(map(() => true));
+            const updatePdfError$ = this.pdfFileFacade.updatePdfFileError$.pipe(map(() => false));
+            observables.push(merge(updatePdfSuccess$, updatePdfError$));
+          }
+
+          if (observables.length === 0) {
+            return of([true]);
+          }
+
+          return combineLatest(observables);
+        }),
+        filter((results) => results.every((result) => result !== undefined))
+      )
+      .subscribe((results) => {
+        if (results.every((result) => result)) {
+          this.snackService.showInfo('Pomyślnie zaktualizowano ofertę');
+        } else {
+          this.snackService.showError('Oferta została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/offers']});
+      });
 
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo("Pomyślnie usunięto ofertę")
@@ -171,7 +245,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
       const timeDifference = endDate.getTime() - startDate.getTime();
-      const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0); // Liczba dni (z 1 jako minimum)
+      const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0);
       this.adjustItineraryDays(nights, startDate);
     }
   }
@@ -193,7 +267,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public addItineraryDay(dayNumber: number, startDate: Date): void {
     const dayGroup = this.fb.group({
       day: [dayNumber],
-      date: [this.getDateForItinerary(startDate, dayNumber)], // Ustalamy datę na podstawie startDate
+      date: [this.getDateForItinerary(startDate, dayNumber)],
       port: [''],
       arrivalTime: [''],
       departureTime: ['']
@@ -203,31 +277,25 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public getDateForItinerary(startDate: Date, dayNumber: number): string {
     const newDate = new Date(startDate);
-    newDate.setDate(startDate.getDate() + dayNumber - 1); // Dodajemy odpowiednią liczbę dni
-    return newDate.toISOString().split('T')[0]; // Zwracamy datę w formacie YYYY-MM-DD
+    newDate.setDate(startDate.getDate() + dayNumber - 1);
+    return newDate.toISOString().split('T')[0];
   }
 
   public onImageFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        image: file
-      });
+      this.imageFile = file;
     }
   }
 
   public onPDFFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        pdf: file
-      });
+      this.pdfFile = file;
     }
   }
 
@@ -237,53 +305,49 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   }
 
   public submitForm(): void {
-    const formValue = this.offerForm.value;
-    const formData = new FormData();
-
-    // Dodaj dane formularza do FormData
-    formData.append('name', formValue.name);
-    formData.append('offerUrl', formValue.offerUrl);
-    formData.append('syncData', formValue.syncData);
-    formData.append('price', formValue.price.toString());
-    formData.append('companyId', formValue.companyId);
-    formData.append('shipId', formValue.shipId);
-    formData.append('startDate', formValue.startDate);
-    formData.append('endDate', formValue.endDate);
-
-    if (formValue.image instanceof File) {
-      formData.append('image', formValue.image); // Dodajemy plik do FormData
+    if (this.offerForm.invalid) {
+      return;
     }
 
-    if (formValue.pdf instanceof File) {
-      formData.append('pdf', formValue.pdf); // Dodajemy plik do FormData
+    const payload = {...this.offerForm.value};
+    for (const key in payload) {
+      if (payload[key] === '' || payload[key] === null) {
+        delete payload[key];
+      }
     }
 
-    if (formValue.itinerary && Array.isArray(formValue.itinerary)) {
-      formData.append('itinerary', JSON.stringify(formValue.itinerary));
-    }
-
-    if (formValue.destinations && Array.isArray(formValue.destinations)) {
-      formValue.destinations.forEach((destinationsId: string | Blob) => {
-        formData.append('destinations[]', destinationsId);
-      });
-    }
-
-    if (formValue.categories && Array.isArray(formValue.categories)) {
-      formValue.categories.forEach((categoryId: string | Blob) => {
-        formData.append('categories[]', categoryId);
-      });
-    }
-
-
-    // Teraz wywołujemy metodę do wysyłania danych
     if (this.mode === "ADD") {
-      this.offerFacade.createOffer({formData});
+      this.offerFacade.createOffer({formData: payload});
     }
 
     if (this.mode === "EDIT") {
       const id = this.editingOffer.id
-      this.offerFacade.updateOffer({id, formData});
+      this.offerFacade.updateOffer({id, formData: payload});
     }
+  }
+
+  public createImageFile(offerId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.createImageFile({imageFileType: 'offer', targetId: offerId, formData})
+  }
+
+  public createPdfFile(offerId: string): void {
+    const formData = new FormData()
+    formData.append('pdfFile', this.pdfFile);
+    this.pdfFileFacade.createPdfFile({pdfFileType: 'offer', targetId: offerId, formData})
+  }
+
+  public updateImageFile(offerId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.updateImageFile({imageFileType: 'offer', targetId: offerId, formData})
+  }
+
+  public updatePdfFile(offerId: string): void {
+    const formData = new FormData()
+    formData.append('pdfFile', this.pdfFile);
+    this.pdfFileFacade.updateImageFile({pdfFileType: 'offer', targetId: offerId, formData})
   }
 
   public deleteOffer(): void {

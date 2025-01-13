@@ -4,23 +4,20 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors
 } from '@nestjs/common';
-import {CompanyService} from './company.service';
-import {AuthGuard} from "@modules/auth/guards/auth.guard";
-import {AnyFilesInterceptor} from "@nestjs/platform-express";
-import {CreateCompanyDto} from "@modules/company/dto/create-offer.dto";
-import {Company} from "@modules/company/company.entity";
-import {UpdateCompanyDto} from "@modules/company/dto/update-offer.dto";
+import { CompanyService } from './company.service';
+import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { CreateCompanyDto } from '@modules/company/dto/create-offer.dto';
+import { Company } from '@modules/company/company.entity';
+import { UpdateCompanyDto } from '@modules/company/dto/update-offer.dto';
 
 @Controller('company')
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {
-  }
+  constructor(private readonly companyService: CompanyService) {}
 
   @Get('/')
   findAll() {
@@ -34,29 +31,25 @@ export class CompanyController {
 
   @UseGuards(AuthGuard)
   @Post('/')
-  @UseInterceptors(AnyFilesInterceptor())
   async createCompany(
-    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() createCompanyDto: CreateCompanyDto,
     @Req() req: { user: any },
   ): Promise<Company> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-
-    return await this.companyService.createOffer(createCompanyDto, req.user, imageFile);
+    return await this.companyService.createOffer(createCompanyDto, req.user);
   }
 
   @UseGuards(AuthGuard)
-  @Post('/:companyID')
-  @UseInterceptors(AnyFilesInterceptor())
+  @Patch('/:companyID')
   async updateCompany(
-    @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('companyID') companyID: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req: { user: any },
   ): Promise<Company> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-
-    return await this.companyService.updateOffer(companyID, updateCompanyDto, req.user, imageFile);
+    return await this.companyService.updateOffer(
+      companyID,
+      updateCompanyDto,
+      req.user,
+    );
   }
 
   @UseGuards(AuthGuard)

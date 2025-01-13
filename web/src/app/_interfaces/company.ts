@@ -1,7 +1,4 @@
-import {Offer} from './offer';
-import {Ship} from './ship';
 import {ImageFile} from './file';
-import {FileUpload} from './file-upload';
 import {User} from './user';
 
 export interface Company {
@@ -9,9 +6,9 @@ export interface Company {
   name: string;
   key: string;
   description: string;
-  offers: Offer[]
-  ships: Ship[]
-  imageFile: ImageFile | FileUpload;
+  priceIncludes: string[]
+  priceExcludes: string[]
+  imageFile: ImageFile;
   imageFileId: string;
   createdBy: User,
   createdById: string

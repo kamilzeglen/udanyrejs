@@ -1,11 +1,11 @@
-export enum SaveTypes {
-  OFFER = "OFFER",
-  COMPANY = "COMPANY",
-  SHIP = "SHIP",
+export enum ImageFileType {
+  OFFER = 'offer',
+  COMPANY = 'company',
+  SHIP = 'ship',
 }
 
-export enum UpdateTypes {
-  OFFER = "OFFER",
-  COMPANY = "COMPANY",
-  SHIP = "SHIP",
+export enum PdfFileType {
+  OFFER = 'offer',
+  COMPANY = 'company',
+  SHIP = 'ship',
 }

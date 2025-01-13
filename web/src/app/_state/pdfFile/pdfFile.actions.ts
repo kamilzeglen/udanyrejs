@@ -1,0 +1,10 @@
+import {createAction, props} from '@ngrx/store';
+import {PdfFile} from '../../_interfaces/file';
+
+export const createPdfFile = createAction('[PdfFile] Create Pdf File' ,props<{ payload: { pdfFileType: string, targetId: string, formData: FormData } }>());
+export const createPdfFileSuccess = createAction('[PdfFile] Create Image Pdf Success', props<{ pdfFile: PdfFile }>());
+export const createPdfFileError = createAction('[PdfFile] Create Pdf File Error', props<{ errorMessage: string }>());
+
+export const updatePdfFile = createAction('[PdfFile] Update Pdf File' ,props<{ payload: { pdfFileType: string, targetId: string, formData: FormData } }>());
+export const updatePdfFileSuccess = createAction('[PdfFile] Update Image Pdf Success', props<{ pdfFile: PdfFile }>());
+export const updatePdfFileError = createAction('[PdfFile] Update Pdf File Error', props<{ errorMessage: string }>());

@@ -10,7 +10,6 @@ import { environment } from '@environment';
 export class OffersHttpService {
 
   private API_URL = environment.API_URL;
-  private defaultOpts = { withCredentials: true };
 
   constructor(
     private http: HttpClient
@@ -32,18 +31,18 @@ export class OffersHttpService {
     return this.http.get<Offer>(url);
   }
 
-  public createOffer(payload: { formData: FormData }): Observable<Offer> {
+  public createOffer(payload: { formData: Partial<Offer> }): Observable<Offer> {
     const url = `${this.API_URL}/offers/`;
-    return this.http.post<Offer>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Offer>(url, payload.formData);
   }
 
-  public updateOffer(payload: { id: string, formData: FormData }): Observable<Offer> {
+  public updateOffer(payload: { id: string, formData: Partial<Offer> }): Observable<Offer> {
     const url = `${this.API_URL}/offers/` + payload.id;
-    return this.http.post<Offer>(url, payload.formData, this.defaultOpts);
+    return this.http.patch<Offer>(url, payload.formData);
   }
 
   public deleteOffer(payload: {id: string}): Observable<boolean> {
     const url = `${this.API_URL}/offers/` + payload.id;
-    return this.http.delete<boolean>(url, this.defaultOpts);
+    return this.http.delete<boolean>(url);
   }
 }

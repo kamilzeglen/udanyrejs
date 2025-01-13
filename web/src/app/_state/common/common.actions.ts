@@ -9,14 +9,14 @@ export const getCompany = createAction('[Common] Get Company', props<{ payload: 
 export const getCompanySuccess = createAction('[Common] Get Company Success', props<{ company: Company }>());
 export const getCompanyError = createAction('[Common] Get Company Error', props<{ errorMessage: string }>());
 
-export const createCompany = createAction('[Common] Create Company', props<{ payload: { formData: FormData } }>());
-export const createCompanySuccess = createAction('[Common] Create Company Success');
+export const createCompany = createAction('[Common] Create Company', props<{ payload: { formData: Partial<Company> } }>());
+export const createCompanySuccess = createAction('[Common] Create Company Success', props<{ company: Company }>());
 export const createCompanyError = createAction('[Common] Create Company Error', props<{ errorMessage: string }>());
 
 export const updateCompany = createAction('[Common] Update Company', props<{
-  payload: { id: string, formData: FormData }
+  payload: { id: string, formData: Partial<Company> }
 }>());
-export const updateCompanySuccess = createAction('[Common] Update Company Success');
+export const updateCompanySuccess = createAction('[Common] Update Company Success', props<{ company: Company }>());
 export const updateCompanyError = createAction('[Common] Update Company Error', props<{ errorMessage: string }>());
 
 export const deleteCompany = createAction('[Common] Delete Company', props<{ payload: { id: string }}>());

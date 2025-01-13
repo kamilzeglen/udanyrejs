@@ -10,7 +10,6 @@ import {Category, Company, Destination, Ship} from '@interfaces';
 export class CommonHttpService {
 
   private API_URL = environment.API_URL;
-  private defaultOpts = {withCredentials: true};
 
   constructor(
     private http: HttpClient
@@ -27,19 +26,19 @@ export class CommonHttpService {
     return this.http.get<Company>(url);
   }
 
-  public createCompany(payload: { formData: FormData }): Observable<Company> {
+  public createCompany(payload: { formData: Partial<Company> }): Observable<Company> {
     const url = `${this.API_URL}/company/`;
-    return this.http.post<Company>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Company>(url, payload.formData);
   }
 
-  public updateCompany(payload: { id: string, formData: FormData }): Observable<Company> {
+  public updateCompany(payload: { id: string, formData: Partial<Company> }): Observable<Company> {
     const url = `${this.API_URL}/company/` + payload.id;
-    return this.http.post<Company>(url, payload.formData, this.defaultOpts);
+    return this.http.patch<Company>(url, payload.formData);
   }
 
   public deleteOffer(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/company/` + payload.id;
-    return this.http.delete<boolean>(url, this.defaultOpts);
+    return this.http.delete<boolean>(url);
   }
 
   public getShips(payload: {companyId: string}): Observable<Ship[]> {
@@ -54,17 +53,17 @@ export class CommonHttpService {
 
   public createShip(payload: { formData: FormData }): Observable<Ship> {
     const url = `${this.API_URL}/ship/`;
-    return this.http.post<Ship>(url, payload.formData, this.defaultOpts);
+    return this.http.post<Ship>(url, payload.formData);
   }
 
   public updateShip(payload: { id: string, formData: FormData }): Observable<Ship> {
     const url = `${this.API_URL}/ship/` + payload.id;
-    return this.http.post<Ship>(url, payload.formData, this.defaultOpts);
+    return this.http.patch<Ship>(url, payload.formData);
   }
 
   public deleteShip(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/ship/` + payload.id;
-    return this.http.delete<boolean>(url, this.defaultOpts);
+    return this.http.delete<boolean>(url);
   }
 
   public getCategories(): Observable<Category[]> {

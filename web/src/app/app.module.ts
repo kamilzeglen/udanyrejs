@@ -8,15 +8,14 @@ import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {effects, facades, reducers} from '@state';
 import {JwtModule} from '@auth0/angular-jwt';
-import {AuthGuard} from '@shared/_guard/auth-guard.service';
+import {AuthGuard} from '@core/_guard/auth-guard.service';
 import {SharedModule} from '@shared/shared.module';
 import {AppRoutingModule} from './app-routing.module';
-import {BrowserModule} from '@angular/platform-browser';
-import {LayoutAdminModule} from './layout-admin/layout-admin.module';
 import {MAT_DATE_FORMATS} from '@angular/material/core';
 import {LayoutComponent} from './layout/layout.component';
 import {NavbarComponent} from './layout/navbar/navbar.component';
 import {FooterComponent} from './layout/footer/footer.component';
+import {CoreModule} from '@core/core.module';
 
 registerLocaleData(pl);
 
@@ -59,10 +58,9 @@ const guards = [
         tokenGetter: tokenGetter,
       },
     }),
-    BrowserModule,
-    AppRoutingModule,
     SharedModule,
-    LayoutAdminModule,
+    CoreModule,
+    AppRoutingModule,
   ],
   providers: [
     ...facades,

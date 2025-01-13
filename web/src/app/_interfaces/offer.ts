@@ -4,7 +4,6 @@ import {ImageFile, PdfFile} from './file';
 import {Ship} from './ship';
 import {Category} from './category';
 import {Destination} from './destination';
-import {FileUpload} from './file-upload';
 import {User} from './user';
 
 export interface Offer {
@@ -19,9 +18,9 @@ export interface Offer {
   shipId: string;
   startDate: string;
   endDate: string;
-  imageFile: ImageFile | FileUpload;
+  imageFile: ImageFile;
   imageFileId: string;
-  pdfFile: PdfFile | FileUpload;
+  pdfFile: PdfFile;
   pdfFileId: string;
   destinations: Destination[];
   categories: Category[]

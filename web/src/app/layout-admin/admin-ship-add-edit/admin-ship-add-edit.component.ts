@@ -5,8 +5,10 @@ import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 import {RouterFacade} from '@state/router';
 import {ActivatedRoute} from '@angular/router';
 import {Ship} from '@interfaces';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
+import {combineLatest, filter, merge, of, ReplaySubject, take, takeUntil} from 'rxjs';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
+import {map, switchMap} from 'rxjs/operators';
+import {ImageFileFacade} from '@state/imageFile';
 
 @Component({
   selector: 'app-admin-ship-add-edit',
@@ -21,7 +23,8 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
 
   public isInitializing: boolean = false;
 
-  public offerForm: FormGroup;
+  public imageFile: File
+  public shipForm: FormGroup;
 
   public companies$ = this.commonFacade.companies$
 
@@ -32,13 +35,14 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
     private readonly router: RouterFacade,
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
+    private readonly imageFileFacade: ImageFileFacade,
   ) {
   }
 
   public ngOnInit() {
     this.isInitializing = true;
 
-    this.offerForm = this.fb.group({
+    this.shipForm = this.fb.group({
       name: ['', Validators.required],
       description: ['', Validators.required],
       yearBuilt: ['', Validators.required],
@@ -50,7 +54,6 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       crew: ['', Validators.required],
       currency: ['', Validators.required],
       companyId: ['', Validators.required],
-      image: [null],
     });
 
     this.commonFacade.getShipSuccess$.pipe(take(1)).subscribe((ship) => {
@@ -62,18 +65,12 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       }
 
       if (this.editingShip) {
-        this.offerForm.patchValue({
-          name: this.editingShip?.name,
-          description: this.editingShip?.description,
-          yearBuilt: this.editingShip?.yearBuilt,
-          length: this.editingShip?.length,
-          width: this.editingShip?.width,
-          tonnage: this.editingShip?.tonnage,
-          passengersDecks: this.editingShip?.passengersDecks,
-          passengers: this.editingShip?.passengers,
-          crew: this.editingShip?.crew,
-          currency: this.editingShip?.currency,
-          companyId: this.editingShip?.companyId,
+        this.shipForm.patchValue({
+          ...this.editingShip,
+          length: Number(this.editingShip.length),
+          width: Number(this.editingShip.width),
+          yearBuilt: Number(this.editingShip.yearBuilt),
+          tonnage: Number(this.editingShip.tonnage),
         });
       }
 
@@ -90,20 +87,67 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.commonFacade.createShipSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ship}) => {
-      this.snackService.showInfo('Pomyślnie dodano statek')
-      this.router.changeRoute({linkParams: ['/admin/ships', ship.companyId]});
+    this.commonFacade.createShipError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas dodawania statku');
     })
 
-    this.commonFacade.updateShipSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ship}) => {
-      this.snackService.showInfo('Pomyślnie zaktualizowano statek')
-      this.router.changeRoute({linkParams: ['/admin/ships', ship.companyId]});
+    this.commonFacade.updateShipError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas aktualizowania statku');
     })
 
-    this.commonFacade.deleteShipSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto statek")
-      this.router.changeRoute({linkParams: ['/admin/ships']});
-    })
+    this.commonFacade.createShipSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({ship}) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.createImageFile(ship.id);
+
+          const createImageSuccess$ = this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true));
+          const createImageError$ = this.imageFileFacade.createImageFileError$.pipe(map(() => false));
+
+          return combineLatest([merge(createImageSuccess$, createImageError$)]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined)
+      )
+      .subscribe(([imageResult]) => {
+        if (imageResult) {
+          this.snackService.showInfo('Pomyślnie dodano statek');
+        } else {
+          this.snackService.showError('Statek została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/ships']});
+      })
+
+    this.commonFacade.updateShipSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({ship}) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.updateImageFile(ship.id);
+
+          const updateImageSuccess$ = this.imageFileFacade.updateImageFileSuccess$.pipe(map(() => true));
+          const updateImageError$ = this.imageFileFacade.updateImageFileError$.pipe(map(() => false));
+
+          return combineLatest([merge(updateImageSuccess$, updateImageError$)]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined)
+      )
+      .subscribe(([imageResult]) => {
+        if (imageResult) {
+          this.snackService.showInfo('Pomyślnie zaktualizowano statek');
+        } else {
+          this.snackService.showError('Statek została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu');
+        }
+
+        this.router.changeRoute({linkParams: ['/admin/ships', this.editingShip?.company?.id]});
+      })
 
     this.commonFacade.getCompanies();
   }
@@ -116,44 +160,44 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
   public onImageFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    this.snackService.showInfo('Pomyślnie dodano plik')
 
     if (file) {
-      this.offerForm.patchValue({
-        image: file
-      });
+      this.imageFile = file;
     }
   }
 
   public submitForm(): void {
-    const formValue = this.offerForm.value;
-    const formData = new FormData();
-
-    formData.append('name', formValue.name);
-    formData.append('description', formValue.description);
-    formData.append('yearBuilt', formValue.yearBuilt);
-    formData.append('length', formValue.length);
-    formData.append('width', formValue.width);
-    formData.append('tonnage', formValue.tonnage);
-    formData.append('passengersDecks', formValue.passengersDecks);
-    formData.append('passengers', formValue.passengers);
-    formData.append('crew', formValue.crew);
-    formData.append('currency', formValue.currency);
-    formData.append('companyId', formValue.companyId);
-
-    if (formValue.image instanceof File) {
-      formData.append('image', formValue.image);
+    if (this.shipForm.invalid) {
+      return;
     }
 
+    const payload = {...this.shipForm.value};
+    for (const key in payload) {
+      if (payload[key] === '' || payload[key] === null) {
+        delete payload[key];
+      }
+    }
 
     if (this.mode === "ADD") {
-      this.commonFacade.createShip({formData});
+      this.commonFacade.createShip({formData: payload});
     }
 
     if (this.mode === "EDIT") {
       const id = this.editingShip.id
-      this.commonFacade.updateShip({id, formData});
+      this.commonFacade.updateShip({id, formData: payload});
     }
+  }
+
+  public createImageFile(shipId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.createImageFile({imageFileType: 'ship', targetId: shipId, formData})
+  }
+
+  public updateImageFile(shipId: string): void {
+    const formData = new FormData()
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.updateImageFile({imageFileType: 'ship', targetId: shipId, formData})
   }
 
   public deleteShip(): void {

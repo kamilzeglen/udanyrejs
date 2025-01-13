@@ -1,45 +1,50 @@
-import {Injectable} from '@nestjs/common';
-import {Offer} from "@modules/offer/offer.entity";
+import { Injectable } from '@nestjs/common';
 import * as path from 'path';
-import {existsSync, mkdirSync, unlinkSync, writeFileSync} from 'fs';
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {ImageFile} from "@modules/image-file/image-file.entity";
-import {Company} from "@modules/company/company.entity";
-import {Ship} from "@modules/ship/ship.entity";
-import {SaveTypes, UpdateTypes} from "../../interfaces/save-update-file-types";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ImageFile } from '@modules/image-file/image-file.entity';
 import * as fs from 'fs/promises';
+import { ImageFileType } from '../../interfaces/save-update-file-types';
+import { User } from '@modules/user/user.entity';
+import { Offer } from '@modules/offer/offer.entity';
+import { Ship } from '@modules/ship/ship.entity';
+import { Company } from '@modules/company/company.entity';
 
 @Injectable()
 export class ImageFileService {
-
   constructor(
     @InjectRepository(ImageFile)
     private imageFileRepository: Repository<ImageFile>,
-  ) {
-  }
+    @InjectRepository(Offer)
+    private offerRepository: Repository<Offer>,
+    @InjectRepository(Company)
+    private companyRepository: Repository<Company>,
+    @InjectRepository(Ship)
+    private shipRepository: Repository<Ship>,
+  ) {}
 
-  findFileByName(name: string): Promise<ImageFile> {
-    return this.imageFileRepository.findOneBy({name: name});
-  }
-
-  async saveImage(file: Express.Multer.File, type: SaveTypes, target: Offer | Company | Ship): Promise<ImageFile> {
-
-    let uploadDir: string = './uploads/images'
-    if (type === SaveTypes.OFFER) {
+  async createImageFile(
+    targetId: string,
+    imageFileType: ImageFileType,
+    file: Express.Multer.File,
+    requestUser: User,
+  ): Promise<ImageFile> {
+    let uploadDir: string = './uploads/images';
+    if (imageFileType === ImageFileType.OFFER) {
       uploadDir = process.env.OFFERS_IMAGES_PATH;
     }
 
-    if (type === SaveTypes.COMPANY) {
+    if (imageFileType === ImageFileType.COMPANY) {
       uploadDir = process.env.COMPANIES_IMAGES_PATH;
     }
 
-    if (type === SaveTypes.SHIP) {
+    if (imageFileType === ImageFileType.SHIP) {
       uploadDir = process.env.SHIPS_IMAGES_PATH;
     }
 
     if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, {recursive: true});
+      mkdirSync(uploadDir, { recursive: true });
     }
 
     if (!file) {
@@ -51,59 +56,73 @@ export class ImageFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${target.id}${extname}`;
+    const fileName = `${targetId}${extname}`;
     const filePath = path.join(uploadDir, fileName);
 
     writeFileSync(filePath, file.buffer);
 
-    let imageFileEntity: ImageFile
-    if (type === SaveTypes.OFFER) {
+    let imageFileEntity: ImageFile;
+    if (imageFileType === ImageFileType.OFFER) {
+      const target = await this.offerRepository.findOneBy({ id: targetId });
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
         path: filePath,
-        offer: target
+        offer: target,
+        createdBy: requestUser,
       });
     }
 
-    if (type === SaveTypes.COMPANY) {
+    if (imageFileType === ImageFileType.COMPANY) {
+      const target = await this.companyRepository.findOneBy({ id: targetId });
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
         path: filePath,
-        company: target
+        company: target,
+        createdBy: requestUser,
       });
     }
 
-    if (type === SaveTypes.SHIP) {
+    if (imageFileType === ImageFileType.SHIP) {
+      const target = await this.shipRepository.findOneBy({ id: targetId });
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
         path: filePath,
-        ship: target
+        ship: target,
+        createdBy: requestUser,
       });
     }
 
     return this.imageFileRepository.save(imageFileEntity);
   }
 
-  async updateImage(file: Express.Multer.File, type: UpdateTypes, target: Offer | Company | Ship): Promise<ImageFile> {
-
-    let uploadDir: string = './uploads/images'
-    if (type === UpdateTypes.OFFER) {
+  async updateImageFile(
+    targetId: string,
+    imageFileType: ImageFileType,
+    file: Express.Multer.File,
+    requestUser: User,
+  ): Promise<ImageFile> {
+    let uploadDir: string = './uploads/images';
+    let target: any;
+    if (imageFileType === ImageFileType.OFFER) {
+      target = await this.offerRepository.findOneBy({ id: targetId });
       uploadDir = process.env.OFFERS_IMAGES_PATH;
     }
 
-    if (type === UpdateTypes.COMPANY) {
+    if (imageFileType === ImageFileType.COMPANY) {
+      target = await this.companyRepository.findOneBy({ id: targetId });
       uploadDir = process.env.COMPANIES_IMAGES_PATH;
     }
 
-    if (type === UpdateTypes.SHIP) {
+    if (imageFileType === ImageFileType.SHIP) {
+      target = await this.shipRepository.findOneBy({ id: targetId });
       uploadDir = process.env.SHIPS_IMAGES_PATH;
     }
 
     if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, {recursive: true});
+      mkdirSync(uploadDir, { recursive: true });
     }
 
     if (!file) {
@@ -115,12 +134,12 @@ export class ImageFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${target.id}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
+    const fileName = `${targetId}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
     const filePath = path.join(uploadDir, fileName);
 
-    const existingFile = target.imageFile;
+    const existingFile: ImageFile = target.imageFile;
 
-    let newImageFile: ImageFile
+    let newImageFile: ImageFile;
     if (existingFile) {
       // Krok 1: Usunięcie starego pliku z dysku (jeśli istnieje)
       if (existsSync(existingFile.path)) {
@@ -128,38 +147,41 @@ export class ImageFileService {
       }
 
       // Krok 2: Uaktualnienie danych w bazie
-      existingFile.name = fileName; // Aktualizujemy tylko nazwę oryginalną
-      existingFile.originalName = file.originalname; // Aktualizujemy tylko nazwę oryginalną
-      existingFile.path = filePath; // Aktualizujemy ścieżkę pliku
+      existingFile.name = fileName;
+      existingFile.originalName = file.originalname;
+      existingFile.path = filePath;
+      existingFile.updatedBy = requestUser;
 
       // Krok 3: Zapisanie zmienionego rekordu w bazie
       await this.imageFileRepository.save(existingFile); // Zamiast 'update', używamy 'save' do zaktualizowania istniejącego rekordu
     } else {
-
-      if (type === UpdateTypes.OFFER) {
+      if (imageFileType === ImageFileType.OFFER) {
         newImageFile = this.imageFileRepository.create({
           name: fileName,
           originalName: file.originalname,
           path: filePath,
           offer: target,
+          createdBy: requestUser,
         });
       }
 
-      if (type === UpdateTypes.COMPANY) {
+      if (imageFileType === ImageFileType.COMPANY) {
         newImageFile = this.imageFileRepository.create({
           name: fileName,
           originalName: file.originalname,
           path: filePath,
           company: target,
+          createdBy: requestUser,
         });
       }
 
-      if (type === UpdateTypes.SHIP) {
+      if (imageFileType === ImageFileType.SHIP) {
         newImageFile = this.imageFileRepository.create({
           name: fileName,
           originalName: file.originalname,
           path: filePath,
           ship: target,
+          createdBy: requestUser,
         });
       }
 
@@ -172,7 +194,6 @@ export class ImageFileService {
   }
 
   async removeImageFile(filePath: string): Promise<boolean> {
-
     if (!filePath) {
       throw new Error('Path not found');
     }
@@ -183,7 +204,6 @@ export class ImageFileService {
       } else {
         console.error(`File does not exist: ${filePath}`);
       }
-
     } catch (err) {
       console.error(`Failed to delete file: ${err.message}`);
       throw new Error('Failed to delete the physical file');

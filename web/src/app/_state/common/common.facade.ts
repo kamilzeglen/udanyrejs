@@ -4,6 +4,7 @@ import {Store} from '@ngrx/store';
 import {AppState} from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
+import {Company} from '@interfaces';
 
 
 @Injectable()
@@ -19,10 +20,14 @@ export class CommonFacade {
   public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
 
   public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
+  public createCompanyError$ = this.actions.pipe(ofType(commonActions.createCompanyError));
   public createShipSuccess$ = this.actions.pipe(ofType(commonActions.createShipSuccess));
+  public createShipError$ = this.actions.pipe(ofType(commonActions.createShipError));
 
   public updateCompanySuccess$ = this.actions.pipe(ofType(commonActions.updateCompanySuccess));
+  public updateCompanyError$ = this.actions.pipe(ofType(commonActions.updateCompanyError));
   public updateShipSuccess$ = this.actions.pipe(ofType(commonActions.updateShipSuccess));
+  public updateShipError$ = this.actions.pipe(ofType(commonActions.updateShipError));
 
   public deleteCompanySuccess$ = this.actions.pipe(ofType(commonActions.deleteCompanySuccess));
   public deleteShipSuccess$ = this.actions.pipe(ofType(commonActions.deleteShipSuccess));
@@ -41,11 +46,11 @@ export class CommonFacade {
     this.store.dispatch(commonActions.getCompany({payload}));
   }
 
-  public createCompany(payload: { formData: FormData }): void {
+  public createCompany(payload: { formData: Partial<Company> }): void {
     this.store.dispatch(commonActions.createCompany({payload}));
   }
 
-  public updateCompany(payload: { id: string, formData: FormData }): void {
+  public updateCompany(payload: { id: string, formData: Partial<Company> }): void {
     this.store.dispatch(commonActions.updateCompany({payload}));
   }
 

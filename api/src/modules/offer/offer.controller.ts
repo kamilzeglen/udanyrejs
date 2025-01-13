@@ -4,22 +4,19 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors
 } from '@nestjs/common';
-import {OfferService} from './offer.service';
-import {CreateOfferDto} from "@modules/offer/dto/create-offer.dto";
-import {Offer} from "@modules/offer/offer.entity";
-import {AuthGuard} from "@modules/auth/guards/auth.guard";
-import {AnyFilesInterceptor} from "@nestjs/platform-express";
+import { OfferService } from './offer.service';
+import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
+import { Offer } from '@modules/offer/offer.entity';
+import { AuthGuard } from '@modules/auth/guards/auth.guard';
 
 @Controller('offers')
 export class OfferController {
-  constructor(private readonly offerService: OfferService) {
-  }
+  constructor(private readonly offerService: OfferService) {}
 
   @Get('/')
   async searchOffers(): Promise<Offer[]> {
@@ -27,49 +24,45 @@ export class OfferController {
   }
 
   @Get('/:category')
-  async searchOffersByCategory(@Param('category') category: string): Promise<Offer[]> {
+  async searchOffersByCategory(
+    @Param('category') category: string,
+  ): Promise<Offer[]> {
     if (category) {
       return await this.offerService.findOffersByCategory(category);
     }
   }
 
-  @Get('/details/:offerID')
-  async getOneOffer(@Param('offerID') offerID: string): Promise<any[]> {
-    return await this.offerService.findOne(offerID);
+  @Get('/details/:offerId')
+  async getOneOffer(@Param('offerId') offerId: string): Promise<Offer> {
+    return await this.offerService.findOneById(offerId);
   }
 
   @UseGuards(AuthGuard)
   @Post('/')
-  @UseInterceptors(AnyFilesInterceptor())
   async createOffer(
-    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-    const pdfFile = files.find((file) => file.fieldname === 'pdf');
-
-    return await this.offerService.createOffer(createOfferDto, req.user, imageFile, pdfFile);
+    return await this.offerService.createOffer(createOfferDto, req.user);
   }
 
   @UseGuards(AuthGuard)
-  @Post('/:offerID')
-  @UseInterceptors(AnyFilesInterceptor())
+  @Patch('/:offerId')
   async updateOffer(
-    @UploadedFiles() files: Array<Express.Multer.File>,
-    @Param('offerID') offerID: string,
+    @Param('offerId') offerId: string,
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: { user: any },
   ): Promise<Offer> {
-    const imageFile = files.find((file) => file.fieldname === 'image');
-    const pdfFile = files.find((file) => file.fieldname === 'pdf');
-
-    return await this.offerService.updateOffer(offerID, createOfferDto, req.user, imageFile, pdfFile);
+    return await this.offerService.updateOffer(
+      offerId,
+      createOfferDto,
+      req.user,
+    );
   }
 
   @UseGuards(AuthGuard)
-  @Delete('/:offerID')
-  async removeOffer(@Param('offerID') offerID: string): Promise<boolean> {
-    return await this.offerService.removeOffer(offerID);
+  @Delete('/:offerId')
+  async removeOffer(@Param('offerId') offerId: string): Promise<boolean> {
+    return await this.offerService.removeOffer(offerId);
   }
 }

@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
-import {Offer} from "@modules/offer/offer.entity";
+  UpdateDateColumn,
+} from 'typeorm';
+import { Offer } from '@modules/offer/offer.entity';
+import { User } from '@modules/user/user.entity';
 
 @Entity()
 export class PdfFile {
@@ -17,14 +20,26 @@ export class PdfFile {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({type: 'varchar', length: 255})
+  @Column({ type: 'varchar', length: 255 })
   originalName: string;
 
   @Column({ type: 'varchar', length: 255 })
   path: string;
 
-  @OneToOne(() => Offer, (offer) => offer.pdfFile, {nullable: false })
+  @OneToOne(() => Offer, (offer) => offer.pdfFile, { nullable: false })
   offer: Offer;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  createdBy: User;
+  @Column({ type: 'uuid', nullable: true })
+  createdById: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn()
+  updatedBy: User;
+  @Column({ type: 'uuid', nullable: true })
+  updatedById: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import * as offerActions from '@state/offer/offer.actions';
 import {of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {OffersHttpService} from '../../_http/offers.http.service';
+import {OffersHttpService} from '@core/_http/offers.http.service';
 
 @Injectable()
 export class OfferEffects {
@@ -50,8 +50,8 @@ export class OfferEffects {
       ofType(offerActions.createOffer),
       switchMap(({payload}) => {
         return this.http.createOffer(payload).pipe(
-          map(() => {
-            return offerActions.createOfferSuccess();
+          map((offer) => {
+            return offerActions.createOfferSuccess({offer});
           }),
           catchError(errorMessage => {
             return of(offerActions.createOfferError({errorMessage}));
@@ -66,8 +66,8 @@ export class OfferEffects {
       ofType(offerActions.updateOffer),
       switchMap(({payload}) => {
         return this.http.updateOffer(payload).pipe(
-          map(() => {
-            return offerActions.updateOfferSuccess();
+          map((offer) => {
+            return offerActions.updateOfferSuccess({offer});
           }),
           catchError(errorMessage => {
             return of(offerActions.updateOfferError({errorMessage}));

@@ -1,8 +1,6 @@
-import {IsOptional, IsString,} from "class-validator";
-
+import { ArrayNotEmpty, IsArray, IsString } from 'class-validator';
 
 export class CreateCompanyDto {
-
   @IsString()
   name: string;
 
@@ -12,7 +10,11 @@ export class CreateCompanyDto {
   @IsString()
   description: string;
 
-  @IsString()
-  @IsOptional()
-  image?: any;
+  @IsArray()
+  @ArrayNotEmpty()
+  priceIncludes: string[];
+
+  @IsArray()
+  @ArrayNotEmpty()
+  priceExcludes: string[];
 }

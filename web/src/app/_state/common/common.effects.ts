@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {of} from 'rxjs';
 import * as commonActions from '@state/common/common.actions';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {CommonHttpService} from '../../_http/common.http.service';
+import {CommonHttpService} from '@core/_http/common.http.service';
 
 @Injectable()
 export class CommonEffects {
@@ -50,8 +50,8 @@ export class CommonEffects {
       ofType(commonActions.createCompany),
       switchMap(({payload}) => {
         return this.http.createCompany(payload).pipe(
-          map(() => {
-            return commonActions.createCompanySuccess();
+          map((company) => {
+            return commonActions.createCompanySuccess({company});
           }),
           catchError(errorMessage => {
             return of(commonActions.createCompanyError({errorMessage}));
@@ -66,8 +66,8 @@ export class CommonEffects {
       ofType(commonActions.updateCompany),
       switchMap(({payload}) => {
         return this.http.updateCompany(payload).pipe(
-          map(() => {
-            return commonActions.updateCompanySuccess();
+          map((company) => {
+            return commonActions.updateCompanySuccess({company});
           }),
           catchError(errorMessage => {
             return of(commonActions.updateCompanyError({errorMessage}));

@@ -112,6 +112,7 @@
           accept=".png, .jpg, .jpeg"
           (change)="onImageFileChange($event)"
         />
+        <div class="current-file" *ngIf="editingOffer?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
       </div>
 
       <div class="form-group">
@@ -122,6 +123,7 @@
           accept=".pdf"
           (change)="onPDFFileChange($event)"
         />
+        <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.pdfFile.originalName}} <mat-icon>check_circle</mat-icon></div>
       </div>
     </section>
 
@@ -157,7 +159,7 @@
       Usuń ofertę
     </button>
 
-    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid">
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid || (!imageFile && !editingOffer?.imageFile?.name) || (!pdfFile && !editingOffer?.pdfFile?.name)">
       {{ mode === 'ADD' ? "Dodaj ofertę" : "Zaktualizuj ofertę" }}
     </button>
   </form>
