@@ -40,7 +40,7 @@
       <!-- Description Column -->
       <ng-container matColumnDef="description">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Opis</th>
-        <td mat-cell *matCellDef="let element">{{ element.description || '-' }}</td>
+        <td mat-cell *matCellDef="let element" [innerHTML]="element.description">{{ element.description ? '' : '-' }}</td>
       </ng-container>
 
       <!-- Actions Column -->

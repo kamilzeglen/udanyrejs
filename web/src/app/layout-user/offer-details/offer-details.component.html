@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="image-container offer" *ngIf="offer.imageFile?.name">
+  <div class="image-container-offer" *ngIf="offer.imageFile?.name">
     <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie oferty" class="offer-image"/>
   </div>
 
@@ -62,45 +62,47 @@
   <div class="company-description" *ngIf="offer.company?.description" [innerHTML]="offer.company.description"></div>
   <div class="ship-description" *ngIf="offer.ship?.description" [innerHTML]="offer.ship.description"></div>
 
-  <div class="image-container ship" *ngIf="offer.ship?.imageFile?.name">
+  <div class="image-container-ship" *ngIf="offer.ship?.imageFile?.name">
     <img [src]="API_URL + '/ships/images/' + offer.ship.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
   </div>
 
-  <div class="ship-details-title">
-    <h2>Charakterystyka statku</h2>
-  </div>
-  <div class="ship-details">
-    <div class="element">
-      <div class="element-label">Rok budowy:</div>
-      <div class="element-value">{{ offer.ship.yearBuilt || '-' }}</div>
+  <div class="ship">
+    <div class="ship-details-title">
+      <h2>Charakterystyka statku</h2>
     </div>
-    <div class="element">
-      <div class="element-label">Obowiązująca waluta:</div>
-      <div class="element-value">{{ offer.ship.currency || '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Długość:</div>
-      <div class="element-value">{{ offer.ship.length ? offer.ship.length + ' m' : '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Szerokość:</div>
-      <div class="element-value">{{ offer.ship.width ? offer.ship.width + ' m' : '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Tonaż:</div>
-      <div class="element-value">{{ offer.ship.tonnage ? offer.ship.tonnage + ' t' : '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Pokłady pasażerskie:</div>
-      <div class="element-value">{{ offer.ship.passengersDecks || '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Pasażerowie:</div>
-      <div class="element-value">{{ offer.ship.passengers || '-' }}</div>
-    </div>
-    <div class="element">
-      <div class="element-label">Załoga:</div>
-      <div class="element-value">{{ offer.ship.crew || '-' }}</div>
+    <div class="ship-details">
+      <div class="element">
+        <div class="element-label">Rok budowy:</div>
+        <div class="element-value">{{ offer.ship.yearBuilt || '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Obowiązująca waluta:</div>
+        <div class="element-value">{{ offer.ship.currency || '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Długość:</div>
+        <div class="element-value">{{ offer.ship.length ? offer.ship.length + ' m' : '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Szerokość:</div>
+        <div class="element-value">{{ offer.ship.width ? offer.ship.width + ' m' : '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Tonaż:</div>
+        <div class="element-value">{{ offer.ship.tonnage ? offer.ship.tonnage + ' t' : '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Pokłady pasażerskie:</div>
+        <div class="element-value">{{ offer.ship.passengersDecks || '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Pasażerowie:</div>
+        <div class="element-value">{{ offer.ship.passengers ? offer.ship.passengers + ' osób' : '-' }}</div>
+      </div>
+      <div class="element">
+        <div class="element-label">Załoga:</div>
+        <div class="element-value">{{ offer.ship.crew ? offer.ship.crew + ' osób' : '-' }}</div>
+      </div>
     </div>
   </div>
 

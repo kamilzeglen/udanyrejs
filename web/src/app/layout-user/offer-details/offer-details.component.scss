@@ -67,66 +67,69 @@
     }
   }
 
-  .ship-details-title {
-    h2 {
-      font-size: 1.5rem;
-      color: #2c3e50;
-      margin: 20px 0;
-      text-align: center;
-    }
-  }
-
-  .ship-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  .ship {
+    padding: 1.5rem;
     background-color: #fff;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 
-    .element {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .element-label {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: $text-color;
-      margin-bottom: 0.5rem;
-    }
-
-    .element-value {
-      font-size: 1rem;
-      color: $text-color;
-      font-weight: 400;
-      padding: 0.5rem 0;
-      transition: color 0.3s ease-in-out;
-
-      &:hover {
-        color: $primary-color;
+    .ship-details-title {
+      h2 {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin: 10px 0 40px 0;
+        text-align: center;
+        font-weight: 600;
       }
     }
 
-    .element-value.currency {
-      font-weight: bold;
-      color: $primary-color;
-    }
-
-    @include media("<=phone") {
-      .ship-details {
-        grid-template-columns: 1fr;
-      }
+    .ship-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
 
       .element {
-        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .element-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $text-color;
+        margin-bottom: 0.5rem;
+      }
+
+      .element-value {
+        font-size: 1rem;
+        color: $text-color;
+        font-weight: 400;
+        padding: 0.5rem 0;
+        transition: color 0.3s ease-in-out;
+
+        &:hover {
+          color: $primary-color;
+        }
+      }
+
+      .element-value.currency {
+        font-weight: bold;
+        color: $primary-color;
+      }
+
+      @include media("<=phone") {
+        .ship-details {
+          grid-template-columns: 1fr;
+        }
+
+        .element {
+          margin-bottom: 1rem;
+        }
       }
     }
   }
-
 
   .company-name,
   .ship-name,
@@ -143,13 +146,11 @@
     font-weight: 600;
   }
 
-  .image-container {
+  .image-container-offer,
+  .image-container-ship
+  {
     margin: 1.5rem auto;
     text-align: center;
-
-    &.ship {
-      margin-bottom: 0;
-    }
 
     img {
       max-width: 100%;
@@ -163,6 +164,10 @@
     }
   }
 
+  .image-container-ship {
+    margin-bottom: 0;
+  }
+
   .itinerary-section {
     margin-top: 2rem;
 
@@ -171,6 +176,7 @@
       color: #2c3e50;
       margin-bottom: 1rem;
       text-align: center;
+      font-weight: 600;
     }
 
     .itinerary-table {
@@ -239,6 +245,7 @@
     padding: 20px;
     text-indent: 30px;
     font-size: 16px;
+    text-align: justify;
   }
 }
 
