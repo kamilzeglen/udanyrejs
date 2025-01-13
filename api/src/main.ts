@@ -35,7 +35,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(API_PORT || 3000);
+  await app.listen(API_PORT || 1111);
 }
 
 bootstrap();
