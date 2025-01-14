@@ -46,126 +46,100 @@
               "src/scss/ngZorro.scss",
               "src/scss/materialUI.scss",
               "node_modules/ng-zorro-antd/ng-zorro-antd.min.css",
-              "node_modules/@ng-select/ng-select/themes/default.theme.css"
+              "https://cdn.jsdelivr.net/npm/@angular/material/prebuilt-themes/indigo-pink.css"
             ],
             "scripts": [],
-            "vendorChunk": true,
-            "extractLicenses": false,
-            "buildOptimizer": false,
-            "sourceMap": true,
-            "optimization": false,
-            "namedChunks": true
+            "budgets": [
+              {
+                "type": "bundle",
+                "name": "main",
+                "maximumWarning": "2mb",
+                "maximumError": "5mb"
+              },
+              {
+                "type": "initial",
+                "name": "initial",
+                "maximumWarning": "5MB",
+                "maximumError": "10MB"
+              },
+              {
+                "type": "anyComponentStyle",
+                "name": "component-styles",
+                "maximumWarning": "5MB",
+                "maximumError": "10MB"
+              }
+            ]
           },
           "configurations": {
             "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "5MB",
+                  "maximumError": "10MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "5MB",
+                  "maximumError": "10MB"
+                }
+              ],
+              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "5MB",
-                  "maximumError": "10MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "5MB",
-                  "maximumError": "10MB"
-                }
               ]
             },
             "development": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dev.ts"
-                }
-              ],
               "optimization": false,
-              "outputHashing": "all",
-              "sourceMap": true,
-              "namedChunks": true,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "20mb",
-                  "maximumError": "22mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "50kb",
-                  "maximumError": "100kb"
-                }
-              ]
-            },
-            "local": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.local.ts"
-                }
-              ],
-              "optimization": false,
-              "outputHashing": "none",
-              "sourceMap": true,
-              "namedChunks": false,
               "extractLicenses": false,
-              "vendorChunk": false,
-              "buildOptimizer": false,
-              "budgets": [
+              "sourceMap": true,
+              "fileReplacements": [
                 {
-                  "type": "initial",
-                  "maximumWarning": "22mb",
-                  "maximumError": "24mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "50kb",
-                  "maximumError": "100kb"
+                  "replace": "src/environments/environment.prod.ts",
+                  "with": "src/environments/environment.ts"
                 }
               ]
             }
           },
-          "defaultConfiguration": "local"
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "buildTarget": "web:build"
-          },
           "configurations": {
             "production": {
               "buildTarget": "web:build:production"
             },
             "development": {
               "buildTarget": "web:build:development"
-            },
-            "local": {
-              "buildTarget": "web:build:local"
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "cache": true,
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
           }
         }
       }
