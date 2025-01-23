@@ -7,6 +7,7 @@ import {ContactComponent} from './contact/contact.component';
 import {SharedModule} from '@shared/shared.module';
 import {OfferCardComponent} from './offer-card/offer-card.component';
 import {AboutUsComponent} from './about-us/about-us.component';
+import {OfferFiltersComponent} from './offer-filters/offer-filters.component';
 
 const components = [
   OfferListComponent,
@@ -14,7 +15,8 @@ const components = [
   OfferCardComponent,
   LoginComponent,
   ContactComponent,
-  AboutUsComponent
+  AboutUsComponent,
+  OfferFiltersComponent
 ];
 
 @NgModule({

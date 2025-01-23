@@ -11,6 +11,7 @@ import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-
 import {ImageFileFacade} from '@state/imageFile';
 import {PdfFileFacade} from '@state/pdfFile';
 import {map, switchMap} from 'rxjs/operators';
+import {ScrapperFacade} from '@state/scrapper';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -30,14 +31,23 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public destinations$ = this.commonFacade.destinations$
   public categories$ = this.commonFacade.categories$
 
+  public scrapping$ = this.scrapperFacade.loading$
+
   public offerForm: FormGroup;
-  public imageFile: File
-  public pdfFile: File
+
+  public scrappedData: boolean;
+
+  public imageFile: File | string
+  public scrappedImageFile: boolean
+
+  public pdfFile: File | string
+  public scrappedPdfFile: boolean
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly commonFacade: CommonFacade,
     private readonly offerFacade: OfferFacade,
+    private readonly scrapperFacade: ScrapperFacade,
     private readonly imageFileFacade: ImageFileFacade,
     private readonly pdfFileFacade: PdfFileFacade,
     private readonly router: RouterFacade,
@@ -73,32 +83,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       }
 
       if (this.editingOffer) {
-        this.offerForm.patchValue({
-          ...this.editingOffer,
-          price: Number(this.editingOffer.price),
-          destinations: this.editingOffer?.destinations?.map((destinations: any) => destinations.id),
-          categories: this.editingOffer?.categories?.map((categories: any) => categories.id),
-        });
-
-        // Dodanie itinerary, jeśli istnieje
-        if (this.editingOffer?.itinerary) {
-          const itineraryData = typeof this.editingOffer.itinerary === 'string'
-            ? JSON.parse(this.editingOffer.itinerary)
-            : this.editingOffer.itinerary;
-
-          if (Array.isArray(itineraryData)) {
-            itineraryData.forEach((day, index) => {
-              const dayGroup = this.fb.group({
-                day: [day.day || index + 1],
-                date: [day.date || null],
-                port: [day.port || null],
-                arrivalTime: [day.arrivalTime || null],
-                departureTime: [day.departureTime || null],
-              });
-              this.itineraryArray.push(dayGroup);
-            });
-          }
-        }
+        this.patchValues(this.editingOffer)
       }
 
       this.isInitializing = false;
@@ -172,6 +157,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       )
       .subscribe((results) => {
         if (results.every((result) => result)) {
+          console.log('gfd')
           this.snackService.showInfo('Pomyślnie dodano ofertę');
         } else {
           this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
@@ -222,6 +208,38 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo("Pomyślnie usunięto ofertę")
       this.router.changeRoute({linkParams: ['/admin/offers']});
+    })
+
+    this.scrapperFacade.scrapOfferFileSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
+
+      if (!offer) {
+        return
+      }
+
+      this.scrappedData = true
+
+      if (offer.scrappedShipName) {
+        this.commonFacade.getShipByNameSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ship}) => {
+          this.offerForm.patchValue({
+            companyId: ship.company.id,
+            shipId: ship.id
+          })
+        })
+
+        this.commonFacade.getShipByName({name: offer.scrappedShipName})
+      }
+
+      if (offer.scrappedImageFileURL) {
+        this.scrappedImageFile = true
+        this.imageFile = offer.scrappedImageFileURL
+      }
+
+      if (offer.scrappedPdfFileURL) {
+        this.scrappedPdfFile = true
+        this.pdfFile = offer.scrappedPdfFileURL
+      }
+
+      this.patchValues(offer)
     })
 
     this.commonFacade.getCompanies();
@@ -301,7 +319,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
 
   public importOffer(): void {
-    console.log('Import')
+    this.scrapperFacade.scrapOffer({url: this.offerForm.get('offerUrl').value});
   }
 
   public submitForm(): void {
@@ -366,6 +384,38 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           this.offerFacade.deleteOffer({id: this.editingOffer.id})
         });
     }
+  }
+
+  public patchValues(data: Partial<Offer>): void {
+    this.offerForm.patchValue({
+      ...data,
+      price: Number(data.price),
+      destinations: data?.destinations?.map((destinations: any) => destinations.id),
+      categories: data?.categories?.map((categories: any) => categories.id),
+    });
+
+    // Dodanie itinerary, jeśli istnieje
+    if (data?.itinerary) {
+      this.itineraryArray.clear()
+
+      const itineraryData = typeof data.itinerary === 'string'
+        ? JSON.parse(data.itinerary)
+        : data.itinerary;
+
+      if (Array.isArray(itineraryData)) {
+        itineraryData.forEach((day, index) => {
+          const dayGroup = this.fb.group({
+            day: [day.day || index + 1],
+            date: [day.date || null],
+            port: [day.port || null],
+            arrivalTime: [day.arrivalTime || null],
+            departureTime: [day.departureTime || null],
+          });
+          this.itineraryArray.push(dayGroup);
+        });
+      }
+    }
+
   }
 
 

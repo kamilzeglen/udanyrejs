@@ -14,16 +14,21 @@ export class AppComponent implements OnInit {
     this.deviceInfoService.startObservingDevice();
 
     this.adjustBodyMargin();
+
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDarkMode) {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.add('light-theme');
+    }
   }
 
   private adjustBodyMargin(): void {
     const html = document.documentElement;
     const body = document.body;
 
-    // Sprawdzenie, czy pasek przewijania jest obecny
     const isScrollbarVisible = html.scrollHeight > html.clientHeight || body.scrollHeight > body.clientHeight;
 
-    // Dodanie marginesu, jeśli pasek przewijania nie jest widoczny
     if (!isScrollbarVisible) {
       body.style.marginRight = '8px';
     } else {

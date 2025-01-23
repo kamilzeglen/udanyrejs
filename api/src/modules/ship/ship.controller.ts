@@ -19,12 +19,16 @@ import { Ship } from '@modules/ship/ship.entity';
 export class ShipController {
   constructor(private readonly shipService: ShipService) {}
 
-  @Get('/details/:shipId')
-  async getOneOffer(@Param('shipId') shipId: string): Promise<any[]> {
-    return await this.shipService.findOne(shipId);
+  @Get('/details/id/:shipId')
+  async getOneOfferById(@Param('shipId') shipId: string): Promise<Ship> {
+    return await this.shipService.findOneById(shipId);
+  }
+  @Get('/details/name/:shipName')
+  async getOneOfferByName(@Param('shipName') shipName: string): Promise<Ship> {
+    return await this.shipService.findOneByName(shipName);
   }
 
-  @Get(':companyId')
+  @Get('/:companyId')
   async findShipsByCompany(@Param('companyId') companyId: string) {
     return this.shipService.findShipsByCompany(companyId);
   }

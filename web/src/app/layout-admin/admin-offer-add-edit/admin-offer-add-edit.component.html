@@ -12,8 +12,10 @@
       <div class="form-group">
         <label for="offerUrl">Adres URL oferty:</label>
         <input id="offerUrl" formControlName="offerUrl" type="text" placeholder="Wprowadź adres URL"/>
-        <button mat-raised-button color="primary" class="import-button" (click)="importOffer()">Zaimportuj</button>
+        <button mat-raised-button color="primary" class="import-button" (click)="importOffer()" [disabled]="scrappedData">Zaimportuj</button>
       </div>
+
+      <app-spinner *ngIf="scrapping$ | async" appAutoSpinner [size]="75"></app-spinner>
 
       <div class="form-group">
         <label>
@@ -28,7 +30,7 @@
       <h2>Dane dotyczące rejsu</h2>
       <div class="form-group">
         <label for="name">Nazwa rejsu:</label>
-        <input id="name" formControlName="name" type="text" placeholder="Nazwa rejsu"/>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa rejsu" />
       </div>
 
       <div class="form-group" *ngIf="destinations$ | async as destinations">
@@ -111,7 +113,9 @@
           type="file"
           accept=".png, .jpg, .jpeg"
           (change)="onImageFileChange($event)"
+          [disabled]="scrappedImageFile"
         />
+        <div class="current-file" *ngIf="scrappedImageFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
         <div class="current-file" *ngIf="editingOffer?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
       </div>
 
@@ -122,7 +126,9 @@
           type="file"
           accept=".pdf"
           (change)="onPDFFileChange($event)"
+          [disabled]="scrappedPdfFile"
         />
+        <div class="current-file" *ngIf="scrappedPdfFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
         <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.pdfFile.originalName}} <mat-icon>check_circle</mat-icon></div>
       </div>
     </section>

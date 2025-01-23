@@ -2,8 +2,9 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OfferFacade} from 'src/app/_state/offer';
 import {ReplaySubject, takeUntil} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
-import {OffersPayload, SubMenuItem} from '@interfaces';
+import {SearchOffersPayload, SubMenuItem} from '@interfaces';
 import {CommonFacade} from '@state/common';
+import moment from 'moment-timezone';
 
 @Component({
   selector: 'app-offer-list',
@@ -13,10 +14,15 @@ import {CommonFacade} from '@state/common';
 export class OfferListComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
 
-  public category: string
+  public filters: { [key: string]: any } = {
+    category: null,
+    startDate: null,
+    endDate: null,
+    companyIdList: [],
+    destinationIdList: []
+  };
 
   public offers$ = this.offerFacade.offers$
-  public categories$ = this.commonFacade.categories$
   public loading$ = this.offerFacade.loading$
 
   public subMenuItems: SubMenuItem[] = [];
@@ -30,14 +36,10 @@ export class OfferListComponent implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
-      this.category = paramMap.get('category');
-
-      const searchOpts: Partial<OffersPayload> = {
-        category: this.category?.toLowerCase()
-      };
+      this.filters.category = paramMap.get('category');
 
       this.commonFacade.getCategories()
-      this.getOffers(searchOpts)
+      this.getOffers(this.filters)
     })
 
     this.commonFacade.getCategoriesSuccess$
@@ -59,7 +61,21 @@ export class OfferListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public getOffers(opts?: Partial<OffersPayload>): void {
-    this.offerFacade.getOffers(opts)
+  public getOffers(opts?: Partial<SearchOffersPayload>): void {
+    if (opts?.startDate) {
+      opts.startDate = moment.tz(opts.startDate, 'Europe/Warsaw').startOf('day').toDate();
+    }
+
+    if (opts?.endDate) {
+      opts.endDate = moment.tz(opts.endDate, 'Europe/Warsaw').endOf('day').toDate();
+    }
+
+    this.offerFacade.getOffers(opts);
+  }
+
+  public onFiltersChanged(changedFilter: { key: string; value: any }): void {
+    this.filters = {...this.filters, [changedFilter.key]: changedFilter.value};
+
+    this.getOffers(this.filters);
   }
 }

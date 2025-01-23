@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Offer, OffersPayload} from '@interfaces';
+import {Offer, SearchOffersPayload} from '@interfaces';
 import { environment } from '@environment';
 
 @Injectable({
@@ -16,14 +16,9 @@ export class OffersHttpService {
   ) {
   }
 
-  public getOffers(payload?: Partial<OffersPayload>): Observable<Offer[]> {
-    let url: string
-    if (payload?.category) {
-      url = `${this.API_URL}/offers/` + payload?.category;
-    } else {
-      url = `${this.API_URL}/offers`;
-    }
-    return this.http.get<Offer[]>(url);
+  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<Offer[]> {
+    const url = `${this.API_URL}/offers/search`;
+    return this.http.post<Offer[]>(url, payload);
   }
 
   public getOffer(payload: {id: string}): Observable<Offer> {

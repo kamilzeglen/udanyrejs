@@ -15,6 +15,10 @@
   text-decoration: none;
   color: inherit;
 
+  @include media("<1400px") {
+    max-width: 500px;
+  }
+
   @include media("<=phone") {
     width: unset;
     margin: 20px;
@@ -29,7 +33,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f1f1f1;
+    background-color: $background-color;
     padding: 10px;
 
     .company-logo {
@@ -52,7 +56,7 @@
 
   .offer-details {
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: $background-color;
 
     .offer-title {
       font-size: 24px;

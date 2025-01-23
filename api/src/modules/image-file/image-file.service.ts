@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as path from 'path';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import { User } from '@modules/user/user.entity';
 import { Offer } from '@modules/offer/offer.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Company } from '@modules/company/company.entity';
+import axios from 'axios';
 
 @Injectable()
 export class ImageFileService {
@@ -210,5 +211,22 @@ export class ImageFileService {
     }
 
     return true;
+  }
+
+  async downloadImageFromUrl(url: string): Promise<Express.Multer.File> {
+    try {
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      const fileBuffer = Buffer.from(response.data, 'binary');
+      const extname = path.extname(url).toLowerCase() || '.jpg'; // Zakładając, że URL kończy się rozszerzeniem pliku
+      const fileName = `${Date.now()}${extname}`; // Generowanie unikalnej nazwy pliku
+
+      return {
+        originalname: fileName,
+        buffer: fileBuffer,
+        mimetype: response.headers['content-type'],
+      } as Express.Multer.File;
+    } catch {
+      throw new BadRequestException('Failed to download image from URL');
+    }
   }
 }

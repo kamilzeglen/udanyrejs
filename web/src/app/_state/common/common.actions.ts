@@ -27,9 +27,13 @@ export const getShips = createAction('[Common] Get Ships', props<{ companyId: st
 export const getShipsSuccess = createAction('[Common] Get Ships Success', props<{ ships: Ship[] }>());
 export const getShipsError = createAction('[Common] Get Ships Error', props<{ errorMessage: string }>());
 
-export const getShip = createAction('[Common] Get Ship', props<{ payload: { id: string } }>());
-export const getShipSuccess = createAction('[Common] Get Ship Success', props<{ ship: Ship }>());
-export const getShipError = createAction('[Common] Get Ship Error', props<{ errorMessage: string }>());
+export const getShipById = createAction('[Common] Get Ship By ID', props<{ payload: { id: string } }>());
+export const getShipByIdSuccess = createAction('[Common] Get Ship By ID Success', props<{ ship: Ship }>());
+export const getShipByIdError = createAction('[Common] Get Ship By ID Error', props<{ errorMessage: string }>());
+
+export const getShipByName = createAction('[Common] Get Ship By Name', props<{ payload: { name: string } }>());
+export const getShipByNameSuccess = createAction('[Common] Get Ship By Name Success', props<{ ship: Ship }>());
+export const getShipByNameError = createAction('[Common] Get Ship By Name Error', props<{ errorMessage: string }>());
 
 export const createShip = createAction('[Common] Create Ship', props<{ payload: { formData: FormData } }>());
 export const createShipSuccess = createAction('[Common] Create Ship Success', props<{ ship: Ship }>());

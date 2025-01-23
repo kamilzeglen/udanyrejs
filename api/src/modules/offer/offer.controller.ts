@@ -13,14 +13,17 @@ import { OfferService } from './offer.service';
 import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
 import { Offer } from '@modules/offer/offer.entity';
 import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 
 @Controller('offers')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
-  @Get('/')
-  async searchOffers(): Promise<Offer[]> {
-    return await this.offerService.findAll();
+  @Post('/search')
+  async searchOffers(
+    @Body() searchOfferDto: SearchOffersDto,
+  ): Promise<Offer[]> {
+    return await this.offerService.searchOffers(searchOfferDto);
   }
 
   @Get('/:category')

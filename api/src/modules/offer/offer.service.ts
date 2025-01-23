@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -17,6 +17,7 @@ import { DestinationService } from '@modules/destination/destination.service';
 import { CategoryService } from '@modules/category/category.service';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
+import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 
 @Injectable()
 export class OfferService {
@@ -33,8 +34,73 @@ export class OfferService {
     private readonly destinationService: DestinationService,
   ) {}
 
-  async findAll(): Promise<any[]> {
-    return await this.offerRepository.find();
+  async searchOffers(searchOffersDto: SearchOffersDto): Promise<Offer[]> {
+    console.log(searchOffersDto);
+
+    const whereClauses: string[] = [];
+    const whereParams: ObjectLiteral = {};
+    const { category, startDate, endDate, destinationIdList, companyIdList } =
+      searchOffersDto;
+
+    const dbQuery = this.offerRepository.createQueryBuilder('offer');
+
+    if (category) {
+      const categoryId = (await this.categoryService.findOneByUrl(category)).id;
+
+      whereClauses.push('category.id = :categoryId');
+      whereParams.categoryId = categoryId;
+    }
+
+    if (companyIdList && companyIdList.length > 0) {
+      whereClauses.push('offer.companyId IN (:...companyIdList)');
+      whereParams.companyIdList = companyIdList;
+    }
+
+    if (startDate) {
+      whereClauses.push('offer.startDate >= :startDate');
+      whereParams.startDate = startDate;
+    }
+
+    if (endDate) {
+      whereClauses.push('offer.endDate <= :endDate');
+      whereParams.endDate = endDate;
+    }
+
+    if (destinationIdList && destinationIdList.length > 0) {
+      whereClauses.push('destination.id IN (:...destinationIdList)');
+      whereParams.destinationIdList = destinationIdList;
+    }
+
+    return await dbQuery
+      .leftJoinAndSelect('offer.company', 'company')
+      .leftJoinAndSelect('offer.ship', 'ship')
+      .leftJoinAndSelect('ship.company', 'shipCompany')
+      .leftJoinAndSelect('offer.imageFile', 'offerImageFile')
+      .leftJoinAndSelect('company.imageFile', 'companyImageFile')
+      .leftJoinAndSelect('offer.categories', 'category')
+      .leftJoinAndSelect('offer.destinations', 'destination')
+      .where(whereClauses.join(' AND '), whereParams)
+      .select([
+        'offer.id',
+        'offer.name',
+        'offer.price',
+        'offer.startDate',
+        'offer.endDate',
+        'offer.company',
+        'offer.createdAt',
+        'offer.updatedAt',
+        'offerImageFile.id',
+        'offerImageFile.name',
+        'offerImageFile.path',
+        'ship.id',
+        'ship.name',
+        'company.id',
+        'company.name',
+        'companyImageFile.id',
+        'companyImageFile.name',
+        'companyImageFile.path',
+      ])
+      .getMany();
   }
 
   findOneById(id: string): Promise<Offer> {

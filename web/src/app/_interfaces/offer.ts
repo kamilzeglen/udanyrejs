@@ -33,3 +33,9 @@ export interface Offer {
   updatedAt: Date | string;
   deletedAt: Date | string;
 }
+
+export interface OfferScrapper extends Offer {
+  scrappedShipName: string
+  scrappedImageFileURL: string
+  scrappedPdfFileURL: string
+}

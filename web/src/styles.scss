@@ -1,4 +1,12 @@
+@use '@angular/material' as mat;
+
+@import 'scss/scroll-bar';
+@import 'scss/notification';
+@import 'scss/ng-select/styles';
+@import 'scss/material-ui/styles';
+@import 'scss/ng-zorro/styles';
 @import 'scss/variables';
+@import 'scss/udanyrejs';
 
 html, body {
   width: 100vw;
@@ -65,48 +73,11 @@ textarea,
   }
 }
 
-.snack-notify {
-  border-radius: 4px;
-  font-family: 'Roboto', sans-serif;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
+html, body {
+  height: 100%;
 }
 
-.info-snack {
-  background-color: $tertiary-color;
-  color: #ffffff;
-}
-
-.warning-snack {
-  background-color: $warn;
-  color: #ffffff;
-}
-
-.error-snack {
-  background-color: $negative;
-  color: #ffffff;
-}
-
-// Scroll
-/* Works on Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: $tertiary-color rgba(255, 165, 0, 0);
-}
-
-/* Works on Chrome, Edge, and Safari */
-*::-webkit-scrollbar {
-  width: 12px;
-}
-
-*::-webkit-scrollbar-track {
-  background: rgba(255, 165, 0, 0);
-}
-
-*::-webkit-scrollbar-thumb {
-  background-color: $tertiary-color;
-  border-radius: 20px;
-  border: 3px solid rgba(255, 165, 0, 0);
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }

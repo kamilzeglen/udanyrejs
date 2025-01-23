@@ -2,7 +2,7 @@
 @import '../../../scss/breakpoints';
 
 .navbar {
-  border-bottom: 4px solid $tertiary-color;
+  border-bottom: 4px solid $primary-color;
   flex-shrink: 0; // Zapobiega zmniejszaniu nagłówka
   display: flex;
   justify-content: center;

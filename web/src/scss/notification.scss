@@ -1,0 +1,25 @@
+@import "variables";
+
+.snack-notify {
+  border-radius: 4px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+}
+
+.info-snack {
+  background-color: $tertiary-color;
+  color: #ffffff;
+}
+
+.warning-snack {
+  background-color: $warn;
+  color: #ffffff;
+}
+
+.error-snack {
+  background-color: $negative;
+  color: #ffffff;
+}

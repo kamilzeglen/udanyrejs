@@ -5,6 +5,7 @@ import {RouterEffects, RouterFacade, RouterStateUrl} from '@state/router';
 import {OfferEffects, OfferFacade, offerReducer, OfferState} from 'src/app/_state/offer';
 import {ImageFileEffects, ImageFileFacade, imageFileReducer, ImageFileState} from '@state/imageFile';
 import {PdfFileEffects, PdfFileFacade, pdfFileReducer, PdfFileState} from '@state/pdfFile';
+import {ScrapperEffects, ScrapperFacade, scrapperReducer, ScrapperState} from '@state/scrapper';
 
 export const reducers = {
   users: usersReducer,
@@ -13,6 +14,7 @@ export const reducers = {
   common: commonReducer,
   imageFile: imageFileReducer,
   pdfFile: pdfFileReducer,
+  scrapper: scrapperReducer,
 }
 
 export const effects = [
@@ -23,6 +25,7 @@ export const effects = [
   CommonEffects,
   ImageFileEffects,
   PdfFileEffects,
+  ScrapperEffects,
 ]
 
 export const facades = [
@@ -33,6 +36,7 @@ export const facades = [
   CommonFacade,
   ImageFileFacade,
   PdfFileFacade,
+  ScrapperFacade
 ]
 
 export interface AppState {
@@ -43,4 +47,5 @@ export interface AppState {
   common: CommonState,
   imageFile: ImageFileState,
   pdfFile: PdfFileState,
+  scrapper: ScrapperState,
 }

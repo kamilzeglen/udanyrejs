@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
@@ -9,6 +9,7 @@ import * as path from 'node:path';
 import { PdfFileType } from '../../interfaces/save-update-file-types';
 import { User } from '@modules/user/user.entity';
 import * as process from 'node:process';
+import axios from 'axios';
 
 @Injectable()
 export class PdfFileService {
@@ -19,7 +20,7 @@ export class PdfFileService {
     private offerRepository: Repository<Offer>,
   ) {}
 
-  async createImageFile(
+  async createPdfFile(
     targetId: string,
     pdfFileType: PdfFileType,
     file: Express.Multer.File,
@@ -130,5 +131,22 @@ export class PdfFileService {
     }
 
     return true;
+  }
+
+  async downloadPdfFromUrl(url: string): Promise<Express.Multer.File> {
+    try {
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      const fileBuffer = Buffer.from(response.data, 'binary');
+      const extname = path.extname(url).toLowerCase() || '.pdf'; // Domyślne rozszerzenie, jeśli brak w URL
+      const fileName = `${Date.now()}${extname}`; // Generowanie unikalnej nazwy pliku
+
+      return {
+        originalname: fileName,
+        buffer: fileBuffer,
+        mimetype: response.headers['content-type'],
+      } as Express.Multer.File;
+    } catch {
+      throw new BadRequestException('Failed to download PDF from URL');
+    }
   }
 }

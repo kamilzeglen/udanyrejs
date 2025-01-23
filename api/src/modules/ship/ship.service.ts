@@ -23,12 +23,12 @@ export class ShipService {
     private readonly userService: UserService,
   ) {}
 
-  async findOne(id: string): Promise<any> {
+  findOneById(id: string): Promise<Ship> {
     return this.shipRepository.findOneBy({ id });
   }
 
-  findOneById(id: string): Promise<Ship> {
-    return this.shipRepository.findOneBy({ id });
+  findOneByName(name: string): Promise<Ship> {
+    return this.shipRepository.findOneBy({ name });
   }
 
   async findShipsByCompany(companyId: string): Promise<Ship[]> {

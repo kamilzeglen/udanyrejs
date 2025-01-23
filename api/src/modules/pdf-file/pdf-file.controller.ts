@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Param,
   Patch,
@@ -14,6 +15,7 @@ import { AuthGuard } from '@modules/auth/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PdfFileType } from '../../interfaces/save-update-file-types';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
+import { CreatePdfFileDto } from '@modules/pdf-file/dto/create-pdf-file.dto';
 
 @Controller('pdf-file')
 export class PdfFileController {
@@ -25,19 +27,31 @@ export class PdfFileController {
   async createOfferImageFile(
     @Param('pdfFileType') pdfFileType: PdfFileType,
     @Param('targetId') targetId: string,
+    @Body() createPdfFileDto: CreatePdfFileDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: { user: any },
   ): Promise<PdfFile> {
-    if (!file) {
+    if (!file && !createPdfFileDto.pdfFile) {
       throw new BadRequestException(
-        'No file provided. Please upload a valid file.',
+        'No file provided. Please upload a valid file or url.',
       );
     }
 
-    return this.pdfFileService.createImageFile(
+    let pdfFile: Express.Multer.File | string;
+
+    if (createPdfFileDto.pdfFile) {
+      // Jeśli przesłano URL, pobieramy obraz
+      pdfFile = await this.pdfFileService.downloadPdfFromUrl(
+        createPdfFileDto.pdfFile,
+      );
+    } else {
+      pdfFile = file; // Jeśli przesłano plik, używamy go
+    }
+
+    return this.pdfFileService.createPdfFile(
       targetId,
       pdfFileType,
-      file,
+      pdfFile,
       req.user,
     );
   }

@@ -46,8 +46,13 @@ export class CommonHttpService {
     return this.http.get<Ship[]>(url);
   }
 
-  public getShip(payload: { id: string }): Observable<Ship> {
-    const url = `${this.API_URL}/ship/details/` + payload.id;
+  public getShipById(payload: { id: string }): Observable<Ship> {
+    const url = `${this.API_URL}/ship/details/id/` + payload.id;
+    return this.http.get<Ship>(url);
+  }
+
+  public getShipByName(payload: { name: string }): Observable<Ship> {
+    const url = `${this.API_URL}/ship/details/name/` + payload.name;
     return this.http.get<Ship>(url);
   }
 

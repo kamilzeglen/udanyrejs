@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {AppState} from '@state';
 import * as offerActions from './offer.actions';
 import * as offerSelectors from './offer.selectors';
-import {Offer, OffersPayload} from '@interfaces';
+import {Offer, SearchOffersPayload} from '@interfaces';
 
 
 @Injectable()
@@ -26,7 +26,7 @@ export class OfferFacade {
   ) {
   }
 
-  public getOffers(payload?: Partial<OffersPayload>): void {
+  public getOffers(payload?: Partial<SearchOffersPayload>): void {
     this.store.dispatch(offerActions.getOffers({payload}));
   }
 

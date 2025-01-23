@@ -56,7 +56,7 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       companyId: ['', Validators.required],
     });
 
-    this.commonFacade.getShipSuccess$.pipe(take(1)).subscribe((ship) => {
+    this.commonFacade.getShipByNameSuccess$.pipe(take(1)).subscribe((ship) => {
       this.editingShip = ship.ship;
 
       if (!this.editingShip) {
@@ -81,7 +81,7 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       const shipId = paramMap.get('shipId');
       if (shipId) {
         this.mode = 'EDIT';
-        this.commonFacade.getShip({id: shipId});
+        this.commonFacade.getShipById({id: shipId});
       } else {
         this.isInitializing = false;
       }

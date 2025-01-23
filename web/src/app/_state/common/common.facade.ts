@@ -16,7 +16,7 @@ export class CommonFacade {
   public loading$ = this.store.select(commonSelectors.selectLoading);
 
   public getCompanySuccess$ = this.actions.pipe(ofType(commonActions.getCompanySuccess));
-  public getShipSuccess$ = this.actions.pipe(ofType(commonActions.getShipSuccess));
+  public getShipByNameSuccess$ = this.actions.pipe(ofType(commonActions.getShipByNameSuccess));
   public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
 
   public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
@@ -62,8 +62,12 @@ export class CommonFacade {
     this.store.dispatch(commonActions.getShips({companyId}));
   }
 
-  public getShip(payload: { id: string }): void {
-    this.store.dispatch(commonActions.getShip({payload}));
+  public getShipById(payload: { id: string }): void {
+    this.store.dispatch(commonActions.getShipById({payload}));
+  }
+
+  public getShipByName(payload: { name: string }): void {
+    this.store.dispatch(commonActions.getShipByName({payload}));
   }
 
   public createShip(payload: { formData: FormData }): void {

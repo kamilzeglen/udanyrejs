@@ -110,16 +110,32 @@ export class CommonEffects {
     )
   )
 
-  getShip$ = createEffect(() =>
+  getShipById$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(commonActions.getShip),
+      ofType(commonActions.getShipById),
       switchMap(({payload}) => {
-        return this.http.getShip(payload).pipe(
+        return this.http.getShipById(payload).pipe(
           map(ship => {
-            return commonActions.getShipSuccess({ship});
+            return commonActions.getShipByIdSuccess({ship});
           }),
           catchError(errorMessage => {
-            return of(commonActions.getShipError({errorMessage}));
+            return of(commonActions.getShipByIdError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  getShipByName$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getShipByName),
+      switchMap(({payload}) => {
+        return this.http.getShipByName(payload).pipe(
+          map(ship => {
+            return commonActions.getShipByNameSuccess({ship});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getShipByNameError({errorMessage}));
           })
         );
       })
