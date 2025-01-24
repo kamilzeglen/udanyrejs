@@ -5,28 +5,30 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
-import {Role} from "../role/role.entity";
+  UpdateDateColumn,
+} from 'typeorm';
+import { Role } from '../role/role.entity';
 
 @Entity()
 export class User {
-
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({type: 'varchar', length: 40})
+  @Column({ type: 'varchar', length: 40 })
   email: string;
 
-  @Column({type: 'varchar'})
+  @Column({ type: 'varchar' })
   password: string;
 
-  @Column({default: false})
+  @Column({ default: false })
   isActive: boolean;
 
-  @ManyToOne(() => Role, (role) => role.users, { eager: false, nullable: false })
+  @ManyToOne(() => Role, (role) => role.users, {
+    eager: false,
+    nullable: false,
+  })
   role: Role;
-  @Column({type: 'uuid', nullable: false})
+  @Column({ type: 'uuid', nullable: false })
   roleId: string;
 
   @CreateDateColumn()
