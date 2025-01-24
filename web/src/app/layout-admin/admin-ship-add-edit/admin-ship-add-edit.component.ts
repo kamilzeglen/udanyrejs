@@ -56,8 +56,8 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       companyId: ['', Validators.required],
     });
 
-    this.commonFacade.getShipByNameSuccess$.pipe(take(1)).subscribe((ship) => {
-      this.editingShip = ship.ship;
+    this.commonFacade.getShipByIdSuccess$.pipe(take(1)).subscribe(({ship}) => {
+      this.editingShip = ship;
 
       if (!this.editingShip) {
         this.snackService.showError('Nie znaleziono statku')

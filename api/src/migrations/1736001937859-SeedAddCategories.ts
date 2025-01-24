@@ -1,14 +1,14 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SeedAddCategories1736001937859 implements MigrationInterface {
-  name = 'SeedAddCategories1736001937859'
+  name = 'SeedAddCategories1736001937859';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      INSERT INTO "category" ("id", "name", "url")
+      INSERT INTO "category" ("id", "name", "url", "createdById", "updatedById")
       VALUES 
-        (uuid_generate_v4(), 'Popularne', 'popular'),
-        (uuid_generate_v4(), 'Nowe', 'new')
+        (uuid_generate_v4(), 'Popularne', 'popular', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Nowe', 'new', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d')
     `);
   }
 
@@ -18,5 +18,4 @@ export class SeedAddCategories1736001937859 implements MigrationInterface {
       WHERE "name" IN ('Popularne', 'Nowe');
     `);
   }
-
 }

@@ -26,7 +26,6 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     this.commonFacade.getCompanies();
     this.commonFacade.getDestinations();
-    console.log('fsd')
   }
 
   public ngOnDestroy(): void {

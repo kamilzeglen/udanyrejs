@@ -1,71 +1,62 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
-import * as path from 'path';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SeedAddCompaniesImages1736103439391 implements MigrationInterface {
-    name = 'SeedAddCompaniesImages1736103439391'
+  name = 'SeedAddCompaniesImages1736103439391';
 
   public imagesPath = process.env.COMPANIES_IMAGES_PATH;
   public companyImages = [
     {
-      companyId: '9532e2a2-1ad2-452a-be02-f0a849a6f363',
-      imageName: '9532e2a2-1ad2-452a-be02-f0a849a6f363.png',
+      companyName: 'MSC Cruises',
       originalName: 'MSC.png',
-      path: path.join(this.imagesPath, '9532e2a2-1ad2-452a-be02-f0a849a6f363.png'),
     },
     {
-      companyId: '531a42ab-9cfb-4217-8532-ea6d5d08d123',
-      imageName: '531a42ab-9cfb-4217-8532-ea6d5d08d123.png',
+      companyName: 'Royal Caribbean',
       originalName: 'ROYAL_CARIBBEAN.png',
-      path: path.join(this.imagesPath, '531a42ab-9cfb-4217-8532-ea6d5d08d123.png'),
     },
     {
-      companyId: '521a42ab-8cfb-4977-8532-ea6d5c08d953',
-      imageName: '521a42ab-8cfb-4977-8532-ea6d5c08d953.png',
+      companyName: 'Costa Cruises',
       originalName: 'COSTA.png',
-      path: path.join(this.imagesPath, '521a42ab-8cfb-4977-8532-ea6d5c08d953.png'),
     },
     {
-      companyId: '521a42ab-8cfb-4357-8532-ea6d5c08d123',
-      imageName: '521a42ab-8cfb-4357-8532-ea6d5c08d123.png',
+      companyName: 'Norwegian Cruise Line',
       originalName: 'NCL.png',
-      path: path.join(this.imagesPath, '521a42ab-8cfb-4357-8532-ea6d5c08d123.png'),
     },
     {
-      companyId: '521a19ab-8cfb-4977-8532-ea6d5c08d953',
-      imageName: '521a19ab-8cfb-4977-8532-ea6d5c08d953.png',
+      companyName: 'AIDA Cruises',
       originalName: 'AIDA.png',
-      path: path.join(this.imagesPath, '521a19ab-8cfb-4977-8532-ea6d5c08d953.png'),
     },
     {
-      companyId: '123a45ab-7cfb-4217-8532-ea6d5d08d123',
-      imageName: '123a45ab-7cfb-4217-8532-ea6d5d08d123.png',
+      companyName: 'TUI Cruises',
       originalName: 'TUI.png',
-      path: path.join(this.imagesPath, '123a45ab-7cfb-4217-8532-ea6d5d08d123.png'),
     },
-  ]
-
+  ];
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-
-    // Iterowanie przez dane i tworzenie rekordów
     for (const image of this.companyImages) {
-      // Wstaw zdjęcie do tabeli ImageFile
+      const companyIdResult = await queryRunner.query(`
+        SELECT "id" FROM "company" WHERE "name" = '${image.companyName}'
+      `);
+      const companyId = companyIdResult[0]?.id;
+      const fileName = companyId + '.png';
+      const filePath = this.imagesPath + companyId + '.png';
+
       await queryRunner.query(
         `
-        INSERT INTO "image_file" ("id", "name", "originalName", "path", "createdAt", "updatedAt")
-        VALUES (uuid_generate_v4(), $1, $2, $3, NOW(), NOW())
+        INSERT INTO "image_file" ("id", "name", "originalName", "path", "createdById", "updatedById")
+        VALUES (uuid_generate_v4(), $1, $2, $3, '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d')
       `,
-        [image.imageName, image.originalName, image.path],
+        [fileName, image.originalName, filePath],
       );
 
-      // Pobierz ID właśnie dodanego zdjęcia
-      const imageIdResult = await queryRunner.query(`
+      const imageIdResult = await queryRunner.query(
+        `
         SELECT id FROM "image_file" WHERE "path" = $1 LIMIT 1
-      `, [image.path]);
+      `,
+        [filePath],
+      );
 
       const imageId = imageIdResult[0]?.id;
 
-      // Zaktualizuj tabelę Company, przypisując id zdjęcia
       if (imageId) {
         await queryRunner.query(
           `
@@ -73,32 +64,34 @@ export class SeedAddCompaniesImages1736103439391 implements MigrationInterface {
           SET "imageFileId" = $1
           WHERE "id" = $2
         `,
-          [imageId, image.companyId],
+          [imageId, companyId],
         );
       }
     }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-
     for (const image of this.companyImages) {
-      // Najpierw usuń powiązania w tabeli "company"
+      const companyIdResult = await queryRunner.query(`
+        SELECT "id" FROM "company" WHERE "name" = '${image.companyName}'
+      `);
+      const companyId = companyIdResult[0]?.id;
+
       await queryRunner.query(
         `
         UPDATE "company"
         SET "imageFileId" = NULL
         WHERE "id" = $1
       `,
-        [image.companyId],
+        [companyId],
       );
 
-      // Następnie usuń rekord z tabeli "image_file"
       await queryRunner.query(
         `
         DELETE FROM "image_file"
         WHERE "path" = $1
       `,
-        [image.path],
+        [this.imagesPath + companyId + '.png'],
       );
     }
   }

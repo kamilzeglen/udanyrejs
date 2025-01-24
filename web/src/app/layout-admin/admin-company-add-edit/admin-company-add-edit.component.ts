@@ -59,13 +59,17 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       if (this.editingCompany) {
         this.companyForm.patchValue(this.editingCompany);
 
-        this.editingCompany.priceIncludes.forEach(include => {
+        if (this.editingCompany.priceIncludes) {
+          this.editingCompany.priceIncludes.forEach(include => {
           this.priceIncludesArray.push(this.fb.control(include, Validators.required));
         });
+        }
 
-        this.editingCompany.priceExcludes.forEach(exclude => {
-          this.priceExcludesArray.push(this.fb.control(exclude, Validators.required));
-        });
+        if (this.editingCompany.priceExcludes) {
+          this.editingCompany.priceExcludes.forEach(exclude => {
+            this.priceExcludesArray.push(this.fb.control(exclude, Validators.required));
+          });
+        }
       }
 
       this.isInitializing = false;

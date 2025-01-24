@@ -70,7 +70,6 @@ export class CompanyService {
       updatedBy,
     });
 
-    // Zapisz zmiany w bazie danych
     return this.companyRepository.save(existingCompany);
   }
 

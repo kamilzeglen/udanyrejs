@@ -50,6 +50,26 @@
     </table>
   </div>
 
+<div class="in-price-section" *ngIf="offer.company.priceIncludes && offer.company.priceExcludes">
+  <div class="price-include">
+    <h3>Wliczone w cenę:</h3>
+    <ul>
+      <li *ngFor="let include of offer.company.priceIncludes">
+        {{ include }}
+      </li>
+    </ul>
+  </div>
+  <div class="price-exclude">
+    <h3>Nie wliczone w cenę:</h3>
+    <ul>
+      <li *ngFor="let exclude of offer.company.priceExcludes">
+        {{ exclude }}
+      </li>
+    </ul>
+  </div>
+</div>
+
+
   <nz-divider></nz-divider>
   <div class="ship-title" *ngIf="offer.ship?.name">
     <h1>{{ offer.ship.name }}</h1>

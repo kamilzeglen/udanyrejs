@@ -142,7 +142,6 @@ export class OfferService {
       company,
       ship,
       createdBy: requestUser,
-      updatedBy: requestUser,
     });
 
     const savedOffer = await this.offerRepository.save(offer);
@@ -187,7 +186,6 @@ export class OfferService {
       updatedBy: requestUser,
       company,
       ship,
-      updatedAt: new Date(),
     });
 
     if (categories && categories.length > 0) {

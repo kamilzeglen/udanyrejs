@@ -66,7 +66,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       name: ['', Validators.required],
       price: [null, Validators.required],
       companyId: ['', Validators.required],
-      destinations: ['', Validators.required],
+      destinations: [''],
       categories: [''],
       shipId: ['', Validators.required],
       startDate: ['', Validators.required],
@@ -157,7 +157,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       )
       .subscribe((results) => {
         if (results.every((result) => result)) {
-          console.log('gfd')
           this.snackService.showInfo('Pomyślnie dodano ofertę');
         } else {
           this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');

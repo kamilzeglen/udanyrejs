@@ -12,7 +12,7 @@
       <div class="form-group">
         <label for="offerUrl">Adres URL oferty:</label>
         <input id="offerUrl" formControlName="offerUrl" type="text" placeholder="Wprowadź adres URL"/>
-        <button mat-raised-button color="primary" class="import-button" (click)="importOffer()" [disabled]="scrappedData">Zaimportuj</button>
+        <button mat-raised-button color="primary" class="import-button" (click)="importOffer()" [disabled]="scrappedData || !offerForm.get('offerUrl').value">Zaimportuj</button>
       </div>
 
       <app-spinner *ngIf="scrapping$ | async" appAutoSpinner [size]="75"></app-spinner>

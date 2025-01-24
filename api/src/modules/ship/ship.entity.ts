@@ -29,6 +29,12 @@ export class Ship {
   @Column({ type: 'int', nullable: true })
   yearBuilt: number;
 
+  @Column({ type: 'int', nullable: true })
+  renovation: number;
+
+  @Column({ type: 'int', nullable: true })
+  speed: number;
+
   @Column({ type: 'decimal', nullable: true })
   length: number;
 

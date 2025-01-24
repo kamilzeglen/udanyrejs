@@ -1,44 +1,44 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class SeedAddDestinations1736002105209 implements MigrationInterface {
-    name = 'SeedAddDestinations1736002105209'
+  name = 'SeedAddDestinations1736002105209';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
-      INSERT INTO "destination" ("id", "name")
+      INSERT INTO "destination" ("id", "name", "createdById", "updatedById")
       VALUES 
-        (uuid_generate_v4(), 'Afryka'),
-        (uuid_generate_v4(), 'Alaska'),
-        (uuid_generate_v4(), 'Ameryka Północna'),
-        (uuid_generate_v4(), 'Ameryka Południowa'),
-        (uuid_generate_v4(), 'Ameryka Środkowa'),
-        (uuid_generate_v4(), 'Antarktyda'),
-        (uuid_generate_v4(), 'Arktyka'),
-        (uuid_generate_v4(), 'Australia i Nowa Zelandia'),
-        (uuid_generate_v4(), 'Azja'),
-        (uuid_generate_v4(), 'Bahamy'),
-        (uuid_generate_v4(), 'Bermudy'),
-        (uuid_generate_v4(), 'Dubaj i Zjednoczone Emiraty Arabskie'),
-        (uuid_generate_v4(), 'Europa'),
-        (uuid_generate_v4(), 'Europa Północna'),
-        (uuid_generate_v4(), 'Galapagos'),
-        (uuid_generate_v4(), 'Hawaje'),
-        (uuid_generate_v4(), 'Kanada i Nowa Anglia'),
-        (uuid_generate_v4(), 'Kanał Panamski'),
-        (uuid_generate_v4(), 'Karaiby'),
-        (uuid_generate_v4(), 'Morze Adriatyckie'),
-        (uuid_generate_v4(), 'Morze Bałtyckie'),
-        (uuid_generate_v4(), 'Morze Egejskie'),
-        (uuid_generate_v4(), 'Morze Śródziemne'),
-        (uuid_generate_v4(), 'Norweskie Fiordy'),
-        (uuid_generate_v4(), 'Ocean Indyjski'),
-        (uuid_generate_v4(), 'Polinezja Francuska'),
-        (uuid_generate_v4(), 'Południowy Pacyfik'),
-        (uuid_generate_v4(), 'Półwysep Arabski'),
-        (uuid_generate_v4(), 'Riwiera Meksykańska'),
-        (uuid_generate_v4(), 'Wyspy Greckie'),
-        (uuid_generate_v4(), 'Wyspy Kanaryjskie'),
-        (uuid_generate_v4(), 'Wyspy Oceanu Atlantyckiego');
+        (uuid_generate_v4(), 'Afryka', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Alaska', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Ameryka Północna', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Ameryka Południowa', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Ameryka Środkowa', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Antarktyda', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Arktyka', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Australia i Nowa Zelandia', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Azja', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Bahamy', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Bermudy', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Dubaj i Zjednoczone Emiraty Arabskie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Europa', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Europa Północna', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Galapagos', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Hawaje', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Kanada i Nowa Anglia', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Kanał Panamski', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Karaiby', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Morze Adriatyckie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Morze Bałtyckie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Morze Egejskie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Morze Śródziemne', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Norweskie Fiordy', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Ocean Indyjski', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Polinezja Francuska', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Południowy Pacyfik', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Półwysep Arabski', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Riwiera Meksykańska', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Wyspy Greckie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Wyspy Kanaryjskie', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d'),
+        (uuid_generate_v4(), 'Wyspy Oceanu Atlantyckiego', '12345678-3cf2-4e11-87c2-f6a75aa28f8d', '12345678-3cf2-4e11-87c2-f6a75aa28f8d')
     `);
   }
 

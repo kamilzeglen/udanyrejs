@@ -17,6 +17,7 @@ export class CommonFacade {
 
   public getCompanySuccess$ = this.actions.pipe(ofType(commonActions.getCompanySuccess));
   public getShipByNameSuccess$ = this.actions.pipe(ofType(commonActions.getShipByNameSuccess));
+  public getShipByIdSuccess$ = this.actions.pipe(ofType(commonActions.getShipByIdSuccess));
   public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
 
   public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
