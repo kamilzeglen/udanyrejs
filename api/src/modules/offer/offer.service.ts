@@ -18,6 +18,7 @@ import { CategoryService } from '@modules/category/category.service';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
+import { ItineraryService } from '@modules/itinerary/itinerary.service';
 
 @Injectable()
 export class OfferService {
@@ -32,6 +33,7 @@ export class OfferService {
     private readonly shipService: ShipService,
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
+    private readonly itineraryService: ItineraryService,
   ) {}
 
   async searchOffers(searchOffersDto: SearchOffersDto): Promise<Offer[]> {
@@ -128,8 +130,14 @@ export class OfferService {
     createOfferDto: CreateOfferDto,
     reqCreatedBy: User,
   ): Promise<Offer> {
-    const { companyId, shipId, destinations, categories, ...createUserData } =
-      createOfferDto;
+    const {
+      companyId,
+      shipId,
+      destinations,
+      categories,
+      itinerary,
+      ...createUserData
+    } = createOfferDto;
 
     const requestUser = await this.userService.findOneByEmail(
       reqCreatedBy.email,
@@ -153,6 +161,14 @@ export class OfferService {
     if (destinations && destinations.length > 0) {
       savedOffer.destinations =
         await this.destinationService.findByIds(destinations);
+    }
+
+    if (itinerary && itinerary.length > 0) {
+      await this.itineraryService.createItineraries(
+        itinerary,
+        savedOffer,
+        reqCreatedBy.id,
+      );
     }
 
     return this.offerRepository.save(savedOffer);

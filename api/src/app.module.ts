@@ -1,19 +1,21 @@
-import {Module} from '@nestjs/common';
-import {AppController} from './app.controller';
-import {AppService} from './app.service';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {UserModule} from "@modules/user/user.module";
-import {OfferModule} from '@modules/offer/offer.module';
-import {AuthModule} from "@modules/auth/auth.module";
-import {RoleModule} from "@modules/role/role.module";
-import {TypeOrmModule, TypeOrmModuleAsyncOptions} from "@nestjs/typeorm";
-import {CompanyModule} from "@modules/company/company.module";
-import {ImageFileModule} from "@modules/image-file/image-file.module";
-import {PdfFileModule} from "@modules/pdf-file/pdf-file.module";
-import {ShipModule} from "@modules/ship/ship.module";
-import {ServeStaticModule} from "@nestjs/serve-static";
-import {CategoryModule} from "@modules/category/category.module";
-import {DestinationModule} from "@modules/destination/destination.module";
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from '@modules/user/user.module';
+import { OfferModule } from '@modules/offer/offer.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { RoleModule } from '@modules/role/role.module';
+import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
+import { CompanyModule } from '@modules/company/company.module';
+import { ImageFileModule } from '@modules/image-file/image-file.module';
+import { PdfFileModule } from '@modules/pdf-file/pdf-file.module';
+import { ShipModule } from '@modules/ship/ship.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { CategoryModule } from '@modules/category/category.module';
+import { DestinationModule } from '@modules/destination/destination.module';
+import { CityModule } from '@modules/city/city.module';
+import { ItineraryModule } from '@modules/itinerary/itinerary.module';
 
 @Module({
   imports: [
@@ -58,11 +60,12 @@ import {DestinationModule} from "@modules/destination/destination.module";
     ImageFileModule,
     CategoryModule,
     DestinationModule,
-  PdfFileModule,
-  ShipModule
+    PdfFileModule,
+    ShipModule,
+    ItineraryModule,
+    CityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-}
+export class AppModule {}

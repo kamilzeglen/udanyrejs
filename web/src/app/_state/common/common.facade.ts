@@ -5,12 +5,14 @@ import {AppState} from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
 import {Company} from '@interfaces';
+import {City} from '../../_interfaces/city';
 
 
 @Injectable()
 export class CommonFacade {
   public companies$ = this.store.select(commonSelectors.selectCompanies);
   public ships$ = this.store.select(commonSelectors.selectShips);
+  public cities$ = this.store.select(commonSelectors.selectCities);
   public destinations$ = this.store.select(commonSelectors.selectDestinations);
   public categories$ = this.store.select(commonSelectors.selectCategories);
   public loading$ = this.store.select(commonSelectors.selectLoading);
@@ -19,11 +21,16 @@ export class CommonFacade {
   public getShipByNameSuccess$ = this.actions.pipe(ofType(commonActions.getShipByNameSuccess));
   public getShipByIdSuccess$ = this.actions.pipe(ofType(commonActions.getShipByIdSuccess));
   public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
+  public getCitiesSuccess$ = this.actions.pipe(ofType(commonActions.getCitiesSuccess));
 
   public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
   public createCompanyError$ = this.actions.pipe(ofType(commonActions.createCompanyError));
   public createShipSuccess$ = this.actions.pipe(ofType(commonActions.createShipSuccess));
   public createShipError$ = this.actions.pipe(ofType(commonActions.createShipError));
+  public createCitySuccess$ = this.actions.pipe(ofType(commonActions.createCitySuccess));
+  public createCityError$ = this.actions.pipe(ofType(commonActions.createCityError));
+  public createCitiesSuccess$ = this.actions.pipe(ofType(commonActions.createCitiesSuccess));
+  public createCitiesError$ = this.actions.pipe(ofType(commonActions.createCitiesError));
 
   public updateCompanySuccess$ = this.actions.pipe(ofType(commonActions.updateCompanySuccess));
   public updateCompanyError$ = this.actions.pipe(ofType(commonActions.updateCompanyError));
@@ -89,5 +96,17 @@ export class CommonFacade {
 
   public getDestinations(): void {
     this.store.dispatch(commonActions.getDestinations());
+  }
+
+  public getCities(): void {
+    this.store.dispatch(commonActions.getCities());
+  }
+
+  public createCity(payload: { formData: Partial<City> }): void {
+    this.store.dispatch(commonActions.createCity({payload}));
+  }
+
+  public createCities(payload: { cities: string[] }): void {
+    this.store.dispatch(commonActions.createCities({payload}));
   }
 }

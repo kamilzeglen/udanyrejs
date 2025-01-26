@@ -1,5 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {City} from '../../_interfaces/city';
 
 export const getCompanies = createAction('[Common] Get Companies');
 export const getCompaniesSuccess = createAction('[Common] Get Companies Success', props<{ companies: Company[] }>());
@@ -60,3 +61,15 @@ export const getDestinationsSuccess = createAction('[Common] Get Destination Suc
   destinations: Destination[]
 }>());
 export const getDestinationsError = createAction('[Common] Get Destination Error', props<{ errorMessage: string }>());
+
+export const getCities = createAction('[Common] Get Cities')
+export const getCitiesSuccess = createAction('[Common] Get Cities Success', props<{ cities: City[] }>());
+export const getCitiesError = createAction('[Common] Get Cities Error', props<{ errorMessage: string }>());
+
+export const createCity = createAction('[Common] Create City', props<{ payload: { formData: Partial<City> } }>());
+export const createCitySuccess = createAction('[Common] Create City Success', props<{ city: City }>());
+export const createCityError = createAction('[Common] Create City Error', props<{ errorMessage: string }>());
+
+export const createCities = createAction('[Common] Create Cities', props<{ payload: { cities: string[] } }>());
+export const createCitiesSuccess = createAction('[Common] Create Cities Success', props<{ cities: City[] }>());
+export const createCitiesError = createAction('[Common] Create Cities Error', props<{ errorMessage: string }>());

@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '@environment';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {City} from '../../_interfaces/city';
 
 @Injectable({
   providedIn: 'root'
@@ -79,5 +80,20 @@ export class CommonHttpService {
   public getDestinations(): Observable<Destination[]> {
     const url = `${this.API_URL}/destination/`;
     return this.http.get<Destination[]>(url);
+  }
+
+  public getCities(): Observable<City[]> {
+    const url = `${this.API_URL}/city`;
+    return this.http.get<City[]>(url);
+  }
+
+  public createCity(payload: { formData: Partial<City> }): Observable<City> {
+    const url = `${this.API_URL}/city/`;
+    return this.http.post<City>(url, payload.formData);
+  }
+
+  public createCities(payload: { cities: string[] }): Observable<City[]> {
+    const url = `${this.API_URL}/city/many`;
+    return this.http.post<City[]>(url, payload);
   }
 }

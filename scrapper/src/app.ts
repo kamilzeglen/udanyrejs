@@ -8,7 +8,7 @@ import cors from "cors";
 interface CruiseData {
   day: number;
   date: string | null;
-  port: string | null;
+  city: string | null;
   arrivalTime: string | null;
   departureTime: string | null;
 }
@@ -66,9 +66,13 @@ async function scrapeWithPlaywright(url: string) {
         // Wyciągnij dane z odpowiednich kolumn
         const day = parseInt(columns[0]?.textContent?.trim() || '0', 10);
         const rawDate = columns[1]?.querySelector('div:nth-child(2)')?.textContent?.trim() || null;
-        const port = columns[2]?.querySelector('div')?.textContent?.trim() || null;
+        let city = columns[2]?.querySelector('div')?.textContent?.trim() || null;
         const arrivalTime = columns[3]?.querySelector('span')?.textContent?.trim() || null;
         const departureTime = columns[4]?.querySelector('span')?.textContent?.trim() || null;
+
+        if (city) {
+          city = city.split(',')[0].trim();
+        }
 
         // Zamień datę na format YYYY-MM-DD
         const formattedDate = rawDate
@@ -78,7 +82,7 @@ async function scrapeWithPlaywright(url: string) {
         return {
           day,
           date: formattedDate,
-          port,
+          city,
           arrivalTime,
           departureTime,
         };
@@ -139,7 +143,6 @@ function generatePdfLink(url: string): string {
   const regex = /rejs\/(\d+)_.*?_(\d+)(?:\?|$)/;
   const match = url.match(regex);
 
-  console.log(match);
   if (!match || match.length < 3) {
     throw new Error("Could not extract itineraryId and scheduleId from URL");
   }

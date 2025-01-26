@@ -222,6 +222,52 @@ export class CommonEffects {
     )
   )
 
+  getCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCities),
+      switchMap(() => {
+        return this.http.getCities().pipe(
+          map(cities => {
+            return commonActions.getCitiesSuccess({cities});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getCitiesError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
 
+  createCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCity),
+      switchMap(({payload}) => {
+        return this.http.createCity(payload).pipe(
+          map((city) => {
+            return commonActions.createCitySuccess({city});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createCityError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  createCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCities),
+      switchMap(({payload}) => {
+        return this.http.createCities(payload).pipe(
+          map((cities) => {
+            return commonActions.createCitiesSuccess({cities});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createCitiesError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
 
 }

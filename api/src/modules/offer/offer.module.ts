@@ -11,6 +11,7 @@ import { ShipModule } from '@modules/ship/ship.module';
 import { PdfFileModule } from '@modules/pdf-file/pdf-file.module';
 import { DestinationModule } from '@modules/destination/destination.module';
 import { CategoryModule } from '@modules/category/category.module';
+import { ItineraryModule } from '@modules/itinerary/itinerary.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CategoryModule } from '@modules/category/category.module';
     ShipModule,
     DestinationModule,
     CategoryModule,
+    ItineraryModule,
   ],
   controllers: [OfferController],
   providers: [OfferService],

@@ -12,6 +12,7 @@ import {ImageFileFacade} from '@state/imageFile';
 import {PdfFileFacade} from '@state/pdfFile';
 import {map, switchMap} from 'rxjs/operators';
 import {ScrapperFacade} from '@state/scrapper';
+import {City} from '../../_interfaces/city';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -28,6 +29,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public companies$ = this.commonFacade.companies$
   public ships$ = this.commonFacade.ships$
+  public cities$ = this.commonFacade.cities$
   public destinations$ = this.commonFacade.destinations$
   public categories$ = this.commonFacade.categories$
 
@@ -42,6 +44,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public pdfFile: File | string
   public scrappedPdfFile: boolean
+
+  public availableCities: City[]
 
   constructor(
     private readonly fb: FormBuilder,
@@ -127,6 +131,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.snackService.showError('Wystąpił błąd podczas aktualizowania oferty');
     })
 
+    this.commonFacade.getCitiesSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({cities}) => {
+      this.availableCities = cities
+    })
+
     this.offerFacade.createOfferSuccess$
       .pipe(
         takeUntil(this.destroy$),
@@ -210,7 +218,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     })
 
     this.scrapperFacade.scrapOfferFileSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
-
       if (!offer) {
         return
       }
@@ -219,12 +226,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
       if (offer.scrappedShipName) {
         this.commonFacade.getShipByNameSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ship}) => {
+          if (!ship?.company?.id) {
+            this.snackService.showError("Nie znaleziono statku")
+          }
           this.offerForm.patchValue({
             companyId: ship.company.id,
             shipId: ship.id
           })
         })
-
         this.commonFacade.getShipByName({name: offer.scrappedShipName})
       }
 
@@ -238,12 +247,27 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         this.pdfFile = offer.scrappedPdfFileURL
       }
 
-      this.patchValues(offer)
+      if (offer.itinerary) {
+        this.commonFacade.createCitiesSuccess$.pipe(take(1), takeUntil(this.destroy$)).subscribe(({cities}) => {
+          this.availableCities = cities;
+          this.patchValues(offer)
+        })
+
+        const citySet = new Set(
+          offer.itinerary
+            .map(day => (typeof day.city === 'string' ? day.city : null)) // Wyciągnij tylko stringi
+            .filter(city => city !== null) // Usuń null z wyników
+        );
+        this.commonFacade.createCities({cities: Array.from(citySet)})
+      } else {
+        this.patchValues(offer)
+      }
     })
 
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
+    this.commonFacade.getCities();
   }
 
   public ngOnDestroy(): void {
@@ -315,7 +339,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.pdfFile = file;
     }
   }
-
 
   public importOffer(): void {
     this.scrapperFacade.scrapOffer({url: this.offerForm.get('offerUrl').value});
@@ -393,9 +416,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       categories: data?.categories?.map((categories: any) => categories.id),
     });
 
-    // Dodanie itinerary, jeśli istnieje
     if (data?.itinerary) {
-      this.itineraryArray.clear()
+      this.itineraryArray.clear();
 
       const itineraryData = typeof data.itinerary === 'string'
         ? JSON.parse(data.itinerary)
@@ -403,20 +425,61 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
       if (Array.isArray(itineraryData)) {
         itineraryData.forEach((day, index) => {
+          console.log(day)
+
+    if (day.city && !day.cityId) {
+      const matchingCity = this.availableCities.find(city => city.name === day.city);
+      if (matchingCity) {
+        day.cityId = matchingCity.id; // Przypisujemy ID do day.cityId
+      }
+    }
+
           const dayGroup = this.fb.group({
             day: [day.day || index + 1],
             date: [day.date || null],
-            port: [day.port || null],
+            port: [day.cityId || null],
             arrivalTime: [day.arrivalTime || null],
             departureTime: [day.departureTime || null],
           });
+
           this.itineraryArray.push(dayGroup);
         });
       }
     }
-
   }
 
+
+  public createCity(city: Partial<City>, index: number): City | null {
+    if (!city.id) {
+      this.commonFacade.createCitySuccess$.pipe(take(1), takeUntil(this.destroy$)).subscribe(({city}) => {
+        this.snackService.showInfo('Pomyślnie dodano miasto: ' + city.name);
+        this.commonFacade.getCities();
+
+        if (index >= 0) {
+          this.updateCityValue(city, index);
+        }
+
+        return city
+      })
+
+      this.commonFacade.createCity({formData: city});
+    }
+    return null
+  }
+
+
+  public updateCityValue(city: City, index: number): void {
+    const itinerary = this.offerForm.get('itinerary') as FormArray;
+
+    if (itinerary.controls[index]) {
+      const dayControl = itinerary.controls[index];
+      const portControl = dayControl.get('port');
+
+      if (portControl) {
+        portControl.setValue(city.id);
+      }
+    }
+  }
 
   public goBack(): void {
     this.router.changeRoute({linkParams: ['/admin/offers']});
