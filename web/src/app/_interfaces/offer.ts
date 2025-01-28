@@ -11,6 +11,7 @@ export interface Offer {
   name: string;
   offerUrl: string;
   syncData: string;
+  isPromotion: boolean;
   company: Company;
   companyId: string;
   price: number;
@@ -34,7 +35,12 @@ export interface Offer {
   deletedAt: Date | string;
 }
 
-export interface OfferScrapper extends Offer {
+export interface OfferScrapper {
+  name: string;
+  startDate: string;
+  endDate: string;
+  price: number;
+  itinerary: Itinerary[];
   scrappedShipName: string
   scrappedImageFileURL: string
   scrappedPdfFileURL: string

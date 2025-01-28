@@ -140,6 +140,7 @@
     }
   },
   "cli": {
+    "defaultCollection": "@ngrx/schematics",
     "analytics": false
   }
 }

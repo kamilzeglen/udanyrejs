@@ -8,7 +8,7 @@ import {NgZorroExportsModule} from '@shared/ngZorroExports.module';
 import {MaterialUIExportsModule} from '@shared/materialUIExports.module';
 import {SpinnerComponent} from '@shared/spinner/spinner.component';
 import {AutoSpinnerDirective} from '@shared/_directive/auto-spinner.directive';
-import {SubMenuComponent} from '@shared/sub-menu/sub-menu.component';
+import {SubMenuComponent} from '../layout/sub-menu/sub-menu.component';
 import {NgSelectModule} from '@ng-select/ng-select';
 
 

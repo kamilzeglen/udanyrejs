@@ -35,8 +35,6 @@ export class OfferService {
   ) {}
 
   async searchOffers(searchOffersDto: SearchOffersDto): Promise<Offer[]> {
-    console.log(searchOffersDto);
-
     const whereClauses: string[] = [];
     const whereParams: ObjectLiteral = {};
     const { category, startDate, endDate, destinationIdList, companyIdList } =
@@ -44,7 +42,12 @@ export class OfferService {
 
     const dbQuery = this.offerRepository.createQueryBuilder('offer');
 
-    if (category) {
+    if (category === 'promotions') {
+      whereClauses.push('offer.isPromotion = :isPromotion');
+      whereParams.isPromotion = true;
+    }
+
+    if (category?.length && category !== 'promotions') {
       const categoryId = (await this.categoryService.findOneByUrl(category)).id;
 
       whereClauses.push('category.id = :categoryId');
@@ -84,6 +87,7 @@ export class OfferService {
         'offer.id',
         'offer.name',
         'offer.price',
+        'offer.isPromotion',
         'offer.startDate',
         'offer.endDate',
         'offer.company',

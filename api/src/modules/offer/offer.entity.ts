@@ -34,6 +34,9 @@ export class Offer {
   @Column({ default: false })
   syncData: boolean;
 
+  @Column({ default: false })
+  isPromotion: boolean;
+
   @ManyToOne(() => Company, (company) => company.offers, {
     eager: true,
     nullable: false,

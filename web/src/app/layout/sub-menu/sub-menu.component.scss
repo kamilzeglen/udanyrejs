@@ -1,7 +1,8 @@
-@import '../../../scss/variables.scss';
+@import '../../../scss/variables';
 
 .submenu {
   display: flex;
+  min-height: 40px;
   height: auto;
   background-image: linear-gradient($primary-color, #002b4f);
   font-size: 16px;

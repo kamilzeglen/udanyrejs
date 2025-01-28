@@ -1,1 +1,52 @@
-<p>about-us works!</p>
+<div class="about-me-wrapper">
+  <section class="company-description">
+    <h1>O nas</h1>
+    <p>
+      Witamy w naszym biurze rejsów wycieczkowych! Jako firma z wieloletnim doświadczeniem
+      specjalizujemy się w organizacji niezapomnianych podróży morskich. Oferujemy naszym klientom
+      najwyższą jakość usług oraz szeroki wybór luksusowych rejsów po najpiękniejszych zakątkach świata.
+    </p>
+    <p>
+      Jesteśmy pasjonatami podróży, a każda nasza wyprawa to wyjątkowa przygoda, którą staramy się
+      dzielić z naszymi klientami. Nasze rejsy to połączenie luksusu, komfortu i niezapomnianych
+      widoków, które na zawsze pozostaną w pamięci.
+    </p>
+    <p>
+      Z nami poznasz nie tylko najpiękniejsze plaże, ale i niezwykłe kultury, a każdy rejs to szansa na
+      spełnienie marzeń o podróży życia. Nasz zespół to eksperci od turystyki morskiej, którzy z
+      pełnym zaangażowaniem i pasją tworzą dla Państwa idealne wakacje na morzu.
+    </p>
+    <p>
+      Każdy z naszych pracowników ma bogate doświadczenie w branży turystycznej, co pozwala nam
+      oferować usługi na najwyższym poziomie. Nasza oferta obejmuje rejsy po różnych zakątkach świata,
+      od tropikalnych wysp po historyczne porty Morza Śródziemnego. Z nami każda podróż jest przygodą! Zapraszamy do kontaktu!
+    </p>
+  </section>
+
+  <section class="office-info">
+    <h1>Nasze biuro</h1>
+    <p>
+      Znajdujemy się w samym sercu Myślenic, pod adresem:
+      <strong>{{ officeAddress.street }}, {{ officeAddress.city }}</strong>.
+      To tutaj nasza pasja spotyka się z profesjonalizmem, aby zrealizować Państwa marzenia o wyjątkowych
+      podróżach. Każda wizyta u nas to doskonała okazja, by
+      porozmawiać o przyszłych rejsach oraz uzyskać szczegółowe informacje o naszej ofercie.
+    </p>
+    <p>
+      Chętnie doradzimy Wam, który rejs będzie najlepszy, odpowiemy na wszystkie pytania i pomożemy
+      w wyborze najbardziej odpowiadającej Wam oferty. Odwiedźcie nas, aby poznać naszą pełną ofertę i
+      zaplanować niezapomnianą podróż. Zawsze jesteśmy do Państwa dyspozycji!
+    </p>
+    <p>
+      Jeśli nie możecie nas odwiedzić osobiście, zapraszamy do kontaktu telefonicznego lub mailowego.
+      Z radością odpowiemy na wszystkie pytania!
+    </p>
+  </section>
+
+  <section class="gallery">
+    <h2>Nasze wspomnienia</h2>
+    <div class="images">
+      <img *ngFor="let photo of cruises_photos" src="{{photo.path}}" alt="{{photo.alt}}"/>
+    </div>
+  </section>
+</div>

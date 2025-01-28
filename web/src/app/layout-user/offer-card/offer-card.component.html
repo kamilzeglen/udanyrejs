@@ -1,4 +1,7 @@
 <a class="offer-card" [routerLink]="['/offers/details', offer.id]">
+  <!-- Zawieszka -->
+  <div class="offer-badge" *ngIf="offer.isPromotion ">Promocja</div>
+
   <!-- Logo firmy -->
   <div class="logo-container" *ngIf="offer.company?.imageFile?.name">
     <img src="{{API_URL + '/companies/images/' + offer.company.imageFile.name}}" alt="Logo firmy" class="company-logo"/>

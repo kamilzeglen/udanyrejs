@@ -28,6 +28,7 @@
     "@ng-select/ng-select": "^13.9.1",
     "@ngrx/effects": "^18.1.1",
     "@ngrx/router-store": "^18.1.1",
+    "@ngrx/schematics": "^19.0.0",
     "@ngrx/store": "^18.1.1",
     "enviroment": "^1.0.0",
     "moment": "^2.30.1",

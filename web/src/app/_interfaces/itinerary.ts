@@ -1,7 +1,7 @@
 export interface Itinerary {
   day: number;
   date: string;
-  port: string;
+  city: string;
   arrivalTime: string;
   departureTime: string;
 }

@@ -1,18 +1,30 @@
 <nav class="navbar">
   <div class="navbar-container">
     <!-- Lewa fala -->
-    <img *ngIf="deviceInfo.deviceTypeDetected === 'DESKTOP'" src="/assets/wave-left.png" class="wave wave-left" alt="Left Wave" />
+    <img src="/assets/wave-left.png" class="wave wave-left" alt="Left Wave" />
+
 
     <!-- Główna zawartość nawigacji -->
     <div class="navbar-content">
+
       <!-- Link Oferty -->
       <a routerLink="/offers" class="nav-link">
         <span>Oferty</span>
       </a>
 
+      <!-- Link Promocje -->
+      <a routerLink="/offers/promotions" class="nav-link" *ngIf="deviceInfo.deviceTypeDetected === 'DESKTOP'">
+        <span>Promocje</span>
+      </a>
+
       <!-- Logo na środku -->
       <a routerLink="/offers" class="logo-container">
         <img src="/assets/logo.png" class="logo" alt="UdanyRejs Logo" />
+      </a>
+
+      <!-- Link O nas -->
+      <a routerLink="/about-us" class="nav-link" *ngIf="deviceInfo.deviceTypeDetected === 'DESKTOP'">
+        <span>O nas</span>
       </a>
 
       <!-- Link Kontakt -->
@@ -22,6 +34,6 @@
     </div>
 
     <!-- Prawa fala -->
-    <img *ngIf="deviceInfo.deviceTypeDetected === 'DESKTOP'" src="/assets/wave-right.png" class="wave wave-right" alt="Right Wave" />
+    <img src="/assets/wave-right.png" class="wave wave-right" alt="Right Wave" />
   </div>
 </nav>

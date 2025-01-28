@@ -51,7 +51,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
           return {
             day: day.day,
             date: day.date,
-            port: day.port,
+            city: day.city,
             arrivalTime: day.arrivalTime,
             departureTime: day.departureTime
           };

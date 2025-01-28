@@ -1,6 +1,7 @@
 "use strict";
 import { OfferService } from './offer/offer.service';
 import { RoleModule } from './role/role.module';
+import { EmailModule } from './email/email.module';
 import { PdfFileModule } from './pdf-file/pdf-file.module';
 import { ImageFileModule } from './image-file/image-file.module';
 import { PdfFileModule } from './pdf-file/pdf-file.module';

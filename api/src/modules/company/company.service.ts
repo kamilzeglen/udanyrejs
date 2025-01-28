@@ -24,7 +24,11 @@ export class CompanyService {
   ) {}
 
   findAll(): Promise<Company[]> {
-    return this.companyRepository.find();
+    return this.companyRepository.find({
+      where: {
+        isActive: true,
+      },
+    });
   }
 
   async findOne(id: string): Promise<any> {

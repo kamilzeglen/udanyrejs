@@ -2,6 +2,7 @@
 @import '../../../scss/breakpoints';
 
 .offer-card {
+  position: relative;
   width: 100%;
   max-width: 600px;
   margin: 30px auto;
@@ -86,6 +87,33 @@
       strong {
         color: #333;
       }
+    }
+  }
+
+  .offer-badge {
+    position: absolute;
+    top: 115px;
+    left: -24px;
+    background-color: $tertiary-color; // Kolor zawieszki
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 6px 50px; // Szerokość i wysokość zawieszki
+    transform: rotate(-45deg); // Obrót o 45 stopni w lewą stronę
+    transform-origin: top left; // Punkt obrotu w górnym lewym rogu
+    text-align: center;
+    text-transform: uppercase;
+    z-index: 10;
+
+    // Styl tekstu
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Dostosowanie dla małych ekranów
+    @include media("<=phone") {
+      font-size: 10px;
+      padding: 4px 40px;
     }
   }
 }

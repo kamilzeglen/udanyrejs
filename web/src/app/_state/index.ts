@@ -6,6 +6,7 @@ import {OfferEffects, OfferFacade, offerReducer, OfferState} from 'src/app/_stat
 import {ImageFileEffects, ImageFileFacade, imageFileReducer, ImageFileState} from '@state/imageFile';
 import {PdfFileEffects, PdfFileFacade, pdfFileReducer, PdfFileState} from '@state/pdfFile';
 import {ScrapperEffects, ScrapperFacade, scrapperReducer, ScrapperState} from '@state/scrapper';
+import {EmailEffects, EmailFacade, emailReducer, EmailState} from '@state/email';
 
 export const reducers = {
   users: usersReducer,
@@ -15,6 +16,7 @@ export const reducers = {
   imageFile: imageFileReducer,
   pdfFile: pdfFileReducer,
   scrapper: scrapperReducer,
+  email: emailReducer,
 }
 
 export const effects = [
@@ -26,6 +28,7 @@ export const effects = [
   ImageFileEffects,
   PdfFileEffects,
   ScrapperEffects,
+  EmailEffects,
 ]
 
 export const facades = [
@@ -36,7 +39,8 @@ export const facades = [
   CommonFacade,
   ImageFileFacade,
   PdfFileFacade,
-  ScrapperFacade
+  ScrapperFacade,
+  EmailFacade
 ]
 
 export interface AppState {
@@ -48,4 +52,5 @@ export interface AppState {
   imageFile: ImageFileState,
   pdfFile: PdfFileState,
   scrapper: ScrapperState,
+  email: EmailState,
 }

@@ -23,6 +23,9 @@ export class Company {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @Column({ type: 'varchar', length: 100, unique: true })
   key: string;
 

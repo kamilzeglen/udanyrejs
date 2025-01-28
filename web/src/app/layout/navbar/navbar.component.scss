@@ -20,6 +20,10 @@
   .wave {
     height: 32px;
 
+    @include media("<=1200px") {
+      display: none;
+    }
+
     &.wave-left {
       padding-right: 0;
     }
@@ -48,6 +52,7 @@
   .nav-link {
     font-size: 18px;
     font-weight: 600;
+    padding: 0 20px;
     color: $text-color;
     text-shadow: grey 1px 1px;
     text-decoration: none;

@@ -42,7 +42,7 @@
       <tr *ngFor="let stop of itineraryData; let i = index">
         <td>{{ i + 1 }}</td>
         <td *ngIf="deviceInfo.deviceTypeDetected !== 'PHONE'">{{ (stop.date | date: 'dd.MM.yyyy') || '-' }}</td>
-        <td>{{ stop.port || '-' }}</td>
+        <td>{{ stop.city || '-' }}</td>
         <td>{{ stop.arrivalTime || '-' }}</td>
         <td>{{ stop.departureTime || '-' }}</td>
       </tr>

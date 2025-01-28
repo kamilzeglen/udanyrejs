@@ -285,7 +285,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     const dayGroup = this.fb.group({
       day: [dayNumber],
       date: [this.getDateForItinerary(startDate, dayNumber)],
-      port: [''],
+      city: [''],
       arrivalTime: [''],
       departureTime: ['']
     });
@@ -406,7 +406,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           const dayGroup = this.fb.group({
             day: [day.day || index + 1],
             date: [day.date || null],
-            port: [day.port || null],
+            city: [day.city || null],
             arrivalTime: [day.arrivalTime || null],
             departureTime: [day.departureTime || null],
           });
