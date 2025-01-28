@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import { ValidationPipe } from '@nestjs/common';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const parsedConfig = require('dotenv').config();
 if (!parsedConfig.parsed || parsedConfig.error) {
   throw Error('DOTENV did not return proper config');
