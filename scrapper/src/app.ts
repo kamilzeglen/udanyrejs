@@ -21,9 +21,9 @@ const port = process.env.PORT || 4006;
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: 'http://localhost:4200', // Domena frontendu
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Dozwolone metody HTTP
-    credentials: true, // Jeśli chcesz przesyłać ciasteczka
+    origin: process.env.WEB_URL,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    credentials: true,
   })
 );
 
