@@ -1,0 +1,46 @@
+@import '../../../scss/variables';
+@import '../../../scss/breakpoints';
+
+.offers-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+
+  .offers {
+    width: 600px;
+
+    .no-offers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: $background-color;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+
+      p {
+        margin: 0;
+        color: $text-color;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .left-side,
+  .right-side {
+    min-width: 500px;
+
+    @include media(">2000px") {
+      margin: 0 50px;
+    }
+
+    @include media("<=1600px") {
+      display: none;
+    }
+  }
+}

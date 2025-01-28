@@ -1,0 +1,7 @@
+<div class="submenu">
+  <div class="submenu-item" *ngFor="let item of subMenuItems">
+    <a routerLink="{{ (item.url).toLowerCase() }}" class="nav-link">
+      <span>{{ item.name }}</span>
+    </a>
+  </div>
+</div>

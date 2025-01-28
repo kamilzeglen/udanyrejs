@@ -1,4 +1,4 @@
-import {IsString, IsNumber, IsOptional, IsDateString} from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
 
 export class ItineraryDayDto {
   @IsNumber()
@@ -9,7 +9,7 @@ export class ItineraryDayDto {
 
   @IsString()
   @IsOptional()
-  port?: string;
+  city?: string;
 
   @IsString()
   @IsOptional()

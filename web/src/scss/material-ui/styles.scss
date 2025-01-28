@@ -1,0 +1,21 @@
+@import "../variables";
+
+html {
+  .mat-datepicker-content {
+    background-color: white;
+  }
+
+  .mat-calendar-body-selected {
+    background-color: $primary-color;
+    color: $white;
+  }
+
+  .mat-calendar-body-today {
+    border: 1px solid $primary-color;
+  }
+
+  .mat-mdc-form-field-infix {
+    width: unset;
+  }
+}
+

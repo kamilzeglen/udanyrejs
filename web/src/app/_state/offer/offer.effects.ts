@@ -1,9 +1,9 @@
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Injectable} from '@angular/core';
 import * as offerActions from '@state/offer/offer.actions';
-import {of} from 'rxjs';
+import {delay, of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {OffersHttpService} from '../../_http/offers.http.service';
+import {OffersHttpService} from '@core/_http/offers.http.service';
 
 @Injectable()
 export class OfferEffects {
@@ -16,10 +16,17 @@ export class OfferEffects {
   getOffers$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.getOffers),
-      switchMap(() => {
-        return this.http.getOffers().pipe(
-          map(offers => {
-            return offerActions.getOffersSuccess({offers});
+      switchMap(({payload}) => {
+        const startTime = Date.now();
+
+        return this.http.getOffers(payload).pipe(
+          switchMap(offers => {
+            const elapsedTime = Date.now() - startTime;
+            const remainingTime = Math.max(500 - elapsedTime, 0);
+
+            return of(offerActions.getOffersSuccess({offers})).pipe(
+              delay(remainingTime)
+            );
           }),
           catchError(errorMessage => {
             return of(offerActions.getOfferError({errorMessage}));
@@ -28,6 +35,7 @@ export class OfferEffects {
       })
     )
   );
+
 
   getOffer$ = createEffect(() =>
     this.actions$.pipe(
@@ -45,13 +53,13 @@ export class OfferEffects {
     )
   );
 
-  createOffer = createEffect(() =>
+  createOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.createOffer),
       switchMap(({payload}) => {
         return this.http.createOffer(payload).pipe(
-          map(() => {
-            return offerActions.createOfferSuccess();
+          map((offer) => {
+            return offerActions.createOfferSuccess({offer});
           }),
           catchError(errorMessage => {
             return of(offerActions.createOfferError({errorMessage}));
@@ -61,13 +69,13 @@ export class OfferEffects {
     )
   )
 
-  updateOffer = createEffect(() =>
+  updateOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.updateOffer),
       switchMap(({payload}) => {
         return this.http.updateOffer(payload).pipe(
-          map(() => {
-            return offerActions.updateOfferSuccess();
+          map((offer) => {
+            return offerActions.updateOfferSuccess({offer});
           }),
           catchError(errorMessage => {
             return of(offerActions.updateOfferError({errorMessage}));
@@ -77,7 +85,7 @@ export class OfferEffects {
     )
   )
 
-  deleteOffer = createEffect(() =>
+  deleteOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.deleteOffer),
       switchMap(({payload}) => {

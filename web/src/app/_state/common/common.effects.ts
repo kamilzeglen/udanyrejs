@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {of} from 'rxjs';
 import * as commonActions from '@state/common/common.actions';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {CommonHttpService} from '../../_http/common.http.service';
+import {CommonHttpService} from '@core/_http/common.http.service';
 
 @Injectable()
 export class CommonEffects {
@@ -29,6 +29,71 @@ export class CommonEffects {
     )
   );
 
+  getCompany$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCompany),
+      switchMap(({payload}) => {
+        return this.http.getCompany(payload).pipe(
+          map(company => {
+            return commonActions.getCompanySuccess({company});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getCompanyError({errorMessage}));
+          })
+        );
+      })
+    )
+  );
+
+  createOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCompany),
+      switchMap(({payload}) => {
+        return this.http.createCompany(payload).pipe(
+          map((company) => {
+            return commonActions.createCompanySuccess({company});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createCompanyError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  updateOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateCompany),
+      switchMap(({payload}) => {
+        return this.http.updateCompany(payload).pipe(
+          map((company) => {
+            return commonActions.updateCompanySuccess({company});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.updateCompanyError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  deleteOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deleteCompany),
+      switchMap(({payload}) => {
+        return this.http.deleteOffer(payload).pipe(
+          map(() => {
+            return commonActions.deleteCompanySuccess();
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.deleteCompanyError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+
   getShips$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getShips),
@@ -44,5 +109,119 @@ export class CommonEffects {
       })
     )
   )
+
+  getShipById$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getShipById),
+      switchMap(({payload}) => {
+        return this.http.getShipById(payload).pipe(
+          map(ship => {
+            return commonActions.getShipByIdSuccess({ship});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getShipByIdError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  getShipByName$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getShipByName),
+      switchMap(({payload}) => {
+        return this.http.getShipByName(payload).pipe(
+          map(ship => {
+            return commonActions.getShipByNameSuccess({ship});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getShipByNameError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  createShip$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createShip),
+      switchMap(({payload}) => {
+        return this.http.createShip(payload).pipe(
+          map((ship) => {
+            return commonActions.createShipSuccess({ship});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createShipError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  updateShip$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateShip),
+      switchMap(({payload}) => {
+        return this.http.updateShip(payload).pipe(
+          map((ship) => {
+            return commonActions.updateShipSuccess({ship});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.updateShipError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  deleteShip$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deleteShip),
+      switchMap(({payload}) => {
+        return this.http.deleteShip(payload).pipe(
+          map(() => {
+            return commonActions.deleteShipSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.deleteShipError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  getCategories$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCategories),
+      switchMap(() => {
+        return this.http.getCategories().pipe(
+          map(categories => {
+            return commonActions.getCategoriesSuccess({categories});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getCategoriesError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  getDestinations$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getDestinations),
+      switchMap(() => {
+        return this.http.getDestinations().pipe(
+          map(destinations => {
+            return commonActions.getDestinationsSuccess({destinations});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getDestinationsError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+
 
 }

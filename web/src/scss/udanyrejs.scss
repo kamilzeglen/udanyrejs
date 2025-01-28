@@ -1,0 +1,16 @@
+@import "variables";
+@import "breakpoints";
+
+.udanyrejs-field {
+  display: block;
+
+  label {
+    width: 100%;
+    color: $primary-color;
+    font-weight: 500;
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+}

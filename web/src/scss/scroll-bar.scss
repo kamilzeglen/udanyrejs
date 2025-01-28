@@ -1,0 +1,23 @@
+@import "variables";
+
+// Scroll
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: $primary-color rgba(255, 165, 0, 0);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 165, 0, 0);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: $primary-color;
+  border-radius: 20px;
+  border: 3px solid rgba(255, 165, 0, 0);
+}

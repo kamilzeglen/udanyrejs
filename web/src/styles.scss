@@ -1,11 +1,25 @@
-@import 'scss/variables';
+@use '@angular/material' as mat;
 
-body {
-  padding: 0;
+@import 'scss/scroll-bar';
+@import 'scss/notification';
+@import 'scss/ng-select/styles';
+@import 'scss/material-ui/styles';
+@import 'scss/ng-zorro/styles';
+@import 'scss/variables';
+@import 'scss/udanyrejs';
+
+html, body {
+  width: 100vw;
+  height: 100vh;
   margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 app-root {
+  width: 100vw;
+  height: 100vh;
   padding: 0;
   margin: 0;
 }
@@ -19,7 +33,9 @@ label {
 }
 
 input,
-mat-select {
+mat-select,
+textarea,
+{
   padding: 10px;
   font-size: 14px;
   border: 1px solid $primary-color;
@@ -57,46 +73,11 @@ mat-select {
   }
 }
 
-
-.info-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: blue;
+html, body {
+  height: 100%;
 }
 
-.success-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: blue;
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
-
-.error-message {
-  font-size: 0.8em;
-  font-weight: bolder;
-  color: red;
-}
-
-.snack-notify {
-  border-radius: 4px;
-  font-family: 'Roboto', sans-serif;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  padding: 10px 16px;
-}
-
-.info-snack {
-  background-color: #2196f3;
-  color: #ffffff;
-}
-
-.warning-snack {
-  background-color: #ff9800;
-  color: #ffffff;
-}
-
-.error-snack {
-  background-color: #f44336;
-  color: #ffffff;
-}
-

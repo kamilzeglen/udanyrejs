@@ -4,7 +4,7 @@ import * as authActions from '@state/auth/auth.actions';
 import {of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import * as routerActions from '@state/router/router.actions';
-import {AuthHttpService} from '../../_http/auth.http.service';
+import {AuthHttpService} from '@core/_http/auth.http.service';
 
 @Injectable()
 export class AuthEffects {

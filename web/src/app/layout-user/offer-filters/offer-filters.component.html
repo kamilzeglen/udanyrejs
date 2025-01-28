@@ -1,0 +1,107 @@
+<div class="offer-filters-wrapper">
+  <div class="filter-toggle" (click)="toggleFilters()">
+    <mat-icon>tune</mat-icon>
+  </div>
+
+  <div
+    class="filters"
+    [class.visible]="isFiltersVisible"
+    [class.hidden]="!isFiltersVisible"
+  >
+    <h3>Filtry rejsów</h3>
+
+    <div>
+      <div class="udanyrejs-field">
+        <label class="input-label">Data początkowa</label>
+        <mat-form-field class="start-date">
+          <input
+            matInput
+            [matDatepicker]="startDatePicker"
+            placeholder="Data początkowa"
+            [ngModel]="filters.startDate"
+            (ngModelChange)="onFilterChange('startDate', $event)"
+            (focus)="startDatePicker.open()"
+            [max]="filters.endDate"
+            readonly/>
+          <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle
+            matSuffix
+            *ngIf="filters.startDate"
+            (click)="onFilterChange('startDate', null); $event.stopPropagation()">
+            <mat-icon matDatepickerToggleIcon>clear</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="udanyrejs-field">
+        <label class="input-label">Data końcowa</label>
+        <mat-form-field class="start-date">
+          <input
+            matInput
+            [matDatepicker]="endDatePicker"
+            placeholder="Data końcowa"
+            [ngModel]="filters.endDate"
+            (ngModelChange)="onFilterChange('endDate', $event)"
+            (focus)="endDatePicker.open()"
+            [min]="filters.startDate"
+            readonly/>
+          <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker-toggle
+            matSuffix
+            *ngIf="filters.endDate"
+            (click)="onFilterChange('endDate', null); $event.stopPropagation()">
+            <mat-icon matDatepickerToggleIcon>clear</mat-icon>
+          </mat-datepicker-toggle>
+          <mat-datepicker #endDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Armator -->
+      <div class="udanyrejs-field">
+        <label class="input-label">Armator</label>
+        <ng-select
+          [items]="companies$ | async"
+          bindLabel="name"
+          bindValue="id"
+          appendTo="body"
+          [ngModel]="filters.companyIdList"
+          (ngModelChange)="onFilterChange('companyIdList', $event)"
+          [placeholder]="
+                  filters.companyIdList.length
+                    ? 'Wybrani armatorzy'
+                    : 'Wybierz armatorów'
+                "
+          [multiple]="true"
+          [searchable]="false"
+          [closeOnSelect]="false"
+          [clearable]="true">
+        </ng-select>
+      </div>
+
+      <!-- Destination -->
+      <div class="udanyrejs-field">
+        <label class="input-label">Kierunek</label>
+        <ng-select
+          [items]="destinations$ | async"
+          bindLabel="name"
+          bindValue="id"
+          appendTo="body"
+          [ngModel]="filters.destinationIdList"
+          (ngModelChange)="onFilterChange('destinationIdList', $event)"
+          [placeholder]="
+                  filters.destinationIdList.length
+                    ? 'Wybrany kierunek'
+                    : 'Wybierz kierunek'
+                "
+          [multiple]="true"
+          [searchable]="false"
+          [closeOnSelect]="false"
+          [clearable]="true">
+        </ng-select>
+      </div>
+
+    </div>
+  </div>
+
+</div>

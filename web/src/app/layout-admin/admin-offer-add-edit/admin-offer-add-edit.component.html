@@ -1,0 +1,172 @@
+<div class="admin-offer-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+
+  <form [formGroup]="offerForm">
+    <!-- Sekcja Importowania / Synchronizacja -->
+    <section class="section import-section">
+      <h2>Importowanie / Synchronizacja</h2>
+      <div class="form-group">
+        <label for="offerUrl">Adres URL oferty:</label>
+        <input id="offerUrl" formControlName="offerUrl" type="text" placeholder="Wprowadź adres URL"/>
+        <button mat-raised-button color="primary" class="import-button" (click)="importOffer()" [disabled]="scrappedData || !offerForm.get('offerUrl').value">Zaimportuj</button>
+      </div>
+
+      <app-spinner *ngIf="scrapping$ | async" appAutoSpinner [size]="75"></app-spinner>
+
+      <div class="form-group">
+        <label>
+          <input type="checkbox" formControlName="syncData"/>
+          Czy mam cyklicznie synchronizować dane
+        </label>
+      </div>
+    </section>
+
+    <!-- Sekcja Dane dotyczące rejsu -->
+    <section class="section data-section">
+      <h2>Dane dotyczące rejsu</h2>
+      <div class="form-group">
+        <label for="name">Nazwa rejsu:</label>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa rejsu" />
+      </div>
+
+      <div class="form-group" *ngIf="destinations$ | async as destinations">
+        <label for="destinations">Kierunki:</label>
+        <mat-select formControlName="destinations" id="destinations" placeholder="Kierunki" [disabled]="!destinations$" multiple>
+          <mat-option *ngFor="let destination of destinations" [value]="destination.id">
+            {{ destination.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="form-group" *ngIf="categories$ | async as categories">
+        <label for="categories">Kategorie:</label>
+        <mat-select formControlName="categories" id="categories" placeholder="Kategorie" [disabled]="!categories$" multiple>
+          <mat-option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Cena: (Euro)</label>
+        <input id="price" formControlName="price" type="number" placeholder="Cena"/>
+      </div>
+
+      <div class="form-group">
+        <label for="companyId">Firma:</label>
+        <mat-select formControlName="companyId" id="companyId" placeholder="Firma" [disabled]="!companies$">
+          <mat-option *ngFor="let company of companies$ | async" [value]="company.id">
+            {{ company.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="form-group">
+        <label for="shipId">Statek:</label>
+        <mat-select formControlName="shipId" id="shipId" placeholder="Statek" [disabled]="!ships$">
+          <mat-option *ngFor="let ship of ships$ | async" [value]="ship.id">
+            {{ ship.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="form-group">
+        <label>Data początkowa:</label>
+        <mat-form-field class="start-date" appearance="outline">
+          <input
+            matInput
+            [max]="offerForm.get('endDate')?.value || null"
+            [matDatepicker]="startDate"
+            placeholder="Data początkowa"
+            formControlName="startDate"
+            (focus)="startDate.open()"
+            readonly/>
+          <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
+          <mat-datepicker #startDate></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <label>Data końcowa:</label>
+        <mat-form-field class="start-date" appearance="outline">
+          <input
+            matInput
+            [min]="offerForm.get('startDate')?.value || null"
+            [matDatepicker]="endDate"
+            placeholder="Data początkowa"
+            formControlName="endDate"
+            (focus)="endDate.open()"
+            readonly/>
+          <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
+          <mat-datepicker #endDate></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <label for="imageUpload">Załaduj obrazek (png, jpg, jpeg):</label>
+        <input
+          id="imageUpload"
+          type="file"
+          accept=".png, .jpg, .jpeg"
+          (change)="onImageFileChange($event)"
+          [disabled]="scrappedImageFile"
+        />
+        <div class="current-file" *ngIf="scrappedImageFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
+        <div class="current-file" *ngIf="editingOffer?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+      </div>
+
+      <div class="form-group">
+        <label for="pdfUpload">Załaduj PDF:</label>
+        <input
+          id="pdfUpload"
+          type="file"
+          accept=".pdf"
+          (change)="onPDFFileChange($event)"
+          [disabled]="scrappedPdfFile"
+        />
+        <div class="current-file" *ngIf="scrappedPdfFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
+        <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.pdfFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+      </div>
+    </section>
+
+    <!-- Sekcja Plan Podróży -->
+    <section class="section itinerary-section" *ngIf="itineraryArray.controls.length > 0">
+      <h2>Plan Podróży</h2>
+      <div formArrayName="itinerary">
+        <div *ngFor="let day of itineraryArray.controls; let i = index" [formGroupName]="i" class="itinerary-item">
+          <div class="itinerary-input">
+            <label>Dzień {{ i + 1 }}:</label>
+            <input type="date" formControlName="date" placeholder="Data"/>
+          </div>
+
+          <div class="itinerary-input">
+            <label>Port:</label>
+            <input type="text" formControlName="city" placeholder="Port docelowy"/>
+          </div>
+
+          <div class="itinerary-input">
+            <label>Przyjazd:</label>
+            <input type="time" formControlName="arrivalTime" placeholder="Czas przyjazdu"/>
+          </div>
+
+          <div class="itinerary-input">
+            <label>Odjazd:</label>
+            <input type="time" formControlName="departureTime" placeholder="Czas odjazdu"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <button *ngIf="mode === 'EDIT'" (click)="deleteOffer()" mat-raised-button class="deleteOffer">
+      Usuń ofertę
+    </button>
+
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid || (!imageFile && !editingOffer?.imageFile?.name) || (!pdfFile && !editingOffer?.pdfFile?.name)">
+      {{ mode === 'ADD' ? "Dodaj ofertę" : "Zaktualizuj ofertę" }}
+    </button>
+  </form>
+</div>

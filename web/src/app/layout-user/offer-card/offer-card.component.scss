@@ -1,0 +1,119 @@
+@import '../../../scss/variables';
+@import '../../../scss/breakpoints';
+
+.offer-card {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 30px auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+  font-family: Arial, sans-serif;
+  display: block;
+  text-decoration: none;
+  color: inherit;
+
+  @include media("<1400px") {
+    max-width: 500px;
+  }
+
+  @include media("<=phone") {
+    width: unset;
+    margin: 20px;
+  }
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $background-color;
+    padding: 10px;
+
+    .company-logo {
+      height: 50px;
+      object-fit: contain;
+    }
+  }
+
+  .image-container {
+    width: 100%;
+    overflow: hidden;
+
+    .ship-image {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+  }
+
+
+  .offer-details {
+    padding: 20px;
+    background-color: $background-color;
+
+    .offer-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+
+      @include media("<=desktop") {
+        font-size: 22px;
+      }
+      @include media("<=phone") {
+        font-size: 20px;
+      }
+    }
+
+    p {
+      font-size: 18px;
+      color: #666;
+      margin: 8px 0;
+
+      @include media("<=desktop") {
+        font-size: 16px;
+      }
+      @include media("<=phone") {
+        font-size: 14px;
+      }
+
+      strong {
+        color: #333;
+      }
+    }
+  }
+
+  .offer-badge {
+    position: absolute;
+    top: 115px;
+    left: -24px;
+    background-color: $tertiary-color; // Kolor zawieszki
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 6px 50px; // Szerokość i wysokość zawieszki
+    transform: rotate(-45deg); // Obrót o 45 stopni w lewą stronę
+    transform-origin: top left; // Punkt obrotu w górnym lewym rogu
+    text-align: center;
+    text-transform: uppercase;
+    z-index: 10;
+
+    // Styl tekstu
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Dostosowanie dla małych ekranów
+    @include media("<=phone") {
+      font-size: 10px;
+      padding: 4px 40px;
+    }
+  }
+}

@@ -1,0 +1,77 @@
+<div class="admin-company-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+
+  <form [formGroup]="companyForm">
+
+    <!-- Sekcja Dane dotyczące firmy -->
+    <section class="section data-section">
+      <h2>Dane dotyczące firmy</h2>
+
+      <div class="form-group">
+        <label for="name">Nazwa firmy:</label>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa firmy"/>
+      </div>
+
+      <div class="form-group">
+        <label for="key">Klucz firmy:</label>
+        <input id="key" formControlName="key" type="text" placeholder="Klucz firmy"/>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Opis firmy: (HTML)</label>
+        <textarea id="description" formControlName="description" type="text" placeholder="Opis firmy"
+                  rows="15"></textarea>
+      </div>
+
+
+      <div class="split">
+        <div class="left">
+          <h3>Cena zawiera:</h3>
+          <div formArrayName="priceIncludes">
+            <div *ngFor="let control of priceIncludesArray.controls; let i = index" class="input-group">
+              <input [formControlName]="i" placeholder="Co zawiera cena"/>
+              <mat-icon (click)="removePriceInclude(i)">delete</mat-icon>
+            </div>
+            <button (click)="addPriceInclude()" class="add-btn">Dodaj element</button>
+          </div>
+        </div>
+
+        <div class="right">
+          <h3>Cena nie zawiera:</h3>
+          <div formArrayName="priceExcludes">
+            <div *ngFor="let control of priceExcludesArray.controls; let i = index" class="input-group">
+              <input [formControlName]="i" placeholder="Co nie zawiera cena"/>
+              <mat-icon (click)="removePriceExclude(i)">delete</mat-icon>
+            </div>
+            <button (click)="addPriceExclude()" class="add-btn">Dodaj element</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="imageUpload">Załaduj obrazek (png, jpg, jpeg):</label>
+        <input
+          id="imageUpload"
+          type="file"
+          accept=".png, .jpg, .jpeg"
+          (change)="onImageFileChange($event)"
+        />
+        <div class="current-file" *ngIf="editingCompany?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingCompany.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+      </div>
+
+    </section>
+
+    <button *ngIf="mode === 'EDIT'" (click)="deleteCompany()" mat-raised-button class="deleteCompany">
+      Usuń firmę
+    </button>
+
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit"
+            [disabled]="companyForm.invalid || (!imageFile && !editingCompany?.imageFile?.name)">
+      {{ mode === 'ADD' ? "Dodaj firme" : "Zaktualizuj firme" }}
+    </button>
+  </form>
+</div>

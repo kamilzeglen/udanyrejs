@@ -26,6 +26,8 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCardModule} from '@angular/material/card';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatDividerModule} from '@angular/material/divider';
+import {MatNativeDateModule} from '@angular/material/core';
+import {MatList, MatListItem} from '@angular/material/list';
 
 const materialModules = [
   MatFormFieldModule,
@@ -54,7 +56,10 @@ const materialModules = [
   MatButtonToggleModule,
   MatCardModule,
   MatSlideToggleModule,
-  MatDividerModule
+  MatDividerModule,
+  MatNativeDateModule,
+  MatList,
+  MatListItem
 ];
 
 @NgModule({

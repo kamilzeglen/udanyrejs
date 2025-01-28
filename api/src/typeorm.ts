@@ -1,7 +1,7 @@
-import {config as dotenvConfig} from 'dotenv';
-import {DataSource} from "typeorm";
+import { config as dotenvConfig } from 'dotenv';
+import { DataSource } from 'typeorm';
 
-dotenvConfig({path: '.env'});
+dotenvConfig({ path: '.env' });
 
 const {
   DATABASE_HOST,
@@ -21,6 +21,6 @@ const MyDataSource = new DataSource({
   migrations: ['dist/migrations/**/*.js'],
   entities: ['dist/modules/**/*.entity.js'],
   logging: true,
-})
+});
 
 export default MyDataSource;

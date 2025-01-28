@@ -1,0 +1,64 @@
+@import '../../../scss/variables';
+@import '../../../scss/breakpoints';
+
+.offer-filters-wrapper {
+  margin: 30px 30px;
+  position: sticky;
+  place-items: end;
+  top: 20px;
+  z-index: 10;
+
+  .filter-toggle {
+    height: 80px;
+    width: 80px;
+    cursor: pointer;
+    background-color: $background-color;
+    color: $primary-color;
+    border: none;
+    padding: 20px;
+    border-radius: 50%;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    align-content: center;
+    margin-bottom: 20px;
+
+    ::ng-deep {
+      mat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 30px;
+        font-weight: 500;
+        align-content: center;
+      }
+    }
+  }
+
+  .filters {
+    overflow: hidden;
+    transition: opacity 0.5s ease;
+    opacity: 0;
+    background-color: $background-color;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+
+    &.visible {
+      height: auto;
+      opacity: 1;
+    }
+
+    &.hidden {
+      opacity: 0;
+    }
+
+    h3 {
+      text-align: center;
+      font-size: 1.25rem;
+      color: #333;
+      margin-bottom: 20px;
+    }
+  }
+}
