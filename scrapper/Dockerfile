@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the backend port
-EXPOSE 3001
+EXPOSE 4006
 
 # Set the default command to run the app
 CMD ["npx", "ts-node", "src/app.ts"]
