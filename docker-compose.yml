@@ -45,6 +45,19 @@ services:
             - nginx-proxy-manager_default
             - udanyrejs_default
 
+    udanyrejs-playwright:
+        build:
+            context: ./playwright
+            dockerfile: Dockerfile
+        container_name: udanyrejs-playwright
+        env_file:
+            - playwright/.env
+        restart: always
+        ports:
+            - "6006:6006"
+        networks:
+            - udanyrejs_default
+
 networks:
     nginx-proxy-manager_default:
         external: true
