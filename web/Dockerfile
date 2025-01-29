@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Budowanie aplikacji Angular
-RUN npm run build --prod
+RUN npm run build --omit=dev
 
 # Etap uruchamiania aplikacji
 FROM nginx:alpine
