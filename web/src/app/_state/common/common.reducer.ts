@@ -48,7 +48,6 @@ const reducer = createReducer(
     ...state,
     loading: true,
     errorMessage: null,
-    categories: [],
   })),
   on(commonActions.getCategoriesSuccess, (state, {categories}) => ({
     ...state,

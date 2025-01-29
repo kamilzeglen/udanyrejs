@@ -40,19 +40,19 @@ import { EmailModule } from '@modules/email/email.module';
     }),
     MailerModule.forRoot({
       transport: {
-        host: 'ssl0.ovh.net',
-        port: 465,
-        secure: true,
+        host: process.env.MAIL_HOST,
+        port: parseInt(process.env.MAIL_PORT, 10),
+        secure: process.env.MAIL_SECURE === 'true',
         auth: {
-          user: 'noreply@udanyrejs.pl',
-          pass: 'J:qF:%m!8maF4V-',
+          user: process.env.MAIL_USER,
+          pass: process.env.MAIL_PASS,
         },
       },
       defaults: {
-        from: '"No Reply" <noreplay@udanyrejs.pl>',
+        from: process.env.MAIL_FROM,
       },
       template: {
-        dir: join(__dirname, '..', '/templates'), // Katalog wyżej od obecnego pliku
+        dir: join(__dirname, '..', '/templates'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

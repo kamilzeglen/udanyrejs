@@ -4,7 +4,8 @@ import {Store} from '@ngrx/store';
 import {AppState} from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
-import {Company} from '@interfaces';
+import {Category, Company} from '@interfaces';
+import {filter, Observable, tap} from 'rxjs';
 
 
 @Injectable()
@@ -85,6 +86,22 @@ export class CommonFacade {
 
   public getCategories(): void {
     this.store.dispatch(commonActions.getCategories());
+  }
+
+  public getCategories$(): Observable<Category[]> {
+    return this.store.select(commonSelectors.selectCategories).pipe(
+      tap(categories => {
+        if (!categories || !categories.length) {
+          this.getCategories();
+        }
+      }),
+      filter(categories => {
+        if (categories === null || !categories.length) {
+          return false;
+        }
+        return true;
+      })
+    );
   }
 
   public getDestinations(): void {

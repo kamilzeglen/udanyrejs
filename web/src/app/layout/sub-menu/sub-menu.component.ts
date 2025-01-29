@@ -1,7 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {SubMenuItem} from '@interfaces';
 import {SubMenuService} from './sub-menu.service';
-import {Subscription} from 'rxjs';
+import {Subscription, take} from 'rxjs';
+import {CommonFacade} from '@state/common';
 
 @Component({
   selector: 'app-sub-menu',
@@ -13,15 +14,30 @@ export class SubMenuComponent implements OnInit, OnDestroy {
   subMenuItems: SubMenuItem[] = [];
   private subscription: Subscription = new Subscription();
 
-  constructor(private subMenuService: SubMenuService) {}
+  constructor(
+    private readonly subMenuService: SubMenuService,
+    private readonly commonFacade: CommonFacade,
+  ) {
+  }
 
-  ngOnInit() {
+  public ngOnInit() {
     this.subscription = this.subMenuService.subMenuItems$.subscribe((items) => {
-      this.subMenuItems = items;
+
+      if (items && items.length > 0) {
+        this.subMenuItems = structuredClone(items);
+      } else {
+        const categories$ = this.commonFacade.getCategories$()
+        categories$.pipe(take(1)).subscribe((categories) => {
+          this.subMenuItems = categories.map(category => ({
+            name: category.name,
+            url: `/offers/${category.url}`
+          }));
+        });
+      }
     });
   }
 
-  ngOnDestroy() {
+  public ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 }
