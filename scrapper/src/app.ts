@@ -30,7 +30,7 @@ console.log('APP port: ', process.env.PORT);
 console.log('Allowing origin: ', process.env.WEB_URL);
 
 async function scrapeWithPlaywright(url: string) {
-  const browser = await chromium.launch({headless: true}); // Uruchom przeglądarkę w trybie headless
+  const browser = await chromium.launch({headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox']}); // Uruchom przeglądarkę w trybie headless
   const page = await browser.newPage();
 
   try {
