@@ -49,7 +49,7 @@ import { EmailModule } from '@modules/email/email.module';
         },
       },
       defaults: {
-        from: process.env.MAIL_FROM,
+        from: '"No Reply" <noreplay@udanyrejs.pl>',
       },
       template: {
         dir: join(__dirname, '..', '/templates'),
