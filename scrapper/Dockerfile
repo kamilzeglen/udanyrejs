@@ -13,23 +13,6 @@ RUN npm install
 # Install Playwright browsers
 RUN npx playwright install
 
-# Install dependencies for Playwright browsers (for Alpine Linux)
-RUN apk add --no-cache \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    alsa-lib \
-    libdrm \
-    libx11-xcb \
-    fontconfig \
-    ttf-freefont
-
 # Copy the entire application code
 COPY . .
 
