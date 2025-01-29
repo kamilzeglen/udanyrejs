@@ -22,10 +22,10 @@ services:
         ports:
             - "5006:5006"
         volumes:
-            - ./files/OFFERS_IMAGES:/app/files/OFFERS_IMAGES
-            - ./files/SHIPS_IMAGES:/app/files/SHIPS_IMAGES
-            - ./files/COMPANIES_IMAGES:/app/files/COMPANIES_IMAGES
-            - ./files/OFFERS_PDFS:/app/files/OFFERS_PDFS
+            - ./files/OFFERS_IMAGES:/api/files/OFFERS_IMAGES
+            - ./files/SHIPS_IMAGES:/api/files/SHIPS_IMAGES
+            - ./files/COMPANIES_IMAGES:/api/files/COMPANIES_IMAGES
+            - ./files/OFFERS_PDFS:/api/files/OFFERS_PDFS
         networks:
             - nginx-proxy-manager_default
             - postgres_default
