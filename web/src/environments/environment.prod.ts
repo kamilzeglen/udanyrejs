@@ -1,5 +1,5 @@
 export const environment = {
   PRODUCTION: true,
-  API_URL: 'http://udanyrejs-backend:5006',
-  SCRAPPER_URL: 'http://udanyrejs-scrapper:4006',
+  API_URL: 'https://api.udanyrejs.pl/',
+  SCRAPPER_URL: 'https://scrapper.udanyrejs.pl//',
 };
