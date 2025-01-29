@@ -24,6 +24,7 @@ app.use(
     origin: process.env.WEB_URL,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 console.log('APP port: ', process.env.PORT);
