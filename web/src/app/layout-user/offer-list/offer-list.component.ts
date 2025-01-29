@@ -36,24 +36,11 @@ export class OfferListComponent implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
-      this.filters.category = paramMap.get('category');
+      this.filters = {...this.filters, category: paramMap.get('category')};
 
-      this.commonFacade.getCategories()
-      this.getOffers(this.filters)
-    })
-
-    this.commonFacade.getCategoriesSuccess$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(action => {
-        const categories = action.categories;
-        this.subMenuItems = [
-          {name: 'Wszystkie', url: '/offers'},
-          ...categories.map(category => ({
-            name: category.name,
-            url: `/offers/${category.url}`
-          }))
-        ];
-      });
+      this.commonFacade.getCategories();
+      this.getOffers(this.filters);
+    });
   }
 
   public ngOnDestroy(): void {

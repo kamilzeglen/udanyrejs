@@ -50,8 +50,6 @@ services:
             context: ./playwright
             dockerfile: Dockerfile
         container_name: udanyrejs-playwright
-        env_file:
-            - playwright/.env
         restart: always
         ports:
             - "6006:6006"

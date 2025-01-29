@@ -15,31 +15,34 @@
     text-align: center;
 
     h1 {
-      font-size: 3rem;
-      line-height: 3rem;
+      font-size: 32px;
+      line-height: 32px;
       color: $text-color;
       font-weight: 600;
       margin: 0;
 
       @include media("<=phone") {
-        font-size: 2rem;
-        line-height: 2.5rem;
+        font-size: 28px;
+        line-height: 28px;
+        font-weight: 500;
       }
     }
   }
 
   .subtitle,
   .ship-subtitle {
+    padding-top: 20px;
     text-align: center;
-    font-size: 1.5rem;
-    line-height: 3rem;
+    font-size: 20px;
+    line-height: 20px;
     color: $text-color;
     font-weight: 600;
     margin: 0;
 
     @include media("<=phone") {
-      font-size: 1rem;
-      line-height: 2rem;
+      font-size: 16px;
+      line-height: 16px;
+      font-weight: 600;
     }
 
   }
@@ -222,13 +225,18 @@
 
   .in-price-section {
     display: flex;
+    justify-content: space-between;
     width: 100%;
     margin: 30px 10px;
 
     .price-include,
     .price-exclude {
-      width: 50%;
+      width: 48%;
       margin: 0 15px;
+
+      @include media("<=phone") {
+        margin: unset;
+      }
 
       h3 {
         font-size: 1.5em;
@@ -246,6 +254,7 @@
         font-size: 1em;
         line-height: 1.6;
         color: $text-color;
+        margin-top: 5px;
       }
     }
   }
