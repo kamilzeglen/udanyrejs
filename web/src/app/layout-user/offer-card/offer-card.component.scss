@@ -30,7 +30,11 @@
 
   @include media("<=phone") {
     width: unset;
-    margin: 0 20px;
+    margin: 20px;
+  }
+
+  &.no-margin {
+    margin-top: 0;
   }
 
   &.promoted {

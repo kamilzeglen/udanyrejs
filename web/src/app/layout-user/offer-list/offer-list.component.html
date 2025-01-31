@@ -12,8 +12,8 @@
     </div>
 
       <div *ngIf="offers.length > 0; else noOffers">
-        <div *ngFor="let offer of offers">
-          <app-offer-card [offer]="offer"></app-offer-card>
+        <div *ngFor="let offer of offers; index as offerIndex">
+          <app-offer-card [index]="offerIndex" [offer]="offer"></app-offer-card>
         </div>
       </div>
 

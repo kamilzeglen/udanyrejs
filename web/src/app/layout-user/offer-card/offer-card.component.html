@@ -1,4 +1,4 @@
-<a class="offer-card" [routerLink]="['/offers/details', offer.id]" [class.promoted]="offer.isPromotion">
+<a class="offer-card" [routerLink]="['/offers/details', offer.id]" [class.promoted]="offer.isPromotion" [class.no-margin]="index === 0">
   <!-- Zawieszka -->
   <div class="offer-badge" *ngIf="offer.isPromotion ">Promocja</div>
 

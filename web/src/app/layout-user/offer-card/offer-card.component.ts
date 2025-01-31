@@ -8,6 +8,7 @@ import {environment} from '@environment';
   styleUrl: './offer-card.component.scss'
 })
 export class OfferCardComponent {
+  @Input() index: number;
   @Input() offer: Offer;
 
   public API_URL = environment.API_URL;
