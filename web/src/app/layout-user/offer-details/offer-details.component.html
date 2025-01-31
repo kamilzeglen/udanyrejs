@@ -1,4 +1,7 @@
 <div class="offer-details-wrapper" *ngIf="offer && !loading">
+  <div class="left-side"></div>
+  <div class="central-side">
+
   <div class="title">
     <h1>{{ offer.name }}</h1>
   </div>
@@ -129,6 +132,21 @@
   <div class="back-button">
     <button (click)="goBack()">Powrót</button>
   </div>
+
+  </div>
+  <div class="right-side">
+    <div class="sticky-buttons">
+      <div class="sticky-button">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span class="button-label">PDF</span>
+      </div>
+      <div class="sticky-button">
+        <mat-icon>call</mat-icon>
+        <span class="button-label">Kontakt</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <app-spinner *ngIf="loading" appAutoSpinner [size]="75"></app-spinner>

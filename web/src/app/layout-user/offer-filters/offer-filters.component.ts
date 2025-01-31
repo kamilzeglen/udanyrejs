@@ -2,6 +2,8 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angula
 import {CommonFacade} from '@state/common';
 import {ReplaySubject} from 'rxjs';
 import {animate, state, style, transition, trigger} from '@angular/animations';
+import {DatepickerCustomHeaderComponent} from '@shared/datepicker-custom-header/datepicker-custom-header.component';
+import moment from 'moment-timezone';
 
 @Component({
   selector: 'app-offer-filters',
@@ -21,6 +23,10 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
   @Input() filters: { [key: string]: any } = {};
   @Output() filterChanged = new EventEmitter<{ key: string; value: any }>();
 
+  readonly exampleHeader = DatepickerCustomHeaderComponent;
+
+  public today =  new Date();
+
   public isFiltersVisible = false;
 
   public companies$ = this.commonFacade.companies$
@@ -32,6 +38,7 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
+    console.log(this.today)
     this.commonFacade.getCompanies();
     this.commonFacade.getDestinations();
   }
@@ -48,4 +55,6 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
   public onFilterChange(key: string, value: any): void {
     this.filterChanged.emit({ key, value });
   }
+
+  protected readonly moment = moment;
 }

@@ -16,6 +16,6 @@
   <div class="offer-details">
     <h2 class="offer-title">{{ offer.name }}</h2>
     <p><strong>Termin:</strong> {{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}</p>
-    <p><strong>Cena od:</strong> {{ offer.price }} &#8364;</p>
+    <p><strong>Cena od:</strong> {{ offer.price | currency: '&#8364;' : 'symbol' : '0.0' }} </p>
   </div>
 </a>
