@@ -1,5 +1,6 @@
 <div class="offer-filters-wrapper">
   <div class="filter-toggle" (click)="toggleFilters()">
+    <div class="filter-toggle-text">Filtry</div>
     <mat-icon>tune</mat-icon>
   </div>
 
@@ -99,6 +100,10 @@
           [closeOnSelect]="false"
           [clearable]="true">
         </ng-select>
+      </div>
+
+      <div class="close-button">
+        <button (click)="toggleFilters()">Zamknij</button>
       </div>
 
     </div>

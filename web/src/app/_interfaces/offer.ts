@@ -9,6 +9,7 @@ import {User} from './user';
 export interface Offer {
   id: string;
   name: string;
+  isActive: boolean;
   offerUrl: string;
   syncData: string;
   isPromotion: boolean;

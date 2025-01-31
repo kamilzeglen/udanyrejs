@@ -9,6 +9,10 @@
   .offers {
     width: 600px;
 
+    @include media("<=1400px") {
+      width: 500px;
+    }
+
     .no-offers {
       display: flex;
       justify-content: center;
@@ -40,6 +44,12 @@
     }
 
     @include media("<=1600px") {
+      display: none;
+    }
+  }
+
+  .filters-mobile {
+    @include media(">1600px") {
       display: none;
     }
   }
