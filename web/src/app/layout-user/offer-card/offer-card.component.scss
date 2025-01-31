@@ -37,7 +37,6 @@
     margin-top: 0;
   }
 
-
   &.promoted {
     @include media("<=1400px") {
       border-color: $tertiary-color;
