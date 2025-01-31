@@ -1,11 +1,19 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {CommonFacade} from '@state/common';
 import {ReplaySubject} from 'rxjs';
+import {animate, state, style, transition, trigger} from '@angular/animations';
 
 @Component({
   selector: 'app-offer-filters',
   templateUrl: './offer-filters.component.html',
-  styleUrl: './offer-filters.component.scss'
+  styleUrl: './offer-filters.component.scss',
+  animations: [
+    trigger('filtersAnimation', [
+      state('hidden', style({height: '0px', opacity: 0, overflow: 'hidden'})),
+      state('visible', style({height: '*', opacity: 1})),
+      transition('hidden <=> visible', animate('300ms ease-in-out')),
+    ]),
+  ],
 })
 export class OfferFiltersComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);

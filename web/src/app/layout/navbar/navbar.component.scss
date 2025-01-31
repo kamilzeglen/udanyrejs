@@ -15,6 +15,11 @@
     align-items: flex-end;
     width: 100%;
     padding: 0 20px;
+
+    @include media("<=phone") {
+      padding: unset;
+
+    }
   }
 
   .wave {
@@ -60,6 +65,11 @@
     align-items: center;
     transition: color 0.3s ease, transform 0.3s ease;
 
+    @include media("<=400px") {
+      padding: 0 10px;
+    }
+
+
     &:hover {
       color: darken($secondary-color, 10%);
       transform: scale(1.1);
@@ -91,6 +101,10 @@
     .logo {
       height: 60px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+      @include media("<=phone") {
+        height: 50px;
+      }
 
       &:hover {
         transform: scale(1.05);

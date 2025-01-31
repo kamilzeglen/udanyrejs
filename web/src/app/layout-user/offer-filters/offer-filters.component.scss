@@ -2,26 +2,46 @@
 @import '../../../scss/breakpoints';
 
 .offer-filters-wrapper {
-  margin: 30px 30px;
-  position: sticky;
   place-items: end;
-  top: 20px;
-  z-index: 10;
+
+  @include media(">1600px") {
+    position: sticky;
+    margin: 30px 30px;
+    top: 20px;
+    z-index: 10;
+  }
+
+  @include media("<=1600px") {
+    justify-items: center;
+  }
+
+  @include media("<=1400px") {
+    max-width: 500px;
+    margin: 0 20px;
+  }
 
   .filter-toggle {
-    height: 80px;
-    width: 80px;
     cursor: pointer;
-    background-color: $background-color;
     color: $primary-color;
     border: none;
     padding: 20px;
     border-radius: 50%;
     font-size: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     align-content: center;
-    margin-bottom: 20px;
+
+    @include media(">1600px") {
+      height: 80px;
+      width: 80px;
+      margin-bottom: 20px;
+      background-color: $background-color;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @include media("<=1600px") {
+      display: flex;
+      align-items: center;
+    }
 
     ::ng-deep {
       mat-icon {
@@ -45,6 +65,10 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
 
+    @include media("<=1600px") {
+      margin-bottom: 30px;
+    }
+
     &.visible {
       height: auto;
       opacity: 1;
@@ -52,6 +76,8 @@
 
     &.hidden {
       opacity: 0;
+      display: none;
+      margin-bottom: 0;
     }
 
     h3 {
@@ -59,6 +85,38 @@
       font-size: 1.25rem;
       color: #333;
       margin-bottom: 20px;
+    }
+  }
+
+  .filter-toggle-text {
+    padding-right: 10px;
+
+    @include media(">1600px") {
+      display: none;
+    }
+  }
+
+  .close-button {
+    @include media(">1600px") {
+      display: none;
+    }
+
+    margin-top: 2rem;
+    text-align: center;
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 50px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #2980b9;
+      }
     }
   }
 }
