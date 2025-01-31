@@ -9,7 +9,7 @@
     [class.visible]="isFiltersVisible"
     [class.hidden]="!isFiltersVisible"
   >
-    <h3>Filtry rejsów</h3>
+    <h3 class="filter-title">Filtry rejsów</h3>
 
     <div>
       <div class="udanyrejs-field">
@@ -22,6 +22,7 @@
             [ngModel]="filters.startDate"
             (ngModelChange)="onFilterChange('startDate', $event)"
             (focus)="startDatePicker.open()"
+            [min]="today"
             [max]="filters.endDate"
             readonly/>
           <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
@@ -31,7 +32,7 @@
             (click)="onFilterChange('startDate', null); $event.stopPropagation()">
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
-          <mat-datepicker #startDatePicker></mat-datepicker>
+          <mat-datepicker #startDatePicker [calendarHeaderComponent]="exampleHeader"></mat-datepicker>
         </mat-form-field>
       </div>
 
@@ -45,7 +46,7 @@
             [ngModel]="filters.endDate"
             (ngModelChange)="onFilterChange('endDate', $event)"
             (focus)="endDatePicker.open()"
-            [min]="filters.startDate"
+            [min]="today"
             readonly/>
           <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
           <mat-datepicker-toggle
@@ -54,7 +55,7 @@
             (click)="onFilterChange('endDate', null); $event.stopPropagation()">
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
-          <mat-datepicker #endDatePicker></mat-datepicker>
+          <mat-datepicker #endDatePicker [calendarHeaderComponent]="exampleHeader"></mat-datepicker>
         </mat-form-field>
       </div>
 

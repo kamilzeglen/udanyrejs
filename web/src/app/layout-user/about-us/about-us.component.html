@@ -46,7 +46,14 @@
   <section class="gallery">
     <h2>Nasze wspomnienia</h2>
     <div class="images">
-      <img *ngFor="let photo of cruises_photos" src="{{photo.path}}" alt="{{photo.alt}}"/>
+      <img
+        nz-image
+        *ngFor="let photo of cruises_photos"
+        width="200px"
+        height="200px"
+        nzSrc="{{photo.path}}"
+        alt=""
+      />
     </div>
   </section>
 </div>
