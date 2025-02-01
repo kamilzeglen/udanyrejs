@@ -1,7 +1,6 @@
-import {IsNumber, IsOptional, IsString, IsUUID} from "class-validator";
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateShipDto {
-
   @IsString()
   name: string;
 

@@ -12,7 +12,7 @@
 
   <div class="offer-details">
     <div class="element">
-      <div class="element-label">Linia:</div>
+      <div class="element-label">Armator:</div>
       <div class="element-value">{{ offer.company?.name }}</div>
     </div>
     <div class="element">
@@ -24,6 +24,10 @@
       <div class="element-value">Od {{ offer.price }} Euro</div>
     </div>
   </div>
+
+    <div class="pdf-box">
+      <a class="action-button" (click)="downloadPdfFile(offer.id)">Oferta PDF</a>
+    </div>
 
   <div class="image-container-offer" *ngIf="offer.imageFile?.name">
     <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie oferty" class="offer-image"/>
@@ -53,27 +57,26 @@
     </table>
   </div>
 
-<div class="in-price-section" *ngIf="offer.company.priceIncludes && offer.company.priceExcludes">
-  <div class="price-include">
-    <h3>Wliczone w cenę:</h3>
-    <ul>
-      <li *ngFor="let include of offer.company.priceIncludes">
-        {{ include }}
-      </li>
-    </ul>
-  </div>
-  <div class="price-exclude">
-    <h3>Nie wliczone w cenę:</h3>
-    <ul>
-      <li *ngFor="let exclude of offer.company.priceExcludes">
-        {{ exclude }}
-      </li>
-    </ul>
-  </div>
-</div>
+    <div class="in-price-section" *ngIf="offer.company.priceIncludes && offer.company.priceExcludes">
+      <div class="price-include">
+        <h3>Wliczone w cenę:</h3>
+        <ul>
+          <li *ngFor="let include of offer.company.priceIncludes">
+            {{ include }}
+          </li>
+        </ul>
+      </div>
+      <div class="price-exclude">
+        <h3>Nie wliczone w cenę:</h3>
+        <ul>
+          <li *ngFor="let exclude of offer.company.priceExcludes">
+            {{ exclude }}
+          </li>
+        </ul>
+      </div>
+    </div>
 
-
-  <nz-divider></nz-divider>
+    <nz-divider></nz-divider>
   <div class="ship-title" *ngIf="offer.ship?.name">
     <h1>{{ offer.ship.name }}</h1>
   </div>
@@ -129,19 +132,24 @@
     </div>
   </div>
 
-  <div class="back-button">
-    <button (click)="goBack()">Powrót</button>
-  </div>
+    <div class="footer-contact-box">
+      <p>Jeśli jesteś zainteresowany naszą ofertą, skontaktuj się z nami!</p>
+      <a class="action-button" (click)="redirectToContact(offer.id)">Kontakt</a>
+    </div>
+
+    <div class="footer-pdf-box">
+      <a class="action-button" (click)="downloadPdfFile(offer.id)">Oferta PDF</a>
+    </div>
 
 
   </div>
   <div class="right-side">
     <div class="sticky-buttons">
-      <div class="sticky-button">
+      <div class="sticky-button" (click)="downloadPdfFile(offer.id)">
         <mat-icon>picture_as_pdf</mat-icon>
         <span class="button-label">PDF</span>
       </div>
-      <div class="sticky-button">
+      <div class="sticky-button" (click)="redirectToContact(offer.id)">
         <mat-icon>call</mat-icon>
         <span class="button-label">Kontakt</span>
       </div>

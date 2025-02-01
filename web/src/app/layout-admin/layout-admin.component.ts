@@ -6,13 +6,4 @@ import {Component} from '@angular/core';
   styleUrl: './layout-admin.component.scss'
 })
 export class LayoutAdminComponent {
-
-  public subMenuItems = [
-    {name: 'Edytuj oferty', url: '/admin/offers'},
-    {name: 'Edytuj firmy', url: '/admin/companies'},
-    {name: 'Edytuj statki', url: '/admin/ships'},
-  ];
-
-
-
 }

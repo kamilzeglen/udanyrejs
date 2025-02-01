@@ -1,3 +1,4 @@
+@import '../../../scss/variables';
 @import '../../../scss/breakpoints';
 
 .contact {
@@ -37,6 +38,12 @@
           border: 1px solid #ccc;
           border-radius: 5px;
           font-size: 16px;
+
+          &.disabled {
+            background-color: #eee;
+            color: $grey;
+            cursor: not-allowed;
+          }
         }
 
         textarea {

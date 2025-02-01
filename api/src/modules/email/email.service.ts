@@ -13,25 +13,41 @@ export class EmailService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async sendEmail(sendEmailDto: SendEmailDto): Promise<void> {
-    const { name, email, message } = sendEmailDto;
+  async sendEmail(sendEmailDto: SendEmailDto): Promise<Email> {
+    const { name, email, offerURL, message } = sendEmailDto;
 
-    await this.mailerService.sendMail({
-      to: 'kontakt@udanyrejs.pl',
-      subject: 'Nowa wiadomość z formularza kontaktowego',
-      template: './contact',
-      context: {
-        name,
-        email,
-        message,
-      },
-    });
+    if (!offerURL) {
+      await this.mailerService.sendMail({
+        to: 'kontakt@udanyrejs.pl',
+        subject: 'Nowa wiadomość z formularza kontaktowego',
+        template: './contact',
+        context: {
+          name,
+          email,
+          message,
+        },
+      });
+    } else {
+      await this.mailerService.sendMail({
+        to: 'kontakt@udanyrejs.pl',
+        subject: 'Nowa wiadomość z formularza kontaktowego',
+        template: './contactWithOffer',
+        context: {
+          name,
+          email,
+          message,
+          offerURL,
+        },
+      });
+    }
 
     const emailEntity = this.emailRepository.create({
       name,
       email,
       message,
+      offerURL,
     });
-    await this.emailRepository.save(emailEntity);
+
+    return await this.emailRepository.save(emailEntity);
   }
 }

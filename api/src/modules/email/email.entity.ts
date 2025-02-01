@@ -18,6 +18,9 @@ export class Email {
   @Column({ length: 100 })
   email: string;
 
+  @Column({ length: 256, nullable: true })
+  offerURL: string;
+
   @Column({ type: 'text' })
   message: string;
 

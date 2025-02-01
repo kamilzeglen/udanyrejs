@@ -1,11 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {of, ReplaySubject, takeUntil} from 'rxjs';
+import {ReplaySubject, takeUntil} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
 import {OfferFacade} from '@state/offer';
 import {AllDeviceInfo, Itinerary, Offer} from '@interfaces';
 import {environment} from '@environment';
 import {Location} from '@angular/common';
 import {DeviceInfoService} from '@shared/device-info/device-info.service';
+import {RouterFacade} from '@state/router';
+import {PdfFileFacade} from '@state/pdfFile';
 
 @Component({
   selector: 'app-offer-details',
@@ -27,7 +29,9 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly activatedRoute: ActivatedRoute,
     private readonly offerFacade: OfferFacade,
     private readonly location: Location,
-    private readonly deviceInfoService: DeviceInfoService
+    private readonly deviceInfoService: DeviceInfoService,
+    private readonly pdfFileFacade: PdfFileFacade,
+    private readonly router: RouterFacade,
   ) {
   }
 
@@ -77,9 +81,15 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  goBack(): void {
-    this.location.back();  // Używa Angular Location do powrotu
+  public goBack(): void {
+    this.location.back();
   }
 
-  protected readonly of = of;
+  public redirectToContact(id: string): void {
+    this.router.changeRoute({linkParams: ['/contact/', id]});
+  }
+
+  public downloadPdfFile(id: string): void {
+    this.pdfFileFacade.downloadPdfFile({pdfFileId: id})
+  }
 }

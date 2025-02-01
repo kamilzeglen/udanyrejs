@@ -5,10 +5,10 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
-} from "typeorm";
-import {User} from "../user/user.entity";
-import {Roles} from "../../interfaces/roles";
+  UpdateDateColumn,
+} from 'typeorm';
+import { User } from '../user/user.entity';
+import { Roles } from '../../interfaces/roles';
 
 @Entity()
 export class Role {
