@@ -1,5 +1,5 @@
 export interface SubMenuItem {
   name: string;
-  isActive: boolean;
+  isVisible: boolean;
   url: string;
 }

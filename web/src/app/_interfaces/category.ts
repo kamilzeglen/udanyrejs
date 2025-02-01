@@ -7,6 +7,7 @@ export interface Category {
   url: string;
   position: number;
   isActive: boolean;
+  isVisible: boolean;
   offers: Offer[];
   createdBy: User,
   createdById: string
