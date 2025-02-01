@@ -30,6 +30,7 @@ export class SubMenuComponent implements OnInit, OnDestroy {
         categories$.pipe(take(1)).subscribe((categories) => {
           this.subMenuItems = categories.map(category => ({
             name: category.name,
+            isActive: category.isActive,
             url: `/offers/${category.url}`
           }));
         });
