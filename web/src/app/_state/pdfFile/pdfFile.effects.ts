@@ -45,4 +45,21 @@ export class PdfFileEffects {
     )
   )
 
+  downloadImageFile$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(pdfFileActions.downloadPdfFile),
+      switchMap(({payload}) => {
+        return this.http.downloadPdfFile(payload).pipe(
+          map((pdfBlob) => {
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            return pdfFileActions.downloadPdfFileSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(pdfFileActions.downloadPdfFileError({errorMessage}));
+          })
+        );
+      })
+    )
+  );
 }

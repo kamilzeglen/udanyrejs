@@ -22,6 +22,10 @@
         <label for="email">Email</label>
         <input id="email" formControlName="email" type="email" placeholder="Wpisz swój email" />
       </div>
+      <div class="form-group" *ngIf="contactForm.get('offer').value">
+        <label for="offer">Oferta</label>
+        <input id="offer" formControlName="offer" type="text" placeholder="" class="disabled" />
+      </div>
       <div class="form-group">
         <label for="message">Wiadomość</label>
         <textarea id="message" formControlName="message" rows="5" placeholder="Napisz swoją wiadomość"></textarea>

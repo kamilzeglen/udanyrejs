@@ -25,4 +25,9 @@ export class PdfFileHttpService {
     const url = `${this.API_URL}/pdf-file/` + payload.pdfFileType + `/` + payload.targetId ;
     return this.http.patch<PdfFile>(url, payload.formData);
   }
+
+  public downloadPdfFile(payload: { pdfFileId: string }): Observable<Blob> {
+    const url = `${this.API_URL}/pdf-file/${payload.pdfFileId}`;
+    return this.http.get(url, {responseType: 'blob'});
+  }
 }

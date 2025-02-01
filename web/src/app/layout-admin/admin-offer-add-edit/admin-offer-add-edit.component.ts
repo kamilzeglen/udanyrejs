@@ -364,7 +364,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public updatePdfFile(offerId: string): void {
     const formData = new FormData()
     formData.append('pdfFile', this.pdfFile);
-    this.pdfFileFacade.updateImageFile({pdfFileType: 'offer', targetId: offerId, formData})
+    this.pdfFileFacade.updatePdfFile({pdfFileType: 'offer', targetId: offerId, formData})
   }
 
   public deleteOffer(): void {

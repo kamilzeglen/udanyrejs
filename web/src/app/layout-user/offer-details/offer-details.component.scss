@@ -264,25 +264,75 @@
     }
   }
 
-  .back-button {
-    margin-top: 2rem;
-    text-align: center;
+    .footer-contact-box {
+      text-align: center;
+      padding: 30px 0 10px 0;
 
-    button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
+      p {
+        padding-bottom: 20px;
+        font-size: 20px;
+        font-weight: 500;
+      }
 
-      &:hover {
-        background-color: #2980b9;
+      a {
+        width: 300px;
+
+        @include media("<phone") {
+          width: 250px;
+        }
       }
     }
-  }
+
+    .footer-pdf-box {
+      text-align: center;
+
+      a {
+        width: 300px;
+
+        @include media("<phone") {
+          width: 250px;
+        }
+      }
+    }
+
+    .pdf-box {
+      @include media(">=desktop") {
+        display: none;
+      }
+
+      text-align: center;
+
+      a {
+        width: 300px;
+
+        @include media("<phone") {
+          width: 250px;
+        }
+      }
+    }
+
+    .action-button {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 15px 40px;
+      background-color: $primary-color;
+      color: white;
+      font-size: 20px;
+      font-weight: 400;
+      text-decoration: none;
+      border-radius: 15px;
+      transition: background 0.3s;
+
+      @include media("<desktop") {
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      @include media("<phone") {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
 
   .company-description,
   .ship-description {

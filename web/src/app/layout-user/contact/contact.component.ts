@@ -1,16 +1,23 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {EmailFacade} from '@state/email';
 import {ReplaySubject, takeUntil} from 'rxjs';
 import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
+import {ActivatedRoute} from '@angular/router';
+import {OfferFacade} from '@state/offer';
+import {Offer} from '@interfaces';
+import {environment} from '@environment';
 
 @Component({
   selector: 'app-contact',
   templateUrl: './contact.component.html',
   styleUrl: './contact.component.scss'
 })
-export class ContactComponent implements OnInit {
+export class ContactComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
+
+  public offer: Offer
+  public WEB_URL = environment.WEB_URL;
 
   contactForm: FormGroup;
 
@@ -33,6 +40,8 @@ export class ContactComponent implements OnInit {
     private readonly emailFacade: EmailFacade,
     private readonly fb: FormBuilder,
     private readonly snackService: SnackbarService,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly offerFacade: OfferFacade,
   ) {
   }
 
@@ -40,13 +49,32 @@ export class ContactComponent implements OnInit {
     this.contactForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      offer: [''],
       message: ['', Validators.required]
     })
+
+    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
+      const offerId = paramMap.get('offerId');
+
+      if (!offerId) {
+        return
+      }
+
+      this.offerFacade.getOffer({id: offerId});
+
+      this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
+        this.contactForm.patchValue({
+          offer: offer.name
+        })
+        this.contactForm.get('offer')?.disable();
+
+        this.offer = offer
+      })
+    });
 
     this.emailFacade.sendEmailSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo("Pomyślnie wysłąno wiadomość. Wkrótce sie odezwiemy")
     })
-
 
     this.emailFacade.sendEmailError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError("Błąd podczas wysyłania wiadomości")
@@ -60,7 +88,12 @@ export class ContactComponent implements OnInit {
 
   onSubmit() {
     if (this.contactForm.valid) {
-      this.emailFacade.sendEmail(this.contactForm.getRawValue())
+      this.emailFacade.sendEmail({
+        name: this.contactForm.get('name').value,
+        email: this.contactForm.get('email').value,
+        offerURL: this.offer ? this.WEB_URL + "/offers/details/" + this.offer.id : null,
+        message: this.contactForm.get('message').value,
+      })
     }
   }
 }

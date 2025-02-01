@@ -26,7 +26,11 @@ export class PdfFileFacade {
     this.store.dispatch(pdfFileActions.createPdfFile({payload}));
   }
 
-  public updateImageFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): void {
+  public updatePdfFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): void {
     this.store.dispatch(pdfFileActions.updatePdfFile({payload}));
+  }
+
+  public downloadPdfFile(payload: { pdfFileId: string }): void {
+    this.store.dispatch(pdfFileActions.downloadPdfFile({payload}));
   }
 }

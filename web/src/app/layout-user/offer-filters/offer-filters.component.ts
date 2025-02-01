@@ -38,7 +38,6 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    console.log(this.today)
     this.commonFacade.getCompanies();
     this.commonFacade.getDestinations();
   }

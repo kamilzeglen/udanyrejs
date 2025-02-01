@@ -149,4 +149,15 @@ export class PdfFileService {
       throw new BadRequestException('Failed to download PDF from URL');
     }
   }
+
+  getPdfPath(Id: string): string {
+    const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
+    const fileName = `${Id}.pdf`;
+
+    if (!existsSync(uploadDir)) {
+      mkdirSync(uploadDir, { recursive: true });
+    }
+
+    return path.join(uploadDir, fileName);
+  }
 }

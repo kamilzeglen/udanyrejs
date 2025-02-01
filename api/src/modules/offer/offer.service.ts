@@ -83,6 +83,7 @@ export class OfferService {
       .leftJoinAndSelect('offer.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
       .where(whereClauses.join(' AND '), whereParams)
+      .andWhere('offer.isActive = true')
       .select([
         'offer.id',
         'offer.name',
