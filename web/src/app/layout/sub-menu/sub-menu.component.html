@@ -1,6 +1,6 @@
 <div class="submenu">
   <div class="submenu-item" *ngFor="let item of subMenuItems">
-    <a *ngIf="item.isActive" routerLink="{{ (item.url).toLowerCase() }}" class="nav-link">
+    <a *ngIf="item.isVisible" routerLink="{{ (item.url).toLowerCase() }}" class="nav-link">
       <span>{{ item.name }}</span>
     </a>
   </div>

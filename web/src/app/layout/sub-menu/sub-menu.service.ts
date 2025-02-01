@@ -5,7 +5,7 @@ import {NavigationEnd, Router} from '@angular/router';
 
 export interface SubMenuItem {
   name: string;
-  isActive: boolean;
+  isVisible: boolean;
   url: string;
 }
 
@@ -20,9 +20,9 @@ export class SubMenuService implements OnDestroy {
 
   private menuConfig: { [key: string]: SubMenuItem[] } = {
     '/admin': [
-      {name: 'Oferty', isActive: true, url: '/admin/offers'},
-      {name: 'Aramtorzy', isActive: true, url: '/admin/companies'},
-      {name: 'Statki', isActive: true, url: '/admin/ships'},
+      {name: 'Oferty', isVisible: true, url: '/admin/offers'},
+      {name: 'Aramtorzy', isVisible: true, url: '/admin/companies'},
+      {name: 'Statki', isVisible: true, url: '/admin/ships'},
     ],
   };
 
