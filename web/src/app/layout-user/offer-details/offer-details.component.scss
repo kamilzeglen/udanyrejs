@@ -86,7 +86,7 @@
 
   .ship {
     padding: 1.5rem;
-    background-color: #fff;
+    background-color: $background-color;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -94,7 +94,7 @@
     .ship-details-title {
       h2 {
         font-size: 1.8rem;
-        color: #2c3e50;
+        color: $text-color;
         margin: 10px 0 40px 0;
         text-align: center;
         font-weight: 600;
@@ -153,7 +153,7 @@
   .data,
   .price {
     font-size: 1.2rem;
-    color: #555;
+    color: $text-color;
     margin: 0.5rem 0;
     text-align: center;
   }
@@ -190,7 +190,7 @@
 
     h2 {
       font-size: 1.8rem;
-      color: #2c3e50;
+      color: $text-color;
       margin-bottom: 1rem;
       text-align: center;
       font-weight: 600;
@@ -204,7 +204,7 @@
       overflow: hidden;
 
       thead {
-        background: #3498db;
+        background: $primary-color;
         color: white;
 
         th {
@@ -216,11 +216,11 @@
 
       tbody {
         tr {
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid $border-color;
           transition: background 0.3s;
 
           &:hover {
-            background: #f2f8ff;
+            background: $background-color;
           }
 
           td {
@@ -326,8 +326,8 @@
       padding: 15px 40px;
       background-color: $primary-color;
       color: white;
-      font-size: 20px;
-      font-weight: 400;
+      font-size: 18px;
+      font-weight: 500;
       text-decoration: none;
       border-radius: 15px;
       transition: background 0.3s;
