@@ -73,7 +73,7 @@ export class ContactComponent implements OnInit, OnDestroy {
     });
 
     this.emailFacade.sendEmailSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie wysłąno wiadomość. Wkrótce sie odezwiemy")
+      this.snackService.showInfo("Pomyślnie wysłąno wiadomość. Wkrótce się skontaktujemy")
     })
 
     this.emailFacade.sendEmailError$.pipe(takeUntil(this.destroy$)).subscribe(() => {

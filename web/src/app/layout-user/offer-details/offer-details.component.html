@@ -19,9 +19,9 @@
       <div class="element-label">Statek:</div>
       <div class="element-value">{{ offer.ship.name }}</div>
     </div>
-    <div class="element">
-      <div class="element-label">Cena:</div>
-      <div class="element-value">Od {{ offer.price }} Euro</div>
+    <div class="element highlight">
+      <div class="element-label">Cena od:</div>
+      <div class="element-value">{{ offer.price | currency: '&#8364;' : 'symbol' : '0.0' }}</div>
     </div>
   </div>
 
