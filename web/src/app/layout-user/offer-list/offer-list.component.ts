@@ -5,6 +5,7 @@ import {ActivatedRoute} from '@angular/router';
 import {SearchOffersPayload, SubMenuItem} from '@interfaces';
 import {CommonFacade} from '@state/common';
 import moment from 'moment-timezone';
+import {Meta, Title} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-offer-list',
@@ -31,12 +32,34 @@ export class OfferListComponent implements OnInit, OnDestroy {
     private readonly offerFacade: OfferFacade,
     private readonly commonFacade: CommonFacade,
     private readonly activatedRoute: ActivatedRoute,
+    private readonly titleService: Title,
+    private readonly metaService: Meta
   ) {
+    this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+    });
   }
 
   public ngOnInit() {
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
+      const category = paramMap.get('category')
       this.filters = {...this.filters, category: paramMap.get('category')};
+
+      if (category === 'promotions') {
+        this.titleService.setTitle('UdanyRejs - Oferty Rejsów - Promocje');
+        this.metaService.updateTag({
+          name: 'description',
+          content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+        });
+      } else {
+        this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
+        this.metaService.updateTag({
+          name: 'description',
+          content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+        });
+      }
 
       this.commonFacade.getCategories();
       this.getOffers(this.filters);

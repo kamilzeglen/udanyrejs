@@ -30,7 +30,7 @@
     </div>
 
   <div class="image-container-offer" *ngIf="offer.imageFile?.name">
-    <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie oferty" class="offer-image"/>
+    <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie oferty - {{offer.name}}" class="offer-image"/>
   </div>
 
   <div class="itinerary-section" *ngIf="itineraryData">
@@ -89,7 +89,7 @@
   <div class="ship-description" *ngIf="offer.ship?.description" [innerHTML]="offer.ship.description"></div>
 
   <div class="image-container-ship" *ngIf="offer.ship?.imageFile?.name">
-    <img [src]="API_URL + '/ships/images/' + offer.ship.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
+    <img [src]="API_URL + '/ships/images/' + offer.ship.imageFile.name" alt="Zdjęcie statku - {{offer.ship.name}}" class="ship-image"/>
   </div>
 
   <div class="ship">

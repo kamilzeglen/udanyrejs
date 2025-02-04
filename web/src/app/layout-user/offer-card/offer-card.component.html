@@ -4,12 +4,12 @@
 
   <!-- Logo firmy -->
   <div class="logo-container" *ngIf="offer.company?.imageFile?.name">
-    <img src="{{API_URL + '/companies/images/' + offer.company.imageFile.name}}" alt="Logo firmy" class="company-logo"/>
+    <img src="{{API_URL + '/companies/images/' + offer.company.imageFile.name}}" alt="Logo armatora - {{offer.company.name}}" class="company-logo"/>
   </div>
 
   <!-- Zdjęcie -->
   <div class="image-container" *ngIf="offer.imageFile">
-    <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt="Zdjęcie statku" class="ship-image"/>
+    <img [src]="API_URL + '/offers/images/' + offer.imageFile.name" alt='Zdjęcie oferty - {{offer.name}}' class="ship-image"/>
   </div>
 
   <!-- Opis oferty -->
