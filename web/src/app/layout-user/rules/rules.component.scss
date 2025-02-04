@@ -1,0 +1,61 @@
+@import '../../../scss/variables';
+
+.regulamin {
+  padding: 40px 20px;
+  background-color: #f8f9fa;
+  color: #333;
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 20px;
+    color: $primary-color;
+    font-weight: 600;
+  }
+
+  .updated-date {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 22px;
+    margin-top: 25px;
+    color: $primary-color;
+    border-bottom: 2px solid $primary-color;
+    padding-bottom: 5px;
+  }
+
+  h3 {
+    font-size: 18px;
+    margin-top: 20px;
+    color: $primary-color;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 10px 0;
+  }
+
+  a {
+    color: $primary-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

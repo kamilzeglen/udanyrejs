@@ -8,6 +8,7 @@ import {Location} from '@angular/common';
 import {DeviceInfoService} from '@shared/device-info/device-info.service';
 import {RouterFacade} from '@state/router';
 import {PdfFileFacade} from '@state/pdfFile';
+import {Meta, Title} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-offer-details',
@@ -32,7 +33,15 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly deviceInfoService: DeviceInfoService,
     private readonly pdfFileFacade: PdfFileFacade,
     private readonly router: RouterFacade,
+    private readonly titleService: Title,
+    private readonly metaService: Meta
   ) {
+    this.titleService.setTitle(`UdanyRejs - Szczegóły oferty`);
+    this.metaService.updateTag({
+      name: 'description',
+      content: `Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`
+    });
+
   }
 
   ngOnInit() {
@@ -42,9 +51,16 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       this.deviceInfo = info;
     });
 
-    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe((offer) => {
-      this.offer = offer.offer;
+    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
+      this.offer = offer;
       this.loading = false;
+
+      this.titleService.setTitle(`UdanyRejs - ${offer.name} `);
+      this.metaService.updateTag({
+        name: 'description',
+        content: `Sprawdź szczegóły rejsu: ${offer.name}. Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`
+      });
+
 
       const itineraryData = typeof this.offer.itinerary === 'string'
         ? JSON.parse(this.offer.itinerary)

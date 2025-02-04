@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {Meta, Title} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-about-us',
@@ -6,6 +7,15 @@ import {Component} from '@angular/core';
   styleUrl: './about-us.component.scss'
 })
 export class AboutUsComponent {
+
+  constructor(private titleService: Title, private metaService: Meta) {
+    this.titleService.setTitle('UdanyRejs - O nas');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Poznaj naszą firmę i naszą misję. UdanyRejs to lider w organizacji luksusowych rejsów wycieczkowych.'
+    });
+  }
+
   officeAddress = {
     street: 'Słowackiego 90',
     city: '32-400 Myślenice'

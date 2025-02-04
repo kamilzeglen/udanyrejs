@@ -7,6 +7,7 @@ import {ActivatedRoute} from '@angular/router';
 import {OfferFacade} from '@state/offer';
 import {Offer} from '@interfaces';
 import {environment} from '@environment';
+import {Meta, Title} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-contact',
@@ -42,7 +43,14 @@ export class ContactComponent implements OnInit, OnDestroy {
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly offerFacade: OfferFacade,
+    private readonly titleService: Title,
+    private readonly metaService: Meta
   ) {
+    this.titleService.setTitle('UdanyRejs - Kontakt');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Masz pytania? Skontaktuj się z nami! Jesteśmy do Twojej dyspozycji, aby pomóc Ci znaleźć idealny rejs.'
+    });
   }
 
   public ngOnInit() {

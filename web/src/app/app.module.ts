@@ -11,7 +11,7 @@ import {JwtModule} from '@auth0/angular-jwt';
 import {AuthGuard} from '@core/_guard/auth-guard.service';
 import {SharedModule} from '@shared/shared.module';
 import {AppRoutingModule} from './app-routing.module';
-import {MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import {MAT_DATE_FORMATS} from '@angular/material/core';
 import {LayoutComponent} from './layout/layout.component';
 import {NavbarComponent} from './layout/navbar/navbar.component';
 import {FooterComponent} from './layout/footer/footer.component';
