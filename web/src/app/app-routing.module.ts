@@ -14,6 +14,8 @@ const routes: Routes = [
         path: 'admin',
         loadChildren: () => import('./layout-admin/layout-admin.module').then(m => m.LayoutAdminModule),
       },
+      { path: 'sitemap.xml', redirectTo: '', pathMatch: 'full' },
+      { path: 'robots.txt', redirectTo: '', pathMatch: 'full' },
       {path: '**', redirectTo: 'offers'},
     ],
   },
