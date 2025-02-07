@@ -8,16 +8,16 @@ app-spinner {
   height: 5vw;
 
   @include media("<=phone") {
-    width: 50%;  // Przykład zmiany szerokości na mniejszą na telefonach
+    width: 50%;
     height: 50%;
   }
 }
 
 .spinner {
-  border: 5px solid rgba(0, 0, 0, 0.1); /* Zewnętrzna obwódka */
-  border-top: 5px solid $primary-color; /* Zmiana koloru animowanej obwódki */
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-top: 5px solid $primary-color;
   border-radius: 50%;
-  animation: spin 2s linear infinite;  // Przykład zmiany czasu animacji
+  animation: spin 2s linear infinite;
 }
 
 
