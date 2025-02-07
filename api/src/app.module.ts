@@ -18,6 +18,8 @@ import { DestinationModule } from '@modules/destination/destination.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailModule } from '@modules/email/email.module';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -86,6 +88,8 @@ import { EmailModule } from '@modules/email/email.module';
     PdfFileModule,
     ShipModule,
     EmailModule,
+    TerminusModule,
+    HttpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

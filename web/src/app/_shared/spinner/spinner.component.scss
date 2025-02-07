@@ -1,11 +1,25 @@
 @import '../../../scss/variables.scss';
+@import '../../../scss/breakpoints.scss';
+
+app-spinner {
+  display: block;
+  margin: 0 auto;
+  width: 5vw;
+  height: 5vw;
+
+  @include media("<=phone") {
+    width: 50%;  // Przykład zmiany szerokości na mniejszą na telefonach
+    height: 50%;
+  }
+}
 
 .spinner {
   border: 5px solid rgba(0, 0, 0, 0.1); /* Zewnętrzna obwódka */
-  border-top: 5px solid $tertiary-color; /* Animowana obwódka */
-  border-radius: 50%; /* Zaokrąglenie */
-  animation: spin 1s linear infinite;
+  border-top: 5px solid $primary-color; /* Zmiana koloru animowanej obwódki */
+  border-radius: 50%;
+  animation: spin 2s linear infinite;  // Przykład zmiany czasu animacji
 }
+
 
 @keyframes spin {
   from {
