@@ -1,0 +1,44 @@
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  color: #721c24;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+
+  .error-icon {
+    height: 100px;
+    font-size: 80px;
+  }
+
+  h1 {
+    height: 40px;
+    margin: 10px 0;
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    max-width: 400px;
+  }
+
+  button {
+    margin-top: 20px;
+    margin-bottom: 20%;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    background-color: #721c24;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+
+    &:hover {
+      background-color: #a94442;
+    }
+  }
+}

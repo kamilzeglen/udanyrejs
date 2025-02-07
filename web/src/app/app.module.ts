@@ -17,6 +17,7 @@ import {NavbarComponent} from './layout/navbar/navbar.component';
 import {FooterComponent} from './layout/footer/footer.component';
 import {CoreModule} from '@core/core.module';
 import { DatepickerCustomHeaderComponent } from '@shared/datepicker-custom-header/datepicker-custom-header.component';
+import { ErrorComponent } from './layout/error/error.component';
 
 registerLocaleData(pl);
 
@@ -51,6 +52,7 @@ const guards = [
   declarations: [
     ...components,
     DatepickerCustomHeaderComponent,
+    ErrorComponent,
   ],
   imports: [
     StoreModule.forRoot(reducers),
