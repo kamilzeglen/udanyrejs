@@ -24,11 +24,13 @@ export class SubMenuComponent implements OnInit, OnDestroy {
     this.subscription = this.subMenuService.subMenuItems$.subscribe((items) => {
 
       if (items && items.length > 0) {
-        this.subMenuItems = structuredClone(items);
+        this.subMenuItems = structuredClone(items).filter(item => item.isVisible);
       } else {
-        const categories$ = this.commonFacade.getCategories$()
+        const categories$ = this.commonFacade.getCategories$();
         categories$.pipe(take(1)).subscribe((categories) => {
-          this.subMenuItems = categories.map(category => ({
+          this.subMenuItems = categories
+            .filter(category => category.isVisible)
+            .map(category => ({
             name: category.name,
             isVisible: category.isVisible,
             url: `/offers/${category.url}`
