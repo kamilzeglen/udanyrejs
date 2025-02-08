@@ -19,7 +19,7 @@ export class PdfFileHttpService {
   public createPdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): Observable<PdfFile> {
     const url = `${this.API_URL}/pdf-file/` + payload.pdfFileType + `/` + payload.targetId ;
     if (payload.pdfUrl) {
-      return this.http.post<ImageFile>(url, {imageUrl: payload.pdfUrl});
+      return this.http.post<ImageFile>(url, {pdfUrl: payload.pdfUrl});
     }
     else {
       return this.http.post<ImageFile>(url, payload.file);
@@ -29,7 +29,7 @@ export class PdfFileHttpService {
   public updatePdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): Observable<PdfFile> {
     const url = `${this.API_URL}/pdf-file/` + payload.pdfFileType + `/` + payload.targetId ;
     if (payload.pdfUrl) {
-      return this.http.patch<PdfFile>(url, {imageUrl: payload.pdfUrl});
+      return this.http.patch<PdfFile>(url, {pdfUrl: payload.pdfUrl});
     } else {
       return this.http.put<PdfFile>(url, payload.file);
     }
