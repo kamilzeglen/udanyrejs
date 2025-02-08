@@ -23,16 +23,19 @@ export class InitDB1733920136881 implements MigrationInterface {
       `CREATE TABLE "category" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "url" character varying NOT NULL, "position" integer, "isActive" boolean NOT NULL DEFAULT true, "isVisible" boolean NOT NULL DEFAULT true, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_9c4e4a89e3674fc9f382d733f03" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "offer" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "offerUrl" character varying, "syncData" boolean NOT NULL DEFAULT false, "isPromotion" boolean NOT NULL DEFAULT false, "companyId" uuid NOT NULL, "shipId" uuid NOT NULL, "price" numeric NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "imageFileId" uuid, "pdfFileId" uuid, "itinerary" json, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "REL_09a60e20a02a56c92e6ed9b171" UNIQUE ("imageFileId"), CONSTRAINT "REL_0c702471989d167d3f17a4d0ae" UNIQUE ("pdfFileId"), CONSTRAINT "PK_57c6ae1abe49201919ef68de900" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "share_stats" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "offerId" character varying NOT NULL, "facebookClicks" integer NOT NULL DEFAULT '0', "instagramClicks" integer NOT NULL DEFAULT '0', "tiktokClicks" integer NOT NULL DEFAULT '0', CONSTRAINT "PK_2469fbf238b41b1edbf02416a3a" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "offer" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "offerUrl" character varying, "syncData" boolean NOT NULL DEFAULT false, "isPromotion" boolean NOT NULL DEFAULT false, "companyId" uuid NOT NULL, "shipId" uuid NOT NULL, "price" numeric NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "imageFileId" uuid, "pdfFileId" uuid, "itinerary" json, "sharedStatId" uuid, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, "shareStatsId" uuid, CONSTRAINT "REL_09a60e20a02a56c92e6ed9b171" UNIQUE ("imageFileId"), CONSTRAINT "REL_0c702471989d167d3f17a4d0ae" UNIQUE ("pdfFileId"), CONSTRAINT "REL_3dd4dca033ce2aa12e535ae08f" UNIQUE ("shareStatsId"), CONSTRAINT "PK_57c6ae1abe49201919ef68de900" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "company" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(100) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "key" character varying(100) NOT NULL, "description" text, "priceIncludes" json, "priceExcludes" json, "imageFileId" uuid, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "UQ_cdeeadf4df87a1b2932dc76ccbd" UNIQUE ("key"), CONSTRAINT "REL_9f803ab1c09ba30259926fc606" UNIQUE ("imageFileId"), CONSTRAINT "PK_056f7854a7afdba7cbd6d45fc20" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "ship" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(100) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "description" text, "yearBuilt" integer, "renovation" integer, "speed" integer, "length" numeric, "width" numeric, "tonnage" numeric, "passengersDecks" integer, "passengers" integer, "crew" integer, "currency" character varying(10), "companyId" uuid NOT NULL, "imageFileId" uuid, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "REL_43fee135257c5903f36ee5d310" UNIQUE ("imageFileId"), CONSTRAINT "PK_136d2c1d431c06ed161e6281661" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "ship" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(100) NOT NULL, "isActive" boolean NOT NULL DEFAULT true, "description" text, "yearBuilt" integer, "renovation" integer, "speed" double precision, "length" numeric, "width" numeric, "tonnage" numeric, "passengersDecks" integer, "passengers" integer, "crew" integer, "currency" character varying(10), "companyId" uuid NOT NULL, "imageFileId" uuid, "createdById" uuid, "updatedById" uuid, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "REL_43fee135257c5903f36ee5d310" UNIQUE ("imageFileId"), CONSTRAINT "PK_136d2c1d431c06ed161e6281661" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "email" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(100) NOT NULL, "email" character varying(100) NOT NULL, "message" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_1e7ed8734ee054ef18002e29b1c" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "email" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(100) NOT NULL, "email" character varying(100) NOT NULL, "offerURL" character varying(256), "message" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_1e7ed8734ee054ef18002e29b1c" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "offer_destinations" ("offerId" uuid NOT NULL, "destinationId" uuid NOT NULL, CONSTRAINT "PK_305646b4184f48589858db85e21" PRIMARY KEY ("offerId", "destinationId"))`,
@@ -90,6 +93,9 @@ export class InitDB1733920136881 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "offer" ADD CONSTRAINT "FK_0c702471989d167d3f17a4d0aeb" FOREIGN KEY ("pdfFileId") REFERENCES "pdf_file"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "offer" ADD CONSTRAINT "FK_3dd4dca033ce2aa12e535ae08f1" FOREIGN KEY ("shareStatsId") REFERENCES "share_stats"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "offer" ADD CONSTRAINT "FK_8ba57e6c9eb4defe589ee1f9283" FOREIGN KEY ("createdById") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -173,6 +179,9 @@ export class InitDB1733920136881 implements MigrationInterface {
       `ALTER TABLE "offer" DROP CONSTRAINT "FK_8ba57e6c9eb4defe589ee1f9283"`,
     );
     await queryRunner.query(
+      `ALTER TABLE "offer" DROP CONSTRAINT "FK_3dd4dca033ce2aa12e535ae08f1"`,
+    );
+    await queryRunner.query(
       `ALTER TABLE "offer" DROP CONSTRAINT "FK_0c702471989d167d3f17a4d0aeb"`,
     );
     await queryRunner.query(
@@ -229,6 +238,7 @@ export class InitDB1733920136881 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE "ship"`);
     await queryRunner.query(`DROP TABLE "company"`);
     await queryRunner.query(`DROP TABLE "offer"`);
+    await queryRunner.query(`DROP TABLE "share_stats"`);
     await queryRunner.query(`DROP TABLE "category"`);
     await queryRunner.query(`DROP TABLE "destination"`);
     await queryRunner.query(`DROP TABLE "image_file"`);

@@ -6,6 +6,7 @@ import {LoginComponent} from './login/login.component';
 import {ContactComponent} from './contact/contact.component';
 import {AboutUsComponent} from './about-us/about-us.component';
 import {RulesComponent} from './rules/rules.component';
+import {ShareStatsComponent} from './share-stats/share-stats.component';
 
 const routes: Routes = [
   {path: '', component: OfferListComponent},
@@ -16,6 +17,7 @@ const routes: Routes = [
   {path: 'contact', component: ContactComponent},
   {path: 'contact/:offerId', component: ContactComponent},
   {path: 'about-us', component: AboutUsComponent},
+  {path: 'share/:platform/:offerId', component: ShareStatsComponent},
   {path: 'rules', component: RulesComponent},
 ];
 

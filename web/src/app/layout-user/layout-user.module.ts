@@ -9,6 +9,7 @@ import {OfferCardComponent} from './offer-card/offer-card.component';
 import {AboutUsComponent} from './about-us/about-us.component';
 import {OfferFiltersComponent} from './offer-filters/offer-filters.component';
 import {RulesComponent} from './rules/rules.component';
+import {ShareStatsComponent} from './share-stats/share-stats.component';
 
 const components = [
   OfferListComponent,
@@ -18,7 +19,8 @@ const components = [
   ContactComponent,
   AboutUsComponent,
   OfferFiltersComponent,
-  RulesComponent
+  RulesComponent,
+  ShareStatsComponent
 ];
 
 @NgModule({
