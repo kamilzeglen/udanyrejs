@@ -199,13 +199,13 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
   public createImageFile(companyId: string): void {
     const formData = new FormData()
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.createImageFile({imageFileType: 'company', targetId: companyId, formData})
+    this.imageFileFacade.createImageFile({imageFileType: 'company', targetId: companyId, file: formData})
   }
 
   public updateImageFile(companyId: string): void {
     const formData = new FormData()
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.updateImageFile({imageFileType: 'company', targetId: companyId, formData})
+    this.imageFileFacade.updateImageFile({imageFileType: 'company', targetId: companyId, file: formData})
   }
 
   public deleteCompany(): void {

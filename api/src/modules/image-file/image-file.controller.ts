@@ -31,7 +31,7 @@ export class ImageFileController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: { user: any },
   ): Promise<ImageFile> {
-    if (!file && !createImageFileDto.imageFile) {
+    if (!file && !createImageFileDto.imageUrl) {
       throw new BadRequestException(
         'No file provided. Please upload a valid file or url.',
       );
@@ -39,13 +39,12 @@ export class ImageFileController {
 
     let imageFile: Express.Multer.File | string;
 
-    if (createImageFileDto.imageFile) {
-      // Jeśli przesłano URL, pobieramy obraz
+    if (createImageFileDto.imageUrl) {
       imageFile = await this.imageFileService.downloadImageFromUrl(
-        createImageFileDto.imageFile,
+        createImageFileDto.imageUrl,
       );
     } else {
-      imageFile = file; // Jeśli przesłano plik, używamy go
+      imageFile = file;
     }
 
     return this.imageFileService.createImageFile(

@@ -22,11 +22,11 @@ export class PdfFileFacade {
   ) {
   }
 
-  public createPdfFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): void {
+  public createPdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): void {
     this.store.dispatch(pdfFileActions.createPdfFile({payload}));
   }
 
-  public updatePdfFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): void {
+  public updatePdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): void {
     this.store.dispatch(pdfFileActions.updatePdfFile({payload}));
   }
 

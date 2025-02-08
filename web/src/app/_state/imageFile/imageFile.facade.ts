@@ -22,11 +22,11 @@ export class ImageFileFacade {
   ) {
   }
 
-  public createImageFile(payload: { imageFileType: string, targetId: string, formData: FormData }): void {
+  public createImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): void {
     this.store.dispatch(imageFileActions.createImageFile({payload}));
   }
 
-  public updateImageFile(payload: { imageFileType: string, targetId: string, formData: FormData }): void {
+  public updateImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): void {
     this.store.dispatch(imageFileActions.updateImageFile({payload}));
   }
 }

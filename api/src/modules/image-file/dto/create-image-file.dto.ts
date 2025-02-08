@@ -1,6 +1,20 @@
-import { IsString } from 'class-validator';
+import {
+  IsInstance,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateImageFileDto {
+  @ValidateIf((o) => !o.file)
   @IsString()
-  imageFile?: string;
+  @IsUrl()
+  @IsOptional()
+  imageUrl?: string;
+
+  @ValidateIf((o) => !o.imageUrl)
+  @IsInstance(Object)
+  @IsOptional()
+  file?: Express.Multer.File;
 }
