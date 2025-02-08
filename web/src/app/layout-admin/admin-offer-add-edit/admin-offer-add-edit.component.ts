@@ -37,10 +37,12 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public scrappedData: boolean;
 
-  public imageFile: File | string
+  public imageFile: File
+  public imageUrl: string
   public scrappedImageFile: boolean
 
-  public pdfFile: File | string
+  public pdfFile: File
+  public pdfUrl: string
   public scrappedPdfFile: boolean
 
   constructor(
@@ -133,14 +135,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         switchMap(({offer}) => {
           const observables: Observable<boolean>[] = [];
 
-          if (this.imageFile) {
+          if (this.imageFile || this.imageUrl) {
             this.createImageFile(offer.id);
             const createImageSuccess$ = this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true));
             const createImageError$ = this.imageFileFacade.createImageFileError$.pipe(map(() => false));
             observables.push(merge(createImageSuccess$, createImageError$));
           }
 
-          if (this.pdfFile) {
+          if (this.pdfFile || this.pdfUrl) {
             this.createPdfFile(offer.id);
             const createPdfSuccess$ = this.pdfFileFacade.createPdfFileSuccess$.pipe(map(() => true));
             const createPdfError$ = this.pdfFileFacade.createPdfFileError$.pipe(map(() => false));
@@ -172,14 +174,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         switchMap(({offer}) => {
           const observables: Observable<boolean>[] = [];
 
-          if (this.imageFile) {
+          if (this.imageFile || this.imageUrl) {
             this.updateImageFile(offer.id);
             const updateImageSuccess$ = this.imageFileFacade.updateImageFileSuccess$.pipe(map(() => true));
             const updateImageError$ = this.imageFileFacade.updateImageFileError$.pipe(map(() => false));
             observables.push(merge(updateImageSuccess$, updateImageError$));
           }
 
-          if (this.pdfFile) {
+          if (this.pdfFile || this.pdfUrl) {
             this.updatePdfFile(offer.id);
             const updatePdfSuccess$ = this.pdfFileFacade.updatePdfFileSuccess$.pipe(map(() => true));
             const updatePdfError$ = this.pdfFileFacade.updatePdfFileError$.pipe(map(() => false));
@@ -230,12 +232,12 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
       if (offer.scrappedImageFileURL) {
         this.scrappedImageFile = true
-        this.imageFile = offer.scrappedImageFileURL
+        this.imageUrl = offer.scrappedImageFileURL
       }
 
       if (offer.scrappedPdfFileURL) {
         this.scrappedPdfFile = true
-        this.pdfFile = offer.scrappedPdfFileURL
+        this.pdfUrl = offer.scrappedPdfFileURL
       }
 
       this.patchValues(offer)
@@ -344,27 +346,83 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   }
 
   public createImageFile(offerId: string): void {
-    const formData = new FormData()
-    formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.createImageFile({imageFileType: 'offer', targetId: offerId, formData})
+    if (this.imageUrl) {
+      this.imageFileFacade.createImageFile({
+        imageFileType: 'offer',
+        targetId: offerId,
+        imageUrl: this.imageUrl
+      });
+    }
+    if (this.imageFile) {
+      const formData = new FormData();
+      formData.append('imageFile', this.imageFile);
+
+      this.imageFileFacade.createImageFile({
+        imageFileType: 'offer',
+        targetId: offerId,
+        file: formData
+      });
+    }
   }
 
   public createPdfFile(offerId: string): void {
-    const formData = new FormData()
-    formData.append('pdfFile', this.pdfFile);
-    this.pdfFileFacade.createPdfFile({pdfFileType: 'offer', targetId: offerId, formData})
+    if (this.pdfUrl) {
+      this.pdfFileFacade.createPdfFile({
+        pdfFileType: 'offer',
+        targetId: offerId,
+        pdfUrl: this.pdfUrl
+      });
+    }
+    if (this.pdfFile) {
+      const formData = new FormData();
+      formData.append('pdfFile', this.pdfFile);
+
+      this.pdfFileFacade.createPdfFile({
+        pdfFileType: 'offer',
+        targetId: offerId,
+        file: formData
+      });
+    }
   }
 
   public updateImageFile(offerId: string): void {
-    const formData = new FormData()
-    formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.updateImageFile({imageFileType: 'offer', targetId: offerId, formData})
+    if (this.imageUrl) {
+      this.imageFileFacade.updateImageFile({
+        imageFileType: 'offer',
+        targetId: offerId,
+        imageUrl: this.imageUrl
+      });
+    }
+    if (this.imageFile) {
+      const formData = new FormData();
+      formData.append('imageFile', this.imageFile);
+
+      this.imageFileFacade.updateImageFile({
+        imageFileType: 'offer',
+        targetId: offerId,
+        file: formData
+      });
+    }
   }
 
   public updatePdfFile(offerId: string): void {
-    const formData = new FormData()
-    formData.append('pdfFile', this.pdfFile);
-    this.pdfFileFacade.updatePdfFile({pdfFileType: 'offer', targetId: offerId, formData})
+    if (this.pdfUrl) {
+      this.pdfFileFacade.updatePdfFile({
+        pdfFileType: 'offer',
+        targetId: offerId,
+        pdfUrl: this.pdfUrl
+      });
+    }
+    if (this.pdfFile) {
+      const formData = new FormData();
+      formData.append('pdfFile', this.pdfFile);
+
+      this.pdfFileFacade.updatePdfFile({
+        pdfFileType: 'offer',
+        targetId: offerId,
+        file: formData
+      });
+    }
   }
 
   public deleteOffer(): void {

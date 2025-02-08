@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '@environment';
-import {PdfFile} from '../../_interfaces/file';
+import {ImageFile, PdfFile} from '../../_interfaces/file';
 
 @Injectable({
   providedIn: 'root'
@@ -16,14 +16,23 @@ export class PdfFileHttpService {
   ) {
   }
 
-  public createPdfFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): Observable<PdfFile> {
+  public createPdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): Observable<PdfFile> {
     const url = `${this.API_URL}/pdf-file/` + payload.pdfFileType + `/` + payload.targetId ;
-    return this.http.post<PdfFile>(url, payload.formData);
+    if (payload.pdfUrl) {
+      return this.http.post<ImageFile>(url, payload.pdfUrl);
+    }
+    else {
+      return this.http.post<ImageFile>(url, payload.file);
+    }
   }
 
-  public updatePdfFile(payload: { pdfFileType: string, targetId: string, formData: FormData }): Observable<PdfFile> {
+  public updatePdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): Observable<PdfFile> {
     const url = `${this.API_URL}/pdf-file/` + payload.pdfFileType + `/` + payload.targetId ;
-    return this.http.patch<PdfFile>(url, payload.formData);
+    if (payload.pdfUrl) {
+      return this.http.patch<PdfFile>(url, payload.pdfUrl)
+    } else {
+      return this.http.put<PdfFile>(url, payload.file);
+    }
   }
 
   public downloadPdfFile(payload: { pdfFileId: string }): Observable<Blob> {

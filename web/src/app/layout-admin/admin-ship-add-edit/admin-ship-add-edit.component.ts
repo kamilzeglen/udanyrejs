@@ -191,13 +191,13 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
   public createImageFile(shipId: string): void {
     const formData = new FormData()
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.createImageFile({imageFileType: 'ship', targetId: shipId, formData})
+    this.imageFileFacade.createImageFile({imageFileType: 'ship', targetId: shipId, file: formData})
   }
 
   public updateImageFile(shipId: string): void {
     const formData = new FormData()
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.updateImageFile({imageFileType: 'ship', targetId: shipId, formData})
+    this.imageFileFacade.updateImageFile({imageFileType: 'ship', targetId: shipId, file: formData})
   }
 
   public deleteShip(): void {

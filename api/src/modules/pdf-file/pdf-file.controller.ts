@@ -35,7 +35,7 @@ export class PdfFileController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: { user: any },
   ): Promise<PdfFile> {
-    if (!file && !createPdfFileDto.pdfFile) {
+    if (!file && !createPdfFileDto.pdfUrl) {
       throw new BadRequestException(
         'No file provided. Please upload a valid file or url.',
       );
@@ -43,13 +43,12 @@ export class PdfFileController {
 
     let pdfFile: Express.Multer.File | string;
 
-    if (createPdfFileDto.pdfFile) {
-      // Jeśli przesłano URL, pobieramy obraz
+    if (createPdfFileDto.pdfUrl) {
       pdfFile = await this.pdfFileService.downloadPdfFromUrl(
-        createPdfFileDto.pdfFile,
+        createPdfFileDto.pdfUrl,
       );
     } else {
-      pdfFile = file; // Jeśli przesłano plik, używamy go
+      pdfFile = file;
     }
 
     return this.pdfFileService.createPdfFile(
