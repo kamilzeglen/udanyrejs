@@ -19,7 +19,7 @@ export class ImageFileHttpService {
   public createImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): Observable<ImageFile> {
     const url = `${this.API_URL}/image-file/` + payload.imageFileType + `/` + payload.targetId ;
     if (payload.imageUrl) {
-      return this.http.post<ImageFile>(url, payload.imageUrl);
+      return this.http.post<ImageFile>(url, {imageUrl: payload.imageUrl});
     }
     else {
       return this.http.post<ImageFile>(url, payload.file);
@@ -29,7 +29,7 @@ export class ImageFileHttpService {
   public updateImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): Observable<ImageFile> {
     const url = `${this.API_URL}/image-file/` + payload.imageFileType + `/` + payload.targetId ;
     if (payload.imageUrl) {
-      return this.http.patch<ImageFile>(url, payload.imageUrl);
+      return this.http.patch<ImageFile>(url, {imageUrl: payload.imageUrl});
     } else {
       return this.http.patch<ImageFile>(url, payload.file);
     }
