@@ -18,6 +18,7 @@ import { CategoryService } from '@modules/category/category.service';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
+import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 
 @Injectable()
 export class OfferService {
@@ -32,6 +33,7 @@ export class OfferService {
     private readonly shipService: ShipService,
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
+    private readonly shareStatsService: ShareStatsService,
   ) {}
 
   async searchOffers(searchOffersDto: SearchOffersDto): Promise<Offer[]> {
@@ -142,25 +144,29 @@ export class OfferService {
     const company = await this.companyService.findOneById(companyId);
     const ship = await this.shipService.findOneById(shipId);
 
-    const offer: Offer = this.offerRepository.create({
-      ...createUserData,
+    let offer = new Offer();
+    Object.assign(offer, createUserData, {
       company,
       ship,
       createdBy: requestUser,
     });
 
-    const savedOffer = await this.offerRepository.save(offer);
+    offer = await this.offerRepository.save(offer);
 
-    if (categories && categories.length > 0) {
-      savedOffer.categories = await this.categoryService.findByIds(categories);
+    const shareStats = await this.shareStatsService.createForOffer(offer);
+
+    offer.sharedStatId = shareStats.id;
+    offer = await this.offerRepository.save(offer);
+
+    if (categories?.length) {
+      offer.categories = await this.categoryService.findByIds(categories);
     }
-
-    if (destinations && destinations.length > 0) {
-      savedOffer.destinations =
+    if (destinations?.length) {
+      offer.destinations =
         await this.destinationService.findByIds(destinations);
     }
 
-    return this.offerRepository.save(savedOffer);
+    return this.offerRepository.save(offer);
   }
 
   async updateOffer(

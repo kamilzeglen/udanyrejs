@@ -165,7 +165,7 @@
       Usuń ofertę
     </button>
 
-    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid || (!imageFile && !editingOffer?.imageFile?.name) || (!pdfFile && !editingOffer?.pdfFile?.name)">
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid || ((!imageFile && !imageUrl) && !editingOffer?.imageFile?.name) || ((!pdfFile && !pdfUrl) && !editingOffer?.pdfFile?.name)">
       {{ mode === 'ADD' ? "Dodaj ofertę" : "Zaktualizuj ofertę" }}
     </button>
   </form>

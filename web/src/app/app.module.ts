@@ -16,8 +16,8 @@ import {LayoutComponent} from './layout/layout.component';
 import {NavbarComponent} from './layout/navbar/navbar.component';
 import {FooterComponent} from './layout/footer/footer.component';
 import {CoreModule} from '@core/core.module';
-import { DatepickerCustomHeaderComponent } from '@shared/datepicker-custom-header/datepicker-custom-header.component';
-import { ErrorComponent } from './layout/error/error.component';
+import {DatepickerCustomHeaderComponent} from '@shared/datepicker-custom-header/datepicker-custom-header.component';
+import {ErrorComponent} from './layout/error/error.component';
 
 registerLocaleData(pl);
 
@@ -41,8 +41,13 @@ const components = [
   AppComponent,
   LayoutComponent,
   NavbarComponent,
-  FooterComponent
+  FooterComponent,
+  ErrorComponent
 ];
+
+const others = [
+  DatepickerCustomHeaderComponent
+]
 
 const guards = [
   AuthGuard,
@@ -51,8 +56,7 @@ const guards = [
 @NgModule({
   declarations: [
     ...components,
-    DatepickerCustomHeaderComponent,
-    ErrorComponent,
+    ...others,
   ],
   imports: [
     StoreModule.forRoot(reducers),

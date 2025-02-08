@@ -35,7 +35,7 @@ export class Ship {
   @Column({ type: 'int', nullable: true })
   renovation: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'float', nullable: true })
   speed: number;
 
   @Column({ type: 'decimal', nullable: true })
