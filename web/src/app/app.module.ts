@@ -18,6 +18,8 @@ import {FooterComponent} from './layout/footer/footer.component';
 import {CoreModule} from '@core/core.module';
 import {DatepickerCustomHeaderComponent} from '@shared/datepicker-custom-header/datepicker-custom-header.component';
 import {ErrorComponent} from './layout/error/error.component';
+import {MatPaginatorIntl} from '@angular/material/paginator';
+import {MatPaginatorIntlPolish} from '@shared/matPaginatorIntlPolish';
 
 registerLocaleData(pl);
 
@@ -77,7 +79,9 @@ const guards = [
     provideAnimationsAsync(),
     // { provide: MAT_DATE_LOCALE, useValue: 'pl-PL' },
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
-    { provide: LOCALE_ID, useValue: 'pl' }],
+    {provide: LOCALE_ID, useValue: 'pl'},
+    {provide: MatPaginatorIntl, useClass: MatPaginatorIntlPolish}
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

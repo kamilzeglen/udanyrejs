@@ -5,4 +5,5 @@ import {OfferState} from './offer.state';
 export const selectOffersState = createFeatureSelector<OfferState>('offer');
 
 export const selectOffers = createSelector(selectOffersState, state => state.offers);
+export const selectOffersAmount = createSelector(selectOffersState, state => state.offersAmount);
 export const selectLoading = createSelector(selectOffersState, state => state.loading);

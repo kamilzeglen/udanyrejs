@@ -12,4 +12,12 @@ export class OfferCardComponent {
   @Input() offer: Offer;
 
   public API_URL = environment.API_URL;
+
+  public isNewOffer(createdAt: Date): boolean {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const offerDate = new Date(createdAt);
+
+    return offerDate >= threeDaysAgo;
+  }
 }

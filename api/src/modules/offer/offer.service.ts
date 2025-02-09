@@ -36,22 +36,39 @@ export class OfferService {
     private readonly shareStatsService: ShareStatsService,
   ) {}
 
-  async searchOffers(searchOffersDto: SearchOffersDto): Promise<Offer[]> {
-    const whereClauses: string[] = [];
+  async searchOffers(
+    searchOffersDto: SearchOffersDto,
+  ): Promise<{ offers: Offer[]; totalCount: number }> {
+    const whereClauses: string[] = ['offer.isActive = true'];
     const whereParams: ObjectLiteral = {};
-    const { category, startDate, endDate, destinationIdList, companyIdList } =
-      searchOffersDto;
+    const {
+      page,
+      category,
+      startDate,
+      endDate,
+      destinationIdList,
+      companyIdList,
+    } = searchOffersDto;
 
-    const dbQuery = this.offerRepository.createQueryBuilder('offer');
+    const sortDirection = 'DESC';
+    const itemsPerPage = 10;
+    let offset: number | undefined;
 
-    if (category === 'promotions') {
-      whereClauses.push('offer.isPromotion = :isPromotion');
-      whereParams.isPromotion = true;
+    if (page) {
+      offset = (page - 1) * itemsPerPage;
     }
 
-    if (category?.length && category !== 'promotions') {
-      const categoryId = (await this.categoryService.findOneByUrl(category)).id;
+    const baseQuery = this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoin('offer.categories', 'category');
 
+    if (category === 'recommended') {
+      whereClauses.push('offer.isRecommended = :isRecommended');
+      whereParams.isRecommended = true;
+    }
+
+    if (category?.length && category !== 'recommended') {
+      const categoryId = (await this.categoryService.findOneByUrl(category)).id;
       whereClauses.push('category.id = :categoryId');
       whereParams.categoryId = categoryId;
     }
@@ -76,7 +93,13 @@ export class OfferService {
       whereParams.destinationIdList = destinationIdList;
     }
 
-    return await dbQuery
+    const whereSQL =
+      whereClauses.length > 0 ? whereClauses.join(' AND ') : '1=1';
+
+    const totalCount = await baseQuery.where(whereSQL, whereParams).getCount();
+
+    const offersQuery = this.offerRepository
+      .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('offer.ship', 'ship')
       .leftJoinAndSelect('ship.company', 'shipCompany')
@@ -84,13 +107,13 @@ export class OfferService {
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('offer.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
-      .where(whereClauses.join(' AND '), whereParams)
-      .andWhere('offer.isActive = true')
+      .where(whereSQL, whereParams)
+      .orderBy('offer.createdAt', sortDirection as 'ASC' | 'DESC')
       .select([
         'offer.id',
         'offer.name',
         'offer.price',
-        'offer.isPromotion',
+        'offer.isRecommended',
         'offer.startDate',
         'offer.endDate',
         'offer.company',
@@ -106,8 +129,15 @@ export class OfferService {
         'companyImageFile.id',
         'companyImageFile.name',
         'companyImageFile.path',
-      ])
-      .getMany();
+      ]);
+
+    if (page) {
+      offersQuery.skip(offset).take(itemsPerPage);
+    }
+
+    const offers = await offersQuery.getMany();
+
+    return { offers, totalCount };
   }
 
   findOneById(id: string): Promise<Offer> {
@@ -118,7 +148,7 @@ export class OfferService {
     const queryBuilder = this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
-      .leftJoinAndSelect('company.imageFile', 'companyImageFile') // Dodanie ImageFile dla Company
+      .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('offer.categories', 'categories')
       .leftJoinAndSelect('offer.imageFile', 'imageFile');
 
@@ -209,7 +239,6 @@ export class OfferService {
         await this.destinationService.findByIds(destinations);
     }
 
-    // Zapisz zmiany w bazie danych
     return this.offerRepository.save(existingOffer);
   }
 

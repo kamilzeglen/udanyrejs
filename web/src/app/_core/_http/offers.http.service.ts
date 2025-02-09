@@ -16,9 +16,9 @@ export class OffersHttpService {
   ) {
   }
 
-  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<Offer[]> {
+  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<{ offers: Offer[]; totalCount: number }> {
     const url = `${this.API_URL}/offers/search`;
-    return this.http.post<Offer[]>(url, payload);
+    return this.http.post<{ offers: Offer[]; totalCount: number }>(url, payload);
   }
 
   public getOffer(payload: {id: string}): Observable<Offer> {

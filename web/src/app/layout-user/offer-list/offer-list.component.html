@@ -2,19 +2,21 @@
   <div class="offers-wrapper">
 
     <div class="left-side">
-      <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+        <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
     </div>
 
     <div class="offers" *ngIf="offers$ | async as offers">
 
-    <div class="filters-mobile">
-      <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
-    </div>
+      <div class="filters-mobile">
+        <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+      </div>
 
       <div *ngIf="offers.length > 0; else noOffers">
         <div *ngFor="let offer of offers; index as offerIndex">
           <app-offer-card [index]="offerIndex" [offer]="offer"></app-offer-card>
         </div>
+
+        <mat-paginator [length]="offersAmount$ | async" [pageSize]="10" [pageSizeOptions]="[]" [hidePageSize]="false" (page)="handlePageEvent($event)" [pageIndex]="(filters.page - 1)" aria-label="Wybierz strone"></mat-paginator>
       </div>
 
       <!-- Komunikat o braku ofert -->

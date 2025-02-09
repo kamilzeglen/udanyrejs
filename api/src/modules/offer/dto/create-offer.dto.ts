@@ -23,6 +23,10 @@ export class CreateOfferDto {
   @IsOptional()
   syncData?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  isRecommended?: boolean;
+
   @IsUUID()
   companyId: string;
 

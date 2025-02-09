@@ -65,6 +65,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     this.offerForm = this.fb.group({
       offerUrl: ['', [Validators.pattern('https?://.+')]],
       syncData: [true],
+      isRecommended: [false],
       name: ['', Validators.required],
       price: [null, Validators.required],
       companyId: ['', Validators.required],

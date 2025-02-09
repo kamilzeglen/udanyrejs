@@ -39,7 +39,7 @@ export class Offer {
   syncData: boolean;
 
   @Column({ default: false })
-  isPromotion: boolean;
+  isRecommended: boolean;
 
   @ManyToOne(() => Company, (company) => company.offers, {
     eager: true,

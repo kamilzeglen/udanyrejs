@@ -28,6 +28,11 @@
     <!-- Sekcja Dane dotyczące rejsu -->
     <section class="section data-section">
       <h2>Dane dotyczące rejsu</h2>
+
+      <div class="form-group">
+        <mat-checkbox formControlName="isRecommended">Oferta polecana:</mat-checkbox>
+      </div>
+
       <div class="form-group">
         <label for="name">Nazwa rejsu:</label>
         <input id="name" formControlName="name" type="text" placeholder="Nazwa rejsu" />

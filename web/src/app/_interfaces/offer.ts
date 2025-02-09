@@ -5,6 +5,7 @@ import {Ship} from './ship';
 import {Category} from './category';
 import {Destination} from './destination';
 import {User} from './user';
+import {ShareStats} from './shareStats';
 
 export interface Offer {
   id: string;
@@ -12,7 +13,7 @@ export interface Offer {
   isActive: boolean;
   offerUrl: string;
   syncData: string;
-  isPromotion: boolean;
+  isRecommended: boolean;
   company: Company;
   companyId: string;
   price: number;
@@ -27,13 +28,15 @@ export interface Offer {
   destinations: Destination[];
   categories: Category[]
   itinerary: Itinerary[];
+  shareStats: ShareStats;
+  sharedStatId: string;
   createdBy: User,
   createdById: string
   updatedBy: User,
   updatedById: string
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  deletedAt: Date | string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
 }
 
 export interface OfferScrapper {
