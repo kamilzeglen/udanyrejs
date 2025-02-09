@@ -240,8 +240,11 @@
   .in-price-section {
     display: flex;
     justify-content: space-between;
-    width: 100%;
     margin: 30px 10px;
+
+    @include media("<=phone") {
+      display: block;
+    }
 
     .price-include,
     .price-exclude {
@@ -249,7 +252,8 @@
       margin: 0 15px;
 
       @include media("<=phone") {
-        margin: unset;
+        width: 100%;
+        margin: 20px 0;
       }
 
       h3 {
@@ -309,14 +313,21 @@
         display: none;
       }
 
+      display: flex;
+      margin: 20px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: $secondary-color;
       text-align: center;
+      align-items: center;
+      place-content: center;
 
-      a {
-        width: 300px;
+      span {
+        margin: 20px 5px;
+      }
 
-        @include media("<phone") {
-          width: 250px;
-        }
+      mat-icon {
+
       }
     }
 
