@@ -2,10 +2,11 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OfferFacade} from 'src/app/_state/offer';
 import {ReplaySubject, takeUntil} from 'rxjs';
 import {ActivatedRoute} from '@angular/router';
-import {SearchOffersPayload, SubMenuItem} from '@interfaces';
+import {SearchOffersPayload} from '@interfaces';
 import {CommonFacade} from '@state/common';
 import moment from 'moment-timezone';
 import {Meta, Title} from '@angular/platform-browser';
+import {PageEvent} from '@angular/material/paginator';
 
 @Component({
   selector: 'app-offer-list',
@@ -16,6 +17,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
 
   public filters: { [key: string]: any } = {
+    page: 1,
     category: null,
     startDate: null,
     endDate: null,
@@ -24,9 +26,8 @@ export class OfferListComponent implements OnInit, OnDestroy {
   };
 
   public offers$ = this.offerFacade.offers$
+  public offersAmount$ = this.offerFacade.offersAmount$
   public loading$ = this.offerFacade.loading$
-
-  public subMenuItems: SubMenuItem[] = [];
 
   constructor(
     private readonly offerFacade: OfferFacade,
@@ -86,6 +87,11 @@ export class OfferListComponent implements OnInit, OnDestroy {
   public onFiltersChanged(changedFilter: { key: string; value: any }): void {
     this.filters = {...this.filters, [changedFilter.key]: changedFilter.value};
 
+    this.getOffers(this.filters);
+  }
+
+  public handlePageEvent(page: PageEvent) {
+    this.filters = { ...this.filters, page: page.pageIndex + 1 };
     this.getOffers(this.filters);
   }
 }

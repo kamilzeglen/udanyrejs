@@ -1,6 +1,16 @@
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class SearchOffersDto {
+  @IsOptional()
+  @IsNumber()
+  page?: number;
+
   @IsOptional()
   @IsString()
   category?: string;

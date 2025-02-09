@@ -22,7 +22,7 @@ export class OfferController {
   @Post('/search')
   async searchOffers(
     @Body() searchOfferDto: SearchOffersDto,
-  ): Promise<Offer[]> {
+  ): Promise<{ offers: Offer[]; totalCount: number }> {
     return await this.offerService.searchOffers(searchOfferDto);
   }
 

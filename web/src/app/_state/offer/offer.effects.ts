@@ -20,11 +20,11 @@ export class OfferEffects {
         const startTime = Date.now();
 
         return this.http.getOffers(payload).pipe(
-          switchMap(offers => {
+          switchMap(result => {
             const elapsedTime = Date.now() - startTime;
             const remainingTime = Math.max(500 - elapsedTime, 0);
 
-            return of(offerActions.getOffersSuccess({offers})).pipe(
+            return of(offerActions.getOffersSuccess({result})).pipe(
               delay(remainingTime)
             );
           }),

@@ -37,7 +37,7 @@
     margin: 20px;
   }
 
-  &.promoted {
+  &.recommended {
     @include media("<=1400px") {
       border-color: $tertiary-color;
     }
@@ -109,15 +109,14 @@
   }
 
   .offer-badge {
+
+
     @include media(">1400px") {
       position: absolute;
-      top: 115px;
-      left: -24px;
-      background-color: $tertiary-color;
-      color: white;
+      width: 200px;
+      height: 30px;
       font-size: 16px;
       font-weight: bold;
-      padding: 6px 50px;
       transform: rotate(-45deg);
       transform-origin: top left;
       text-align: center;
@@ -126,6 +125,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
+      &.promotion {
+        top: 115px;
+        left: -24px;
+        background-color: $tertiary-color;
+        color: white;
+        transform: rotate(-45deg);
+      }
+
+      &.new {
+        top: 90px;
+        left: -50px;
+        background-color: $secondary-color;
+        color: white;
+        transform: rotate(-45deg);
+      }
     }
 
     @include media("<=1400px") {
@@ -141,6 +156,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
+      &.promotion {
+        background-color: $tertiary-color;
+        color: white;
+      }
+
+      &.new {
+        background-color: $secondary-color;
+        color: white;
+      }
     }
   }
 }

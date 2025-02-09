@@ -53,4 +53,19 @@
       display: none;
     }
   }
+
+  mat-paginator {
+    justify-self: center;
+    margin-bottom: 16px;
+
+    ::ng-deep {
+      .mat-mdc-paginator-range-actions {
+        font-size: 20px;
+      }
+
+      .mat-mdc-paginator-page-size {
+        display: none;
+      }
+    }
+  }
 }

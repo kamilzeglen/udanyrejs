@@ -10,6 +10,7 @@ import {Offer, SearchOffersPayload} from '@interfaces';
 @Injectable()
 export class OfferFacade {
   public offers$ = this.store.select(offerSelectors.selectOffers);
+  public offersAmount$ = this.store.select(offerSelectors.selectOffersAmount);
   public loading$ = this.store.select(offerSelectors.selectLoading);
 
   public getOffersSuccess$ = this.actions.pipe(ofType(offerActions.getOffersSuccess));

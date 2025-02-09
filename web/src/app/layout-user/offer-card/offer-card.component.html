@@ -1,6 +1,7 @@
-<a class="offer-card" [routerLink]="['/offers/details', offer.id]" [class.promoted]="offer.isPromotion" [class.no-margin]="index === 0">
+<a class="offer-card" [routerLink]="['/offers/details', offer.id]" [class.recommended]="offer.isRecommended" [class.no-margin]="index === 0">
   <!-- Zawieszka -->
-  <div class="offer-badge" *ngIf="offer.isPromotion ">Promocja</div>
+  <div class="offer-badge new" *ngIf="isNewOffer(offer.createdAt)">Nowe</div>
+  <div class="offer-badge promotion" *ngIf="offer.isRecommended ">Polecamy</div>
 
   <!-- Logo firmy -->
   <div class="logo-container" *ngIf="offer.company?.imageFile?.name">

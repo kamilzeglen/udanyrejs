@@ -11,18 +11,21 @@ const reducer = createReducer(
     loading: true,
     errorMessage: null,
     offers: [],
+    offersAmount: 0,
   })),
-  on(offerActions.getOffersSuccess, (state, {offers}) => ({
+  on(offerActions.getOffersSuccess, (state, {result}) => ({
     ...state,
     loading: false,
     errorMessage: null,
-    offers
+    offers: result.offers,
+    offersAmount: result.totalCount,
   })),
   on(offerActions.getOffersError, (state, {errorMessage}) => ({
     ...state,
     loading: false,
     errorMessage,
     offers: [],
+    offersAmount: 0,
   })),
 )
 
