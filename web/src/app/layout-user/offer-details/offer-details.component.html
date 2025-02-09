@@ -25,8 +25,9 @@
     </div>
   </div>
 
-    <div class="pdf-box">
-      <a class="action-button" (click)="downloadPdfFile(offer.id)">Oferta PDF</a>
+    <div class="pdf-box" (click)="downloadPdfFile(offer.id)">
+      <span>Więcej informacji</span>
+      <mat-icon>download</mat-icon>
     </div>
 
   <div class="image-container-offer" *ngIf="offer.imageFile?.name">
