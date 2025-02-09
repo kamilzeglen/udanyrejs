@@ -60,7 +60,8 @@ export class OfferService {
 
     const baseQuery = this.offerRepository
       .createQueryBuilder('offer')
-      .leftJoin('offer.categories', 'category');
+      .leftJoin('offer.categories', 'category')
+      .leftJoin('offer.destinations', 'destination');
 
     if (category === 'recommended') {
       whereClauses.push('offer.isRecommended = :isRecommended');
