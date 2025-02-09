@@ -37,11 +37,11 @@ export class ShareStatsService {
 
   async update(platform: string, offerId: string): Promise<boolean> {
     const offer = await this.offerRepository.findOneBy({ id: offerId });
-    if (!offer || !offer.sharedStatId) {
+    if (!offer || !offer.shareStatsId) {
       throw new NotFoundException('Oferta lub statystyki nie istnieją');
     }
 
-    const shareStats = await this.findOneById(offer.sharedStatId);
+    const shareStats = await this.findOneById(offer.shareStatsId);
     if (!shareStats) {
       throw new NotFoundException('Statystyki udostępniania nie istnieją');
     }
