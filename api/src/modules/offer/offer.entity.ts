@@ -112,7 +112,7 @@ export class Offer {
   @JoinColumn()
   shareStats: ShareStats;
   @Column({ type: 'uuid', nullable: true })
-  sharedStatId: string;
+  shareStatsId: string;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()

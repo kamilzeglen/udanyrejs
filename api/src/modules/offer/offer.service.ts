@@ -185,7 +185,7 @@ export class OfferService {
 
     const shareStats = await this.shareStatsService.createForOffer(offer);
 
-    offer.sharedStatId = shareStats.id;
+    offer.shareStatId = shareStats.id;
     offer = await this.offerRepository.save(offer);
 
     if (categories?.length) {
