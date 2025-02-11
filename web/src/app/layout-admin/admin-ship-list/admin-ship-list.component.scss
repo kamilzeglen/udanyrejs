@@ -19,6 +19,10 @@
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
+
+    .row:hover {
+      background-color: rgba($grey, 0.05);
+    }
   }
 
   .icon-edit {

@@ -14,6 +14,7 @@ import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
 import { Offer } from '@modules/offer/offer.entity';
 import { AuthGuard } from '@modules/auth/guards/auth.guard';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
+import { PaginationResp } from '../../interfaces/pagination-response';
 
 @Controller('offers')
 export class OfferController {
@@ -22,7 +23,7 @@ export class OfferController {
   @Post('/search')
   async searchOffers(
     @Body() searchOfferDto: SearchOffersDto,
-  ): Promise<{ offers: Offer[]; totalCount: number }> {
+  ): Promise<{ data: Partial<Offer>[]; pagination: PaginationResp }> {
     return await this.offerService.searchOffers(searchOfferDto);
   }
 
@@ -67,5 +68,15 @@ export class OfferController {
   @Delete('/:offerId')
   async removeOffer(@Param('offerId') offerId: string): Promise<boolean> {
     return await this.offerService.removeOffer(offerId);
+  }
+
+  @Get('/:offerId/deactivate')
+  async deactivateOffer(@Param('offerId') offerId: string): Promise<boolean> {
+    return await this.offerService.deactivateOffer(offerId);
+  }
+
+  @Get('/:offerId/activate')
+  async activateOffer(@Param('offerId') offerId: string): Promise<boolean> {
+    return await this.offerService.activateOffer(offerId);
   }
 }

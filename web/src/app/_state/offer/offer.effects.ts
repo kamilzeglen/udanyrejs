@@ -1,7 +1,7 @@
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Injectable} from '@angular/core';
 import * as offerActions from '@state/offer/offer.actions';
-import {delay, of} from 'rxjs';
+import {of} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {OffersHttpService} from '@core/_http/offers.http.service';
 
@@ -17,16 +17,10 @@ export class OfferEffects {
     this.actions$.pipe(
       ofType(offerActions.getOffers),
       switchMap(({payload}) => {
-        const startTime = Date.now();
-
-        return this.http.getOffers(payload).pipe(
-          switchMap(result => {
-            const elapsedTime = Date.now() - startTime;
-            const remainingTime = Math.max(500 - elapsedTime, 0);
-
-            return of(offerActions.getOffersSuccess({result})).pipe(
-              delay(remainingTime)
-            );
+        const {all, count, ...rest} = payload;
+        return this.http.getOffers(rest).pipe(
+          map(offers => {
+            return offerActions.getOffersSuccess({offers: offers});
           }),
           catchError(errorMessage => {
             return of(offerActions.getOfferError({errorMessage}));
@@ -95,6 +89,38 @@ export class OfferEffects {
           }),
           catchError(errorMessage => {
             return of(offerActions.deleteOfferError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  deactivateOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.deactivateOffer),
+      switchMap(({payload}) => {
+        return this.http.deactivateOffer(payload).pipe(
+          map(() => {
+            return offerActions.deactivateOfferSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(offerActions.deactivateOfferError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  activateOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.activateOffer),
+      switchMap(({payload}) => {
+        return this.http.activateOffer(payload).pipe(
+          map(() => {
+            return offerActions.activateOfferSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(offerActions.activateOfferError({errorMessage}));
           })
         );
       })
