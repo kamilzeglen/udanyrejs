@@ -1,7 +1,20 @@
-<div class="submenu">
+<div class="submenu" *ngIf="deviceInfo.deviceTypeDetected !== 'PHONE'">
   <div class="submenu-item" *ngFor="let item of subMenuItems">
     <a *ngIf="item.isVisible" routerLink="{{ (item.url).toLowerCase() }}" class="nav-link">
       <span>{{ item.name }}</span>
+    </a>
+  </div>
+</div>
+
+<div class="submenu" *ngIf="deviceInfo.deviceTypeDetected === 'PHONE'">
+  <div class="submenu-item">
+    <a routerLink="/about-us" class="nav-link">
+      <span>O nas</span>
+    </a>
+  </div>
+  <div class="submenu-item">
+    <a routerLink="/contact" class="nav-link">
+      <span>Kontakt</span>
     </a>
   </div>
 </div>

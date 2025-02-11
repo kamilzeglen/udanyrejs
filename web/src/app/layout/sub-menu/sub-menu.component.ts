@@ -1,8 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {SubMenuItem} from '@interfaces';
+import {AllDeviceInfo, SubMenuItem} from '@interfaces';
 import {SubMenuService} from './sub-menu.service';
-import {Subscription, take} from 'rxjs';
+import {ReplaySubject, Subscription, take, takeUntil} from 'rxjs';
 import {CommonFacade} from '@state/common';
+import {DeviceInfoService} from '@shared/device-info/device-info.service';
 
 @Component({
   selector: 'app-sub-menu',
@@ -11,16 +12,28 @@ import {CommonFacade} from '@state/common';
 })
 
 export class SubMenuComponent implements OnInit, OnDestroy {
+  private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+
   subMenuItems: SubMenuItem[] = [];
   private subscription: Subscription = new Subscription();
+
+  public deviceInfo: AllDeviceInfo;
 
   constructor(
     private readonly subMenuService: SubMenuService,
     private readonly commonFacade: CommonFacade,
+    private readonly deviceInfoService: DeviceInfoService,
   ) {
   }
 
   public ngOnInit() {
+
+    this.deviceInfo = this.deviceInfoService.getInfo();
+
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+      this.deviceInfo = info;
+    });
+
     this.subscription = this.subMenuService.subMenuItems$.subscribe((items) => {
 
       if (items && items.length > 0) {
@@ -42,5 +55,7 @@ export class SubMenuComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 }

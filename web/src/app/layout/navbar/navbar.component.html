@@ -28,8 +28,13 @@
       </a>
 
       <!-- Link Kontakt -->
-      <a routerLink="/contact" class="nav-link">
+      <a routerLink="/contact" class="nav-link" *ngIf="deviceInfo.deviceTypeDetected !== 'PHONE'">
         <span>Kontakt</span>
+      </a>
+
+      <!-- Link Polecamy -->
+      <a routerLink="/offers/recommended" class="nav-link" *ngIf="deviceInfo.deviceTypeDetected === 'PHONE'">
+        <span>Polecamy</span>
       </a>
     </div>
 
