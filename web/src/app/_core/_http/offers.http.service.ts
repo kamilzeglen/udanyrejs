@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Offer, SearchOffersPayload} from '@interfaces';
 import { environment } from '@environment';
+import {PaginatedResponse} from '../../_interfaces/http';
 
 @Injectable({
   providedIn: 'root'
@@ -16,9 +17,9 @@ export class OffersHttpService {
   ) {
   }
 
-  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<{ offers: Offer[]; totalCount: number }> {
+  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<PaginatedResponse<Offer>> {
     const url = `${this.API_URL}/offers/search`;
-    return this.http.post<{ offers: Offer[]; totalCount: number }>(url, payload);
+    return this.http.post<PaginatedResponse<Offer>>(url, payload);
   }
 
   public getOffer(payload: {id: string}): Observable<Offer> {
@@ -39,5 +40,15 @@ export class OffersHttpService {
   public deleteOffer(payload: {id: string}): Observable<boolean> {
     const url = `${this.API_URL}/offers/` + payload.id;
     return this.http.delete<boolean>(url);
+  }
+
+  public deactivateOffer(payload: {id: string}): Observable<boolean> {
+    const url = `${this.API_URL}/offers/` + payload.id + '/deactivate';
+    return this.http.get<boolean>(url);
+  }
+
+  public activateOffer(payload: {id: string}): Observable<boolean> {
+    const url = `${this.API_URL}/offers/` + payload.id + '/activate';
+    return this.http.get<boolean>(url);
   }
 }

@@ -212,6 +212,16 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.router.changeRoute({linkParams: ['/admin/offers']});
     })
 
+    this.offerFacade.activateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo("Pomyślnie aktywowano ofertę")
+      this.router.changeRoute({linkParams: ['/admin/offers']});
+    })
+
+    this.offerFacade.deactivateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo("Pomyślnie dezaktywowano ofertę")
+      this.router.changeRoute({linkParams: ['/admin/offers']});
+    })
+
     this.scrapperFacade.scrapOfferFileSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
 
       if (!offer) {
@@ -258,7 +268,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     return this.offerForm.get('itinerary') as FormArray;
   }
 
-  // Obliczanie liczby dni i aktualizacja itinerary
   public updateItineraryDays(): void {
     const startDate = new Date(this.offerForm.get('startDate')?.value);
     const endDate = new Date(this.offerForm.get('endDate')?.value);
@@ -440,6 +449,42 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           }
 
           this.offerFacade.deleteOffer({id: this.editingOffer.id})
+        });
+    }
+  }
+
+  public deactivateOffer(): void {
+    if (this.editingOffer) {
+      this.confirmationModalService
+        .open({
+          message: "Jesteś pewny że chcesz dezaktywować ofertę: " + this.editingOffer.name + "?"
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe(res => {
+          if (!res) {
+            return;
+          }
+
+          this.offerFacade.deactivateOffer({id: this.editingOffer.id})
+        });
+    }
+  }
+
+  public activateOffer(): void {
+    if (this.editingOffer) {
+      this.confirmationModalService
+        .open({
+          message: "Jesteś pewny że chcesz aktywować ofertę: " + this.editingOffer.name + "?"
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe(res => {
+          if (!res) {
+            return;
+          }
+
+          this.offerFacade.activateOffer({id: this.editingOffer.id})
         });
     }
   }

@@ -9,7 +9,7 @@
 
       <!-- ID Column -->
       <ng-container matColumnDef="id">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <th mat-header-cell *matHeaderCellDef>ID</th>
         <td mat-cell *matCellDef="let element, let i = index ">{{ i + 1 }}</td>
       </ng-container>
 
@@ -27,10 +27,10 @@
 
       <!-- Image Column -->
       <ng-container matColumnDef="image">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Zdjęcie</th>
+        <th mat-header-cell *matHeaderCellDef>Zdjęcie</th>
         <td mat-cell *matCellDef="let element">
-          <mat-icon *ngIf="element.imageFileId">checked</mat-icon>
-          <mat-icon *ngIf="!element.imageFileId">unchecked</mat-icon>
+          <mat-icon *ngIf="element.imageFileId" style="color: green">checked</mat-icon>
+          <mat-icon *ngIf="!element.imageFileId" style="color: red">unchecked</mat-icon>
         </td>
       </ng-container>
 
@@ -43,7 +43,7 @@
 
       <!-- Actions Column -->
       <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Akcje</th>
+        <th mat-header-cell *matHeaderCellDef>Akcje</th>
         <td mat-cell *matCellDef="let element">
           <mat-icon class="icon-edit" (click)="editCompany(element); $event.stopPropagation()">edit</mat-icon>
           <mat-icon class="icon-delete" (click)="deleteCompany(element); $event.stopPropagation()">delete</mat-icon>
@@ -64,7 +64,7 @@
 
       <!-- Header and Row -->
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" (click)="editCompany(row)"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" class="row" (click)="editCompany(row)"></tr>
     </table>
   </div>
 </div>

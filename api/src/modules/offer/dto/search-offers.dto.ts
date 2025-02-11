@@ -1,16 +1,13 @@
 import {
+  IsBoolean,
   IsDateString,
-  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+import { PaginationDto } from '@modules/common/pagination.dto';
 
-export class SearchOffersDto {
-  @IsOptional()
-  @IsNumber()
-  page?: number;
-
+export class SearchOffersDto extends PaginationDto {
   @IsOptional()
   @IsString()
   category?: string;
@@ -30,4 +27,8 @@ export class SearchOffersDto {
   @IsUUID('all', { each: true })
   @IsOptional()
   companyIdList?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  active?: boolean;
 }

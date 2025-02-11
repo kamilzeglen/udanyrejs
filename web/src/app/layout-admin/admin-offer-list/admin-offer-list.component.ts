@@ -2,10 +2,12 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {OfferFacade} from '@state/offer';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
 import {ReplaySubject, take, takeUntil} from 'rxjs';
-import {AllDeviceInfo, Offer} from '@interfaces';
+import {AllDeviceInfo, Offer, SearchOffersPayload} from '@interfaces';
 import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 import {RouterFacade} from '@state/router';
 import {DeviceInfoService} from '@shared/device-info/device-info.service';
+import {Sort, SortDirection} from '@angular/material/sort';
+import {Pagination} from '../../_interfaces/http';
 
 @Component({
   selector: 'app-admin-offer-list',
@@ -15,21 +17,32 @@ import {DeviceInfoService} from '@shared/device-info/device-info.service';
 export class AdminOfferListComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
+  public pageSize = 100;
+
+  public defaultSortBy = 'createdAt';
+  public defaultSortDir: SortDirection = 'desc';
+
+  public currentSortBy = 'createdAt';
+  public currentSortDir: SortDirection = 'desc';
+
   public deviceInfo: AllDeviceInfo;
 
   public offers$ = this.offerFacade.offers$
   public loading$ = this.offerFacade.loading$
+  public pagination$ = this.offerFacade.pagination$
 
   public columnsToDisplay: string[];
   public allColumns: string[] = [
     'id',
     'name',
     'price',
-    'company',
-    'ship',
+    'company.name',
+    'ship.name',
     'startDate',
     'endDate',
     'actions',
+    'stats',
+    'photos',
     'updatedAt',
     'createdAt',
   ];
@@ -57,12 +70,51 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
       this.offerFacade.getOffers()
     })
 
-    this.offerFacade.getOffers()
+    this.getOffers()
   }
 
   public ngOnDestroy(): void {
     this.destroy$.next(true);
     this.destroy$.complete();
+  }
+
+  public sortData(sort: Sort): void {
+    this.pagination$.pipe(take(1)).subscribe(pagination => {
+      const {all, count, ...rest} = pagination;
+      this.currentSortBy = sort.active as Pagination['orderBy'];
+      this.currentSortDir = sort.direction as Pagination['orderDir'];
+      this.getOffers({
+        ...rest,
+        offset: 0,
+        limit: this.pageSize,
+        orderBy: this.currentSortBy,
+        orderDir: this.currentSortDir,
+      });
+    });
+  }
+
+  public getOffers(opts?: Partial<SearchOffersPayload>): void {
+    this.pagination$.pipe(take(1)).subscribe(pagination => {
+
+      if (opts && 'orderBy' in opts) {
+        this.currentSortBy = opts.orderBy;
+      }
+
+      if (opts && 'orderDir' in opts) {
+        this.currentSortDir = opts.orderDir;
+      }
+
+      if (opts && 'limit' in opts) {
+        this.pageSize = opts.limit;
+      }
+
+      this.offerFacade.getOffers({
+        ...pagination,
+        limit: this.pageSize,
+        orderBy: this.currentSortBy || this.defaultSortBy,
+        orderDir: this.currentSortDir || this.defaultSortDir,
+      });
+    });
   }
 
   public deleteOffer(offer: Offer): void {
@@ -93,6 +145,16 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   public addOffer(): void {
     const linkParams = ["/admin/offers/add/"]
+    this.routerFacade.changeRoute({linkParams})
+  }
+
+  public editShip(shipId: string): void {
+    const linkParams = ["/admin/ships/edit/" + shipId]
+    this.routerFacade.changeRoute({linkParams})
+  }
+
+  public editCompany(companyId: string): void {
+    const linkParams = ["/admin/companies/edit/" + companyId]
     this.routerFacade.changeRoute({linkParams})
   }
 

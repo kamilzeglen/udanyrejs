@@ -10,8 +10,8 @@ import {Offer, SearchOffersPayload} from '@interfaces';
 @Injectable()
 export class OfferFacade {
   public offers$ = this.store.select(offerSelectors.selectOffers);
-  public offersAmount$ = this.store.select(offerSelectors.selectOffersAmount);
   public loading$ = this.store.select(offerSelectors.selectLoading);
+  public pagination$ = this.store.select(offerSelectors.selectPagination);
 
   public getOffersSuccess$ = this.actions.pipe(ofType(offerActions.getOffersSuccess));
   public getOfferSuccess$ = this.actions.pipe(ofType(offerActions.getOfferSuccess));
@@ -20,6 +20,11 @@ export class OfferFacade {
   public updateOfferSuccess$ = this.actions.pipe(ofType(offerActions.updateOfferSuccess));
   public updateOfferError$ = this.actions.pipe(ofType(offerActions.updateOfferError));
   public deleteOfferSuccess$ = this.actions.pipe(ofType(offerActions.deleteOfferSuccess));
+  public deleteOfferError$ = this.actions.pipe(ofType(offerActions.deactivateOfferError));
+  public activateOfferSuccess$ = this.actions.pipe(ofType(offerActions.activateOfferSuccess));
+  public activateOfferError$ = this.actions.pipe(ofType(offerActions.activateOfferError));
+  public deactivateOfferSuccess$ = this.actions.pipe(ofType(offerActions.deactivateOfferSuccess));
+  public deactivateOfferError$ = this.actions.pipe(ofType(offerActions.deactivateOfferError));
 
   constructor(
     private store: Store<AppState>,
@@ -45,5 +50,13 @@ export class OfferFacade {
 
   public deleteOffer(payload: {id: string}): void {
     this.store.dispatch(offerActions.deleteOffer({payload}));
+  }
+
+  public deactivateOffer(payload: {id: string}): void {
+    this.store.dispatch(offerActions.deactivateOffer({payload}));
+  }
+
+  public activateOffer(payload: {id: string}): void {
+    this.store.dispatch(offerActions.activateOffer({payload}));
   }
 }

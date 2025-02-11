@@ -135,9 +135,21 @@
     }
   }
 
-  .deleteOffer {
+  .deleteOffer,
+  .deactivateOffer
+  {
     display: flex;
     background: $negative;
+    color: $white;
+    font-size: 18px;
+    padding: 12px 30px;
+    margin: 10px;
+    justify-self: center;
+  }
+
+  .activateOffer {
+    display: flex;
+    background: rgba($primary-color, 0.8);
     color: $white;
     font-size: 18px;
     padding: 12px 30px;

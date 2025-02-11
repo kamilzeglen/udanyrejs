@@ -16,7 +16,17 @@
           <app-offer-card [index]="offerIndex" [offer]="offer"></app-offer-card>
         </div>
 
-        <mat-paginator [length]="offersAmount$ | async" [pageSize]="10" [pageSizeOptions]="[]" [hidePageSize]="false" (page)="handlePageEvent($event)" [pageIndex]="(filters.page - 1)" aria-label="Wybierz strone"></mat-paginator>
+        <div class="paginator-wrapper">
+          <mat-paginator
+            *ngIf="(loading$ | async) === false"
+            [hidePageSize]="false"
+            [length]="(pagination$ | async)?.all"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="pageSizeOptions"
+            [pageIndex]="currPage$ | async"
+            (page)="pageChanged($event)">
+          </mat-paginator>
+        </div>
       </div>
 
       <!-- Komunikat o braku ofert -->

@@ -19,6 +19,7 @@ import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { ShareStatsService } from '@modules/share-stats/share-stats.service';
+import { PaginationResp } from '../../interfaces/pagination-response';
 
 @Injectable()
 export class OfferService {
@@ -38,30 +39,25 @@ export class OfferService {
 
   async searchOffers(
     searchOffersDto: SearchOffersDto,
-  ): Promise<{ offers: Offer[]; totalCount: number }> {
-    const whereClauses: string[] = ['offer.isActive = true'];
-    const whereParams: ObjectLiteral = {};
+  ): Promise<{ data: Partial<Offer>[]; pagination: PaginationResp }> {
     const {
-      page,
+      orderBy,
+      orderDir,
+      offset,
+      limit,
       category,
       startDate,
       endDate,
       destinationIdList,
       companyIdList,
+      active,
     } = searchOffersDto;
 
-    const sortDirection = 'DESC';
-    const itemsPerPage = 10;
-    let offset: number | undefined;
-
-    if (page) {
-      offset = (page - 1) * itemsPerPage;
-    }
-
-    const baseQuery = this.offerRepository
-      .createQueryBuilder('offer')
-      .leftJoin('offer.categories', 'category')
-      .leftJoin('offer.destinations', 'destination');
+    const whereClauses: string[] = [];
+    const whereParams: ObjectLiteral = {};
+    const orderByWithAlias = orderBy.includes('.')
+      ? orderBy
+      : `offer.${orderBy}`;
 
     if (category === 'recommended') {
       whereClauses.push('offer.isRecommended = :isRecommended');
@@ -72,6 +68,11 @@ export class OfferService {
       const categoryId = (await this.categoryService.findOneByUrl(category)).id;
       whereClauses.push('category.id = :categoryId');
       whereParams.categoryId = categoryId;
+    }
+
+    if (active) {
+      whereClauses.push('offer.isActive = (:...active)');
+      whereParams.active = active;
     }
 
     if (companyIdList && companyIdList.length > 0) {
@@ -94,12 +95,7 @@ export class OfferService {
       whereParams.destinationIdList = destinationIdList;
     }
 
-    const whereSQL =
-      whereClauses.length > 0 ? whereClauses.join(' AND ') : '1=1';
-
-    const totalCount = await baseQuery.where(whereSQL, whereParams).getCount();
-
-    const offersQuery = this.offerRepository
+    const dbQuery = this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('offer.ship', 'ship')
@@ -108,12 +104,13 @@ export class OfferService {
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('offer.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
-      .where(whereSQL, whereParams)
-      .orderBy('offer.createdAt', sortDirection as 'ASC' | 'DESC')
+      .leftJoinAndSelect('offer.shareStats', 'shareStats')
+      .where(whereClauses.join(' AND '), whereParams)
       .select([
         'offer.id',
         'offer.name',
         'offer.price',
+        'offer.isActive',
         'offer.isRecommended',
         'offer.startDate',
         'offer.endDate',
@@ -130,15 +127,25 @@ export class OfferService {
         'companyImageFile.id',
         'companyImageFile.name',
         'companyImageFile.path',
-      ]);
+        'shareStats',
+      ])
+      .skip(offset)
+      .take(limit)
+      .orderBy(orderByWithAlias, orderDir.toUpperCase() as any, 'NULLS LAST');
 
-    if (page) {
-      offersQuery.skip(offset).take(itemsPerPage);
-    }
+    const [offers, count] = await dbQuery.getManyAndCount();
 
-    const offers = await offersQuery.getMany();
-
-    return { offers, totalCount };
+    return {
+      data: offers,
+      pagination: {
+        limit,
+        offset,
+        orderDir,
+        orderBy: orderByWithAlias,
+        all: count,
+        count: offers.length,
+      },
+    };
   }
 
   findOneById(id: string): Promise<Offer> {
@@ -253,7 +260,6 @@ export class OfferService {
       throw new Error('Offer not found');
     }
 
-    // Usuń powiązania z kategoriami w tabeli pośredniczącej
     await this.offerRepository
       .createQueryBuilder()
       .delete()
@@ -268,7 +274,6 @@ export class OfferService {
       .where('offerId = :offerID', { offerID })
       .execute();
 
-    // Usuń pliki (jeśli istnieją)
     if (offer.imageFile) {
       await this.imageFileService.removeImageFile(offer.imageFile.path);
     }
@@ -277,7 +282,6 @@ export class OfferService {
       await this.pdfFileService.removePdfFile(offer.pdfFile.path);
     }
 
-    // Usuń ofertę
     await this.offerRepository
       .createQueryBuilder()
       .delete()
@@ -285,6 +289,34 @@ export class OfferService {
       .where('id = :offerID', { offerID })
       .execute();
 
+    return true;
+  }
+
+  async deactivateOffer(offerId: string): Promise<boolean> {
+    const offer = await this.offerRepository.findOne({
+      where: { id: offerId },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+    }
+
+    offer.isActive = false;
+    await this.offerRepository.save(offer);
+    return true;
+  }
+
+  async activateOffer(offerId: string): Promise<boolean> {
+    const offer = await this.offerRepository.findOne({
+      where: { id: offerId },
+    });
+
+    if (!offer) {
+      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+    }
+
+    offer.isActive = true;
+    await this.offerRepository.save(offer);
     return true;
   }
 }
