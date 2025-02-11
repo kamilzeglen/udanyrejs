@@ -102,6 +102,7 @@ export class OfferService {
       .leftJoinAndSelect('ship.company', 'shipCompany')
       .leftJoinAndSelect('offer.imageFile', 'offerImageFile')
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
+      .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('offer.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
       .leftJoinAndSelect('offer.shareStats', 'shareStats')
@@ -127,6 +128,9 @@ export class OfferService {
         'companyImageFile.id',
         'companyImageFile.name',
         'companyImageFile.path',
+        'shipImageFile.id',
+        'shipImageFile.name',
+        'shipImageFile.path',
         'shareStats',
       ])
       .skip(offset)
