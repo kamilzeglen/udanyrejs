@@ -166,11 +166,11 @@
       </div>
     </section>
 
-    <button *ngIf="mode === 'EDIT' && editingOffer.isActive" (click)="deactivateOffer()" mat-raised-button class="deactivateOffer">
+    <button *ngIf="mode === 'EDIT' && editingOffer?.isActive" (click)="deactivateOffer()" mat-raised-button class="deactivateOffer">
       Dezaktywuj ofertę
     </button>
 
-    <button *ngIf="mode === 'EDIT' && !editingOffer.isActive" (click)="activateOffer()" mat-raised-button class="activateOffer">
+    <button *ngIf="mode === 'EDIT' && !editingOffer?.isActive" (click)="activateOffer()" mat-raised-button class="activateOffer">
       Aktywuj ofertę
     </button>
 
