@@ -14,9 +14,20 @@ const config = parsedConfig.parsed;
 async function bootstrap() {
   const { APP_PORT, WEB_URL } = config;
 
+  const allowedOrigins = [
+    process.env.WEB_URL || 'http://localhost:4200',
+    process.env.SCRAPPER_URL || 'http://localhost:3001',
+  ];
+
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: WEB_URL,
+    origin: (origin, callback) => {
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true); // Pozwól na zapytania z tych domen
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
