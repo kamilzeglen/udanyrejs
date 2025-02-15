@@ -69,7 +69,7 @@ export const scrapeFullCruiseData = async (url: string): Promise<CruiseScrapeRes
   console.log('=========');
   console.log('Rozpoczynam scrappowanie:' + url);
 
-  const browser = await chromium.launch();
+  const browser = await chromium.connect('ws://udanyrejs-playwright:6006/');
   const page = await browser.newPage();
 
   try {
