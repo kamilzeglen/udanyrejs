@@ -1,5 +1,7 @@
 import {
   forwardRef,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   NotFoundException,
@@ -22,6 +24,7 @@ import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 import { PaginationResp } from '../../interfaces/pagination-response';
 import axios from 'axios';
 import { Scrapper } from '../../interfaces/scrapper';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class OfferService {
@@ -37,6 +40,7 @@ export class OfferService {
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
     private readonly shareStatsService: ShareStatsService,
+    private readonly configService: ConfigService,
   ) {}
 
   async searchOffers(
@@ -360,17 +364,27 @@ export class OfferService {
 
   async syncOffer(offerId: string, url: string): Promise<Scrapper> {
     try {
-      const response = await axios.post('http://localhost:3001/price-scrap', {
+      const scraperApiUrl = this.configService.get<string>('SCRAPPER_URL');
+
+      if (!scraperApiUrl) {
+        throw new Error(
+          'SCRAPER_API_URL is not defined in environment variables',
+        );
+      }
+
+      const response = await axios.post(scraperApiUrl + '/price-scrap', {
         id: offerId,
         url,
       });
 
       const { exists, price } = response.data;
-
       return { id: offerId, exists, price };
     } catch (error) {
       console.error('Błąd podczas scrapowania:', error.message || error);
-      throw new Error('Error while scraping cruise price');
+      throw new HttpException(
+        'Error while scraping cruise price',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
