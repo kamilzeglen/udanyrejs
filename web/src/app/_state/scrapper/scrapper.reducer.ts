@@ -24,6 +24,22 @@ const reducer = createReducer(
     errorMessage,
     scrappedData: null,
   })),
+
+  on(scrapperActions.syncOfferPrice, state => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+  })),
+  on(scrapperActions.syncOfferPriceSuccess, (state) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+  })),
+  on(scrapperActions.syncOfferPriceError, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+  })),
 )
 
 export function scrapperReducer(state: ScrapperState | undefined, action: Action): ScrapperState {

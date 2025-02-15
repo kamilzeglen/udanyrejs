@@ -44,15 +44,15 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
 
     this.shipForm = this.fb.group({
       name: ['', Validators.required],
-      description: ['', Validators.required],
-      yearBuilt: ['', Validators.required],
-      length: ['', Validators.required],
-      width: ['', Validators.required],
-      tonnage: ['', Validators.required],
-      passengersDecks: ['', Validators.required],
-      passengers: ['', Validators.required],
-      crew: ['', Validators.required],
-      currency: ['', Validators.required],
+      description: [''],
+      yearBuilt: [''],
+      length: [''],
+      width: [''],
+      tonnage: [''],
+      passengersDecks: [''],
+      passengers: [''],
+      crew: [''],
+      currency: [''],
       companyId: ['', Validators.required],
     });
 

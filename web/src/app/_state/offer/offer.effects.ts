@@ -30,23 +30,6 @@ export class OfferEffects {
     )
   );
 
-
-  getOffer$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(offerActions.getOffer),
-      switchMap(({payload}) => {
-        return this.http.getOffer(payload).pipe(
-          map(offer => {
-            return offerActions.getOfferSuccess({offer});
-          }),
-          catchError(errorMessage => {
-            return of(offerActions.getOfferError({errorMessage}));
-          })
-        );
-      })
-    )
-  );
-
   createOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.createOffer),

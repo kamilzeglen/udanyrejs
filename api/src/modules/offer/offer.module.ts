@@ -12,6 +12,7 @@ import { PdfFileModule } from '@modules/pdf-file/pdf-file.module';
 import { DestinationModule } from '@modules/destination/destination.module';
 import { CategoryModule } from '@modules/category/category.module';
 import { ShareStatsModule } from '@modules/share-stats/share-stats.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ShareStatsModule } from '@modules/share-stats/share-stats.module';
     DestinationModule,
     CategoryModule,
     ShareStatsModule,
+    HttpModule,
   ],
   controllers: [OfferController],
   providers: [OfferService],

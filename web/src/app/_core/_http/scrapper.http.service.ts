@@ -9,7 +9,8 @@ import {OfferScrapper} from '@interfaces';
 })
 export class ScrapperHttpService {
 
-  public API_URL = environment.SCRAPPER_URL;
+  public API_URL = environment.API_URL;
+  public SCRAPPER_URL = environment.SCRAPPER_URL;
 
   constructor(
     private http: HttpClient
@@ -17,7 +18,12 @@ export class ScrapperHttpService {
   }
 
   public scrapOffer(payload: { url: string }): Observable<OfferScrapper> {
-    const url = `${this.API_URL}/scrap`;
+    const url = `${this.SCRAPPER_URL}/full-scrap`;
     return this.http.post<OfferScrapper>(url, payload);
+  }
+
+  public syncOfferPrice(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/offers/` + payload.id + '/sync';
+    return this.http.get<boolean>(url);
   }
 }

@@ -20,6 +20,7 @@ import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 import { CreatePdfFileDto } from '@modules/pdf-file/dto/create-pdf-file.dto';
 import { Response } from 'express';
 import * as fs from 'node:fs';
+import { UpdatePdfFileDto } from '@modules/pdf-file/dto/update-pdf-file.dto';
 
 @Controller('pdf-file')
 export class PdfFileController {
@@ -56,6 +57,7 @@ export class PdfFileController {
       pdfFileType,
       pdfFile,
       req.user,
+      createPdfFileDto.pdfUrl,
     );
   }
 
@@ -65,20 +67,32 @@ export class PdfFileController {
   async updateOfferImageFile(
     @Param('pdfFileType') pdfFileType: PdfFileType,
     @Param('targetId') targetId: string,
+    @Body() updatePdfFileDto: UpdatePdfFileDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: { user: any },
   ): Promise<PdfFile> {
-    if (!file) {
+    if (!file && !updatePdfFileDto.pdfUrl) {
       throw new BadRequestException(
-        'No file provided. Please upload a valid file.',
+        'No file provided. Please upload a valid file or url.',
       );
+    }
+
+    let pdfFile: Express.Multer.File | string;
+
+    if (updatePdfFileDto.pdfUrl) {
+      pdfFile = await this.pdfFileService.downloadPdfFromUrl(
+        updatePdfFileDto.pdfUrl,
+      );
+    } else {
+      pdfFile = file;
     }
 
     return this.pdfFileService.updateImageFile(
       targetId,
       pdfFileType,
-      file,
+      pdfFile,
       req.user,
+      updatePdfFileDto.pdfUrl,
     );
   }
 

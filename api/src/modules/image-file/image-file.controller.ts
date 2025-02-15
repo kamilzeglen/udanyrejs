@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileType } from '../../interfaces/save-update-file-types';
 import { ImageFile } from '@modules/image-file/image-file.entity';
 import { CreateImageFileDto } from '@modules/image-file/dto/create-image-file.dto';
+import { UpdateImageFileDto } from '@modules/image-file/dto/update-image-file.dto';
 
 @Controller('image-file')
 export class ImageFileController {
@@ -52,6 +53,7 @@ export class ImageFileController {
       imageFileType,
       imageFile,
       req.user,
+      createImageFileDto.imageUrl,
     );
   }
 
@@ -61,20 +63,32 @@ export class ImageFileController {
   async updateOfferImageFile(
     @Param('imageFileType') imageFileType: ImageFileType,
     @Param('targetId') targetId: string,
+    @Body() updateImageFileDto: UpdateImageFileDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: { user: any },
   ): Promise<ImageFile> {
-    if (!file) {
+    if (!file && !updateImageFileDto.imageUrl) {
       throw new BadRequestException(
-        'No file provided. Please upload a valid file.',
+        'No file provided. Please upload a valid file or url.',
       );
+    }
+
+    let imageFile: Express.Multer.File | string;
+
+    if (updateImageFileDto.imageUrl) {
+      imageFile = await this.imageFileService.downloadImageFromUrl(
+        updateImageFileDto.imageUrl,
+      );
+    } else {
+      imageFile = file;
     }
 
     return this.imageFileService.updateImageFile(
       targetId,
       imageFileType,
-      file,
+      imageFile,
       req.user,
+      updateImageFileDto.imageUrl,
     );
   }
 }

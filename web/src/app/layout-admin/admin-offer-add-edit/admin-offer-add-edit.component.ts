@@ -122,6 +122,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.scrapperFacade.scrapOfferFileError$.pipe(takeUntil(this.destroy$)).subscribe(({errorMessage}) => {
+      this.snackService.showError('Wystąpił błąd podczas pobierania oferty');
+    })
+
     this.offerFacade.createOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
     })

@@ -30,6 +30,15 @@
     color: $neutral;
   }
 
+  .icon-refresh {
+    color: #1ea41e;
+
+    &.disabled {
+      color: #5d6b5d;
+      cursor: not-allowed;
+    }
+  }
+
   .icon-delete {
     color: $negative;
   }

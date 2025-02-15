@@ -28,6 +28,9 @@ export class ImageFile {
   @Column({ type: 'varchar', length: 255 })
   path: string;
 
+  @Column({ type: 'varchar', length: 1024, nullable: true })
+  url: string;
+
   @OneToOne(() => Offer, (offer) => offer.imageFile, { nullable: true })
   offer: Offer;
 

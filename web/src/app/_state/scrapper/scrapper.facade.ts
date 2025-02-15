@@ -14,6 +14,9 @@ export class ScrapperFacade {
   public scrapOfferFileSuccess$ = this.actions.pipe(ofType(scrapperActions.scrapOfferFileSuccess));
   public scrapOfferFileError$ = this.actions.pipe(ofType(scrapperActions.scrapOfferFileError));
 
+  public syncOfferPriceSuccess$ = this.actions.pipe(ofType(scrapperActions.syncOfferPriceSuccess));
+  public syncOfferPriceError$ = this.actions.pipe(ofType(scrapperActions.syncOfferPriceError));
+
   constructor(
     private store: Store<AppState>,
     private actions: Actions
@@ -22,5 +25,9 @@ export class ScrapperFacade {
 
   public scrapOffer(payload: { url: string }): void {
     this.store.dispatch(scrapperActions.scrapOfferFile({payload}));
+  }
+
+    public syncOfferPrice(payload: {id: string}): void {
+    this.store.dispatch(scrapperActions.syncOfferPrice({payload}));
   }
 }
