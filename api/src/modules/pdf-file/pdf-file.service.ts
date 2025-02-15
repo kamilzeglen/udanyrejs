@@ -25,6 +25,7 @@ export class PdfFileService {
     pdfFileType: PdfFileType,
     file: Express.Multer.File,
     requestUser: User,
+    url?: string,
   ): Promise<PdfFile> {
     const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
 
@@ -52,6 +53,7 @@ export class PdfFileService {
       originalName: file.originalname,
       path: filePath,
       offer: target,
+      url: url || null,
       createdBy: requestUser,
     });
 
@@ -63,6 +65,7 @@ export class PdfFileService {
     pdfFileType: PdfFileType,
     file: Express.Multer.File,
     requestUser: User,
+    url?: string,
   ): Promise<PdfFile> {
     const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
     const target = await this.offerRepository.findOneBy({ id: targetId });
@@ -94,6 +97,7 @@ export class PdfFileService {
       existingFile.name = fileName;
       existingFile.originalName = file.originalname;
       existingFile.path = filePath;
+      existingFile.url = url || null;
       existingFile.updatedBy = requestUser;
 
       await this.pdfFileRepository.save(existingFile);
@@ -103,10 +107,11 @@ export class PdfFileService {
         originalName: file.originalname,
         path: filePath,
         offer: target,
+        url: url || null,
         createdBy: requestUser,
       });
 
-      await this.pdfFileRepository.save(newImageFile); // Tworzymy nowy rekord
+      await this.pdfFileRepository.save(newImageFile);
     }
 
     writeFileSync(filePath, file.buffer);
@@ -137,8 +142,8 @@ export class PdfFileService {
     try {
       const response = await axios.get(url, { responseType: 'arraybuffer' });
       const fileBuffer = Buffer.from(response.data, 'binary');
-      const extname = path.extname(url).toLowerCase() || '.pdf'; // Domyślne rozszerzenie, jeśli brak w URL
-      const fileName = `${Date.now()}${extname}`; // Generowanie unikalnej nazwy pliku
+      const extname = path.extname(url).toLowerCase() || '.pdf';
+      const fileName = `${Date.now()}${extname}`;
 
       return {
         originalname: fileName,

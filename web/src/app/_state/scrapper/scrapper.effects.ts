@@ -28,4 +28,20 @@ export class ScrapperEffects {
       })
     )
   )
+
+  syncOfferPrice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(scrapperActions.syncOfferPrice),
+      switchMap(({payload}) => {
+        return this.http.syncOfferPrice(payload).pipe(
+          map(() => {
+            return scrapperActions.syncOfferPriceSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(scrapperActions.syncOfferPriceError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
 }

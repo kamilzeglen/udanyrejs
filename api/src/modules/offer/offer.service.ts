@@ -20,6 +20,8 @@ import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 import { PaginationResp } from '../../interfaces/pagination-response';
+import axios from 'axios';
+import { Scrapper } from '../../interfaces/scrapper';
 
 @Injectable()
 export class OfferService {
@@ -111,6 +113,7 @@ export class OfferService {
         'offer.id',
         'offer.name',
         'offer.price',
+        'offer.offerUrl',
         'offer.isActive',
         'offer.isRecommended',
         'offer.startDate',
@@ -254,6 +257,37 @@ export class OfferService {
     return this.offerRepository.save(existingOffer);
   }
 
+  async syncOfferPrice(offerID: string): Promise<boolean> {
+    const offer = await this.offerRepository.findOne({
+      where: { id: offerID },
+      relations: ['categories', 'imageFile', 'pdfFile'],
+    });
+
+    if (!offer) {
+      throw new Error('Offer not found');
+    }
+
+    if (!offer.offerUrl) {
+      throw new Error('Offer URL not found');
+    }
+
+    const scrapeResult = await this.syncOffer(offer.id, offer.offerUrl);
+    console.log(scrapeResult);
+
+    if (!scrapeResult.exists) {
+      offer.isActive = false;
+      await this.offerRepository.save(offer);
+      return true;
+    }
+
+    if (scrapeResult.price !== offer.price) {
+      offer.price = scrapeResult.price;
+      await this.offerRepository.save(offer);
+    }
+
+    return true;
+  }
+
   async removeOffer(offerID: string): Promise<boolean> {
     const offer = await this.offerRepository.findOne({
       where: { id: offerID },
@@ -322,5 +356,21 @@ export class OfferService {
     offer.isActive = true;
     await this.offerRepository.save(offer);
     return true;
+  }
+
+  async syncOffer(offerId: string, url: string): Promise<Scrapper> {
+    try {
+      const response = await axios.post('http://localhost:3001/price-scrap', {
+        id: offerId,
+        url,
+      });
+
+      const { exists, price } = response.data;
+
+      return { id: offerId, exists, price };
+    } catch (error) {
+      console.error('Błąd podczas scrapowania:', error.message || error);
+      throw new Error('Error while scraping cruise price');
+    }
   }
 }

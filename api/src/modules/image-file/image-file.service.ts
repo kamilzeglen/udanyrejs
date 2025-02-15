@@ -30,6 +30,7 @@ export class ImageFileService {
     imageFileType: ImageFileType,
     file: Express.Multer.File,
     requestUser: User,
+    url?: string,
   ): Promise<ImageFile> {
     let uploadDir: string = './uploads/images';
     if (imageFileType === ImageFileType.OFFER) {
@@ -70,6 +71,7 @@ export class ImageFileService {
         originalName: file.originalname,
         path: filePath,
         offer: target,
+        url: url || null,
         createdBy: requestUser,
       });
     }
@@ -81,6 +83,7 @@ export class ImageFileService {
         originalName: file.originalname,
         path: filePath,
         company: target,
+        url: url || null,
         createdBy: requestUser,
       });
     }
@@ -92,6 +95,7 @@ export class ImageFileService {
         originalName: file.originalname,
         path: filePath,
         ship: target,
+        url: url || null,
         createdBy: requestUser,
       });
     }
@@ -104,6 +108,7 @@ export class ImageFileService {
     imageFileType: ImageFileType,
     file: Express.Multer.File,
     requestUser: User,
+    url?: string,
   ): Promise<ImageFile> {
     let uploadDir: string = './uploads/images';
     let target: any;
@@ -135,26 +140,24 @@ export class ImageFileService {
       throw new Error('Unable to determine file extension');
     }
 
-    const fileName = `${targetId}${extname}`; // Zachowujemy nazwę pliku opartą na ID oferty
+    const fileName = `${targetId}${extname}`;
     const filePath = path.join(uploadDir, fileName);
 
     const existingFile: ImageFile = target.imageFile;
 
     let newImageFile: ImageFile;
     if (existingFile) {
-      // Krok 1: Usunięcie starego pliku z dysku (jeśli istnieje)
       if (existsSync(existingFile.path)) {
         unlinkSync(existingFile.path);
       }
 
-      // Krok 2: Uaktualnienie danych w bazie
       existingFile.name = fileName;
       existingFile.originalName = file.originalname;
       existingFile.path = filePath;
+      existingFile.url = url || null;
       existingFile.updatedBy = requestUser;
 
-      // Krok 3: Zapisanie zmienionego rekordu w bazie
-      await this.imageFileRepository.save(existingFile); // Zamiast 'update', używamy 'save' do zaktualizowania istniejącego rekordu
+      await this.imageFileRepository.save(existingFile);
     } else {
       if (imageFileType === ImageFileType.OFFER) {
         newImageFile = this.imageFileRepository.create({
@@ -162,6 +165,7 @@ export class ImageFileService {
           originalName: file.originalname,
           path: filePath,
           offer: target,
+          url: url || null,
           createdBy: requestUser,
         });
       }
@@ -172,6 +176,7 @@ export class ImageFileService {
           originalName: file.originalname,
           path: filePath,
           company: target,
+          url: url || null,
           createdBy: requestUser,
         });
       }
@@ -182,11 +187,12 @@ export class ImageFileService {
           originalName: file.originalname,
           path: filePath,
           ship: target,
+          url: url || null,
           createdBy: requestUser,
         });
       }
 
-      await this.imageFileRepository.save(newImageFile); // Tworzymy nowy rekord
+      await this.imageFileRepository.save(newImageFile);
     }
 
     writeFileSync(filePath, file.buffer);
@@ -217,8 +223,8 @@ export class ImageFileService {
     try {
       const response = await axios.get(url, { responseType: 'arraybuffer' });
       const fileBuffer = Buffer.from(response.data, 'binary');
-      const extname = path.extname(url).toLowerCase() || '.jpg'; // Zakładając, że URL kończy się rozszerzeniem pliku
-      const fileName = `${Date.now()}${extname}`; // Generowanie unikalnej nazwy pliku
+      const extname = path.extname(url).toLowerCase() || '.jpg';
+      const fileName = `${Date.now()}${extname}`;
 
       return {
         originalname: fileName,
