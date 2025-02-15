@@ -1,15 +1,24 @@
 import {chromium} from 'playwright';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const wsUrl = process.env.PW_URL;
+
+if (!wsUrl) {
+  throw new Error('PLAYWRIGHT_WS_URL is not defined in .env');
+}
 
 export const scrapeCruisePrice = async (url: string): Promise<{ exists: boolean; price?: number }> => {
   console.log('=========');
   console.log('Rozpoczynam scrappowanie ceny:', url);
 
-  const browser = await chromium.connect('ws://udanyrejs-playwright:6006/');
+  const browser = await chromium.connect(wsUrl);
   const page = await browser.newPage();
 
   try {
     await page.goto(url);
-    await page.waitForSelector('h1.banner__header, h2.error__header', {timeout: 5000});
+    await page.waitForSelector('h1.banner__header, h2.error__header', {timeout: 30000});
 
     const errorElement = await page.$('h2.error__header');
     if (errorElement) {
