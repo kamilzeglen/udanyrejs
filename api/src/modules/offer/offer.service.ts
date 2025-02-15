@@ -4,10 +4,11 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectLiteral, Repository } from 'typeorm';
+import { IsNull, Not, ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -25,9 +26,12 @@ import { PaginationResp } from '../../interfaces/pagination-response';
 import axios from 'axios';
 import { Scrapper } from '../../interfaces/scrapper';
 import { ConfigService } from '@nestjs/config';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class OfferService {
+  private readonly logger = new Logger(OfferService.name);
+
   constructor(
     @InjectRepository(Offer)
     private offerRepository: Repository<Offer>,
@@ -163,6 +167,13 @@ export class OfferService {
     return this.offerRepository.findOneBy({ id });
   }
 
+  findAllWithURL(): Promise<Offer[]> {
+    return this.offerRepository.find({
+      where: {
+        offerUrl: Not(IsNull()),
+      },
+    });
+  }
   async findOffersByCategory(category?: string): Promise<Offer[]> {
     const queryBuilder = this.offerRepository
       .createQueryBuilder('offer')
@@ -276,7 +287,6 @@ export class OfferService {
     }
 
     const scrapeResult = await this.syncOffer(offer.id, offer.offerUrl);
-    console.log(scrapeResult);
 
     if (!scrapeResult.exists) {
       offer.isActive = false;
@@ -385,6 +395,27 @@ export class OfferService {
         'Error while scraping cruise price',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  @Cron('0 2 0 * *')
+  async handleCron() {
+    this.logger.log('Rozpoczęcie synchronizacji ofert');
+
+    const offers = await this.findAllWithURL();
+    let index = 0;
+
+    for (const offer of offers) {
+      setTimeout(async () => {
+        try {
+          await this.syncOfferPrice(offer.id);
+          this.logger.log(`Oferta zaktualizowana: ${offer.id} `);
+        } catch (error) {
+          this.logger.error(`Błąd aktualizacji oferty ${offer.id}`, error);
+        }
+      }, index * 60000);
+
+      index++;
     }
   }
 }

@@ -2,6 +2,15 @@ import {chromium} from 'playwright';
 import {CruiseData, CruiseScrapeResult} from '../interfaces/cruise.interface';
 import {formatDate} from '../utils/date.utils';
 import {generatePdfLink} from '../utils/pdf.utils';
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const wsUrl = process.env.PW_URL;
+
+if (!wsUrl) {
+  throw new Error('PLAYWRIGHT_WS_URL is not defined in .env');
+}
 
 const checkForErrorPage = async (page: any): Promise<boolean> => {
   if (page.isClosed()) return false;
@@ -69,12 +78,12 @@ export const scrapeFullCruiseData = async (url: string): Promise<CruiseScrapeRes
   console.log('=========');
   console.log('Rozpoczynam scrappowanie:' + url);
 
-  const browser = await chromium.connect('ws://udanyrejs-playwright:6006/');
+  const browser = await chromium.connect(wsUrl);
   const page = await browser.newPage();
 
   try {
     await page.goto(url);
-    await page.waitForSelector('h1.banner__header, h2.error__header');
+    await page.waitForSelector('h1.banner__header, h2.error__header', {timeout: 30000});
 
     if (await checkForErrorPage(page)) {
       throw new Error('Strona rejsu jest niedostępna');

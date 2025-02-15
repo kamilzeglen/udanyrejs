@@ -21,6 +21,7 @@ export const handleFullScrapeRequest = async (req: Request, res: Response) => {
       ? error.message
       : 'Unknown error occurred';
 
+    console.log(error)
     res.status(status).json({ error: errorMessage });
   }
 };
@@ -45,6 +46,7 @@ export const handlePriceScrapeRequest = async (req: Request, res: Response) => {
 
     res.json({ id: id, exists: true, price: result.price });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 };
