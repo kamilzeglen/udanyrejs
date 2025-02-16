@@ -6,6 +6,8 @@ export interface Category {
   name: string;
   url: string;
   position: number;
+  startDate: Date;
+  endDate: Date;
   isActive: boolean;
   isVisible: boolean;
   offers: Offer[];

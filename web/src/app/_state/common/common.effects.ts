@@ -77,11 +77,11 @@ export class CommonEffects {
     )
   )
 
-  deleteOffer$ = createEffect(() =>
+  deleteCompany$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.deleteCompany),
       switchMap(({payload}) => {
-        return this.http.deleteOffer(payload).pipe(
+        return this.http.deleteCompany(payload).pipe(
           map(() => {
             return commonActions.deleteCompanySuccess();
           }),
@@ -190,6 +190,22 @@ export class CommonEffects {
     )
   )
 
+  getCategory$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCategory),
+      switchMap(({payload}) => {
+        return this.http.getCategory(payload).pipe(
+          map(category => {
+            return commonActions.getCategorySuccess({category});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getCategoryError({errorMessage}));
+          })
+        );
+      })
+    )
+  );
+
   getCategories$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getCategories),
@@ -200,6 +216,54 @@ export class CommonEffects {
           }),
           catchError(errorMessage => {
             return of(commonActions.getCategoriesError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  createCategory$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCategory),
+      switchMap(({payload}) => {
+        return this.http.createCategory(payload).pipe(
+          map((category) => {
+            return commonActions.createCategorySuccess({category});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createCategoryError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  updateCategory$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateCategory),
+      switchMap(({payload}) => {
+        return this.http.updateCategory(payload).pipe(
+          map((category) => {
+            return commonActions.updateCategorySuccess({category});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.updateCategoryError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  deleteCategory$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deleteCategory),
+      switchMap(({payload}) => {
+        return this.http.deleteCategory(payload).pipe(
+          map(() => {
+            return commonActions.deleteCategorySuccess();
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.deleteCategoryError({errorMessage}));
           })
         );
       })
@@ -222,6 +286,68 @@ export class CommonEffects {
     )
   )
 
+  getDestination$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getDestination),
+      switchMap(({payload}) => {
+        return this.http.getDestination(payload).pipe(
+          map(destination => {
+            return commonActions.getDestinationSuccess({destination});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getDestinationError({errorMessage}));
+          })
+        );
+      })
+    )
+  );
 
+  createDestination$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createDestination),
+      switchMap(({payload}) => {
+        return this.http.createDestination(payload).pipe(
+          map((destination) => {
+            return commonActions.createDestinationSuccess({destination});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.createDestinationError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  updateDestination$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateDestination),
+      switchMap(({payload}) => {
+        return this.http.updateDestination(payload).pipe(
+          map((destination) => {
+            return commonActions.updateDestinationSuccess({destination});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.updateDestinationError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
+  deleteDestination$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deleteDestination),
+      switchMap(({payload}) => {
+        return this.http.deleteDestination(payload).pipe(
+          map(() => {
+            return commonActions.deleteDestinationSuccess();
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.deleteDestinationError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
 
 }

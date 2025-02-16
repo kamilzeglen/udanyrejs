@@ -1,0 +1,28 @@
+<div class="admin-company-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+
+  <form [formGroup]="destinationForm">
+
+    <section class="section data-section">
+      <h2>Dane dotyczące firmy</h2>
+
+      <div class="form-group">
+        <label for="name">Nazwa firmy:</label>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa firmy"/>
+      </div>
+    </section>
+
+    <button *ngIf="mode === 'EDIT'" (click)="deleteDestination()" mat-raised-button class="delete-destination">
+      Usuń region
+    </button>
+
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit"
+            [disabled]="destinationForm.invalid">
+      {{ mode === 'ADD' ? "Dodaj region" : "Zaktualizuj region" }}
+    </button>
+  </form>
+</div>

@@ -16,23 +16,53 @@ export class CommonFacade {
   public categories$ = this.store.select(commonSelectors.selectCategories);
   public loading$ = this.store.select(commonSelectors.selectLoading);
 
-  public getCompanySuccess$ = this.actions.pipe(ofType(commonActions.getCompanySuccess));
+  public getShipsSuccess$ = this.actions.pipe(ofType(commonActions.getShipsSuccess));
+  public getShipsError$ = this.actions.pipe(ofType(commonActions.getShipsError));
   public getShipByNameSuccess$ = this.actions.pipe(ofType(commonActions.getShipByNameSuccess));
+  public getShipByNameError$ = this.actions.pipe(ofType(commonActions.getShipByNameError));
   public getShipByIdSuccess$ = this.actions.pipe(ofType(commonActions.getShipByIdSuccess));
-  public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
-
-  public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
-  public createCompanyError$ = this.actions.pipe(ofType(commonActions.createCompanyError));
+  public getShipByIdError$ = this.actions.pipe(ofType(commonActions.getShipByIdError));
   public createShipSuccess$ = this.actions.pipe(ofType(commonActions.createShipSuccess));
   public createShipError$ = this.actions.pipe(ofType(commonActions.createShipError));
-
-  public updateCompanySuccess$ = this.actions.pipe(ofType(commonActions.updateCompanySuccess));
-  public updateCompanyError$ = this.actions.pipe(ofType(commonActions.updateCompanyError));
   public updateShipSuccess$ = this.actions.pipe(ofType(commonActions.updateShipSuccess));
   public updateShipError$ = this.actions.pipe(ofType(commonActions.updateShipError));
-
-  public deleteCompanySuccess$ = this.actions.pipe(ofType(commonActions.deleteCompanySuccess));
   public deleteShipSuccess$ = this.actions.pipe(ofType(commonActions.deleteShipSuccess));
+
+  public getCompanySuccess$ = this.actions.pipe(ofType(commonActions.getCompanySuccess));
+  public getCompanyError$ = this.actions.pipe(ofType(commonActions.getCompanyError));
+  public getCompaniesSuccess$ = this.actions.pipe(ofType(commonActions.getCompaniesSuccess));
+  public getCompaniesError$ = this.actions.pipe(ofType(commonActions.getCompaniesError));
+  public createCompanySuccess$ = this.actions.pipe(ofType(commonActions.createCompanySuccess));
+  public createCompanyError$ = this.actions.pipe(ofType(commonActions.createCompanyError));
+  public updateCompanySuccess$ = this.actions.pipe(ofType(commonActions.updateCompanySuccess));
+  public updateCompanyError$ = this.actions.pipe(ofType(commonActions.updateCompanyError));
+  public deleteCompanySuccess$ = this.actions.pipe(ofType(commonActions.deleteCompanySuccess));
+  public deleteCompanyError$ = this.actions.pipe(ofType(commonActions.deleteCompanyError));
+
+  public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
+  public getCategoriesError$ = this.actions.pipe(ofType(commonActions.getCategoriesError));
+  public getCategorySuccess$ = this.actions.pipe(ofType(commonActions.getCategorySuccess));
+  public getCategoryError$ = this.actions.pipe(ofType(commonActions.getCategoryError));
+  public createCategorySuccess$ = this.actions.pipe(ofType(commonActions.createCategorySuccess));
+  public createCategoryError$ = this.actions.pipe(ofType(commonActions.createCategoryError));
+  public updateCategorySuccess$ = this.actions.pipe(ofType(commonActions.updateCategorySuccess));
+  public updateCategoryError$ = this.actions.pipe(ofType(commonActions.updateCategoryError));
+  public deleteCategorySuccess$ = this.actions.pipe(ofType(commonActions.deleteCategorySuccess));
+  public deleteCategoryError$ = this.actions.pipe(ofType(commonActions.deleteCategoryError));
+
+  public getDestinationsSuccess$ = this.actions.pipe(ofType(commonActions.getDestinationsSuccess));
+  public getDestinationsError$ = this.actions.pipe(ofType(commonActions.getDestinationsError));
+  public getDestinationSuccess$ = this.actions.pipe(ofType(commonActions.getDestinationSuccess));
+  public getDestinationError$ = this.actions.pipe(ofType(commonActions.getDestinationError));
+  public createDestinationSuccess$ = this.actions.pipe(ofType(commonActions.createDestinationSuccess));
+  public createDestinationError$ = this.actions.pipe(ofType(commonActions.createDestinationError));
+  public updateDestinationSuccess$ = this.actions.pipe(ofType(commonActions.updateDestinationSuccess));
+  public updateDestinationError$ = this.actions.pipe(ofType(commonActions.updateDestinationError));
+  public deleteDestinationSuccess$ = this.actions.pipe(ofType(commonActions.deleteDestinationSuccess));
+  public deleteDestinationError$ = this.actions.pipe(ofType(commonActions.deleteDestinationError));
+
+
+
 
   constructor(
     private store: Store<AppState>,
@@ -84,8 +114,24 @@ export class CommonFacade {
     this.store.dispatch(commonActions.deleteShip({payload}));
   }
 
+  public getCategory(payload: { id: string }): void {
+    this.store.dispatch(commonActions.getCategory({payload}));
+  }
+
   public getCategories(): void {
     this.store.dispatch(commonActions.getCategories());
+  }
+
+  public createCategory(payload: { formData: FormData }): void {
+    this.store.dispatch(commonActions.createCategory({payload}));
+  }
+
+  public updateCategory(payload: { id: string, formData: FormData }): void {
+    this.store.dispatch(commonActions.updateCategory({payload}));
+  }
+
+  public deleteCategory(payload: { id: string }): void {
+    this.store.dispatch(commonActions.deleteCategory({payload}));
   }
 
   public getCategories$(): Observable<Category[]> {
@@ -106,5 +152,21 @@ export class CommonFacade {
 
   public getDestinations(): void {
     this.store.dispatch(commonActions.getDestinations());
+  }
+
+  public getDestination(payload: { id: string }): void {
+    this.store.dispatch(commonActions.getDestination({payload}));
+  }
+
+  public createDestination(payload: { formData: FormData }): void {
+    this.store.dispatch(commonActions.createDestination({payload}));
+  }
+
+  public updateDestination(payload: { id: string, formData: FormData }): void {
+    this.store.dispatch(commonActions.updateDestination({payload}));
+  }
+
+  public deleteDestination(payload: { id: string }): void {
+    this.store.dispatch(commonActions.deleteDestination({payload}));
   }
 }

@@ -1,0 +1,11 @@
+/dist
+/node_modules
+/node_modules/**
+/build
+.env
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen

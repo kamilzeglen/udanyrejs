@@ -7,11 +7,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './company.entity';
-import { CreateCompanyDto } from '@modules/company/dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
-import { UpdateCompanyDto } from '@modules/company/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
+import { CreateCompanyDto } from '@modules/company/dto/create-company.dto';
+import { UpdateCompanyDto } from '@modules/company/dto/update-company.dto';
 
 @Injectable()
 export class CompanyService {
@@ -23,8 +23,8 @@ export class CompanyService {
     private readonly userService: UserService,
   ) {}
 
-  findAll(): Promise<Company[]> {
-    return this.companyRepository.find({
+  async findAll(): Promise<Company[]> {
+    return await this.companyRepository.find({
       where: {
         isActive: true,
       },
@@ -35,11 +35,11 @@ export class CompanyService {
     return this.companyRepository.findOneBy({ id });
   }
 
-  findOneById(id: string): Promise<Company> {
-    return this.companyRepository.findOneBy({ id });
+  async findOneById(id: string): Promise<Company> {
+    return await this.companyRepository.findOneBy({ id });
   }
 
-  async createOffer(
+  async createCompany(
     createCompanyDto: CreateCompanyDto,
     reqCreatedBy: User,
   ): Promise<Company> {
@@ -49,12 +49,10 @@ export class CompanyService {
       createdBy,
     });
 
-    const savedCompany = await this.companyRepository.save(company);
-
-    return this.companyRepository.save(savedCompany);
+    return await this.companyRepository.save(company);
   }
 
-  async updateOffer(
+  async updateCompany(
     id: string,
     updateCompanyDto: UpdateCompanyDto,
     reqCreatedBy: User,
@@ -91,7 +89,7 @@ export class CompanyService {
       await this.imageFileService.removeImageFile(company.imageFile.path);
     }
 
-    await this.companyRepository.delete(companyID);
+    await this.companyRepository.delete(company.id);
 
     return true;
   }
