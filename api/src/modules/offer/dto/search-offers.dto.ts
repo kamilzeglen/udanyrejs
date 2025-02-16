@@ -30,5 +30,5 @@ export class SearchOffersDto extends PaginationDto {
 
   @IsBoolean()
   @IsOptional()
-  active?: boolean;
+  showInactive?: boolean;
 }

@@ -50,7 +50,8 @@ export class OfferListComponent implements OnInit, OnDestroy {
     startDate: null,
     endDate: null,
     companyIdList: [],
-    destinationIdList: []
+    destinationIdList: [],
+    showInactive: false,
   };
 
   constructor(
