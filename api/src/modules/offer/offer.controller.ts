@@ -85,9 +85,4 @@ export class OfferController {
   async activateOffer(@Param('offerId') offerId: string): Promise<boolean> {
     return await this.offerService.activateOffer(offerId);
   }
-
-  @Get('/test/test')
-  async testOffer(): Promise<void> {
-    this.offerService.handleCron();
-  }
 }

@@ -295,6 +295,9 @@ export class OfferService {
     }
 
     if (scrapeResult.price !== offer.price) {
+      this.logger.log(
+        `Zaktualizowano cenę: ${scrapeResult.price} (${offer.price})`,
+      );
       offer.price = scrapeResult.price;
       await this.offerRepository.save(offer);
     }
