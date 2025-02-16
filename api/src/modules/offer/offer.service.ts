@@ -8,7 +8,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Not, ObjectLiteral, Repository } from 'typeorm';
+import {
+  IsNull,
+  LessThanOrEqual,
+  Not,
+  ObjectLiteral,
+  Repository,
+} from 'typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -60,7 +66,7 @@ export class OfferService {
       endDate,
       destinationIdList,
       companyIdList,
-      active,
+      showInactive,
     } = searchOffersDto;
 
     const whereClauses: string[] = [];
@@ -80,9 +86,9 @@ export class OfferService {
       whereParams.categoryId = categoryId;
     }
 
-    if (active) {
-      whereClauses.push('offer.isActive = (:...active)');
-      whereParams.active = active;
+    if (!showInactive) {
+      whereClauses.push('offer.isActive = :active');
+      whereParams.active = true;
     }
 
     if (companyIdList && companyIdList.length > 0) {
@@ -289,6 +295,9 @@ export class OfferService {
     const scrapeResult = await this.syncOffer(offer.id, offer.offerUrl);
 
     if (!scrapeResult.exists) {
+      this.logger.log(
+        `Oferta dezaktywowana: ${offer.id} (Oferta nie istnieje)`,
+      );
       offer.isActive = false;
       await this.offerRepository.save(offer);
       return true;
@@ -296,7 +305,7 @@ export class OfferService {
 
     if (scrapeResult.price !== offer.price) {
       this.logger.log(
-        `Zaktualizowano cenę: ${scrapeResult.price} (${offer.price})`,
+        `Zaktualizowano cenę oferty: ${offer.id} (${offer.price} € -> ${scrapeResult.price} €)`,
       );
       offer.price = scrapeResult.price;
       await this.offerRepository.save(offer);
@@ -401,10 +410,8 @@ export class OfferService {
     }
   }
 
-  @Cron('0 2 0 * *')
+  @Cron('0 2 * * *')
   async handleCron() {
-    this.logger.log('Rozpoczęcie synchronizacji ofert');
-
     const offers = await this.findAllWithURL();
     let index = 0;
 
@@ -412,13 +419,48 @@ export class OfferService {
       setTimeout(async () => {
         try {
           await this.syncOfferPrice(offer.id);
-          this.logger.log(`Oferta zaktualizowana: ${offer.id} `);
         } catch (error) {
           this.logger.error(`Błąd aktualizacji oferty ${offer.id}`, error);
         }
       }, index * 60000);
 
       index++;
+    }
+  }
+
+  @Cron('0 0 */4 * * *')
+  async deactivateExpiredOffers() {
+    const daysBeforeInactive = parseInt(
+      this.configService.get<string>('DAYS_BEFORE_INACTIVE'),
+      10,
+    );
+
+    if (isNaN(daysBeforeInactive)) {
+      this.logger.error('DAYS_BEFORE_INACTIVE nie jest poprawną liczbą');
+      return;
+    }
+
+    const today = new Date();
+    const thresholdDate = new Date();
+    thresholdDate.setDate(today.getDate() + daysBeforeInactive);
+
+    const expiredOffers = await this.offerRepository.find({
+      where: {
+        startDate: LessThanOrEqual(thresholdDate),
+        isActive: true,
+      },
+    });
+
+    if (expiredOffers.length === 0) {
+      return;
+    }
+
+    for (const offer of expiredOffers) {
+      offer.isActive = false;
+      await this.offerRepository.save(offer);
+      this.logger.log(
+        `Oferta dezaktywowana: ${offer.id} (Mniej niz ${daysBeforeInactive} dni)`,
+      );
     }
   }
 }

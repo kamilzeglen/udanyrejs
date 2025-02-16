@@ -2,6 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import { ValidationPipe } from '@nestjs/common';
+import * as crypto from 'crypto';
+
+if (!global.crypto) {
+  (global as any).crypto = {
+    randomUUID: crypto.randomUUID,
+  };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const parsedConfig = require('dotenv').config();
@@ -23,7 +30,7 @@ async function bootstrap() {
   app.enableCors({
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true); // Pozwól na zapytania z tych domen
+        callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }

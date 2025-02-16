@@ -6,4 +6,5 @@ export interface SearchOffersPayload extends Pagination {
   startDate?: Date
   companyIdList?: string[],
   destinationIdList?: string[],
+  showInactive?: boolean,
 }

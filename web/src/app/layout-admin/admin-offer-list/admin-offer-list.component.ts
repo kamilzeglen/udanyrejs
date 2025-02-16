@@ -97,6 +97,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
         limit: this.pageSize,
         orderBy: this.currentSortBy,
         orderDir: this.currentSortDir,
+
       });
     });
   }
@@ -121,6 +122,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
         limit: this.pageSize,
         orderBy: this.currentSortBy || this.defaultSortBy,
         orderDir: this.currentSortDir || this.defaultSortDir,
+        showInactive: true
       });
     });
   }
