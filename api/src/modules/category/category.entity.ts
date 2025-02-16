@@ -26,6 +26,12 @@ export class Category {
   @Column({ nullable: true })
   position: number;
 
+  @Column({ nullable: true })
+  startDate: Date;
+
+  @Column({ nullable: true })
+  endDate: Date;
+
   @Column({ default: true })
   isActive: boolean;
 

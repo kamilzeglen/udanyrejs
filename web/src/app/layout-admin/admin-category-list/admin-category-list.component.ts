@@ -1,32 +1,35 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ReplaySubject, take, takeUntil} from 'rxjs';
 import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {AllDeviceInfo, Company} from '@interfaces';
+import {AllDeviceInfo, Category} from '@interfaces';
 import {CommonFacade} from '@state/common';
 import {RouterFacade} from '@state/router';
 import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
 import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
 
 @Component({
-  selector: 'app-admin-company-list',
-  templateUrl: './admin-company-list.component.html',
-  styleUrl: './admin-company-list.component.scss',
+  selector: 'app-admin-category-list',
+  templateUrl: './admin-category-list.component.html',
+  styleUrl: './admin-category-list.component.scss',
 })
-export class AdminCompanyListComponent implements OnInit, OnDestroy {
+export class AdminCategoryListComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
   public deviceInfo: AllDeviceInfo;
 
-  public companies$ = this.commonFacade.companies$
-  public ships$ = this.commonFacade.ships$
+  public categories$ = this.commonFacade.categories$
   public loading$ = this.commonFacade.loading$
 
   public allColumns: string[] = [
     'id',
     'name',
-    'key',
-    'image',
-    'description',
+    'url',
+    'position',
+    'startDate',
+    'endDate',
+    'isActive',
+    'isVisible',
+    'offerCount',
     'actions',
     'updatedAt',
     'createdAt',
@@ -52,12 +55,12 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
 
     this.columnsToDisplay = this.getColumnsToDisplay();
 
-    this.commonFacade.deleteCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto firmę")
-      this.commonFacade.getCompanies()
+    this.commonFacade.deleteCategorySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo("Pomyślnie usunięto kategorie")
+      this.commonFacade.getCategories()
     })
 
-    this.commonFacade.getCompanies()
+    this.commonFacade.getCategories()
   }
 
   public ngOnDestroy(): void {
@@ -65,20 +68,20 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public addCompany(): void {
-    const linkParams = ["/admin/companies/add/"]
+  public addCategory(): void {
+    const linkParams = ["/admin/categories/add/"]
     this.routerFacade.changeRoute({linkParams})
   }
 
-  public editCompany(company: Company): void {
-    const linkParams = ["/admin/companies/edit/" + company.id]
+  public editCategory(category: Category): void {
+    const linkParams = ["/admin/categories/edit/" + category.id]
     this.routerFacade.changeRoute({linkParams})
   }
 
-  public deleteCompany(company: Company): void {
+  public deleteCategory(category: Category): void {
     this.confirmationModalService
       .open({
-        message: "Jesteś pewny że chcesz usunąć firmę: " + company.name + "?"
+        message: "Jesteś pewny że chcesz usunąć kategorie: " + category.name + "?"
       })
       .afterClosed()
       .pipe(take(1))
@@ -87,7 +90,7 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.commonFacade.deleteCompany({id: company.id})
+        this.commonFacade.deleteCategory({id: category.id})
       });
   }
 
@@ -96,10 +99,10 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['id', 'name', 'image', 'description', 'createdAt', 'expand'];
+      return ['id', 'name', 'url', 'position', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['id', 'name', 'image', 'createdAt', 'expand'];
+      return ['id', 'name', 'url', 'position'];
     }
     return [];
   }

@@ -42,7 +42,7 @@ export class SubMenuComponent implements OnInit, OnDestroy {
         const categories$ = this.commonFacade.getCategories$();
         categories$.pipe(take(1)).subscribe((categories) => {
           this.subMenuItems = categories
-            .filter(category => category.isVisible)
+            .filter(category => category.isActive && category.isVisible)
             .map(category => ({
             name: category.name,
             isVisible: category.isVisible,

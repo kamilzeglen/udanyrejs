@@ -16,6 +16,10 @@ export class CommonHttpService {
   ) {
   }
 
+  // =========
+  // Companies
+  // =========
+
   public getCompanies(): Observable<Company[]> {
     const url = `${this.API_URL}/company`;
     return this.http.get<Company[]>(url);
@@ -36,10 +40,14 @@ export class CommonHttpService {
     return this.http.patch<Company>(url, payload.formData);
   }
 
-  public deleteOffer(payload: { id: string }): Observable<boolean> {
+  public deleteCompany(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/company/` + payload.id;
     return this.http.delete<boolean>(url);
   }
+
+  // =========
+  // Ships
+  // =========
 
   public getShips(payload: {companyId: string}): Observable<Ship[]> {
     const url = `${this.API_URL}/ship/` + payload.companyId;
@@ -71,13 +79,61 @@ export class CommonHttpService {
     return this.http.delete<boolean>(url);
   }
 
+  // =========
+  // Category
+  // =========
+
   public getCategories(): Observable<Category[]> {
     const url = `${this.API_URL}/category`;
     return this.http.get<Category[]>(url);
   }
 
+  public getCategory(payload: { id: string }): Observable<Category> {
+    const url = `${this.API_URL}/category/details/` + payload.id;
+    return this.http.get<Category>(url);
+  }
+
+  public createCategory(payload: { formData: FormData }): Observable<Category> {
+    const url = `${this.API_URL}/category/`;
+    return this.http.post<Category>(url, payload.formData);
+  }
+
+  public updateCategory(payload: { id: string, formData: FormData }): Observable<Category> {
+    const url = `${this.API_URL}/category/` + payload.id;
+    return this.http.patch<Category>(url, payload.formData);
+  }
+
+  public deleteCategory(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/category/` + payload.id;
+    return this.http.delete<boolean>(url);
+  }
+
+  // =========
+  // Destination
+  // =========
+
   public getDestinations(): Observable<Destination[]> {
     const url = `${this.API_URL}/destination/`;
     return this.http.get<Destination[]>(url);
+  }
+
+  public getDestination(payload: { id: string }): Observable<Destination> {
+    const url = `${this.API_URL}/destination/details/` + payload.id;
+    return this.http.get<Destination>(url);
+  }
+
+  public createDestination(payload: { formData: FormData }): Observable<Destination> {
+    const url = `${this.API_URL}/destination/`;
+    return this.http.post<Destination>(url, payload.formData);
+  }
+
+  public updateDestination(payload: { id: string, formData: FormData }): Observable<Destination> {
+    const url = `${this.API_URL}/destination/` + payload.id;
+    return this.http.patch<Destination>(url, payload.formData);
+  }
+
+  public deleteDestination(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/destination/` + payload.id;
+    return this.http.delete<boolean>(url);
   }
 }

@@ -1,0 +1,193 @@
+@import '../../../scss/variables';
+
+.admin-company-add-edit {
+  .title {
+    margin: 10px 0;
+    justify-self: center;
+    font-weight: 600;
+  }
+
+  form {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease;
+  }
+
+  /* Section Titles */
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    padding-left: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* Form Sections */
+  .section {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+
+  /* Form Fields */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+
+    input:focus,
+    mat-select:focus {
+      outline: none;
+    }
+  }
+
+  .split {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Odstęp między sekcjami */
+    margin: 20px 0;
+
+    .left, .right {
+      width: 48%;
+    }
+
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid $white;
+      margin-right: 10px;
+      transition: border-color 0.3s ease;
+    }
+
+    .input-group input:focus {
+      border-color: $tertiary-color; /* Kolor fokusu */
+      outline: none;
+    }
+
+    .input-group button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      position: absolute;
+      right: -35px; /* Przesunięcie przycisku w prawo */
+      top: 50%;
+      transform: translateY(-50%);
+      color: $negative; /* Kolor ikony usuwania */
+      transition: color 0.3s ease;
+    }
+
+    .input-group button:hover {
+      color: $negative; /* Zmiana koloru ikony przy hoverze */
+    }
+
+    .add-btn {
+      color: $white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .left, .right {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .left .add-btn, .right .add-btn {
+      background-color: $primary-color;
+    }
+
+    .left .add-btn:hover, .right .add-btn:hover {
+      background-color: $primary-color; /* Zmiana koloru przycisku w zależności od sekcji */
+    }
+
+    /* Ustawienie ikony w przycisku */
+    .mat-icon {
+      color: $negative;
+      font-size: 20px;
+    }
+  }
+
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* File Inputs */
+  input[type='file'] {
+    padding: 5px;
+    font-size: 14px;
+    background: $white;
+    border: 1px solid $primary-color;
+    border-radius: 6px;
+
+    &:hover {
+      border-color: #005b96;
+    }
+  }
+
+  /* Submit Button */
+  button[type='submit'] {
+    display: flex;
+    background: $primary-color;
+    font-size: 18px;
+    padding: 12px 30px;
+    justify-self: center;
+
+    &:disabled {
+      background-color: #b0bec5;
+      cursor: not-allowed;
+    }
+  }
+
+  .delete-category {
+    display: flex;
+    background: $negative;
+    color: $white;
+    font-size: 18px;
+    padding: 12px 30px;
+    margin: 10px;
+    justify-self: center;
+  }
+
+  .current-file {
+    display: flex;
+    padding: 5px;
+
+    mat-icon {
+      margin-left: 10px;
+      color: $positive;
+    }
+  }
+}

@@ -11,21 +11,21 @@ import {
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { AuthGuard } from '@modules/auth/guards/auth.guard';
-import { CreateCompanyDto } from '@modules/company/dto/create-offer.dto';
 import { Company } from '@modules/company/company.entity';
-import { UpdateCompanyDto } from '@modules/company/dto/update-offer.dto';
+import { UpdateCompanyDto } from '@modules/company/dto/update-company.dto';
+import { CreateCompanyDto } from '@modules/company/dto/create-company.dto';
 
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get('/')
-  findAll() {
+  async getAllCompanies(): Promise<Company[]> {
     return this.companyService.findAll();
   }
 
   @Get('/details/:companyID')
-  async getOneOffer(@Param('companyID') companyID: string): Promise<any[]> {
+  async getCompany(@Param('companyID') companyID: string): Promise<any[]> {
     return await this.companyService.findOne(companyID);
   }
 
@@ -35,7 +35,7 @@ export class CompanyController {
     @Body() createCompanyDto: CreateCompanyDto,
     @Req() req: { user: any },
   ): Promise<Company> {
-    return await this.companyService.createOffer(createCompanyDto, req.user);
+    return await this.companyService.createCompany(createCompanyDto, req.user);
   }
 
   @UseGuards(AuthGuard)
@@ -45,7 +45,7 @@ export class CompanyController {
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req: { user: any },
   ): Promise<Company> {
-    return await this.companyService.updateOffer(
+    return await this.companyService.updateCompany(
       companyID,
       updateCompanyDto,
       req.user,
