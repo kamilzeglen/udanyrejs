@@ -6,6 +6,7 @@ import { User } from '@modules/user/user.entity';
 import { CreateDestinationDto } from '@modules/destination/dto/create-destination.dto';
 import { UserService } from '@modules/user/user.service';
 import { UpdateDestinationDto } from '@modules/destination/dto/update-destination.dto';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class DestinationService {
@@ -13,6 +14,7 @@ export class DestinationService {
     @InjectRepository(Destination)
     private readonly destinationRepository: Repository<Destination>,
     private readonly userService: UserService,
+    private readonly logService: LogService,
   ) {}
 
   async findAll(): Promise<Destination[]> {
@@ -44,6 +46,11 @@ export class DestinationService {
       createdBy,
     });
 
+    await this.logService.createLog(
+      'Dodano region: ' + destination.name,
+      reqCreatedBy.email,
+    );
+
     return await this.destinationRepository.save(destination);
   }
 
@@ -52,34 +59,51 @@ export class DestinationService {
     updateDestinationDto: UpdateDestinationDto,
     reqCreatedBy: User,
   ): Promise<Destination> {
-    const existingDestination = await this.destinationRepository.findOne({
+    const destination = await this.destinationRepository.findOne({
       where: { id },
     });
 
-    if (!existingDestination) {
+    if (!destination) {
       throw new NotFoundException(`Destination with ID ${id} not found`);
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
 
-    Object.assign(existingDestination, {
+    Object.assign(destination, {
       ...updateDestinationDto,
       updatedBy,
     });
 
-    return this.destinationRepository.save(existingDestination);
+    await this.logService.createLog(
+      'Zaktualizowano region: ' +
+        destination.name +
+        ' (' +
+        destination.id +
+        ')',
+      reqCreatedBy.email,
+    );
+
+    return this.destinationRepository.save(destination);
   }
 
-  async removeDestination(destinationId: string): Promise<boolean> {
-    const category = await this.destinationRepository.findOne({
+  async removeDestination(
+    destinationId: string,
+    reqCreatedBy: User,
+  ): Promise<boolean> {
+    const destination = await this.destinationRepository.findOne({
       where: { id: destinationId },
     });
 
-    if (!category) {
+    if (!destination) {
       throw new Error('Destination not found');
     }
 
-    await this.destinationRepository.delete(category.id);
+    await this.logService.createLog(
+      'Usunięto region: ' + destination.name + ' (' + destination.id + ')',
+      reqCreatedBy.email,
+    );
+
+    await this.destinationRepository.delete(destination.id);
 
     return true;
   }

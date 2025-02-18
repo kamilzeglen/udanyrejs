@@ -350,4 +350,20 @@ export class CommonEffects {
     )
   )
 
+  getLogs$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getLogs),
+      switchMap(() => {
+        return this.http.getLogs().pipe(
+          map(logs => {
+            return commonActions.getLogsSuccess({logs});
+          }),
+          catchError(errorMessage => {
+            return of(commonActions.getLogsError({errorMessage}));
+          })
+        );
+      })
+    )
+  )
+
 }

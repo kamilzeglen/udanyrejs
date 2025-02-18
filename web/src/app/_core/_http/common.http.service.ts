@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '@environment';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {Log} from '../../_interfaces/log';
 
 @Injectable({
   providedIn: 'root'
@@ -135,5 +136,14 @@ export class CommonHttpService {
   public deleteDestination(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/destination/` + payload.id;
     return this.http.delete<boolean>(url);
+  }
+
+  // =========
+  // Logs
+  // =========
+
+  public getLogs(): Observable<Log[]> {
+    const url = `${this.API_URL}/log/`;
+    return this.http.get<Log[]>(url);
   }
 }

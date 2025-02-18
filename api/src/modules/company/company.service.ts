@@ -12,6 +12,7 @@ import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
 import { CreateCompanyDto } from '@modules/company/dto/create-company.dto';
 import { UpdateCompanyDto } from '@modules/company/dto/update-company.dto';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class CompanyService {
@@ -21,6 +22,7 @@ export class CompanyService {
     @Inject(forwardRef(() => ImageFileService))
     private readonly imageFileService: ImageFileService,
     private readonly userService: UserService,
+    private readonly logService: LogService,
   ) {}
 
   async findAll(): Promise<Company[]> {
@@ -49,6 +51,11 @@ export class CompanyService {
       createdBy,
     });
 
+    await this.logService.createLog(
+      'Dodano armatora: ' + company.name,
+      reqCreatedBy.email,
+    );
+
     return await this.companyRepository.save(company);
   }
 
@@ -57,25 +64,30 @@ export class CompanyService {
     updateCompanyDto: UpdateCompanyDto,
     reqCreatedBy: User,
   ): Promise<Company> {
-    const existingCompany = await this.companyRepository.findOne({
+    const company = await this.companyRepository.findOne({
       where: { id },
     });
 
-    if (!existingCompany) {
+    if (!company) {
       throw new NotFoundException(`Company with ID ${id} not found`);
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
 
-    Object.assign(existingCompany, {
+    Object.assign(company, {
       ...updateCompanyDto,
       updatedBy,
     });
 
-    return this.companyRepository.save(existingCompany);
+    await this.logService.createLog(
+      'Zaktualizowano armatora: ' + company.name + ' (' + company.id + ')',
+      reqCreatedBy.email,
+    );
+
+    return this.companyRepository.save(company);
   }
 
-  async removeCompany(companyID: string): Promise<boolean> {
+  async removeCompany(companyID: string, reqCreatedBy: User): Promise<boolean> {
     const company = await this.companyRepository.findOne({
       where: { id: companyID },
       relations: ['imageFile'],
@@ -88,6 +100,11 @@ export class CompanyService {
     if (company.imageFile) {
       await this.imageFileService.removeImageFile(company.imageFile.path);
     }
+
+    await this.logService.createLog(
+      'Usunięto armatora: ' + company.name + ' (' + company.id + ')',
+      reqCreatedBy.email,
+    );
 
     await this.companyRepository.delete(company.id);
 

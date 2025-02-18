@@ -25,6 +25,7 @@ export class SubMenuService implements OnDestroy {
       {name: 'Statki', isVisible: true, url: '/admin/ships'},
       {name: 'Kategorie', isVisible: true, url: '/admin/categories'},
       {name: 'Regiony', isVisible: true, url: '/admin/destinations'},
+      {name: 'Logi', isVisible: true, url: '/admin/logs'},
     ],
   };
 

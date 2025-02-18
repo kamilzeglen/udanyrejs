@@ -12,6 +12,7 @@ import { ImageFileService } from '@modules/image-file/image-file.service';
 import { UpdateShipDto } from '@modules/ship/dto/update-ship.dto';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class ShipService {
@@ -21,6 +22,7 @@ export class ShipService {
     @Inject(forwardRef(() => ImageFileService))
     private readonly imageFileService: ImageFileService,
     private readonly userService: UserService,
+    private readonly logService: LogService,
   ) {}
 
   findOneById(id: string): Promise<Ship> {
@@ -48,6 +50,11 @@ export class ShipService {
       createdBy,
     });
 
+    await this.logService.createLog(
+      'Dodano statek: ' + ship.name,
+      reqCreatedBy.email,
+    );
+
     const savedShip = await this.shipRepository.save(ship);
 
     return this.shipRepository.save(savedShip);
@@ -58,25 +65,30 @@ export class ShipService {
     updateShipDto: UpdateShipDto,
     reqCreatedBy: User,
   ): Promise<Ship> {
-    const existingShip = await this.shipRepository.findOne({
+    const ship = await this.shipRepository.findOne({
       where: { id },
     });
 
-    if (!existingShip) {
+    if (!ship) {
       throw new NotFoundException(`Ship with ID ${id} not found`);
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
 
-    Object.assign(existingShip, {
+    Object.assign(ship, {
       ...updateShipDto,
       updatedBy,
     });
 
-    return this.shipRepository.save(existingShip);
+    await this.logService.createLog(
+      'Zaktualizowano statek: ' + ship.name + ' (' + ship.id + ')',
+      reqCreatedBy.email,
+    );
+
+    return this.shipRepository.save(ship);
   }
 
-  async removeShip(shipId: string): Promise<boolean> {
+  async removeShip(shipId: string, reqCreatedBy: User): Promise<boolean> {
     const ship = await this.shipRepository.findOne({
       where: { id: shipId },
       relations: ['imageFile'],
@@ -89,6 +101,11 @@ export class ShipService {
     if (ship.imageFile) {
       await this.imageFileService.removeImageFile(ship.imageFile.path);
     }
+
+    await this.logService.createLog(
+      'Usunięto statek: ' + ship.name + ' (' + ship.id + ')',
+      reqCreatedBy.email,
+    );
 
     await this.shipRepository.delete(shipId);
 

@@ -4,10 +4,12 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from '../role/role.entity';
+import { Log } from '@modules/log/log.entity';
 
 @Entity()
 export class User {
@@ -30,6 +32,9 @@ export class User {
   role: Role;
   @Column({ type: 'uuid', nullable: false })
   roleId: string;
+
+  @OneToMany(() => Log, (log) => log.createdBy)
+  logs: Log[];
 
   @CreateDateColumn()
   createdAt: Date;

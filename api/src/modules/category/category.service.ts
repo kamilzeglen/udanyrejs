@@ -6,6 +6,7 @@ import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
 import { CreateCategoryDto } from '@modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@modules/category/dto/update-category.dto';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class CategoryService {
@@ -13,6 +14,7 @@ export class CategoryService {
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly userService: UserService,
+    private readonly logService: LogService,
   ) {}
 
   async findAll(): Promise<Category[]> {
@@ -53,6 +55,11 @@ export class CategoryService {
       createdBy,
     });
 
+    await this.logService.createLog(
+      'Dodano kategorię: ' + category.name,
+      reqCreatedBy.email,
+    );
+
     return await this.categoryRepository.save(category);
   }
 
@@ -61,25 +68,33 @@ export class CategoryService {
     updateCategoryDto: UpdateCategoryDto,
     reqCreatedBy: User,
   ): Promise<Category> {
-    const existingCategory = await this.categoryRepository.findOne({
+    const category = await this.categoryRepository.findOne({
       where: { id },
     });
 
-    if (!existingCategory) {
+    if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
 
-    Object.assign(existingCategory, {
+    Object.assign(category, {
       ...updateCategoryDto,
       updatedBy,
     });
 
-    return this.categoryRepository.save(existingCategory);
+    await this.logService.createLog(
+      'Zaktualizowano kategorie: ' + category.name + ' (' + category.id + ')',
+      reqCreatedBy.email,
+    );
+
+    return this.categoryRepository.save(category);
   }
 
-  async removeCategory(categoryId: string): Promise<boolean> {
+  async removeCategory(
+    categoryId: string,
+    reqCreatedBy: User,
+  ): Promise<boolean> {
     const category = await this.categoryRepository.findOne({
       where: { id: categoryId },
     });
@@ -87,6 +102,11 @@ export class CategoryService {
     if (!category) {
       throw new Error('Category not found');
     }
+
+    await this.logService.createLog(
+      'Usunięto kategorie: ' + category.name + ' (' + category.id + ')',
+      reqCreatedBy.email,
+    );
 
     await this.categoryRepository.delete(category.id);
 

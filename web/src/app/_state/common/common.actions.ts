@@ -1,5 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {Category, Company, Destination, Ship} from '@interfaces';
+import {Log} from '../../_interfaces/log';
 
 export const getCompanies = createAction('[Common] Get Companies');
 export const getCompaniesSuccess = createAction('[Common] Get Companies Success', props<{ companies: Company[] }>());
@@ -82,6 +83,10 @@ export const getDestinationsSuccess = createAction('[Common] Get Destinations Su
   destinations: Destination[]
 }>());
 export const getDestinationsError = createAction('[Common] Get Destinations Error', props<{ errorMessage: string }>());
+
+export const getLogs = createAction('[Common] Get Logs');
+export const getLogsSuccess = createAction('[Common] Get Logs Success', props<{logs: Log[]}>());
+export const getLogsError = createAction('[Common] Get Logs Error', props<{ errorMessage: string }>());
 
 export const createDestination = createAction('[Common] Create Destination', props<{ payload: { formData: FormData } }>());
 export const createDestinationSuccess = createAction('[Common] Create Destination Success', props<{ destination: Destination }>());

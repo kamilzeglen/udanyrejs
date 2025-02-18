@@ -12,6 +12,7 @@ import {AdminDestinationListComponent} from './admin-destination-list/admin-dest
 import {AdminDestinationAddEditComponent} from './admin-destination-add-edit/admin-destination-add-edit.component';
 import {AdminCompanyAddEditComponent} from './admin-company-add-edit/admin-company-add-edit.component';
 import {AdminCategoryAddEditComponent} from './admin-category-add-edit/admin-category-add-edit.component';
+import {AdminLogsListComponent} from './admin-logs-list/admin-logs-list.component';
 
 const components = [
   LayoutAdminComponent,
@@ -25,6 +26,7 @@ const components = [
   AdminShipAddEditComponent,
   AdminDestinationListComponent,
   AdminDestinationAddEditComponent,
+  AdminLogsListComponent,
 ];
 
 @NgModule({

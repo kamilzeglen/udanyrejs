@@ -14,6 +14,7 @@ export class CommonFacade {
   public ships$ = this.store.select(commonSelectors.selectShips);
   public destinations$ = this.store.select(commonSelectors.selectDestinations);
   public categories$ = this.store.select(commonSelectors.selectCategories);
+  public logs$ = this.store.select(commonSelectors.selectLogs);
   public loading$ = this.store.select(commonSelectors.selectLoading);
 
   public getShipsSuccess$ = this.actions.pipe(ofType(commonActions.getShipsSuccess));
@@ -61,7 +62,8 @@ export class CommonFacade {
   public deleteDestinationSuccess$ = this.actions.pipe(ofType(commonActions.deleteDestinationSuccess));
   public deleteDestinationError$ = this.actions.pipe(ofType(commonActions.deleteDestinationError));
 
-
+  public getLogsSuccess$ = this.actions.pipe(ofType(commonActions.getLogsSuccess));
+  public getLogsError$ = this.actions.pipe(ofType(commonActions.getLogsError));
 
 
   constructor(
@@ -168,5 +170,9 @@ export class CommonFacade {
 
   public deleteDestination(payload: { id: string }): void {
     this.store.dispatch(commonActions.deleteDestination({payload}));
+  }
+
+  public getLogs(): void {
+    this.store.dispatch(commonActions.getLogs());
   }
 }

@@ -61,7 +61,11 @@ export class DestinationController {
   @Delete('/:destinationID')
   async removeCompany(
     @Param('destinationID') destinationID: string,
+    @Req() req: { user: any },
   ): Promise<boolean> {
-    return await this.destinationService.removeDestination(destinationID);
+    return await this.destinationService.removeDestination(
+      destinationID,
+      req.user,
+    );
   }
 }
