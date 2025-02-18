@@ -66,7 +66,7 @@ export class AuthService {
 
     if (user && passwordValid) {
       await this.logService.createLog(
-        'Zalogowao sie na konto' + loginDto.email,
+        'Zalogowano sie na konto: ' + loginDto.email,
         'SYSTEM',
       );
 

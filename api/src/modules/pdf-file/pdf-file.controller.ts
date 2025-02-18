@@ -21,10 +21,14 @@ import { CreatePdfFileDto } from '@modules/pdf-file/dto/create-pdf-file.dto';
 import { Response } from 'express';
 import * as fs from 'node:fs';
 import { UpdatePdfFileDto } from '@modules/pdf-file/dto/update-pdf-file.dto';
+import { LogService } from '@modules/log/log.service';
 
 @Controller('pdf-file')
 export class PdfFileController {
-  constructor(private readonly pdfFileService: PdfFileService) {}
+  constructor(
+    private readonly pdfFileService: PdfFileService,
+    private readonly logService: LogService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Post('/:pdfFileType/:targetId')
@@ -103,6 +107,8 @@ export class PdfFileController {
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: 'File not found' });
     }
+
+    await this.logService.createLog('Pobrano PDF (' + id + ')', 'SYSTEM');
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="file-${id}.pdf"`);
