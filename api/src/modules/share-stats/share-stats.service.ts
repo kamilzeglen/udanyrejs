@@ -7,6 +7,7 @@ import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer } from '@modules/offer/offer.entity';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class ShareStatsService {
@@ -15,6 +16,7 @@ export class ShareStatsService {
     private readonly shareStatsRepository: Repository<ShareStats>,
     @InjectRepository(Offer)
     private readonly offerRepository: Repository<Offer>,
+    private readonly logService: LogService,
   ) {}
 
   async findOneById(sharedStatId: string): Promise<ShareStats> {
@@ -59,6 +61,17 @@ export class ShareStatsService {
       default:
         throw new BadRequestException('Nieobsługiwana platforma');
     }
+
+    await this.logService.createLog(
+      'Skorzystano z reflinka: ' +
+        offer.name +
+        ' (' +
+        offer.id +
+        ') (' +
+        platform.toUpperCase() +
+        ')',
+      'SYSTEM',
+    );
 
     await this.save(shareStats);
 

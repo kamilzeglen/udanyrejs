@@ -1,4 +1,4 @@
-import {initialState, CommonState} from './common.state';
+import {CommonState, initialState} from './common.state';
 import {Action, createReducer, on} from '@ngrx/store';
 import * as commonActions from '@state/common/common.actions';
 
@@ -79,6 +79,25 @@ const reducer = createReducer(
     loading: false,
     errorMessage,
     destinations: [],
+  })),
+
+  on(commonActions.getLogs, state => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+    logs: [],
+  })),
+  on(commonActions.getLogsSuccess, (state, {logs}) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+    logs
+  })),
+  on(commonActions.getLogsError, (state, {errorMessage}) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+    logs: [],
   })),
 )
 

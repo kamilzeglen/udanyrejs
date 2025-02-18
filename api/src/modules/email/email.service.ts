@@ -4,6 +4,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Email } from './email.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class EmailService {
@@ -11,6 +12,7 @@ export class EmailService {
     @InjectRepository(Email)
     private readonly emailRepository: Repository<Email>,
     private readonly mailerService: MailerService,
+    private readonly logService: LogService,
   ) {}
 
   async sendEmail(sendEmailDto: SendEmailDto): Promise<Email> {
@@ -47,6 +49,8 @@ export class EmailService {
       message,
       offerURL,
     });
+
+    await this.logService.createLog('Wysłano E-Mail: ' + email, 'SYSTEM');
 
     return await this.emailRepository.save(emailEntity);
   }

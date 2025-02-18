@@ -21,6 +21,8 @@ import { EmailModule } from '@modules/email/email.module';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LogModule } from '@modules/log/log.module';
+import { ScrapperModule } from '@modules/scrapper/scrapper.module';
 
 @Module({
   imports: [
@@ -96,6 +98,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     ShipModule,
     ShipModule,
     EmailModule,
+    LogModule,
+    ScrapperModule,
   ],
   controllers: [AppController],
   providers: [AppService],

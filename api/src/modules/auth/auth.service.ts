@@ -9,12 +9,14 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
+import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly logService: LogService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<User> {
@@ -23,7 +25,6 @@ export class AuthService {
       throw new NotAcceptableException('User already exists');
     }
 
-    // Sprawdzanie czy hasło jest prawidłowe
     if (!registerDto.password) {
       throw new NotAcceptableException('Password is required');
     }
@@ -32,6 +33,11 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(
       registerDto.password,
       saltOrRounds,
+    );
+
+    await this.logService.createLog(
+      'Dodano konto:' + registerDto.email,
+      'SYSTEM',
     );
 
     return this.userService.createUser({
@@ -59,6 +65,11 @@ export class AuthService {
     }
 
     if (user && passwordValid) {
+      await this.logService.createLog(
+        'Zalogowao sie na konto' + loginDto.email,
+        'SYSTEM',
+      );
+
       const access_token = await this.createToken(user);
       return {
         access_token: access_token.access_token,

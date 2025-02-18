@@ -66,23 +66,37 @@ export class OfferController {
 
   @UseGuards(AuthGuard)
   @Get('/:offerId/sync')
-  async syncOfferPrice(@Param('offerId') offerId: string): Promise<boolean> {
-    return await this.offerService.syncOfferPrice(offerId);
+  async syncOfferPrice(
+    @Param('offerId') offerId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.offerService.syncOfferPrice(offerId, req.user);
   }
 
   @UseGuards(AuthGuard)
   @Delete('/:offerId')
-  async removeOffer(@Param('offerId') offerId: string): Promise<boolean> {
-    return await this.offerService.removeOffer(offerId);
+  async removeOffer(
+    @Param('offerId') offerId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.offerService.removeOffer(offerId, req.user);
   }
 
+  @UseGuards(AuthGuard)
   @Get('/:offerId/deactivate')
-  async deactivateOffer(@Param('offerId') offerId: string): Promise<boolean> {
-    return await this.offerService.deactivateOffer(offerId);
+  async deactivateOffer(
+    @Param('offerId') offerId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.offerService.deactivateOffer(offerId, req.user);
   }
 
+  @UseGuards(AuthGuard)
   @Get('/:offerId/activate')
-  async activateOffer(@Param('offerId') offerId: string): Promise<boolean> {
-    return await this.offerService.activateOffer(offerId);
+  async activateOffer(
+    @Param('offerId') offerId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.offerService.activateOffer(offerId, req.user);
   }
 }

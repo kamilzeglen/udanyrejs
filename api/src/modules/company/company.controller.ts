@@ -54,7 +54,10 @@ export class CompanyController {
 
   @UseGuards(AuthGuard)
   @Delete('/:companyID')
-  async removeCompany(@Param('companyID') companyID: string): Promise<boolean> {
-    return await this.companyService.removeCompany(companyID);
+  async removeCompany(
+    @Param('companyID') companyID: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.companyService.removeCompany(companyID, req.user);
   }
 }

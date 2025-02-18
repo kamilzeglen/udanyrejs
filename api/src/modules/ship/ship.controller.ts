@@ -54,7 +54,10 @@ export class ShipController {
 
   @UseGuards(AuthGuard)
   @Delete('/:shipId')
-  async removeCompany(@Param('shipId') shipId: string): Promise<boolean> {
-    return await this.shipService.removeShip(shipId);
+  async removeCompany(
+    @Param('shipId') shipId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return await this.shipService.removeShip(shipId, req.user);
   }
 }

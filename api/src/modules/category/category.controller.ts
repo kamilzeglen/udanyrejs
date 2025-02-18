@@ -61,7 +61,8 @@ export class CategoryController {
   @Delete('/:categoryID')
   async removeCompany(
     @Param('categoryID') categoryID: string,
+    @Req() req: { user: any },
   ): Promise<boolean> {
-    return await this.categoryService.removeCategory(categoryID);
+    return await this.categoryService.removeCategory(categoryID, req.user);
   }
 }

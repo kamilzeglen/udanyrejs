@@ -1,7 +1,5 @@
 import {
   forwardRef,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -29,10 +27,8 @@ import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 import { PaginationResp } from '../../interfaces/pagination-response';
-import axios from 'axios';
-import { Scrapper } from '../../interfaces/scrapper';
-import { ConfigService } from '@nestjs/config';
-import { Cron } from '@nestjs/schedule';
+import { LogService } from '@modules/log/log.service';
+import { ScrapperService } from '@modules/scrapper/scrapper.service';
 
 @Injectable()
 export class OfferService {
@@ -43,6 +39,8 @@ export class OfferService {
     private offerRepository: Repository<Offer>,
     @Inject(forwardRef(() => ImageFileService))
     private readonly imageFileService: ImageFileService,
+    @Inject(forwardRef(() => ScrapperService))
+    private readonly scrapperService: ScrapperService,
     private readonly pdfFileService: PdfFileService,
     private readonly userService: UserService,
     private readonly companyService: CompanyService,
@@ -50,8 +48,69 @@ export class OfferService {
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
     private readonly shareStatsService: ShareStatsService,
-    private readonly configService: ConfigService,
+    private readonly logService: LogService,
   ) {}
+
+  async findOneById(id: string): Promise<Offer> {
+    return await this.offerRepository.findOneBy({ id });
+  }
+
+  async findAllWithURL(): Promise<Offer[]> {
+    return await this.offerRepository.find({
+      where: {
+        offerUrl: Not(IsNull()),
+      },
+    });
+  }
+
+  async findActiveOffers(opts?: { lessThan: Date }): Promise<Offer[]> {
+    if (opts.lessThan) {
+      return await this.offerRepository.find({
+        where: {
+          startDate: LessThanOrEqual(opts.lessThan),
+          isActive: true,
+        },
+      });
+    } else {
+      return await this.offerRepository.find({
+        where: {
+          isActive: true,
+        },
+      });
+    }
+  }
+
+  async findOffersByCategory(category?: string): Promise<Offer[]> {
+    const queryBuilder = this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.company', 'company')
+      .leftJoinAndSelect('company.imageFile', 'companyImageFile')
+      .leftJoinAndSelect('offer.categories', 'categories')
+      .leftJoinAndSelect('offer.imageFile', 'imageFile');
+
+    if (category) {
+      queryBuilder.where('LOWER(categories.url) = LOWER(:category)', {
+        category,
+      });
+    }
+
+    return queryBuilder.getMany();
+  }
+
+  async deactivate(offer: Offer): Promise<Offer> {
+    offer.isActive = false;
+    return await this.offerRepository.save(offer);
+  }
+
+  async activate(offer: Offer): Promise<Offer> {
+    offer.isActive = true;
+    return await this.offerRepository.save(offer);
+  }
+
+  async updatedBy(offer: Offer, user: User): Promise<Offer> {
+    offer.updatedBy = user;
+    return await this.offerRepository.save(offer);
+  }
 
   async searchOffers(
     searchOffersDto: SearchOffersDto,
@@ -169,34 +228,6 @@ export class OfferService {
     };
   }
 
-  findOneById(id: string): Promise<Offer> {
-    return this.offerRepository.findOneBy({ id });
-  }
-
-  findAllWithURL(): Promise<Offer[]> {
-    return this.offerRepository.find({
-      where: {
-        offerUrl: Not(IsNull()),
-      },
-    });
-  }
-  async findOffersByCategory(category?: string): Promise<Offer[]> {
-    const queryBuilder = this.offerRepository
-      .createQueryBuilder('offer')
-      .leftJoinAndSelect('offer.company', 'company')
-      .leftJoinAndSelect('company.imageFile', 'companyImageFile')
-      .leftJoinAndSelect('offer.categories', 'categories')
-      .leftJoinAndSelect('offer.imageFile', 'imageFile');
-
-    if (category) {
-      queryBuilder.where('LOWER(categories.url) = LOWER(:category)', {
-        category,
-      });
-    }
-
-    return queryBuilder.getMany();
-  }
-
   async createOffer(
     createOfferDto: CreateOfferDto,
     reqCreatedBy: User,
@@ -232,6 +263,10 @@ export class OfferService {
         await this.destinationService.findByIds(destinations);
     }
 
+    await this.logService.createLog(
+      'Dodano ofertę: ' + offer.name,
+      reqCreatedBy.email,
+    );
     return this.offerRepository.save(offer);
   }
 
@@ -243,12 +278,12 @@ export class OfferService {
     const { companyId, shipId, destinations, categories, ...updateOfferData } =
       updateOfferDto;
 
-    const existingOffer = await this.offerRepository.findOne({
+    const offer = await this.offerRepository.findOne({
       where: { id },
       relations: ['company', 'ship'],
     });
 
-    if (!existingOffer) {
+    if (!offer) {
       throw new NotFoundException(`Offer with ID ${id} not found`);
     }
 
@@ -258,7 +293,7 @@ export class OfferService {
     const company = await this.companyService.findOneById(companyId);
     const ship = await this.shipService.findOneById(shipId);
 
-    Object.assign(existingOffer, {
+    Object.assign(offer, {
       ...updateOfferData,
       updatedBy: requestUser,
       company,
@@ -266,55 +301,22 @@ export class OfferService {
     });
 
     if (categories && categories.length > 0) {
-      existingOffer.categories =
-        await this.categoryService.findByIds(categories);
+      offer.categories = await this.categoryService.findByIds(categories);
     }
 
     if (destinations && destinations.length > 0) {
-      existingOffer.destinations =
+      offer.destinations =
         await this.destinationService.findByIds(destinations);
     }
 
-    return this.offerRepository.save(existingOffer);
+    await this.logService.createLog(
+      'Zaktualizowano ofertę: ' + offer.name + ' (' + offer.id + ')',
+      reqCreatedBy.email,
+    );
+    return this.offerRepository.save(offer);
   }
 
-  async syncOfferPrice(offerID: string): Promise<boolean> {
-    const offer = await this.offerRepository.findOne({
-      where: { id: offerID },
-      relations: ['categories', 'imageFile', 'pdfFile'],
-    });
-
-    if (!offer) {
-      throw new Error('Offer not found');
-    }
-
-    if (!offer.offerUrl) {
-      throw new Error('Offer URL not found');
-    }
-
-    const scrapeResult = await this.syncOffer(offer.id, offer.offerUrl);
-
-    if (!scrapeResult.exists) {
-      this.logger.log(
-        `Oferta dezaktywowana: ${offer.id} (Oferta nie istnieje)`,
-      );
-      offer.isActive = false;
-      await this.offerRepository.save(offer);
-      return true;
-    }
-
-    if (scrapeResult.price !== offer.price) {
-      this.logger.log(
-        `Zaktualizowano cenę oferty: ${offer.id} (${offer.price} € -> ${scrapeResult.price} €)`,
-      );
-      offer.price = scrapeResult.price;
-      await this.offerRepository.save(offer);
-    }
-
-    return true;
-  }
-
-  async removeOffer(offerID: string): Promise<boolean> {
+  async removeOffer(offerID: string, reqCreatedBy: User): Promise<boolean> {
     const offer = await this.offerRepository.findOne({
       where: { id: offerID },
       relations: ['categories', 'imageFile', 'pdfFile'],
@@ -353,114 +355,112 @@ export class OfferService {
       .where('id = :offerID', { offerID })
       .execute();
 
+    await this.logService.createLog(
+      'Usunięto ofertę: ' + offer.name + ' (' + offer.id + ')',
+      reqCreatedBy.email,
+    );
     return true;
   }
 
-  async deactivateOffer(offerId: string): Promise<boolean> {
-    const offer = await this.offerRepository.findOne({
-      where: { id: offerId },
-    });
+  async deactivateOffer(offerId: string, reqCreatedBy: User): Promise<boolean> {
+    const offer = await this.findOneById(offerId);
+    const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
       throw new NotFoundException(`Offer with ID ${offerId} not found`);
     }
 
-    offer.isActive = false;
-    await this.offerRepository.save(offer);
+    this.deactivate(offer);
+    this.updatedBy(offer, user);
+
+    await this.logService.createLog(
+      'Dezaktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
+      reqCreatedBy.email,
+    );
     return true;
   }
 
-  async activateOffer(offerId: string): Promise<boolean> {
-    const offer = await this.offerRepository.findOne({
-      where: { id: offerId },
-    });
+  async activateOffer(offerId: string, reqCreatedBy: User): Promise<boolean> {
+    const offer = await this.findOneById(offerId);
+    const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
       throw new NotFoundException(`Offer with ID ${offerId} not found`);
     }
 
-    offer.isActive = true;
-    await this.offerRepository.save(offer);
+    this.activate(offer);
+    this.updatedBy(offer, user);
+
+    await this.logService.createLog(
+      'Aktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
+      reqCreatedBy.email,
+    );
     return true;
   }
 
-  async syncOffer(offerId: string, url: string): Promise<Scrapper> {
-    try {
-      const scraperApiUrl = this.configService.get<string>('SCRAPPER_URL');
+  async syncOfferPrice(offerID: string, reqCreatedBy?: User): Promise<boolean> {
+    const offer = await this.offerRepository.findOne({
+      where: { id: offerID },
+      relations: ['categories', 'imageFile', 'pdfFile'],
+    });
 
-      if (!scraperApiUrl) {
-        throw new Error(
-          'SCRAPER_API_URL is not defined in environment variables',
-        );
-      }
-
-      const response = await axios.post(scraperApiUrl + '/price-scrap', {
-        id: offerId,
-        url,
-      });
-
-      const { exists, price } = response.data;
-      return { id: offerId, exists, price };
-    } catch (error) {
-      console.error('Błąd podczas scrapowania:', error.message || error);
-      throw new HttpException(
-        'Error while scraping cruise price',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!offer) {
+      throw new Error('Offer not found');
     }
-  }
 
-  @Cron('0 2 * * *')
-  async handleCron() {
-    const offers = await this.findAllWithURL();
-    let index = 0;
-
-    for (const offer of offers) {
-      setTimeout(async () => {
-        try {
-          await this.syncOfferPrice(offer.id);
-        } catch (error) {
-          this.logger.error(`Błąd aktualizacji oferty ${offer.id}`, error);
-        }
-      }, index * 60000);
-
-      index++;
+    if (!offer.offerUrl) {
+      throw new Error('Offer URL not found');
     }
-  }
 
-  @Cron('0 0 */4 * * *')
-  async deactivateExpiredOffers() {
-    const daysBeforeInactive = parseInt(
-      this.configService.get<string>('DAYS_BEFORE_INACTIVE'),
-      10,
+    const scrapeResult = await this.scrapperService.scrapOfferPrice(
+      offer.id,
+      offer.offerUrl,
     );
 
-    if (isNaN(daysBeforeInactive)) {
-      this.logger.error('DAYS_BEFORE_INACTIVE nie jest poprawną liczbą');
-      return;
-    }
+    if (!scrapeResult.exists) {
+      const logMessage =
+        'Dezaktywowano ofertę: ' +
+        offer.name +
+        ' (' +
+        offer.id +
+        ') (Oferta nie istnieje)';
 
-    const today = new Date();
-    const thresholdDate = new Date();
-    thresholdDate.setDate(today.getDate() + daysBeforeInactive);
-
-    const expiredOffers = await this.offerRepository.find({
-      where: {
-        startDate: LessThanOrEqual(thresholdDate),
-        isActive: true,
-      },
-    });
-
-    if (expiredOffers.length === 0) {
-      return;
-    }
-
-    for (const offer of expiredOffers) {
+      this.logger.log(logMessage);
       offer.isActive = false;
       await this.offerRepository.save(offer);
-      this.logger.log(
-        `Oferta dezaktywowana: ${offer.id} (Mniej niz ${daysBeforeInactive} dni)`,
-      );
+
+      if (reqCreatedBy) {
+        await this.logService.createLog(logMessage, reqCreatedBy.email);
+      } else {
+        await this.logService.createLog(logMessage, 'SYSTEM');
+      }
+
+      return true;
     }
+
+    if (Number(scrapeResult.price) !== Number(offer.price)) {
+      const logMessage =
+        'Dezaktywowano ofertę: ' +
+        offer.name +
+        ' (' +
+        offer.id +
+        ') (' +
+        offer.price +
+        ' € -> ' +
+        scrapeResult.price +
+        ' €)';
+
+      this.logger.log(logMessage);
+      offer.price = scrapeResult.price;
+      await this.offerRepository.save(offer);
+
+      if (reqCreatedBy) {
+        await this.logService.createLog(logMessage, reqCreatedBy.email);
+      } else {
+        await this.logService.createLog(logMessage, 'SYSTEM');
+      }
+    }
+
+    return true;
   }
 }
