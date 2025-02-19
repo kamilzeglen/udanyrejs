@@ -14,7 +14,9 @@ export class LogService {
   ) {}
 
   async findAll(): Promise<Log[]> {
-    return await this.logRepository.find();
+    return await this.logRepository.find({
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async createLog(
