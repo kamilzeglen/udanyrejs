@@ -440,7 +440,7 @@ export class OfferService {
 
     if (Number(scrapeResult.price) !== Number(offer.price)) {
       const logMessage =
-        'Dezaktywowano ofertę: ' +
+        'Zaktualizowano ofertę: ' +
         offer.name +
         ' (' +
         offer.id +
