@@ -49,6 +49,9 @@ export class ShareStatsService {
     }
 
     switch (platform) {
+      case 'web':
+        shareStats.webClicks++;
+        break;
       case 'fb':
         shareStats.facebookClicks++;
         break;

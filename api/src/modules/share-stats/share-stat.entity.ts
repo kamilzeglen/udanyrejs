@@ -10,6 +10,9 @@ export class ShareStats {
   offerId: string;
 
   @Column({ default: 0 })
+  webClicks: number;
+
+  @Column({ default: 0 })
   facebookClicks: number;
 
   @Column({ default: 0 })

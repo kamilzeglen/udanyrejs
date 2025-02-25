@@ -75,35 +75,44 @@
         <th mat-header-cell *matHeaderCellDef>Statystyki</th>
         <td mat-cell *matCellDef="let element">
           <div class="shareStats" *ngIf="element.shareStats">
-            <div>
+            <div (click)="copyToClipboard('web', element.id); $event.stopPropagation()">
+              <i class="fab fa-chrome"></i>
+              <span>{{ element.shareStats.webClicks }}</span>
+            </div>
+            <div (click)="copyToClipboard('fb', element.id); $event.stopPropagation()">
               <i class="fab fa-facebook"></i>
               <span>{{ element.shareStats.facebookClicks }}</span>
             </div>
-            <div>
+            <div (click)="copyToClipboard('ig', element.id); $event.stopPropagation()">
               <i class="fab fa-instagram"></i>
               <span>{{ element.shareStats.instagramClicks }}</span>
             </div>
-            <div>
+            <div (click)="copyToClipboard('tt', element.id); $event.stopPropagation()">
               <i class="fab fa-tiktok"></i>
               <span>{{ element.shareStats.tiktokClicks }}</span>
             </div>
           </div>
           <div class="shareStats" *ngIf="!element.shareStats">
-            <div>
+            <div (click)="copyToClipboard('web', element.id); $event.stopPropagation()">
+              <i class="fab fa-chrome"></i>
+              <span>-</span>
+            </div>
+            <div (click)="copyToClipboard('fb', element.id); $event.stopPropagation()">
               <i class="fab fa-facebook"></i>
               <span>-</span>
             </div>
-            <div>
+            <div (click)="copyToClipboard('ig', element.id); $event.stopPropagation()">
               <i class="fab fa-instagram"></i>
               <span>-</span>
             </div>
-            <div>
+            <div (click)="copyToClipboard('tt', element.id); $event.stopPropagation()">
               <i class="fab fa-tiktok"></i>
               <span>-</span>
             </div>
           </div>
         </td>
       </ng-container>
+
 
       <!-- Photos Column -->
       <ng-container matColumnDef="photos">

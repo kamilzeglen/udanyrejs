@@ -59,6 +59,7 @@ export class OfferService {
     return await this.offerRepository.find({
       where: {
         offerUrl: Not(IsNull()),
+        isActive: true,
       },
     });
   }
