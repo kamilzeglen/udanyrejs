@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ReplaySubject, takeUntil} from 'rxjs';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {OfferFacade} from '@state/offer';
 import {AllDeviceInfo, Itinerary, Offer} from '@interfaces';
 import {environment} from '@environment';
@@ -32,7 +32,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly location: Location,
     private readonly deviceInfoService: DeviceInfoService,
     private readonly pdfFileFacade: PdfFileFacade,
-    private readonly router: RouterFacade,
+    private readonly routerFacade: RouterFacade,
+    private readonly router: Router,
     private readonly titleService: Title,
     private readonly metaService: Meta
   ) {
@@ -41,7 +42,6 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       name: 'description',
       content: `Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`
     });
-
   }
 
   ngOnInit() {
@@ -102,7 +102,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   public redirectToContact(id: string): void {
-    this.router.changeRoute({linkParams: ['/contact/', id]});
+    this.routerFacade.changeRoute({linkParams: ['/contact/', id]});
   }
 
   public downloadPdfFile(id: string): void {

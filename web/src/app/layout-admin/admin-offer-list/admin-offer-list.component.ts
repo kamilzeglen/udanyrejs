@@ -190,4 +190,14 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     }
     return [];
   }
+
+  public copyToClipboard(type: string, id: string) {
+    const url = `${window.location.origin}/share/${type}/${id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      console.log('Skopiowano:', url);
+    }).catch(err => {
+      console.error('Błąd kopiowania:', err);
+    });
+  }
+
 }
