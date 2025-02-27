@@ -18,6 +18,8 @@ export class PdfFileService {
     private pdfFileRepository: Repository<PdfFile>,
     @InjectRepository(Offer)
     private offerRepository: Repository<Offer>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async createPdfFile(
@@ -60,11 +62,11 @@ export class PdfFileService {
     return this.pdfFileRepository.save(pdfFileEntity);
   }
 
-  async updateImageFile(
+  async updatePdfFile(
     targetId: string,
     pdfFileType: PdfFileType,
     file: Express.Multer.File,
-    requestUser: User,
+    requestUser: User | 'SYSTEM',
     url?: string,
   ): Promise<PdfFile> {
     const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
@@ -76,6 +78,12 @@ export class PdfFileService {
 
     if (!file) {
       throw new Error('No file provided for updating');
+    }
+
+    if (requestUser === 'SYSTEM') {
+      requestUser = await this.userRepository.findOneBy({
+        email: 'system@udanyrejs.pl',
+      });
     }
 
     const extname = path.extname(file.originalname).toLowerCase();

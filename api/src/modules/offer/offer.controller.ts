@@ -70,7 +70,7 @@ export class OfferController {
     @Param('offerId') offerId: string,
     @Req() req: { user: any },
   ): Promise<boolean> {
-    return await this.offerService.syncOfferPrice(offerId, req.user);
+    return await this.offerService.syncOffer(offerId, req.user);
   }
 
   @UseGuards(AuthGuard)

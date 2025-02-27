@@ -29,6 +29,7 @@ import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 import { PaginationResp } from '../../interfaces/pagination-response';
 import { LogService } from '@modules/log/log.service';
 import { ScrapperService } from '@modules/scrapper/scrapper.service';
+import { PdfFileType } from '../../interfaces/save-update-file-types';
 
 @Injectable()
 export class OfferService {
@@ -177,6 +178,7 @@ export class OfferService {
       .leftJoinAndSelect('offer.ship', 'ship')
       .leftJoinAndSelect('ship.company', 'shipCompany')
       .leftJoinAndSelect('offer.imageFile', 'offerImageFile')
+      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('offer.categories', 'category')
@@ -198,6 +200,9 @@ export class OfferService {
         'offerImageFile.id',
         'offerImageFile.name',
         'offerImageFile.path',
+        'pdfFile.id',
+        'pdfFile.name',
+        'pdfFile.path',
         'ship.id',
         'ship.name',
         'company.id',
@@ -399,7 +404,7 @@ export class OfferService {
     return true;
   }
 
-  async syncOfferPrice(offerID: string, reqCreatedBy?: User): Promise<boolean> {
+  async syncOffer(offerID: string, reqCreatedBy?: User): Promise<boolean> {
     const offer = await this.offerRepository.findOne({
       where: { id: offerID },
       relations: ['categories', 'imageFile', 'pdfFile'],
@@ -413,7 +418,7 @@ export class OfferService {
       throw new Error('Offer URL not found');
     }
 
-    const scrapeResult = await this.scrapperService.scrapOfferPrice(
+    const scrapeResult = await this.scrapperService.scrapSyncOffer(
       offer.id,
       offer.offerUrl,
     );
@@ -440,6 +445,24 @@ export class OfferService {
     }
 
     if (Number(scrapeResult.price) !== Number(offer.price)) {
+      // Offer
+      offer.price = scrapeResult.price;
+      await this.offerRepository.save(offer);
+
+      // PDF
+      const pdfFile = await this.pdfFileService.downloadPdfFromUrl(
+        scrapeResult.pdfUrl,
+      );
+
+      await this.pdfFileService.updatePdfFile(
+        offer.id,
+        PdfFileType.OFFER,
+        pdfFile,
+        'SYSTEM',
+        scrapeResult.pdfUrl,
+      );
+
+      // Logs
       const logMessage =
         'Zaktualizowano ofertę: ' +
         offer.name +
@@ -452,8 +475,6 @@ export class OfferService {
         ' €)';
 
       this.logger.log(logMessage);
-      offer.price = scrapeResult.price;
-      await this.offerRepository.save(offer);
 
       if (reqCreatedBy) {
         await this.logService.createLog(logMessage, reqCreatedBy.email);

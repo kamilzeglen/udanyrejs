@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import {scrapeFullCruiseData} from "../services/fullScraper.service";
-import {scrapeCruisePrice} from "../services/priceScraper.service";
+import {syncOffer} from "../services/syncScraper.service";
 
 export const handleFullScrapeRequest = async (req: Request, res: Response) => {
   const { url } = req.body;
@@ -38,13 +38,13 @@ export const handlePriceScrapeRequest = async (req: Request, res: Response) => {
   }
 
   try {
-    const result = await scrapeCruisePrice(url);
+    const result = await syncOffer(url);
 
     if (!result.exists) {
       return res.json({ exists: false, message: 'Oferta nie istnieje' });
     }
 
-    res.json({ id: id, exists: true, price: result.price });
+    res.json({ id: id, exists: true, price: result.price, pdfUrl: result.pdfUrl });
   } catch (error) {
     console.log(error)
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });

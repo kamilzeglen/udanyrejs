@@ -31,7 +31,7 @@ export class PdfFileHttpService {
     if (payload.pdfUrl) {
       return this.http.patch<PdfFile>(url, {pdfUrl: payload.pdfUrl});
     } else {
-      return this.http.put<PdfFile>(url, payload.file);
+      return this.http.patch<PdfFile>(url, payload.file);
     }
   }
 

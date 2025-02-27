@@ -115,10 +115,16 @@
 
 
       <!-- Photos Column -->
-      <ng-container matColumnDef="photos">
-        <th mat-header-cell *matHeaderCellDef>Zdjęcia</th>
+      <ng-container matColumnDef="photos-or-pdf">
+        <th mat-header-cell *matHeaderCellDef>PDF / Zdjęcia</th>
         <td mat-cell *matCellDef="let element">
-          <div class="photos">
+          <div class="photos-or-pdf">
+            <div class="element">
+              <span>PDF</span>
+              <mat-icon
+                [ngStyle]="{ color: element.pdfFile ? 'green' : 'red' }">{{ element.pdfFile ? 'check' : 'close' }}
+              </mat-icon>
+            </div>
             <div class="element">
               <span>Oferta</span>
               <mat-icon

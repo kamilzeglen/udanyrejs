@@ -50,9 +50,11 @@
     }
   }
 
-  .photos {
+  .photos-or-pdf {
     .element {
       display: flex;
+      padding: 1px 0;
+      margin: 1px 0;
       font-weight: 500;
 
       span {

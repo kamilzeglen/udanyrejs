@@ -9,6 +9,7 @@ import {DeviceInfoService} from '@shared/device-info/device-info.service';
 import {RouterFacade} from '@state/router';
 import {PdfFileFacade} from '@state/pdfFile';
 import {Meta, Title} from '@angular/platform-browser';
+import {ShareStatsFacade} from '@state/shareStats';
 
 @Component({
   selector: 'app-offer-details',
@@ -35,7 +36,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly router: Router,
     private readonly titleService: Title,
-    private readonly metaService: Meta
+    private readonly metaService: Meta,
+    private readonly shareStatsFacade: ShareStatsFacade
   ) {
     this.titleService.setTitle(`UdanyRejs - Szczegóły oferty`);
     this.metaService.updateTag({
@@ -87,6 +89,12 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       if (!offerId) {
         return
       }
+
+      this.routerFacade.getPreviousUrl().pipe(takeUntil(this.destroy$)).subscribe(previousUrl => {
+        if (previousUrl?.includes('/offers')) {
+          this.shareStatsFacade.updateShareStats({platform: 'web', offerId: offerId});
+        }
+      });
 
       this.offerFacade.getOffer({id: offerId})
     })
