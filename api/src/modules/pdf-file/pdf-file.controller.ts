@@ -91,7 +91,7 @@ export class PdfFileController {
       pdfFile = file;
     }
 
-    return this.pdfFileService.updateImageFile(
+    return this.pdfFileService.updatePdfFile(
       targetId,
       pdfFileType,
       pdfFile,

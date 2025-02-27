@@ -25,14 +25,14 @@ export class ScrapperService {
   ) {}
 
   @Cron('0 2 * * *')
-  async handleCron() {
+  async CronSyncOffer() {
     const offers = await this.offerService.findAllWithURL();
     let index = 0;
 
     for (const offer of offers) {
       setTimeout(async () => {
         try {
-          await this.offerService.syncOfferPrice(offer.id);
+          await this.offerService.syncOffer(offer.id);
         } catch (error) {
           this.logger.error(`Błąd aktualizacji oferty ${offer.id}`, error);
         }
@@ -76,7 +76,7 @@ export class ScrapperService {
     }
   }
 
-  async scrapOfferPrice(offerId: string, url: string): Promise<Scrapper> {
+  async scrapSyncOffer(offerId: string, url: string): Promise<Scrapper> {
     try {
       const scraperApiUrl = this.configService.get<string>('SCRAPPER_URL');
 
@@ -91,8 +91,8 @@ export class ScrapperService {
         url,
       });
 
-      const { exists, price } = response.data;
-      return { id: offerId, exists, price };
+      const { exists, price, pdfUrl } = response.data;
+      return { id: offerId, exists, price, pdfUrl };
     } catch (error) {
       console.error('Błąd podczas scrapowania:', error.message || error);
       throw new HttpException(

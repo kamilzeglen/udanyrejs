@@ -1,5 +1,6 @@
 import {chromium} from 'playwright';
 import dotenv from "dotenv";
+import {generatePdfLink} from '../utils/pdf.utils';
 
 dotenv.config();
 
@@ -9,7 +10,7 @@ if (!wsUrl) {
   throw new Error('PLAYWRIGHT_WS_URL is not defined in .env');
 }
 
-export const scrapeCruisePrice = async (url: string): Promise<{ exists: boolean; price?: number }> => {
+export const syncOffer = async (url: string): Promise<{ exists: boolean; price?: number, pdfUrl?: string }> => {
   console.log('=========');
   console.log('Rozpoczynam scrappowanie ceny:', url);
 
@@ -29,11 +30,12 @@ export const scrapeCruisePrice = async (url: string): Promise<{ exists: boolean;
 
     const priceText = await page.locator('div.cruise__info div.info__price span').first().innerText();
     const price = parseInt(priceText.replace(/\D/g, ''), 10);
+    const pdfUrl = generatePdfLink(page.url())
 
     await browser.close();
     console.log('Scrapowanie zakończone sukcesem:', price);
     console.log('=========');
-    return {exists: true, price};
+    return {exists: true, price, pdfUrl};
 
   } catch (error) {
     await browser.close();

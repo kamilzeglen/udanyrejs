@@ -44,7 +44,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     'endDate',
     'actions',
     'stats',
-    'photos',
+    'photos-or-pdf',
     'updatedAt',
     'createdAt',
   ];

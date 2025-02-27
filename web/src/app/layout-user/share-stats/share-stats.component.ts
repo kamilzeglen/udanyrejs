@@ -12,9 +12,9 @@ export class ShareStatsComponent implements OnInit {
   offerId: string;
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private shareStatsFacade: ShareStatsFacade
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly shareStatsFacade: ShareStatsFacade
   ) {
   }
 

@@ -65,16 +65,23 @@ export class ShareStatsService {
         throw new BadRequestException('Nieobsługiwana platforma');
     }
 
-    await this.logService.createLog(
-      'Skorzystano z reflinka: ' +
-        offer.name +
-        ' (' +
-        offer.id +
-        ') (' +
-        platform.toUpperCase() +
-        ')',
-      'SYSTEM',
-    );
+    if (platform === 'web') {
+      await this.logService.createLog(
+        'Odwiedzono ogłoszenie: ' + offer.name + ' (' + offer.id + ')',
+        'SYSTEM',
+      );
+    } else {
+      await this.logService.createLog(
+        'Skorzystano z reflinka: ' +
+          offer.name +
+          ' (' +
+          offer.id +
+          ') (' +
+          platform.toUpperCase() +
+          ')',
+        'SYSTEM',
+      );
+    }
 
     await this.save(shareStats);
 

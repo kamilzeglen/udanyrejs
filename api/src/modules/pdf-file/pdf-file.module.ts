@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 import { Offer } from '@modules/offer/offer.entity';
 import { AuthModule } from '@modules/auth/auth.module';
+import { User } from '@modules/user/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PdfFile, Offer]), AuthModule],
+  imports: [TypeOrmModule.forFeature([PdfFile, Offer, User]), AuthModule],
   controllers: [PdfFileController],
   providers: [PdfFileService],
   exports: [PdfFileService],
