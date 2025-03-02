@@ -445,10 +445,6 @@ export class OfferService {
     }
 
     if (Number(scrapeResult.price) !== Number(offer.price)) {
-      // Offer
-      offer.price = scrapeResult.price;
-      await this.offerRepository.save(offer);
-
       // PDF
       const pdfFile = await this.pdfFileService.downloadPdfFromUrl(
         scrapeResult.pdfUrl,
@@ -462,7 +458,7 @@ export class OfferService {
         scrapeResult.pdfUrl,
       );
 
-      // Logs
+      // Offer
       const logMessage =
         'Zaktualizowano ofertę: ' +
         offer.name +
@@ -473,6 +469,9 @@ export class OfferService {
         ' € -> ' +
         scrapeResult.price +
         ' €)';
+
+      offer.price = scrapeResult.price;
+      await this.offerRepository.save(offer);
 
       this.logger.log(logMessage);
 
