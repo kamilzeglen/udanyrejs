@@ -97,7 +97,7 @@ export const scrapeFullCruiseData = async (url: string): Promise<CruiseScrapeRes
 
   } catch (error) {
     await browser.close();
-    console.log('Scrapowanie zakończone błedem: ' + error);
+    console.log('Scrapowanie zakończone błędem: ' + error);
     console.log('=========');
     throw new Error(
       `Scraping failed: ${error instanceof Error ? `${error.name} (code: ${'code' in error ? error.code : 'N/A'}): ${error.message}` : error}`
