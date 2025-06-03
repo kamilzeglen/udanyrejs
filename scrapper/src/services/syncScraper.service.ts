@@ -23,9 +23,13 @@ export const syncOffer = async (url: string): Promise<{ exists: boolean; price?:
 
     const errorElement = await page.$('h2.error__header');
     if (errorElement) {
-      await browser.close();
-      console.log('Oferta niedostępna');
-      return {exists: false};
+      const errorText = await errorElement.textContent();
+
+      if (errorText && errorText.includes('udała się w rejs')) {
+        await browser.close();
+        console.log('Oferta niedostępna');
+        return {exists: false};
+      }
     }
 
     const priceText = await page.locator('div.cruise__info div.info__price span').first().innerText();
