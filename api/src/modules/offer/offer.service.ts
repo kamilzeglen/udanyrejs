@@ -244,7 +244,6 @@ export class OfferService {
 
     const existingOffer = await this.offerRepository.findOne({
       where: {
-        name: createUserData.name,
         startDate: createUserData.startDate,
         endDate: createUserData.endDate,
         companyId,
