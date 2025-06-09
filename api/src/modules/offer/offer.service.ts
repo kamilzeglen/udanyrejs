@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -240,6 +241,23 @@ export class OfferService {
   ): Promise<Offer> {
     const { companyId, shipId, destinations, categories, ...createUserData } =
       createOfferDto;
+
+    const existingOffer = await this.offerRepository.findOne({
+      where: {
+        name: createUserData.name,
+        startDate: createUserData.startDate,
+        endDate: createUserData.endDate,
+        companyId,
+        shipId,
+      },
+      withDeleted: false,
+    });
+
+    if (existingOffer) {
+      throw new BadRequestException(
+        'Oferta o tej nazwie i datach już istnieje.',
+      );
+    }
 
     const requestUser = await this.userService.findOneByEmail(
       reqCreatedBy.email,
