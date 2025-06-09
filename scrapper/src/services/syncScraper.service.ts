@@ -43,8 +43,9 @@ export const syncOffer = async (url: string): Promise<{ exists: boolean; price?:
       }
     }
 
-    const priceText = await page.locator('div.cruise__info div.info__price span').first().innerText();
-    const price = parseInt(priceText.replace(/\D/g, ''), 10);
+    let priceText = await page.locator('div.cruise__info div.info__price span').first().innerText();
+    priceText = priceText.replace(/[^\d.]/g, '');
+    const price = parseFloat(priceText);
     const pdfUrl = generatePdfLink(page.url())
 
     await browser.close();

@@ -27,10 +27,9 @@ const checkForErrorPage = async (page: any): Promise<boolean> => {
 const extractCruiseDetails = async (page: any): Promise<CruiseScrapeResult> => {
   const name = await page.locator('h1.wrapper__title').first().innerText();
 
-  let price = await page.locator('div.cruise__info div.info__price span')
-    .first()
-    .innerText();
-  price = price.replace(/\D/g, '');
+  let priceText = await page.locator('div.cruise__info div.info__price span').first().innerText();
+  priceText = priceText.replace(/[^\d.]/g, '');
+  const price = parseFloat(priceText);
 
   const [startDate, endDate] = await Promise.all([
     page.locator('div.info__embark').first().innerText().then(formatDate),
@@ -58,7 +57,7 @@ const extractCruiseDetails = async (page: any): Promise<CruiseScrapeResult> => {
 
   return {
     name,
-    price,
+    price: price.toString(),
     startDate,
     endDate,
     itinerary: await extractItinerary(page),
