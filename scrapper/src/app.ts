@@ -12,7 +12,7 @@ const port = process.env.PORT || 4006;
 
 const allowedOrigins = [
   process.env.WEB_URL || 'http://localhost:4200',
-  process.env.API_URL || 'http://localhost:3000s',
+  process.env.API_URL || 'http://localhost:3000',
 ];
 
 app.use((req: Request, res: Response, next: NextFunction) => {

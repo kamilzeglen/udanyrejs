@@ -1,9 +1,10 @@
-import {chromium} from 'playwright';
+import {Browser, chromium} from 'playwright';
 import dotenv from "dotenv";
 import {generatePdfLink} from '../utils/pdf.utils';
 
 dotenv.config();
 
+const useRemote = process.env.USE_REMOTE_CHROMIUM === 'true';
 const wsUrl = process.env.PW_URL;
 
 if (!wsUrl) {
@@ -14,12 +15,22 @@ export const syncOffer = async (url: string): Promise<{ exists: boolean; price?:
   console.log('=========');
   console.log('Rozpoczynam scrappowanie ceny:', url);
 
-  const browser = await chromium.connect(wsUrl);
+  let browser: Browser;
+
+  if (useRemote) {
+    if (!wsUrl) {
+      throw new Error('WS_CHROMIUM_URL is not defined in .env');
+    }
+    browser = await chromium.connect(wsUrl);
+  } else {
+    browser = await chromium.launch();
+  }
+
   const page = await browser.newPage();
 
   try {
     await page.goto(url);
-    await page.waitForSelector('h1.banner__header, h2.error__header', {timeout: 30000});
+    await page.waitForSelector('h1.wrapper__title, h2.error__header', {timeout: 30000});
 
     const errorElement = await page.$('h2.error__header');
     if (errorElement) {

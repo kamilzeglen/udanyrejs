@@ -1,4 +1,4 @@
-import {chromium} from 'playwright';
+import {Browser, chromium} from 'playwright';
 import {CruiseData, CruiseScrapeResult} from '../interfaces/cruise.interface';
 import {formatDate} from '../utils/date.utils';
 import {generatePdfLink} from '../utils/pdf.utils';
@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const useRemote = process.env.USE_REMOTE_CHROMIUM === 'true';
 const wsUrl = process.env.PW_URL;
 
 if (!wsUrl) {
@@ -24,7 +25,7 @@ const checkForErrorPage = async (page: any): Promise<boolean> => {
 };
 
 const extractCruiseDetails = async (page: any): Promise<CruiseScrapeResult> => {
-  const name = await page.locator('h1.banner__header').first().innerText();
+  const name = await page.locator('h1.wrapper__title').first().innerText();
 
   let price = await page.locator('div.cruise__info div.info__price span')
     .first()
@@ -40,10 +41,20 @@ const extractCruiseDetails = async (page: any): Promise<CruiseScrapeResult> => {
     .first()
     .innerText();
 
-  const scrappedImageFileURL = await page.$eval('.banner', (element: Element) => {
-    const style = window.getComputedStyle(element);
-    return style.backgroundImage.match(/url\("(.*)"\)/)?.[1];
+  const wrapper = await page.$('.wrapper');
+
+  if (!wrapper) {
+    throw new Error('Element .wrapper nie został znaleziony');
+  }
+
+  const scrappedImageFileURL = await page.$eval('.wrapper', (element: HTMLElement) => {
+    const bg = element.style.backgroundImage;
+    const match = bg.match(/url\(["']?(.*?)["']?\)/);
+    return match ? match[1] : null;
   });
+
+  console.log(scrappedImageFileURL)
+
 
   return {
     name,
@@ -52,7 +63,7 @@ const extractCruiseDetails = async (page: any): Promise<CruiseScrapeResult> => {
     endDate,
     itinerary: await extractItinerary(page),
     scrappedShipName,
-    scrappedImageFileURL,
+    scrappedImageFileURL: "https://rejsy4you.pl/" + scrappedImageFileURL,
     scrappedPdfFileURL: generatePdfLink(page.url())
   };
 };
@@ -78,12 +89,22 @@ export const scrapeFullCruiseData = async (url: string): Promise<CruiseScrapeRes
   console.log('=========');
   console.log('Rozpoczynam scrappowanie:' + url);
 
-  const browser = await chromium.connect(wsUrl);
+  let browser: Browser;
+
+  if (useRemote) {
+    if (!wsUrl) {
+      throw new Error('WS_CHROMIUM_URL is not defined in .env');
+    }
+    browser = await chromium.connect(wsUrl);
+  } else {
+    browser = await chromium.launch();
+  }
+
   const page = await browser.newPage();
 
   try {
     await page.goto(url);
-    await page.waitForSelector('h1.banner__header, h2.error__header', {timeout: 30000});
+    await page.waitForSelector('h1.wrapper__title, h2.error__header', {timeout: 30000});
 
     if (await checkForErrorPage(page)) {
       throw new Error('Strona rejsu jest niedostępna');
