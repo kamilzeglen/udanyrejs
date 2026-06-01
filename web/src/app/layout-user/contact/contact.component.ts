@@ -24,15 +24,15 @@ export class ContactComponent implements OnInit, OnDestroy {
 
   employees = [
     {
-      name: 'Iwona Jarząbek-Żegleń',
-      phone: '+48 601 290 334',
-      email: 'iwona.zeglen@udanyrejs.pl',
+      name: 'Pracownik #1',
+      phone: '+48 123 456 789',
+      email: 'pracownik1@udanyrejs.pl',
       photo: 'assets/employees/iwona.png'
     },
     {
-      name: 'Anna Sidor',
-      phone: '+48 507 444 903',
-      email: 'anna.sidor@udanyrejs.pl',
+      name: 'Pracownik #2',
+      phone: '+48 123 456 789',
+      email: 'pracownik2@udanyrejs.pl',
       photo: 'assets/employees/anna.png'
     }
   ];

@@ -1,5 +1,5 @@
 export const environment = {
   PRODUCTION: true,
-  WEB_URL: 'http://localhost:4200',
-  API_URL: 'http://localhost:3000',
+  WEB_URL: 'https://udanyrejs.kamilzeglen.pl',
+  API_URL: 'https://udanyrejs-api.kamilzeglen.pl',
 };
