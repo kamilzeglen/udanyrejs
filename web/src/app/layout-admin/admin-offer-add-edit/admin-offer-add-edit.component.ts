@@ -11,7 +11,6 @@ import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-
 import {ImageFileFacade} from '@state/imageFile';
 import {PdfFileFacade} from '@state/pdfFile';
 import {map, switchMap} from 'rxjs/operators';
-import {ScrapperFacade} from '@state/scrapper';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -31,8 +30,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public destinations$ = this.commonFacade.destinations$
   public categories$ = this.commonFacade.categories$
 
-  public scrapping$ = this.scrapperFacade.loading$
-
   public offerForm: FormGroup;
 
   public scrappedData: boolean;
@@ -49,7 +46,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly commonFacade: CommonFacade,
     private readonly offerFacade: OfferFacade,
-    private readonly scrapperFacade: ScrapperFacade,
     private readonly imageFileFacade: ImageFileFacade,
     private readonly pdfFileFacade: PdfFileFacade,
     private readonly router: RouterFacade,
@@ -121,10 +117,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         this.updateItineraryDays();
       }
     });
-
-    this.scrapperFacade.scrapOfferFileError$.pipe(takeUntil(this.destroy$)).subscribe(({errorMessage}) => {
-      this.snackService.showError('Wystąpił błąd podczas pobierania oferty');
-    })
 
     this.offerFacade.createOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
@@ -226,38 +218,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.router.changeRoute({linkParams: ['/admin/offers']});
     })
 
-    this.scrapperFacade.scrapOfferFileSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
-
-      if (!offer) {
-        return
-      }
-
-      this.scrappedData = true
-
-      if (offer.scrappedShipName) {
-        this.commonFacade.getShipByNameSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ship}) => {
-          this.offerForm.patchValue({
-            companyId: ship.company.id,
-            shipId: ship.id
-          })
-        })
-
-        this.commonFacade.getShipByName({name: offer.scrappedShipName})
-      }
-
-      if (offer.scrappedImageFileURL) {
-        this.scrappedImageFile = true
-        this.imageUrl = offer.scrappedImageFileURL
-      }
-
-      if (offer.scrappedPdfFileURL) {
-        this.scrappedPdfFile = true
-        this.pdfUrl = offer.scrappedPdfFileURL
-      }
-
-      this.patchValues(offer)
-    })
-
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
@@ -330,11 +290,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (file) {
       this.pdfFile = file;
     }
-  }
-
-
-  public importOffer(): void {
-    this.scrapperFacade.scrapOffer({url: this.offerForm.get('offerUrl').value});
   }
 
   public submitForm(): void {

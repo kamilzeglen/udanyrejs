@@ -22,7 +22,6 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LogModule } from '@modules/log/log.module';
-import { ScrapperModule } from '@modules/scrapper/scrapper.module';
 
 @Module({
   imports: [
@@ -99,7 +98,6 @@ import { ScrapperModule } from '@modules/scrapper/scrapper.module';
     ShipModule,
     EmailModule,
     LogModule,
-    ScrapperModule,
   ],
   controllers: [AppController],
   providers: [AppService],

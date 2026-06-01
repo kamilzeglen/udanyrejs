@@ -65,15 +65,6 @@ export class OfferController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/:offerId/sync')
-  async syncOfferPrice(
-    @Param('offerId') offerId: string,
-    @Req() req: { user: any },
-  ): Promise<boolean> {
-    return await this.offerService.syncOffer(offerId, req.user);
-  }
-
-  @UseGuards(AuthGuard)
   @Delete('/:offerId')
   async removeOffer(
     @Param('offerId') offerId: string,

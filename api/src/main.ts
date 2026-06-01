@@ -23,7 +23,6 @@ async function bootstrap() {
 
   const allowedOrigins = [
     process.env.WEB_URL || 'http://localhost:4200',
-    process.env.SCRAPPER_URL || 'http://localhost:3001',
   ];
 
   const app = await NestFactory.create(AppModule);

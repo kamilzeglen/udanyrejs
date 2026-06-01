@@ -29,7 +29,6 @@ import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { ShareStatsService } from '@modules/share-stats/share-stats.service';
 import { PaginationResp } from '../../interfaces/pagination-response';
 import { LogService } from '@modules/log/log.service';
-import { ScrapperService } from '@modules/scrapper/scrapper.service';
 import { PdfFileType } from '../../interfaces/save-update-file-types';
 
 @Injectable()
@@ -41,8 +40,6 @@ export class OfferService {
     private offerRepository: Repository<Offer>,
     @Inject(forwardRef(() => ImageFileService))
     private readonly imageFileService: ImageFileService,
-    @Inject(forwardRef(() => ScrapperService))
-    private readonly scrapperService: ScrapperService,
     private readonly pdfFileService: PdfFileService,
     private readonly userService: UserService,
     private readonly companyService: CompanyService,
@@ -418,87 +415,6 @@ export class OfferService {
       'Aktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
       reqCreatedBy.email,
     );
-    return true;
-  }
-
-  async syncOffer(offerID: string, reqCreatedBy?: User): Promise<boolean> {
-    const offer = await this.offerRepository.findOne({
-      where: { id: offerID },
-      relations: ['categories', 'imageFile', 'pdfFile'],
-    });
-
-    if (!offer) {
-      throw new Error('Offer not found');
-    }
-
-    if (!offer.offerUrl) {
-      throw new Error('Offer URL not found');
-    }
-
-    const scrapeResult = await this.scrapperService.scrapSyncOffer(
-      offer.id,
-      offer.offerUrl,
-    );
-
-    if (!scrapeResult.exists) {
-      const logMessage =
-        'Dezaktywowano ofertę: ' +
-        offer.name +
-        ' (' +
-        offer.id +
-        ') (Oferta nie istnieje)';
-
-      this.logger.log(logMessage);
-      offer.isActive = false;
-      await this.offerRepository.save(offer);
-
-      if (reqCreatedBy) {
-        await this.logService.createLog(logMessage, reqCreatedBy.email);
-      } else {
-        await this.logService.createLog(logMessage, 'SYSTEM');
-      }
-
-      return true;
-    }
-
-    if (Number(scrapeResult.price) !== Number(offer.price)) {
-      // PDF
-      const pdfFile = await this.pdfFileService.downloadPdfFromUrl(
-        scrapeResult.pdfUrl,
-      );
-
-      await this.pdfFileService.updatePdfFile(
-        offer.id,
-        PdfFileType.OFFER,
-        pdfFile,
-        'SYSTEM',
-        scrapeResult.pdfUrl,
-      );
-
-      // Offer
-      const logMessage =
-        'Zaktualizowano ofertę: ' +
-        offer.name +
-        ' (' +
-        offer.id +
-        ') (' +
-        offer.price +
-        ' € -> ' +
-        scrapeResult.price +
-        ' €)';
-
-      offer.price = scrapeResult.price;
-      await this.offerRepository.save(offer);
-
-      this.logger.log(logMessage);
-
-      if (reqCreatedBy) {
-        await this.logService.createLog(logMessage, reqCreatedBy.email);
-      } else {
-        await this.logService.createLog(logMessage, 'SYSTEM');
-      }
-    }
-
     return true;
   }
 }

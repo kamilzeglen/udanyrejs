@@ -13,12 +13,10 @@ import { DestinationModule } from '@modules/destination/destination.module';
 import { CategoryModule } from '@modules/category/category.module';
 import { ShareStatsModule } from '@modules/share-stats/share-stats.module';
 import { HttpModule } from '@nestjs/axios';
-import { ScrapperModule } from '@modules/scrapper/scrapper.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Offer]),
-    forwardRef(() => ScrapperModule),
     ImageFileModule,
     PdfFileModule,
     UserModule,

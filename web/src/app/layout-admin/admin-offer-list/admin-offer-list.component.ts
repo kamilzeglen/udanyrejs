@@ -8,7 +8,6 @@ import {RouterFacade} from '@state/router';
 import {DeviceInfoService} from '@shared/device-info/device-info.service';
 import {Sort, SortDirection} from '@angular/material/sort';
 import {Pagination} from '../../_interfaces/http';
-import {ScrapperFacade} from '@state/scrapper';
 
 @Component({
   selector: 'app-admin-offer-list',
@@ -30,7 +29,6 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   public offers$ = this.offerFacade.offers$
   public loading$ = this.offerFacade.loading$
-  public scrapping$ = this.scrapperFacade.loading$
   public pagination$ = this.offerFacade.pagination$
 
   public columnsToDisplay: string[];
@@ -51,7 +49,6 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly offerFacade: OfferFacade,
-    private readonly scrapperFacade: ScrapperFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
     private readonly routerFacade: RouterFacade,
@@ -70,11 +67,6 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo("Pomyślnie usunięto ofertę")
-      this.getOffers()
-    })
-
-    this.scrapperFacade.syncOfferPriceSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie zaktualizowano oferte")
       this.getOffers()
     })
 
@@ -151,16 +143,6 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public editOffer(offer: Offer): void {
     const linkParams = ["/admin/offers/edit/" + offer.id]
     this.routerFacade.changeRoute({linkParams})
-  }
-
-  public syncOfferPrice(offer: Offer): void {
-
-    if (!offer.offerUrl) {
-      this.snackService.showError('Oferta nie posiada odniesienia URL');
-      return
-    }
-
-    this.scrapperFacade.syncOfferPrice({id: offer.id})
   }
 
   public addOffer(): void {
