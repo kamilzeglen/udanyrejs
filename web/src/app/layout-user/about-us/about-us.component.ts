@@ -17,8 +17,8 @@ export class AboutUsComponent {
   }
 
   officeAddress = {
-    street: 'Słowackiego 90',
-    city: '32-400 Myślenice'
+    street: 'XYZ 123',
+    city: '12-345 XYZ'
   };
 
   cruises_photos = [
