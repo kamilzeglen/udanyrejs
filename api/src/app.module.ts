@@ -51,8 +51,8 @@ import { LogModule } from '@modules/log/log.module';
         port: 465,
         secure: true,
         auth: {
-          user: 'noreply@udanyrejs.pl',
-          pass: 'J:qF:%m!8maF4V-',
+          user: 'XYZ',
+          pass: 'XYZ',
         },
       },
       defaults: {
