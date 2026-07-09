@@ -5,8 +5,6 @@ services:
             dockerfile: Dockerfile
         container_name: udanyrejs-frontend
         restart: always
-        ports:
-            - "3006:80"
         networks:
             - nginx-proxy-manager_default
             - udanyrejs_default
@@ -19,8 +17,6 @@ services:
         env_file:
             - api/.env
         restart: always
-        ports:
-            - "5006:5006"
         volumes:
             - ./files/OFFERS_IMAGES:/api/files/OFFERS_IMAGES
             - ./files/SHIPS_IMAGES:/api/files/SHIPS_IMAGES
