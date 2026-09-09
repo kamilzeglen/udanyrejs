@@ -1,0 +1,36 @@
+services:
+    udanyrejs-frontend:
+        image: ${WEB_IMAGE}
+        container_name: udanyrejs-frontend
+        restart: always
+        labels:
+            - pl.udanyrejs.application=true
+        networks:
+            - nginx-proxy-manager_default
+            - udanyrejs_default
+
+    udanyrejs-backend:
+        image: ${API_IMAGE}
+        container_name: udanyrejs-backend
+        env_file:
+            - api/.env
+        restart: always
+        labels:
+            - pl.udanyrejs.application=true
+        volumes:
+            - ./files/OFFERS_IMAGES:/api/files/OFFERS_IMAGES
+            - ./files/SHIPS_IMAGES:/api/files/SHIPS_IMAGES
+            - ./files/COMPANIES_IMAGES:/api/files/COMPANIES_IMAGES
+            - ./files/OFFERS_PDFS:/api/files/OFFERS_PDFS
+        networks:
+            - nginx-proxy-manager_default
+            - postgres_default
+            - udanyrejs_default
+
+networks:
+    nginx-proxy-manager_default:
+        external: true
+    postgres_default:
+        external: true
+    udanyrejs_default:
+        external: true

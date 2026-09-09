@@ -1,0 +1,104 @@
+name: Lint, test and build pull requests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+  workflow_call:
+    inputs:
+      build:
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check deployment scripts
+        run: |
+          for file in .github/scripts/deploy/*.sh; do
+            bash -n "$file"
+          done
+
+  api:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm --prefix api ci
+
+      - name: Check formatting
+        run: npm --prefix api run format:check
+
+      - name: Lint
+        run: npm --prefix api run lint:check
+
+      - name: Test
+        run: npm --prefix api test -- --runInBand
+
+      - name: Build
+        if: github.event_name == 'pull_request' || inputs.build
+        run: npm --prefix api run build
+
+  web:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm --prefix web ci
+
+      - name: Test
+        run: npm --prefix web test -- --watch=false --browsers=ChromeHeadless
+
+      - name: Build
+        if: github.event_name == 'pull_request' || inputs.build
+        run: npm --prefix web run build
+
+  audit:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Audit dependencies
+        run: |
+          npm --prefix api audit --audit-level=high || true
+          npm --prefix web audit --audit-level=high || true
+        shell: bash

@@ -1,0 +1,161 @@
+name: Build images and deploy to VPS
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-udanyrejs
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/ci.yml
+    with:
+      build: false
+
+  images:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web]
+    env:
+      DOCKER_BUILD_RECORD_UPLOAD: false
+      DOCKER_BUILD_SUMMARY: false
+    steps:
+      - uses: actions/checkout@v6
+      - name: Image coordinates
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+          APP: ${{ matrix.app }}
+        run: echo "tag=ghcr.io/${REPOSITORY,,}-${APP}:${GITHUB_SHA}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-qemu-action@v3
+        if: vars.VPS_PLATFORM == 'linux/arm64'
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.app }}
+          platforms: ${{ vars.VPS_PLATFORM || 'linux/amd64' }}
+          push: true
+          tags: ${{ steps.image.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            pl.udanyrejs.application=true
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,scope=${{ matrix.app }},mode=max
+
+  deploy:
+    needs: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_PORT: ${{ secrets.VPS_PORT }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_PROJECT_PATH: ${{ secrets.VPS_PROJECT_PATH }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+      - name: Configure SSH
+        run: |
+          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts
+      - name: Transfer release configuration
+        run: |
+          release=".deploy/releases/${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf -v remote 'cd %q && mkdir -p %q && tar -xf - -C %q' "$VPS_PROJECT_PATH" "$release" "$release"
+          mkdir -p "$RUNNER_TEMP/release/scripts"
+          cp docker-compose.production.yml "$RUNNER_TEMP/release/compose.yml"
+          cp .github/scripts/deploy/*.sh "$RUNNER_TEMP/release/scripts/"
+          tar -C "$RUNNER_TEMP/release" -cf - . | ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "$remote"
+      - name: Pull images, back up and deploy
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          REGISTRY_USER: ${{ github.actor }}
+        run: |
+          release=".deploy/releases/${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          printf -v remote 'cd %q && bash %q %q %q %q %q' "$VPS_PROJECT_PATH" "$release/scripts/release.sh" "$release" "ghcr.io/${REPOSITORY,,}" "${GITHUB_SHA}-${GITHUB_RUN_ID}" "$REGISTRY_USER"
+          printf '%s' "$GHCR_TOKEN" | ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "$remote"
+
+  notify:
+    needs: [validate, images, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Notify Discord
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          VALIDATE_RES: ${{ needs.validate.result }}
+          IMAGES_RES: ${{ needs.images.result }}
+          DEPLOY_RES: ${{ needs.deploy.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          REF: ${{ github.ref_name }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            exit 0
+          fi
+
+          if [ "$VALIDATE_RES" = "failure" ] || [ "$IMAGES_RES" = "failure" ] || [ "$DEPLOY_RES" = "failure" ]; then
+            COLOR=15548997 # Red
+            STATUS_TEXT="❌ Niepowodzenie"
+          elif [ "$VALIDATE_RES" = "cancelled" ] || [ "$IMAGES_RES" = "cancelled" ] || [ "$DEPLOY_RES" = "cancelled" ]; then
+            COLOR=16776960 # Yellow
+            STATUS_TEXT="⚠️ Anulowano"
+          else
+            COLOR=5763719 # Green
+            STATUS_TEXT="✅ Sukces"
+          fi
+
+          TITLE="Commit ${SHA:0:7}"
+
+          payload=$(jq -n \
+            --arg title "$TITLE" \
+            --arg url "$RUN_URL" \
+            --arg desc "$COMMIT_MSG" \
+            --arg actor "$ACTOR" \
+            --arg branch "$REF" \
+            --arg status "$STATUS_TEXT" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [{
+                title: $title,
+                url: $url,
+                description: $desc,
+                color: $color,
+                fields: [
+                  {name: "Status", value: $status, inline: true},
+                  {name: "Branch", value: $branch, inline: true},
+                  {name: "Autor", value: $actor, inline: true}
+                ]
+              }]
+            }')
+
+          curl --max-time 20 --silent --show-error --fail-with-body -H 'Content-Type: application/json' -d "$payload" "$DISCORD_WEBHOOK_URL"
