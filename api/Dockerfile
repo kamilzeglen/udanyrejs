@@ -30,8 +30,7 @@ RUN npm install --production --legacy-peer-deps
 # Kopiowanie zbudowanej aplikacji z poprzedniego etapu
 COPY --from=builder /api/dist ./dist
 
-# Kopiowanie pliku .env
-COPY .env ./
+# Zmienne środowiskowe wstrzykiwane w runtime przez docker-compose (env_file), nie pieczone w obrazie
 COPY tsconfig*.json ./
 COPY /src/typeorm.ts ./src/
 

@@ -12,11 +12,11 @@ if (!global.crypto) {
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const parsedConfig = require('dotenv').config();
-if (!parsedConfig.parsed || parsedConfig.error) {
+if (!parsedConfig.parsed && !process.env.APP_PORT) {
   throw Error('DOTENV did not return proper config');
 }
 
-const config = parsedConfig.parsed;
+const config = { ...process.env, ...parsedConfig.parsed };
 
 async function bootstrap() {
   const { APP_PORT, WEB_URL } = config;
