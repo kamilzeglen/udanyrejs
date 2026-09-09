@@ -65,7 +65,10 @@ export class ImageFileService {
 
     let imageFileEntity: ImageFile;
     if (imageFileType === ImageFileType.OFFER) {
-      const target = await this.offerRepository.findOneBy({ id: targetId });
+      const target = await this.offerRepository
+        .createQueryBuilder('offer')
+        .where('offer.id = :targetId', { targetId })
+        .getOne();
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
@@ -77,7 +80,10 @@ export class ImageFileService {
     }
 
     if (imageFileType === ImageFileType.COMPANY) {
-      const target = await this.companyRepository.findOneBy({ id: targetId });
+      const target = await this.companyRepository
+        .createQueryBuilder('company')
+        .where('company.id = :targetId', { targetId })
+        .getOne();
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
@@ -89,7 +95,10 @@ export class ImageFileService {
     }
 
     if (imageFileType === ImageFileType.SHIP) {
-      const target = await this.shipRepository.findOneBy({ id: targetId });
+      const target = await this.shipRepository
+        .createQueryBuilder('ship')
+        .where('ship.id = :targetId', { targetId })
+        .getOne();
       imageFileEntity = this.imageFileRepository.create({
         name: fileName,
         originalName: file.originalname,
@@ -113,17 +122,29 @@ export class ImageFileService {
     let uploadDir: string = './uploads/images';
     let target: any;
     if (imageFileType === ImageFileType.OFFER) {
-      target = await this.offerRepository.findOneBy({ id: targetId });
+      target = await this.offerRepository
+        .createQueryBuilder('offer')
+        .leftJoinAndSelect('offer.imageFile', 'imageFile')
+        .where('offer.id = :targetId', { targetId })
+        .getOne();
       uploadDir = process.env.OFFERS_IMAGES_PATH;
     }
 
     if (imageFileType === ImageFileType.COMPANY) {
-      target = await this.companyRepository.findOneBy({ id: targetId });
+      target = await this.companyRepository
+        .createQueryBuilder('company')
+        .leftJoinAndSelect('company.imageFile', 'imageFile')
+        .where('company.id = :targetId', { targetId })
+        .getOne();
       uploadDir = process.env.COMPANIES_IMAGES_PATH;
     }
 
     if (imageFileType === ImageFileType.SHIP) {
-      target = await this.shipRepository.findOneBy({ id: targetId });
+      target = await this.shipRepository
+        .createQueryBuilder('ship')
+        .leftJoinAndSelect('ship.imageFile', 'imageFile')
+        .where('ship.id = :targetId', { targetId })
+        .getOne();
       uploadDir = process.env.SHIPS_IMAGES_PATH;
     }
 

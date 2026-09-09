@@ -14,9 +14,10 @@ export class LogService {
   ) {}
 
   async findAll(): Promise<Log[]> {
-    return await this.logRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+    return await this.logRepository
+      .createQueryBuilder('log')
+      .orderBy('log.createdAt', 'DESC')
+      .getMany();
   }
 
   async createLog(

@@ -7,13 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  IsNull,
-  LessThanOrEqual,
-  Not,
-  ObjectLiteral,
-  Repository,
-} from 'typeorm';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -51,33 +45,41 @@ export class OfferService {
   ) {}
 
   async findOneById(id: string): Promise<Offer> {
-    return await this.offerRepository.findOneBy({ id });
+    return await this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.company', 'company')
+      .leftJoinAndSelect('offer.ship', 'ship')
+      .leftJoinAndSelect('offer.imageFile', 'imageFile')
+      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
+      .leftJoinAndSelect('offer.destinations', 'destinations')
+      .leftJoinAndSelect('offer.categories', 'categories')
+      .leftJoinAndSelect('offer.shareStats', 'shareStats')
+      .leftJoinAndSelect('offer.createdBy', 'createdBy')
+      .leftJoinAndSelect('offer.updatedBy', 'updatedBy')
+      .where('offer.id = :id', { id })
+      .getOne();
   }
 
   async findAllWithURL(): Promise<Offer[]> {
-    return await this.offerRepository.find({
-      where: {
-        offerUrl: Not(IsNull()),
-        isActive: true,
-      },
-    });
+    return await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.offerUrl IS NOT NULL')
+      .andWhere('offer.isActive = :isActive', { isActive: true })
+      .getMany();
   }
 
   async findActiveOffers(opts?: { lessThan: Date }): Promise<Offer[]> {
+    const queryBuilder = this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.isActive = :isActive', { isActive: true });
+
     if (opts.lessThan) {
-      return await this.offerRepository.find({
-        where: {
-          startDate: LessThanOrEqual(opts.lessThan),
-          isActive: true,
-        },
-      });
-    } else {
-      return await this.offerRepository.find({
-        where: {
-          isActive: true,
-        },
+      queryBuilder.andWhere('offer.startDate <= :lessThan', {
+        lessThan: opts.lessThan,
       });
     }
+
+    return queryBuilder.getMany();
   }
 
   async findOffersByCategory(category?: string): Promise<Offer[]> {
@@ -239,15 +241,15 @@ export class OfferService {
     const { companyId, shipId, destinations, categories, ...createUserData } =
       createOfferDto;
 
-    const existingOffer = await this.offerRepository.findOne({
-      where: {
+    const existingOffer = await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.startDate = :startDate', {
         startDate: createUserData.startDate,
-        endDate: createUserData.endDate,
-        companyId,
-        shipId,
-      },
-      withDeleted: false,
-    });
+      })
+      .andWhere('offer.endDate = :endDate', { endDate: createUserData.endDate })
+      .andWhere('offer.companyId = :companyId', { companyId })
+      .andWhere('offer.shipId = :shipId', { shipId })
+      .getOne();
 
     if (existingOffer) {
       throw new BadRequestException(
@@ -298,10 +300,12 @@ export class OfferService {
     const { companyId, shipId, destinations, categories, ...updateOfferData } =
       updateOfferDto;
 
-    const offer = await this.offerRepository.findOne({
-      where: { id },
-      relations: ['company', 'ship'],
-    });
+    const offer = await this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.company', 'company')
+      .leftJoinAndSelect('offer.ship', 'ship')
+      .where('offer.id = :id', { id })
+      .getOne();
 
     if (!offer) {
       throw new NotFoundException(`Offer with ID ${id} not found`);
@@ -337,10 +341,13 @@ export class OfferService {
   }
 
   async removeOffer(offerID: string, reqCreatedBy: User): Promise<boolean> {
-    const offer = await this.offerRepository.findOne({
-      where: { id: offerID },
-      relations: ['categories', 'imageFile', 'pdfFile'],
-    });
+    const offer = await this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.categories', 'categories')
+      .leftJoinAndSelect('offer.imageFile', 'imageFile')
+      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
+      .where('offer.id = :offerID', { offerID })
+      .getOne();
 
     if (!offer) {
       throw new Error('Offer not found');

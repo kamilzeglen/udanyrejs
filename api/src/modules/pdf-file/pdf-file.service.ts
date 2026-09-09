@@ -49,7 +49,10 @@ export class PdfFileService {
 
     writeFileSync(filePath, file.buffer);
 
-    const target = await this.offerRepository.findOneBy({ id: targetId });
+    const target = await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.id = :targetId', { targetId })
+      .getOne();
     const pdfFileEntity = this.pdfFileRepository.create({
       name: fileName,
       originalName: file.originalname,
@@ -70,7 +73,11 @@ export class PdfFileService {
     url?: string,
   ): Promise<PdfFile> {
     const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
-    const target = await this.offerRepository.findOneBy({ id: targetId });
+    const target = await this.offerRepository
+      .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
+      .where('offer.id = :targetId', { targetId })
+      .getOne();
 
     if (!existsSync(uploadDir)) {
       mkdirSync(uploadDir, { recursive: true });
@@ -81,9 +88,10 @@ export class PdfFileService {
     }
 
     if (requestUser === 'SYSTEM') {
-      requestUser = await this.userRepository.findOneBy({
-        email: 'system@udanyrejs.pl',
-      });
+      requestUser = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.email = :email', { email: 'system@udanyrejs.pl' })
+        .getOne();
     }
 
     const extname = path.extname(file.originalname).toLowerCase();

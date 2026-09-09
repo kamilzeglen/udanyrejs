@@ -26,18 +26,25 @@ export class ShipService {
   ) {}
 
   findOneById(id: string): Promise<Ship> {
-    return this.shipRepository.findOneBy({ id });
+    return this.shipRepository
+      .createQueryBuilder('ship')
+      .where('ship.id = :id', { id })
+      .getOne();
   }
 
   findOneByName(name: string): Promise<Ship> {
-    return this.shipRepository.findOneBy({ name });
+    return this.shipRepository
+      .createQueryBuilder('ship')
+      .where('ship.name = :name', { name })
+      .getOne();
   }
 
   async findShipsByCompany(companyId: string): Promise<Ship[]> {
-    return this.shipRepository.find({
-      where: { company: { id: companyId } },
-      relations: ['company'],
-    });
+    return this.shipRepository
+      .createQueryBuilder('ship')
+      .leftJoinAndSelect('ship.company', 'company')
+      .where('company.id = :companyId', { companyId })
+      .getMany();
   }
 
   async createShip(
@@ -65,9 +72,10 @@ export class ShipService {
     updateShipDto: UpdateShipDto,
     reqCreatedBy: User,
   ): Promise<Ship> {
-    const ship = await this.shipRepository.findOne({
-      where: { id },
-    });
+    const ship = await this.shipRepository
+      .createQueryBuilder('ship')
+      .where('ship.id = :id', { id })
+      .getOne();
 
     if (!ship) {
       throw new NotFoundException(`Ship with ID ${id} not found`);
@@ -89,10 +97,11 @@ export class ShipService {
   }
 
   async removeShip(shipId: string, reqCreatedBy: User): Promise<boolean> {
-    const ship = await this.shipRepository.findOne({
-      where: { id: shipId },
-      relations: ['imageFile'],
-    });
+    const ship = await this.shipRepository
+      .createQueryBuilder('ship')
+      .leftJoinAndSelect('ship.imageFile', 'imageFile')
+      .where('ship.id = :shipId', { shipId })
+      .getOne();
 
     if (!ship) {
       throw new Error('Ship not found');
@@ -107,7 +116,12 @@ export class ShipService {
       reqCreatedBy.email,
     );
 
-    await this.shipRepository.delete(shipId);
+    await this.shipRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Ship)
+      .where('id = :shipId', { shipId })
+      .execute();
 
     return true;
   }

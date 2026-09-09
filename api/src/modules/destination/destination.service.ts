@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Destination } from '@modules/destination/destination.entity';
 import { User } from '@modules/user/user.entity';
 import { CreateDestinationDto } from '@modules/destination/dto/create-destination.dto';
@@ -25,15 +25,17 @@ export class DestinationService {
   }
 
   async findOneByID(id: string): Promise<Destination> {
-    return await this.destinationRepository.findOneBy({ id });
+    return await this.destinationRepository
+      .createQueryBuilder('destination')
+      .where('destination.id = :id', { id })
+      .getOne();
   }
 
   async findByIds(ids: string[]): Promise<Destination[]> {
-    return await this.destinationRepository.find({
-      where: {
-        id: In(ids),
-      },
-    });
+    return await this.destinationRepository
+      .createQueryBuilder('destination')
+      .where('destination.id IN (:...ids)', { ids })
+      .getMany();
   }
 
   async createDestination(
@@ -59,9 +61,10 @@ export class DestinationService {
     updateDestinationDto: UpdateDestinationDto,
     reqCreatedBy: User,
   ): Promise<Destination> {
-    const destination = await this.destinationRepository.findOne({
-      where: { id },
-    });
+    const destination = await this.destinationRepository
+      .createQueryBuilder('destination')
+      .where('destination.id = :id', { id })
+      .getOne();
 
     if (!destination) {
       throw new NotFoundException(`Destination with ID ${id} not found`);
@@ -90,9 +93,10 @@ export class DestinationService {
     destinationId: string,
     reqCreatedBy: User,
   ): Promise<boolean> {
-    const destination = await this.destinationRepository.findOne({
-      where: { id: destinationId },
-    });
+    const destination = await this.destinationRepository
+      .createQueryBuilder('destination')
+      .where('destination.id = :destinationId', { destinationId })
+      .getOne();
 
     if (!destination) {
       throw new Error('Destination not found');
@@ -103,7 +107,12 @@ export class DestinationService {
       reqCreatedBy.email,
     );
 
-    await this.destinationRepository.delete(destination.id);
+    await this.destinationRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Destination)
+      .where('id = :destinationId', { destinationId })
+      .execute();
 
     return true;
   }

@@ -12,14 +12,20 @@ export class RoleService {
   ) {}
 
   findAll() {
-    return this.roleRepository.find();
+    return this.roleRepository.createQueryBuilder('role').getMany();
   }
 
   findOne(id: string) {
-    return this.roleRepository.findOne({ where: { id } });
+    return this.roleRepository
+      .createQueryBuilder('role')
+      .where('role.id = :id', { id })
+      .getOne();
   }
 
   async findByKey(key: Roles): Promise<Role> {
-    return this.roleRepository.findOne({ where: { key } });
+    return this.roleRepository
+      .createQueryBuilder('role')
+      .where('role.key = :key', { key })
+      .getOne();
   }
 }

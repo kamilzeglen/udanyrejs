@@ -26,19 +26,24 @@ export class CompanyService {
   ) {}
 
   async findAll(): Promise<Company[]> {
-    return await this.companyRepository.find({
-      where: {
-        isActive: true,
-      },
-    });
+    return await this.companyRepository
+      .createQueryBuilder('company')
+      .where('company.isActive = :isActive', { isActive: true })
+      .getMany();
   }
 
   async findOne(id: string): Promise<any> {
-    return this.companyRepository.findOneBy({ id });
+    return this.companyRepository
+      .createQueryBuilder('company')
+      .where('company.id = :id', { id })
+      .getOne();
   }
 
   async findOneById(id: string): Promise<Company> {
-    return await this.companyRepository.findOneBy({ id });
+    return await this.companyRepository
+      .createQueryBuilder('company')
+      .where('company.id = :id', { id })
+      .getOne();
   }
 
   async createCompany(
@@ -64,9 +69,10 @@ export class CompanyService {
     updateCompanyDto: UpdateCompanyDto,
     reqCreatedBy: User,
   ): Promise<Company> {
-    const company = await this.companyRepository.findOne({
-      where: { id },
-    });
+    const company = await this.companyRepository
+      .createQueryBuilder('company')
+      .where('company.id = :id', { id })
+      .getOne();
 
     if (!company) {
       throw new NotFoundException(`Company with ID ${id} not found`);
@@ -88,10 +94,11 @@ export class CompanyService {
   }
 
   async removeCompany(companyID: string, reqCreatedBy: User): Promise<boolean> {
-    const company = await this.companyRepository.findOne({
-      where: { id: companyID },
-      relations: ['imageFile'],
-    });
+    const company = await this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.imageFile', 'imageFile')
+      .where('company.id = :companyID', { companyID })
+      .getOne();
 
     if (!company) {
       throw new Error('Company not found');
@@ -106,7 +113,12 @@ export class CompanyService {
       reqCreatedBy.email,
     );
 
-    await this.companyRepository.delete(company.id);
+    await this.companyRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Company)
+      .where('id = :companyID', { companyID })
+      .execute();
 
     return true;
   }

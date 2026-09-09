@@ -20,7 +20,10 @@ export class ShareStatsService {
   ) {}
 
   async findOneById(sharedStatId: string): Promise<ShareStats> {
-    return this.shareStatsRepository.findOne({ where: { id: sharedStatId } });
+    return this.shareStatsRepository
+      .createQueryBuilder('shareStats')
+      .where('shareStats.id = :sharedStatId', { sharedStatId })
+      .getOne();
   }
 
   async save(shareStats: ShareStats): Promise<ShareStats> {
@@ -38,7 +41,10 @@ export class ShareStatsService {
   }
 
   async update(platform: string, offerId: string): Promise<boolean> {
-    const offer = await this.offerRepository.findOneBy({ id: offerId });
+    const offer = await this.offerRepository
+      .createQueryBuilder('offer')
+      .where('offer.id = :offerId', { offerId })
+      .getOne();
     if (!offer || !offer.shareStatsId) {
       throw new NotFoundException('Oferta lub statystyki nie istnieją');
     }

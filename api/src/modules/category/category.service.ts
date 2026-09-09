@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Category } from '@modules/category/category.entity';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
@@ -26,23 +26,31 @@ export class CategoryService {
   }
 
   async findOneByID(id: string): Promise<Category> {
-    return await this.categoryRepository.findOneBy({ id });
+    return await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.id = :id', { id })
+      .getOne();
   }
 
   async findOneByName(name: string): Promise<Category> {
-    return await this.categoryRepository.findOneBy({ name });
+    return await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.name = :name', { name })
+      .getOne();
   }
 
   async findOneByUrl(url: string): Promise<Category> {
-    return await this.categoryRepository.findOneBy({ url });
+    return await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.url = :url', { url })
+      .getOne();
   }
 
   async findByIds(ids: string[]): Promise<Category[]> {
-    return this.categoryRepository.find({
-      where: {
-        id: In(ids),
-      },
-    });
+    return this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.id IN (:...ids)', { ids })
+      .getMany();
   }
 
   async createCategory(
@@ -68,9 +76,10 @@ export class CategoryService {
     updateCategoryDto: UpdateCategoryDto,
     reqCreatedBy: User,
   ): Promise<Category> {
-    const category = await this.categoryRepository.findOne({
-      where: { id },
-    });
+    const category = await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.id = :id', { id })
+      .getOne();
 
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
@@ -95,9 +104,10 @@ export class CategoryService {
     categoryId: string,
     reqCreatedBy: User,
   ): Promise<boolean> {
-    const category = await this.categoryRepository.findOne({
-      where: { id: categoryId },
-    });
+    const category = await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('category.id = :categoryId', { categoryId })
+      .getOne();
 
     if (!category) {
       throw new Error('Category not found');
@@ -108,7 +118,12 @@ export class CategoryService {
       reqCreatedBy.email,
     );
 
-    await this.categoryRepository.delete(category.id);
+    await this.categoryRepository
+      .createQueryBuilder()
+      .delete()
+      .from(Category)
+      .where('id = :categoryId', { categoryId })
+      .execute();
 
     return true;
   }

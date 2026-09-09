@@ -25,14 +25,20 @@ export class UserService {
   }
 
   findAllUser(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository.createQueryBuilder('user').getMany();
   }
 
   findOneByID(id: string): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .getOne();
   }
 
   findOneByEmail(email: string): Promise<User> {
-    return this.userRepository.findOneBy({ email });
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email })
+      .getOne();
   }
 }
