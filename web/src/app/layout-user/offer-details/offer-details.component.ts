@@ -27,6 +27,12 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   public loading: boolean = true;
   public itineraryData: Itinerary[];
 
+  public selectedTermId: string;
+  public selectedTermStartDate: string;
+  public selectedTermEndDate: string;
+  public selectedTermPrice: number;
+  public termsViewModel: { id: string; startDate: string; endDate: string; fromPrice: number }[];
+
   constructor(
     private readonly activatedRoute: ActivatedRoute,
     private readonly offerFacade: OfferFacade,
@@ -53,6 +59,13 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       this.deviceInfo = info;
     });
 
+    this.activatedRoute.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((queryParamMap) => {
+      const termId = queryParamMap.get('termId');
+      if (termId) {
+        this.selectedTermId = termId;
+      }
+    });
+
     this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ offer }) => {
       this.offer = offer;
       this.loading = false;
@@ -62,6 +75,21 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         name: 'description',
         content: `Sprawdź szczegóły rejsu: ${offer.name}. Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`,
       });
+
+      this.termsViewModel = (offer.terms || [])
+        .map((term) => ({
+          id: term.id,
+          startDate: term.startDate,
+          endDate: term.endDate,
+          fromPrice: term.prices?.length ? Math.min(...term.prices.map((price) => price.price)) : null,
+        }))
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+      const hasSelectedTerm = this.termsViewModel.some((term) => term.id === this.selectedTermId);
+      if (!hasSelectedTerm) {
+        this.selectedTermId = this.getDefaultTermId(this.termsViewModel);
+      }
+      this.updateSelectedTermSnapshot();
 
       const itineraryData =
         typeof this.offer.itinerary === 'string' ? JSON.parse(this.offer.itinerary) : this.offer.itinerary;
@@ -116,5 +144,32 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   public downloadPdfFile(id: string): void {
     this.pdfFileFacade.downloadPdfFile({ pdfFileId: id });
+  }
+
+  public selectTerm(termId: string): void {
+    this.selectedTermId = termId;
+    this.updateSelectedTermSnapshot();
+  }
+
+  public getDefaultTermId(terms: { id: string; startDate: string }[]): string {
+    if (!terms.length) {
+      return null;
+    }
+
+    const now = new Date();
+    const upcoming = terms.filter((term) => new Date(term.startDate) >= now);
+
+    if (upcoming.length) {
+      return upcoming[0].id;
+    }
+
+    return terms[0].id;
+  }
+
+  private updateSelectedTermSnapshot(): void {
+    const term = this.termsViewModel?.find((t) => t.id === this.selectedTermId);
+    this.selectedTermStartDate = term?.startDate ?? null;
+    this.selectedTermEndDate = term?.endDate ?? null;
+    this.selectedTermPrice = term?.fromPrice ?? null;
   }
 }

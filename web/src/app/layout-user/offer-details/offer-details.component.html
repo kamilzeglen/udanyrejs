@@ -4,7 +4,9 @@
     <div class="title">
       <h1>{{ offer.name }}</h1>
     </div>
-    <div class="subtitle">{{ offer.startDate | date: 'dd.MM.yyyy' }} - {{ offer.endDate | date: 'dd.MM.yyyy' }}</div>
+    <div class="subtitle">
+      {{ selectedTermStartDate | date: 'dd.MM.yyyy' }} - {{ selectedTermEndDate | date: 'dd.MM.yyyy' }}
+    </div>
     <nz-divider></nz-divider>
 
     <div class="offer-details">
@@ -18,7 +20,7 @@
       </div>
       <div class="element highlight">
         <div class="element-label">Cena od:</div>
-        <div class="element-value">{{ offer.price / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</div>
+        <div class="element-value">{{ selectedTermPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</div>
       </div>
     </div>
 
@@ -64,6 +66,27 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="other-terms-section" *ngIf="termsViewModel?.length > 1">
+      <h2>Inne terminy rejsu</h2>
+      <div class="terms-grid">
+        <div
+          *ngFor="let term of termsViewModel"
+          class="term-item"
+          [class.selected]="term.id === selectedTermId"
+          role="button"
+          tabindex="0"
+          (click)="selectTerm(term.id)"
+          (keydown.enter)="selectTerm(term.id)"
+          (keydown.space)="selectTerm(term.id)"
+        >
+          <div class="term-dates">
+            {{ term.startDate | date: 'yyyy-MM-dd' }} → {{ term.endDate | date: 'yyyy-MM-dd' }}
+          </div>
+          <div class="term-price">od {{ term.fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}/os.</div>
+        </div>
+      </div>
     </div>
 
     <div class="in-price-section" *ngIf="offer.company.priceIncludes && offer.company.priceExcludes">
