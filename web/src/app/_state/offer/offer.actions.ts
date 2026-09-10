@@ -1,11 +1,11 @@
 import { createAction, props } from '@ngrx/store';
-import { Offer, SearchOffersPayload } from '@interfaces';
+import { Offer, OfferSearchResult, SearchOffersPayload } from '@interfaces';
 import { PaginatedResponse } from '../../_interfaces/http';
 
 export const getOffers = createAction('[Offer] Get Offers', props<{ payload: Partial<SearchOffersPayload> }>());
 export const getOffersSuccess = createAction(
   '[Offer] Get Offers Success',
-  props<{ offers: PaginatedResponse<Offer> }>(),
+  props<{ offers: PaginatedResponse<OfferSearchResult> }>(),
 );
 export const getOffersError = createAction('[Offers] Get Offers Error', props<{ errorMessage: string }>());
 

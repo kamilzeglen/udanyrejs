@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Offer, SearchOffersPayload } from '@interfaces';
+import { Offer, OfferSearchResult, SearchOffersPayload } from '@interfaces';
 import { environment } from '@environment';
 import { PaginatedResponse } from '../../_interfaces/http';
 
@@ -13,9 +13,9 @@ export class OffersHttpService {
 
   constructor(private http: HttpClient) {}
 
-  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<PaginatedResponse<Offer>> {
+  public getOffers(payload?: Partial<SearchOffersPayload>): Observable<PaginatedResponse<OfferSearchResult>> {
     const url = `${this.API_URL}/offers/search`;
-    return this.http.post<PaginatedResponse<Offer>>(url, payload);
+    return this.http.post<PaginatedResponse<OfferSearchResult>>(url, payload);
   }
 
   public getOffer(payload: { id: string }): Observable<Offer> {
