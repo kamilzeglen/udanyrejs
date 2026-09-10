@@ -77,6 +77,12 @@ jobs:
       - name: Install dependencies
         run: npm --prefix web ci
 
+      - name: Check formatting
+        run: npm --prefix web run format:check
+
+      - name: Lint
+        run: npm --prefix web run lint:check
+
       - name: Test
         run: npm --prefix web test -- --watch=false --browsers=ChromeHeadless
 
