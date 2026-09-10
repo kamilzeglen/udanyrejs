@@ -19,7 +19,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailModule } from '@modules/email/email.module';
 import { TerminusModule } from '@nestjs/terminus';
-import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LogModule } from '@modules/log/log.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -98,8 +97,6 @@ import { envValidationSchema } from '@core/config/env.validation';
       ],
     }),
     TerminusModule,
-    HttpModule,
-
     RoleModule,
     UserModule,
     AuthModule,
