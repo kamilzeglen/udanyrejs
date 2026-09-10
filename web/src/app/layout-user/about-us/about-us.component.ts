@@ -1,24 +1,26 @@
-import {Component} from '@angular/core';
-import {Meta, Title} from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-about-us',
   templateUrl: './about-us.component.html',
-  styleUrl: './about-us.component.scss'
+  styleUrl: './about-us.component.scss',
 })
 export class AboutUsComponent {
-
-  constructor(private titleService: Title, private metaService: Meta) {
+  constructor(
+    private titleService: Title,
+    private metaService: Meta,
+  ) {
     this.titleService.setTitle('UdanyRejs - O nas');
     this.metaService.updateTag({
       name: 'description',
-      content: 'Poznaj naszą firmę i naszą misję. UdanyRejs to lider w organizacji luksusowych rejsów wycieczkowych.'
+      content: 'Poznaj naszą firmę i naszą misję. UdanyRejs to lider w organizacji luksusowych rejsów wycieczkowych.',
     });
   }
 
   officeAddress = {
     street: 'XYZ 123',
-    city: '12-345 XYZ'
+    city: '12-345 XYZ',
   };
 
   cruises_photos = [

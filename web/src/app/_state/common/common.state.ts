@@ -1,6 +1,5 @@
-import {Company, Destination, Ship, Category} from '@interfaces';
-import {Log} from '../../_interfaces/log';
-
+import { Company, Destination, Ship, Category } from '@interfaces';
+import { Log } from '../../_interfaces/log';
 
 export type CommonState = Readonly<{
   companies: Company[];
@@ -11,7 +10,6 @@ export type CommonState = Readonly<{
 
   loading: boolean;
   errorMessage: string;
-
 }>;
 
 export const initialState: CommonState = {

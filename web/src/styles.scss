@@ -8,7 +8,8 @@
 @import 'scss/variables';
 @import 'scss/udanyrejs';
 
-html, body {
+html,
+body {
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -34,8 +35,7 @@ label {
 
 input,
 mat-select,
-textarea,
-{
+textarea {
   padding: 10px;
   font-size: 14px;
   border: 1px solid $primary-color;
@@ -46,8 +46,7 @@ textarea,
 
 /* Buttons */
 .back-button,
-.add-button,
-{
+.add-button {
   margin: 1rem 0;
   text-align: center;
 
@@ -68,16 +67,17 @@ textarea,
     }
 
     &:hover {
-      background-color: $primary-color
+      background-color: $primary-color;
     }
   }
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

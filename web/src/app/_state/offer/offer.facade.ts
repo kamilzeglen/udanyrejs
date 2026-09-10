@@ -1,11 +1,10 @@
-import {Injectable} from '@angular/core';
-import {Actions, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {AppState} from '@state';
+import { Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { AppState } from '@state';
 import * as offerActions from './offer.actions';
 import * as offerSelectors from './offer.selectors';
-import {Offer, SearchOffersPayload} from '@interfaces';
-
+import { Offer, SearchOffersPayload } from '@interfaces';
 
 @Injectable()
 export class OfferFacade {
@@ -28,35 +27,34 @@ export class OfferFacade {
 
   constructor(
     private store: Store<AppState>,
-    private actions: Actions
-  ) {
-  }
+    private actions: Actions,
+  ) {}
 
   public getOffers(payload?: Partial<SearchOffersPayload>): void {
-    this.store.dispatch(offerActions.getOffers({payload}));
+    this.store.dispatch(offerActions.getOffers({ payload }));
   }
 
-  public getOffer(payload: {id: string}): void {
-    this.store.dispatch(offerActions.getOffer({payload}));
+  public getOffer(payload: { id: string }): void {
+    this.store.dispatch(offerActions.getOffer({ payload }));
   }
 
-  public createOffer(payload: {formData: Partial<Offer>}): void {
-    this.store.dispatch(offerActions.createOffer({payload}));
+  public createOffer(payload: { formData: Partial<Offer> }): void {
+    this.store.dispatch(offerActions.createOffer({ payload }));
   }
 
-  public updateOffer(payload: {id: string, formData: Partial<Offer>}): void {
-    this.store.dispatch(offerActions.updateOffer({payload}));
+  public updateOffer(payload: { id: string; formData: Partial<Offer> }): void {
+    this.store.dispatch(offerActions.updateOffer({ payload }));
   }
 
-  public deleteOffer(payload: {id: string}): void {
-    this.store.dispatch(offerActions.deleteOffer({payload}));
+  public deleteOffer(payload: { id: string }): void {
+    this.store.dispatch(offerActions.deleteOffer({ payload }));
   }
 
-  public deactivateOffer(payload: {id: string}): void {
-    this.store.dispatch(offerActions.deactivateOffer({payload}));
+  public deactivateOffer(payload: { id: string }): void {
+    this.store.dispatch(offerActions.deactivateOffer({ payload }));
   }
 
-  public activateOffer(payload: {id: string}): void {
-    this.store.dispatch(offerActions.activateOffer({payload}));
+  public activateOffer(payload: { id: string }): void {
+    this.store.dispatch(offerActions.activateOffer({ payload }));
   }
 }

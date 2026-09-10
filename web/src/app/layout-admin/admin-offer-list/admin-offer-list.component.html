@@ -4,19 +4,19 @@
   </div>
 
   <div class="mat-elevation-z8 custom-table">
-
     <table
       mat-table
       *ngIf="(loading$ | async) === false"
-      [dataSource]="offers$" matSort
+      [dataSource]="offers$"
+      matSort
       (matSortChange)="sortData($event)"
       [matSortActive]="currentSortBy"
-      [matSortDirection]="currentSortDir">
-
+      [matSortDirection]="currentSortDir"
+    >
       <!-- ID Column -->
       <ng-container matColumnDef="id">
         <th mat-header-cell *matHeaderCellDef>Nr</th>
-        <td mat-cell *matCellDef="let element, let i = index ">{{ i + 1 }}</td>
+        <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
       </ng-container>
 
       <!-- Name Column -->
@@ -34,16 +34,26 @@
       <!-- Company Column -->
       <ng-container matColumnDef="company.name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Firma</th>
-        <td mat-cell *matCellDef="let element" class="link"
-            (click)="editCompany(element.company.id); $event.stopPropagation()">{{ element.company.name }}
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="link"
+          (click)="editCompany(element.company.id); $event.stopPropagation()"
+        >
+          {{ element.company.name }}
         </td>
       </ng-container>
 
       <!-- Ship Column -->
       <ng-container matColumnDef="ship.name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Statek</th>
-        <td mat-cell *matCellDef="let element" class="link"
-            (click)="editShip(element.ship.id); $event.stopPropagation()">{{ element.ship.name }}
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="link"
+          (click)="editShip(element.ship.id); $event.stopPropagation()"
+        >
+          {{ element.ship.name }}
         </td>
       </ng-container>
 
@@ -74,44 +84,91 @@
         <th mat-header-cell *matHeaderCellDef>Statystyki</th>
         <td mat-cell *matCellDef="let element">
           <div class="shareStats" *ngIf="element.shareStats">
-            <div (click)="copyToClipboard('web', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('web', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('web', element.id)"
+              (keydown.space)="copyToClipboard('web', element.id)"
+            >
               <i class="fab fa-chrome"></i>
               <span>{{ element.shareStats.webClicks }}</span>
             </div>
-            <div (click)="copyToClipboard('fb', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('fb', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('fb', element.id)"
+              (keydown.space)="copyToClipboard('fb', element.id)"
+            >
               <i class="fab fa-facebook"></i>
               <span>{{ element.shareStats.facebookClicks }}</span>
             </div>
-            <div (click)="copyToClipboard('ig', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('ig', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('ig', element.id)"
+              (keydown.space)="copyToClipboard('ig', element.id)"
+            >
               <i class="fab fa-instagram"></i>
               <span>{{ element.shareStats.instagramClicks }}</span>
             </div>
-            <div (click)="copyToClipboard('tt', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('tt', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('tt', element.id)"
+              (keydown.space)="copyToClipboard('tt', element.id)"
+            >
               <i class="fab fa-tiktok"></i>
               <span>{{ element.shareStats.tiktokClicks }}</span>
             </div>
           </div>
           <div class="shareStats" *ngIf="!element.shareStats">
-            <div (click)="copyToClipboard('web', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('web', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('web', element.id)"
+              (keydown.space)="copyToClipboard('web', element.id)"
+            >
               <i class="fab fa-chrome"></i>
               <span>-</span>
             </div>
-            <div (click)="copyToClipboard('fb', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('fb', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('fb', element.id)"
+              (keydown.space)="copyToClipboard('fb', element.id)"
+            >
               <i class="fab fa-facebook"></i>
               <span>-</span>
             </div>
-            <div (click)="copyToClipboard('ig', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('ig', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('ig', element.id)"
+              (keydown.space)="copyToClipboard('ig', element.id)"
+            >
               <i class="fab fa-instagram"></i>
               <span>-</span>
             </div>
-            <div (click)="copyToClipboard('tt', element.id); $event.stopPropagation()">
+            <div
+              role="button"
+              tabindex="0"
+              (click)="copyToClipboard('tt', element.id); $event.stopPropagation()"
+              (keydown.enter)="copyToClipboard('tt', element.id)"
+              (keydown.space)="copyToClipboard('tt', element.id)"
+            >
               <i class="fab fa-tiktok"></i>
               <span>-</span>
             </div>
           </div>
         </td>
       </ng-container>
-
 
       <!-- Photos Column -->
       <ng-container matColumnDef="photos-or-pdf">
@@ -120,26 +177,26 @@
           <div class="photos-or-pdf">
             <div class="element">
               <span>PDF</span>
-              <mat-icon
-                [ngStyle]="{ color: element.pdfFile ? 'green' : 'red' }">{{ element.pdfFile ? 'check' : 'close' }}
+              <mat-icon [ngStyle]="{ color: element.pdfFile ? 'green' : 'red' }"
+                >{{ element.pdfFile ? 'check' : 'close' }}
               </mat-icon>
             </div>
             <div class="element">
               <span>Oferta</span>
-              <mat-icon
-                [ngStyle]="{ color: element.imageFile ? 'green' : 'red' }">{{ element.imageFile ? 'check' : 'close' }}
+              <mat-icon [ngStyle]="{ color: element.imageFile ? 'green' : 'red' }"
+                >{{ element.imageFile ? 'check' : 'close' }}
               </mat-icon>
             </div>
             <div class="element">
               <span>Armator</span>
-              <mat-icon
-                [ngStyle]="{ color: element.company.imageFile ? 'green' : 'red' }">{{ element.company.imageFile ? 'check' : 'close' }}
+              <mat-icon [ngStyle]="{ color: element.company.imageFile ? 'green' : 'red' }"
+                >{{ element.company.imageFile ? 'check' : 'close' }}
               </mat-icon>
             </div>
             <div class="element">
               <span>Statek</span>
-              <mat-icon
-                [ngStyle]="{ color: element.ship.imageFile ? 'green' : 'red' }">{{ element.ship.imageFile ? 'check' : 'close' }}
+              <mat-icon [ngStyle]="{ color: element.ship.imageFile ? 'green' : 'red' }"
+                >{{ element.ship.imageFile ? 'check' : 'close' }}
               </mat-icon>
             </div>
           </div>
@@ -160,9 +217,15 @@
 
       <!-- Header and Row -->
       <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-      <tr mat-row *matRowDef="let row; columns: columnsToDisplay;" class="row" (click)="editOffer(row)" [class.inactive-row]="!row.isActive"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: columnsToDisplay"
+        class="row"
+        (click)="editOffer(row)"
+        [class.inactive-row]="!row.isActive"
+      ></tr>
     </table>
   </div>
 </div>
 
-<app-spinner *ngIf="(loading$ | async)" appAutoSpinner [size]="75"></app-spinner>
+<app-spinner *ngIf="loading$ | async" appAutoSpinner [size]="75"></app-spinner>

@@ -1,28 +1,28 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {defaultPagination, OfferFacade} from 'src/app/_state/offer';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
-import {SearchOffersPayload} from '@interfaces';
-import {CommonFacade} from '@state/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { defaultPagination, OfferFacade } from 'src/app/_state/offer';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SearchOffersPayload } from '@interfaces';
+import { CommonFacade } from '@state/common';
 import moment from 'moment-timezone';
-import {Meta, Title} from '@angular/platform-browser';
-import {PageEvent} from '@angular/material/paginator';
-import {SortDirection} from '@angular/material/sort';
-import {map} from 'rxjs/operators';
+import { Meta, Title } from '@angular/platform-browser';
+import { PageEvent } from '@angular/material/paginator';
+import { SortDirection } from '@angular/material/sort';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-offer-list',
   templateUrl: './offer-list.component.html',
-  styleUrl: './offer-list.component.scss'
+  styleUrl: './offer-list.component.scss',
 })
 export class OfferListComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
 
-  public offers$ = this.offerFacade.offers$
-  public loading$ = this.offerFacade.loading$
-  public pagination$ = this.offerFacade.pagination$
+  public offers$ = this.offerFacade.offers$;
+  public loading$ = this.offerFacade.loading$;
+  public pagination$ = this.offerFacade.pagination$;
 
-  public page: number = 0
+  public page: number = 0;
 
   public pageSize = defaultPagination.limit;
   public pageSizeOptions = [10, 25, 50];
@@ -34,7 +34,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
   public currentSortDir: SortDirection = 'desc';
 
   public currPage$ = this.pagination$.pipe(
-    map(pagination => {
+    map((pagination) => {
       if (pagination.all === 0) {
         return 0;
       }
@@ -42,7 +42,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
         return 0;
       }
       return Math.floor(pagination.offset / this.pageSize);
-    })
+    }),
   );
 
   public filters: { [key: string]: any } = {
@@ -61,35 +61,38 @@ export class OfferListComponent implements OnInit, OnDestroy {
     private readonly titleService: Title,
     private readonly metaService: Meta,
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
   ) {
     this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
     this.metaService.updateTag({
       name: 'description',
-      content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+      content:
+        'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
     });
   }
 
   public ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.page = params['page'] ? Number(params['page']) - 1 : 0;
     });
 
-    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
-      const category = paramMap.get('category')
-      this.filters = {...this.filters, category: paramMap.get('category')};
+    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
+      const category = paramMap.get('category');
+      this.filters = { ...this.filters, category: paramMap.get('category') };
 
       if (category === 'promotions') {
         this.titleService.setTitle('UdanyRejs - Oferty Rejsów - Promocje');
         this.metaService.updateTag({
           name: 'description',
-          content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+          content:
+            'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
         });
       } else {
         this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
         this.metaService.updateTag({
           name: 'description',
-          content: 'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.'
+          content:
+            'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
         });
       }
 
@@ -104,8 +107,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
   }
 
   public getOffers(opts?: Partial<SearchOffersPayload>): void {
-    this.pagination$.pipe(take(1)).subscribe(pagination => {
-
+    this.pagination$.pipe(take(1)).subscribe((pagination) => {
       if (opts?.startDate) {
         opts.startDate = moment.tz(opts.startDate, 'Europe/Warsaw').startOf('day').toDate();
       }
@@ -130,7 +132,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
         pagination = {
           ...pagination, // Zachowuje istniejące wartości
           offset: this.page * this.pageSize,
-          limit: this.pageSize
+          limit: this.pageSize,
         };
       }
 
@@ -142,11 +144,11 @@ export class OfferListComponent implements OnInit, OnDestroy {
         orderBy: this.currentSortBy || this.defaultSortBy,
         orderDir: this.currentSortDir || this.defaultSortDir,
       });
-    })
+    });
   }
 
   public onFiltersChanged(changedFilter: { key: string; value: any }): void {
-    this.filters = {...this.filters, [changedFilter.key]: changedFilter.value};
+    this.filters = { ...this.filters, [changedFilter.key]: changedFilter.value };
 
     this.getOffers(this.filters);
   }
@@ -158,10 +160,10 @@ export class OfferListComponent implements OnInit, OnDestroy {
 
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {page: page.pageIndex + 1},
+      queryParams: { page: page.pageIndex + 1 },
       queryParamsHandling: 'merge',
     });
 
-    this.getOffers({offset: page.pageIndex * this.pageSize, limit: page.pageSize});
+    this.getOffers({ offset: page.pageIndex * this.pageSize, limit: page.pageSize });
   }
 }

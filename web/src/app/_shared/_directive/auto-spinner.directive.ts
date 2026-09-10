@@ -1,10 +1,13 @@
 import { AfterViewInit, Directive, ElementRef, Renderer2 } from '@angular/core';
 
 @Directive({
-  selector: '[appAutoSpinner]'
+  selector: '[appAutoSpinner]',
 })
 export class AutoSpinnerDirective implements AfterViewInit {
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2,
+  ) {}
 
   ngAfterViewInit(): void {
     const parent = this.el.nativeElement.parentElement;

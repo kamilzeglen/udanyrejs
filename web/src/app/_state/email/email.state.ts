@@ -1,7 +1,7 @@
 export type EmailState = Readonly<{
   emailSent: boolean;
-  sending: boolean,
-  errorMessage: string,
+  sending: boolean;
+  errorMessage: string;
 }>;
 
 export const initialState: EmailState = {

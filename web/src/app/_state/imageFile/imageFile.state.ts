@@ -1,9 +1,9 @@
-import {ImageFile} from '../../_interfaces/file';
+import { ImageFile } from '../../_interfaces/file';
 
 export type ImageFileState = Readonly<{
   imageFile: ImageFile;
-  loading: boolean,
-  errorMessage: string,
+  loading: boolean;
+  errorMessage: string;
 }>;
 
 export const initialState: ImageFileState = {

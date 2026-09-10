@@ -11,7 +11,10 @@ export class ApiErrorInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     if (this.blockRequests) {
-      return of(null).pipe(delay(30000), switchMap(() => next.handle(req)));
+      return of(null).pipe(
+        delay(30000),
+        switchMap(() => next.handle(req)),
+      );
     }
 
     return next.handle(req).pipe(
@@ -25,7 +28,7 @@ export class ApiErrorInterceptor implements HttpInterceptor {
           }, 30000);
         }
         return throwError(() => error);
-      })
+      }),
     );
   }
 }

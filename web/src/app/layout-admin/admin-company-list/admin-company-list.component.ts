@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {AllDeviceInfo, Company} from '@interfaces';
-import {CommonFacade} from '@state/common';
-import {RouterFacade} from '@state/router';
-import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
+import { AllDeviceInfo, Company } from '@interfaces';
+import { CommonFacade } from '@state/common';
+import { RouterFacade } from '@state/router';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 
 @Component({
   selector: 'app-admin-company-list',
@@ -17,20 +17,11 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public companies$ = this.commonFacade.companies$
-  public ships$ = this.commonFacade.ships$
-  public loading$ = this.commonFacade.loading$
+  public companies$ = this.commonFacade.companies$;
+  public ships$ = this.commonFacade.ships$;
+  public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = [
-    'id',
-    'name',
-    'key',
-    'image',
-    'description',
-    'actions',
-    'updatedAt',
-    'createdAt',
-  ];
+  public allColumns: string[] = ['id', 'name', 'key', 'image', 'description', 'actions', 'updatedAt', 'createdAt'];
 
   public columnsToDisplay: string[];
 
@@ -40,24 +31,23 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
-  ) {
-  }
+  ) {}
 
   public ngOnInit() {
     this.deviceInfo = this.deviceInfoService.getInfo();
 
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
       this.deviceInfo = info;
     });
 
     this.columnsToDisplay = this.getColumnsToDisplay();
 
     this.commonFacade.deleteCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto firmę")
-      this.commonFacade.getCompanies()
-    })
+      this.snackService.showInfo('Pomyślnie usunięto firmę');
+      this.commonFacade.getCompanies();
+    });
 
-    this.commonFacade.getCompanies()
+    this.commonFacade.getCompanies();
   }
 
   public ngOnDestroy(): void {
@@ -66,28 +56,28 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
   }
 
   public addCompany(): void {
-    const linkParams = ["/admin/companies/add/"]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/companies/add/'];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editCompany(company: Company): void {
-    const linkParams = ["/admin/companies/edit/" + company.id]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/companies/edit/' + company.id];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public deleteCompany(company: Company): void {
     this.confirmationModalService
       .open({
-        message: "Jesteś pewny że chcesz usunąć firmę: " + company.name + "?"
+        message: 'Jesteś pewny że chcesz usunąć firmę: ' + company.name + '?',
       })
       .afterClosed()
       .pipe(take(1))
-      .subscribe(res => {
+      .subscribe((res) => {
         if (!res) {
           return;
         }
 
-        this.commonFacade.deleteCompany({id: company.id})
+        this.commonFacade.deleteCompany({ id: company.id });
       });
   }
 

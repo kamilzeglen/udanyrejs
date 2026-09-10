@@ -1,14 +1,14 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {AuthFacade} from '@state/auth';
-import {ActivatedRoute} from '@angular/router';
-import {filter, ReplaySubject, takeUntil} from 'rxjs';
-import {RouterFacade} from '@state/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthFacade } from '@state/auth';
+import { ActivatedRoute } from '@angular/router';
+import { filter, ReplaySubject, takeUntil } from 'rxjs';
+import { RouterFacade } from '@state/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
@@ -21,16 +21,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly activatedRoute: ActivatedRoute,
     private readonly authFacade: AuthFacade,
     private readonly routerFacade: RouterFacade,
-  ) {
-  }
+  ) {}
 
   public ngOnInit(): void {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    const {email, message, redirect, safeLogout} = this.activatedRoute.snapshot.queryParams;
+    const { redirect } = this.activatedRoute.snapshot.queryParams;
 
     if (redirect) {
       this.redirect = redirect;
@@ -38,32 +37,32 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.authFacade.getMyselfSuccess$
       .pipe(
-        filter(({user}) => {
+        filter(({ user }) => {
           if (!user) {
             return false;
           }
           return true;
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
-      .subscribe(({user}) => {
+      .subscribe(() => {
         const queryParams = {} as any;
         let linkParams;
 
         // if redirect string shorter than 4 - no redirect - its not possible
         if (this.redirect?.length >= 4) {
           const [path, queryParamsString] = this.redirect.split('?');
-          linkParams = path.split('/').filter(pathPart => !!pathPart);
+          linkParams = path.split('/').filter((pathPart) => !!pathPart);
 
           if (queryParamsString?.length) {
-            queryParamsString.split('&').forEach(keyVal => {
+            queryParamsString.split('&').forEach((keyVal) => {
               const [key, val] = keyVal.split('=');
               queryParams[key] = val;
             });
           }
         }
 
-        this.routerFacade.changeRoute({linkParams, extras: {queryParams}});
+        this.routerFacade.changeRoute({ linkParams, extras: { queryParams } });
       });
   }
 
@@ -77,9 +76,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const {email, password} = this.authForm.value;
+    const { email, password } = this.authForm.value;
     const redirect = this.redirect;
-    this.authFacade.login({email, password}, redirect)
+    this.authFacade.login({ email, password }, redirect);
   }
 }
-

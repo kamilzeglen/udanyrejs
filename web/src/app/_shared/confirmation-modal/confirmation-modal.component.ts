@@ -12,7 +12,7 @@ export class ConfirmationModalComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalOpts,
-    public dialogRef: MatDialogRef<ConfirmationModalComponent>
+    public dialogRef: MatDialogRef<ConfirmationModalComponent>,
   ) {}
 
   ngOnInit(): void {

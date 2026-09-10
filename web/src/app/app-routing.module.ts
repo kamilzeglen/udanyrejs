@@ -1,7 +1,6 @@
-import {NgModule} from '@angular/core';
-import {RouterModule, Routes} from '@angular/router';
-import {ErrorComponent} from './layout/error/error.component';
-
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { ErrorComponent } from './layout/error/error.component';
 
 const routes: Routes = [
   {
@@ -10,20 +9,19 @@ const routes: Routes = [
       { path: 'error', component: ErrorComponent },
       {
         path: '',
-        loadChildren: () => import('./layout-user/layout-user.module').then(m => m.LayoutUserModule),
+        loadChildren: () => import('./layout-user/layout-user.module').then((m) => m.LayoutUserModule),
       },
       {
         path: 'admin',
-        loadChildren: () => import('./layout-admin/layout-admin.module').then(m => m.LayoutAdminModule),
+        loadChildren: () => import('./layout-admin/layout-admin.module').then((m) => m.LayoutAdminModule),
       },
-      {path: '**', redirectTo: 'offers'},
+      { path: '**', redirectTo: 'offers' },
     ],
   },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule {
-}
+export class AppRoutingModule {}

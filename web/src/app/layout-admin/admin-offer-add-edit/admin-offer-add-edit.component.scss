@@ -36,7 +36,6 @@
     }
   }
 
-
   /* Form Fields */
   .form-group {
     display: flex;
@@ -136,8 +135,7 @@
   }
 
   .deleteOffer,
-  .deactivateOffer
-  {
+  .deactivateOffer {
     display: flex;
     background: $negative;
     color: $white;

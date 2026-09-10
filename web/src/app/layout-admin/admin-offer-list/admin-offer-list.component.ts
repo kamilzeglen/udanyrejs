@@ -1,18 +1,18 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {OfferFacade} from '@state/offer';
-import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
-import {AllDeviceInfo, Offer, SearchOffersPayload} from '@interfaces';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
-import {RouterFacade} from '@state/router';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {Sort, SortDirection} from '@angular/material/sort';
-import {Pagination} from '../../_interfaces/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { OfferFacade } from '@state/offer';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { AllDeviceInfo, Offer, SearchOffersPayload } from '@interfaces';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { RouterFacade } from '@state/router';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
+import { Sort, SortDirection } from '@angular/material/sort';
+import { Pagination } from '../../_interfaces/http';
 
 @Component({
   selector: 'app-admin-offer-list',
   templateUrl: './admin-offer-list.component.html',
-  styleUrl: './admin-offer-list.component.scss'
+  styleUrl: './admin-offer-list.component.scss',
 })
 export class AdminOfferListComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
@@ -27,9 +27,9 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public offers$ = this.offerFacade.offers$
-  public loading$ = this.offerFacade.loading$
-  public pagination$ = this.offerFacade.pagination$
+  public offers$ = this.offerFacade.offers$;
+  public loading$ = this.offerFacade.loading$;
+  public pagination$ = this.offerFacade.pagination$;
 
   public columnsToDisplay: string[];
   public allColumns: string[] = [
@@ -52,25 +52,24 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
     private readonly routerFacade: RouterFacade,
-    private readonly deviceInfoService: DeviceInfoService
-  ) {
-  }
+    private readonly deviceInfoService: DeviceInfoService,
+  ) {}
 
   public ngOnInit() {
     this.deviceInfo = this.deviceInfoService.getInfo();
 
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
       this.deviceInfo = info;
     });
 
     this.columnsToDisplay = this.getColumnsToDisplay();
 
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto ofertę")
-      this.getOffers()
-    })
+      this.snackService.showInfo('Pomyślnie usunięto ofertę');
+      this.getOffers();
+    });
 
-    this.getOffers()
+    this.getOffers();
   }
 
   public ngOnDestroy(): void {
@@ -79,8 +78,8 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   }
 
   public sortData(sort: Sort): void {
-    this.pagination$.pipe(take(1)).subscribe(pagination => {
-      const {all, count, ...rest} = pagination;
+    this.pagination$.pipe(take(1)).subscribe((pagination) => {
+      const { all: _all, count: _count, ...rest } = pagination;
       this.currentSortBy = sort.active as Pagination['orderBy'];
       this.currentSortDir = sort.direction as Pagination['orderDir'];
       this.getOffers({
@@ -89,14 +88,12 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
         limit: this.pageSize,
         orderBy: this.currentSortBy,
         orderDir: this.currentSortDir,
-
       });
     });
   }
 
   public getOffers(opts?: Partial<SearchOffersPayload>): void {
-    this.pagination$.pipe(take(1)).subscribe(pagination => {
-
+    this.pagination$.pipe(take(1)).subscribe((pagination) => {
       if (opts && 'orderBy' in opts) {
         this.currentSortBy = opts.orderBy;
       }
@@ -114,7 +111,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
         limit: this.pageSize,
         orderBy: this.currentSortBy || this.defaultSortBy,
         orderDir: this.currentSortDir || this.defaultSortDir,
-        showInactive: true
+        showInactive: true,
       });
     });
   }
@@ -122,42 +119,42 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public deleteOffer(offer: Offer): void {
     this.confirmationModalService
       .open({
-        message: "Jesteś pewny że chcesz usunąć ofertę: " + offer.name + "?"
+        message: 'Jesteś pewny że chcesz usunąć ofertę: ' + offer.name + '?',
       })
       .afterClosed()
       .pipe(take(1))
-      .subscribe(res => {
+      .subscribe((res) => {
         if (!res) {
           return;
         }
 
-        this.offerFacade.deleteOffer({id: offer.id})
+        this.offerFacade.deleteOffer({ id: offer.id });
       });
   }
 
   public detailsOffer(offer: Offer): void {
-    const linkParams = ["/offers/details/" + offer.id]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/offers/details/' + offer.id];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editOffer(offer: Offer): void {
-    const linkParams = ["/admin/offers/edit/" + offer.id]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/offers/edit/' + offer.id];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public addOffer(): void {
-    const linkParams = ["/admin/offers/add/"]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/offers/add/'];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editShip(shipId: string): void {
-    const linkParams = ["/admin/ships/edit/" + shipId]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/ships/edit/' + shipId];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editCompany(companyId: string): void {
-    const linkParams = ["/admin/companies/edit/" + companyId]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/companies/edit/' + companyId];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public getColumnsToDisplay(): string[] {
@@ -175,11 +172,13 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   public copyToClipboard(type: string, id: string) {
     const url = `${window.location.origin}/share/${type}/${id}`;
-    navigator.clipboard.writeText(url).then(() => {
-      console.log('Skopiowano:', url);
-    }).catch(err => {
-      console.error('Błąd kopiowania:', err);
-    });
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        console.log('Skopiowano:', url);
+      })
+      .catch((err) => {
+        console.error('Błąd kopiowania:', err);
+      });
   }
-
 }

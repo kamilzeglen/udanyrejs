@@ -11,7 +11,7 @@ export class DeviceInfoService {
 
   constructor(
     private readonly deviceService: DeviceDetectorService,
-    private readonly breakpointObserver: BreakpointObserver
+    private readonly breakpointObserver: BreakpointObserver,
   ) {}
 
   public startObservingDevice(): void {

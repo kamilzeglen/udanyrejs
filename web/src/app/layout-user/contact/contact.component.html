@@ -1,12 +1,14 @@
 <div class="contact">
-    <section class="employees">
+  <section class="employees">
     <h1>Skontaktuj się z naszymi pracownikami</h1>
     <div class="employee-card" *ngFor="let employee of employees">
       <img [src]="employee.photo" [alt]="employee.name" />
       <div>
         <h3>{{ employee.name }}</h3>
         <p>Telefon: {{ employee.phone }}</p>
-        <p>Email: <a [href]="'mailto:' + employee.email">{{ employee.email }}</a></p>
+        <p>
+          Email: <a [href]="'mailto:' + employee.email">{{ employee.email }}</a>
+        </p>
       </div>
     </div>
   </section>

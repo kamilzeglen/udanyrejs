@@ -3,7 +3,7 @@
     <button (click)="goBack()">Powrót</button>
   </div>
 
-  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+  <h1 class="title">{{ mode === 'EDIT' ? 'Edycja' : 'Dodawanie' }}</h1>
 
   <form [formGroup]="offerForm">
     <!-- Sekcja Dane dotyczące rejsu -->
@@ -21,7 +21,13 @@
 
       <div class="form-group" *ngIf="destinations$ | async as destinations">
         <label for="destinations">Kierunki:</label>
-        <mat-select formControlName="destinations" id="destinations" placeholder="Kierunki" [disabled]="!destinations$" multiple>
+        <mat-select
+          formControlName="destinations"
+          id="destinations"
+          placeholder="Kierunki"
+          [disabled]="!destinations$"
+          multiple
+        >
           <mat-option *ngFor="let destination of destinations" [value]="destination.id">
             {{ destination.name }}
           </mat-option>
@@ -30,7 +36,13 @@
 
       <div class="form-group" *ngIf="categories$ | async as categories">
         <label for="categories">Kategorie:</label>
-        <mat-select formControlName="categories" id="categories" placeholder="Kategorie" [disabled]="!categories$" multiple>
+        <mat-select
+          formControlName="categories"
+          id="categories"
+          placeholder="Kategorie"
+          [disabled]="!categories$"
+          multiple
+        >
           <mat-option *ngFor="let category of categories" [value]="category.id">
             {{ category.name }}
           </mat-option>
@@ -39,7 +51,7 @@
 
       <div class="form-group">
         <label for="price">Cena: (Euro)</label>
-        <input id="price" formControlName="price" type="number" placeholder="Cena"/>
+        <input id="price" formControlName="price" type="number" placeholder="Cena" />
       </div>
 
       <div class="form-group">
@@ -61,32 +73,36 @@
       </div>
 
       <div class="form-group">
-        <label>Data początkowa:</label>
+        <label for="startDate">Data początkowa:</label>
         <mat-form-field class="start-date" appearance="outline">
           <input
+            id="startDate"
             matInput
             [max]="offerForm.get('endDate')?.value || null"
             [matDatepicker]="startDate"
             placeholder="Data początkowa"
             formControlName="startDate"
             (focus)="startDate.open()"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
           <mat-datepicker #startDate></mat-datepicker>
         </mat-form-field>
       </div>
 
       <div class="form-group">
-        <label>Data końcowa:</label>
+        <label for="endDate">Data końcowa:</label>
         <mat-form-field class="end-date" appearance="outline">
           <input
+            id="endDate"
             matInput
             [min]="offerForm.get('startDate')?.value || null"
             [matDatepicker]="endDate"
             placeholder="Data początkowa"
             formControlName="endDate"
             (focus)="endDate.open()"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
           <mat-datepicker #endDate></mat-datepicker>
         </mat-form-field>
@@ -101,8 +117,12 @@
           (change)="onImageFileChange($event)"
           [disabled]="scrappedImageFile"
         />
-        <div class="current-file" *ngIf="scrappedImageFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
-        <div class="current-file" *ngIf="editingOffer?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+        <div class="current-file" *ngIf="scrappedImageFile">
+          <b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="current-file" *ngIf="editingOffer?.imageFile?.originalName">
+          <b>Aktualny plik</b>: {{ editingOffer.imageFile.originalName }} <mat-icon>check_circle</mat-icon>
+        </div>
       </div>
 
       <div class="form-group">
@@ -114,8 +134,12 @@
           (change)="onPDFFileChange($event)"
           [disabled]="scrappedPdfFile"
         />
-        <div class="current-file" *ngIf="scrappedPdfFile"><b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon></div>
-        <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName"><b>Aktualny plik</b>: {{editingOffer.pdfFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+        <div class="current-file" *ngIf="scrappedPdfFile">
+          <b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName">
+          <b>Aktualny plik</b>: {{ editingOffer.pdfFile.originalName }} <mat-icon>check_circle</mat-icon>
+        </div>
       </div>
     </section>
 
@@ -125,42 +149,70 @@
       <div formArrayName="itinerary">
         <div *ngFor="let day of itineraryArray.controls; let i = index" [formGroupName]="i" class="itinerary-item">
           <div class="itinerary-input">
-            <label>Dzień {{ i + 1 }}:</label>
-            <input type="date" formControlName="date" placeholder="Data"/>
+            <label [attr.for]="'itineraryDate' + i">Dzień {{ i + 1 }}:</label>
+            <input [id]="'itineraryDate' + i" type="date" formControlName="date" placeholder="Data" />
           </div>
 
           <div class="itinerary-input">
-            <label>Port:</label>
-            <input type="text" formControlName="city" placeholder="Port docelowy"/>
+            <label [attr.for]="'itineraryCity' + i">Port:</label>
+            <input [id]="'itineraryCity' + i" type="text" formControlName="city" placeholder="Port docelowy" />
           </div>
 
           <div class="itinerary-input">
-            <label>Przyjazd:</label>
-            <input type="time" formControlName="arrivalTime" placeholder="Czas przyjazdu"/>
+            <label [attr.for]="'itineraryArrival' + i">Przyjazd:</label>
+            <input
+              [id]="'itineraryArrival' + i"
+              type="time"
+              formControlName="arrivalTime"
+              placeholder="Czas przyjazdu"
+            />
           </div>
 
           <div class="itinerary-input">
-            <label>Odjazd:</label>
-            <input type="time" formControlName="departureTime" placeholder="Czas odjazdu"/>
+            <label [attr.for]="'itineraryDeparture' + i">Odjazd:</label>
+            <input
+              [id]="'itineraryDeparture' + i"
+              type="time"
+              formControlName="departureTime"
+              placeholder="Czas odjazdu"
+            />
           </div>
         </div>
       </div>
     </section>
 
-    <button *ngIf="mode === 'EDIT' && editingOffer?.isActive" (click)="deactivateOffer()" mat-raised-button class="deactivateOffer">
+    <button
+      *ngIf="mode === 'EDIT' && editingOffer?.isActive"
+      (click)="deactivateOffer()"
+      mat-raised-button
+      class="deactivateOffer"
+    >
       Dezaktywuj ofertę
     </button>
 
-    <button *ngIf="mode === 'EDIT' && !editingOffer?.isActive" (click)="activateOffer()" mat-raised-button class="activateOffer">
+    <button
+      *ngIf="mode === 'EDIT' && !editingOffer?.isActive"
+      (click)="activateOffer()"
+      mat-raised-button
+      class="activateOffer"
+    >
       Aktywuj ofertę
     </button>
 
-    <button *ngIf="mode === 'EDIT'" (click)="deleteOffer()" mat-raised-button class="deleteOffer">
-      Usuń ofertę
-    </button>
+    <button *ngIf="mode === 'EDIT'" (click)="deleteOffer()" mat-raised-button class="deleteOffer">Usuń ofertę</button>
 
-    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="offerForm.invalid || ((!imageFile && !imageUrl) && !editingOffer?.imageFile?.name) || ((!pdfFile && !pdfUrl) && !editingOffer?.pdfFile?.name)">
-      {{ mode === 'ADD' ? "Dodaj ofertę" : "Zaktualizuj ofertę" }}
+    <button
+      (click)="submitForm()"
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="
+        offerForm.invalid ||
+        (!imageFile && !imageUrl && !editingOffer?.imageFile?.name) ||
+        (!pdfFile && !pdfUrl && !editingOffer?.pdfFile?.name)
+      "
+    >
+      {{ mode === 'ADD' ? 'Dodaj ofertę' : 'Zaktualizuj ofertę' }}
     </button>
   </form>
 </div>

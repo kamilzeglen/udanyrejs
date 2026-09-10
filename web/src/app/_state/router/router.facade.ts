@@ -1,12 +1,12 @@
-import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 
-import {Location} from '@angular/common';
-import {ChangeRoutePayload} from '@interfaces';
-import {AppState} from '@state';
+import { Location } from '@angular/common';
+import { ChangeRoutePayload } from '@interfaces';
+import { AppState } from '@state';
 import * as actions from './router.actions';
-import {BehaviorSubject, filter} from 'rxjs';
-import {NavigationEnd, Router} from '@angular/router';
+import { BehaviorSubject, filter } from 'rxjs';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Injectable()
 export class RouterFacade {
@@ -16,14 +16,12 @@ export class RouterFacade {
   constructor(
     private readonly store: Store<AppState>,
     private readonly location: Location,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.previousUrlSubject.next(this.currentUrl);
-        this.currentUrl = event.url;
-      });
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
+      this.previousUrlSubject.next(this.currentUrl);
+      this.currentUrl = event.url;
+    });
   }
 
   public changeRoute(params: ChangeRoutePayload): void {

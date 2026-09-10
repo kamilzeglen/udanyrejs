@@ -32,7 +32,6 @@
     transition: all 0.3s ease;
   }
 
-
   /* Form Fields */
   .form-group {
     display: flex;
@@ -51,7 +50,8 @@
     gap: 20px; /* Odstęp między sekcjami */
     margin: 20px 0;
 
-    .left, .right {
+    .left,
+    .right {
       width: 48%;
     }
 
@@ -111,16 +111,19 @@
       transition: background-color 0.3s ease;
     }
 
-    .left, .right {
+    .left,
+    .right {
       display: flex;
       flex-direction: column;
     }
 
-    .left .add-btn, .right .add-btn {
+    .left .add-btn,
+    .right .add-btn {
       background-color: $primary-color;
     }
 
-    .left .add-btn:hover, .right .add-btn:hover {
+    .left .add-btn:hover,
+    .right .add-btn:hover {
       background-color: $primary-color; /* Zmiana koloru przycisku w zależności od sekcji */
     }
 
@@ -130,7 +133,6 @@
       font-size: 20px;
     }
   }
-
 
   /* Animations */
   @keyframes fadeIn {

@@ -1,12 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Actions, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {AppState} from '@state';
+import { Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { AppState } from '@state';
 import * as authActions from './auth.actions';
 import * as authSelectors from './auth.selectors';
-import {filter, Observable, tap} from 'rxjs';
-import {User} from '@interfaces';
-
+import { filter, Observable, tap } from 'rxjs';
+import { User } from '@interfaces';
 
 @Injectable()
 export class AuthFacade {
@@ -19,31 +18,30 @@ export class AuthFacade {
 
   constructor(
     private store: Store<AppState>,
-    private actions: Actions
-  ) {
-  }
+    private actions: Actions,
+  ) {}
 
   public getMyself(redirect: string | null): void {
-    this.store.dispatch(authActions.getMyself({redirect}));
+    this.store.dispatch(authActions.getMyself({ redirect }));
   }
 
   public getMyself$(redirect: string | null): Observable<User> {
     return this.store.select(authSelectors.selectMyself).pipe(
-      tap(myself => {
+      tap((myself) => {
         if (!myself) {
           this.getMyself(redirect);
         }
       }),
-      filter(myself => {
+      filter((myself) => {
         if (!myself) {
           return false;
         }
         return true;
-      })
+      }),
     );
   }
 
-  public login(payload: { email: string, password: string }, redirect: string | null): void {
-    this.store.dispatch(authActions.login({payload, redirect}));
+  public login(payload: { email: string; password: string }, redirect: string | null): void {
+    this.store.dispatch(authActions.login({ payload, redirect }));
   }
 }

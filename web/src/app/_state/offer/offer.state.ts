@@ -1,6 +1,5 @@
-import {Offer} from '@interfaces';
-import {Pagination} from '../../_interfaces/http';
-
+import { Offer } from '@interfaces';
+import { Pagination } from '../../_interfaces/http';
 
 export type OfferState = Readonly<{
   offers: Offer[];

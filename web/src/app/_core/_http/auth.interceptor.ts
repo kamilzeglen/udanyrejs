@@ -6,11 +6,11 @@ import {
   HttpRequest,
   HttpStatusCode,
 } from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {Observable, throwError} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
-import {Router} from '@angular/router';
+import { Injectable } from '@angular/core';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -19,8 +19,7 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private readonly router: Router,
     private readonly snackService: SnackbarService,
-  ) {
-  }
+  ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     request = request.clone({
@@ -33,14 +32,16 @@ export class AuthInterceptor implements HttpInterceptor {
       }),
       catchError((httpErrorResponse: HttpErrorResponse) => {
         const requestUrl = request.url;
-        const skipErrorCheck = this.urlsToSkipUnauthorized.some(urlPart => requestUrl.toLowerCase().includes(urlPart));
+        const skipErrorCheck = this.urlsToSkipUnauthorized.some((urlPart) =>
+          requestUrl.toLowerCase().includes(urlPart),
+        );
 
         if (skipErrorCheck && httpErrorResponse.status === HttpStatusCode.Unauthorized) {
           return throwError(() => httpErrorResponse);
         }
 
         if (httpErrorResponse.status === HttpStatusCode.Unauthorized) {
-          this.snackService.showError('Dostęp wymaga autoryzacjo')
+          this.snackService.showError('Dostęp wymaga autoryzacjo');
           const encodedRedirectUrl = encodeURIComponent(this.router.url);
           this.router.navigate(['/login'], { queryParams: { redirect: encodedRedirectUrl } });
           return throwError(() => httpErrorResponse);
@@ -52,7 +53,7 @@ export class AuthInterceptor implements HttpInterceptor {
         }
 
         return throwError(() => httpErrorResponse);
-      })
+      }),
     );
   }
 }

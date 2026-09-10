@@ -10,12 +10,10 @@ export interface ModalOpts {
   providedIn: 'root',
 })
 export class ConfirmationModalService {
-  constructor(
-    private dialog: MatDialog,
-  ) {}
+  constructor(private dialog: MatDialog) {}
 
   public open(opts: ModalOpts): MatDialogRef<ConfirmationModalComponent> {
-    let dialogWidth = '500px';
+    const dialogWidth = '500px';
 
     return this.dialog.open(ConfirmationModalComponent, {
       width: dialogWidth,

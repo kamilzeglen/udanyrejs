@@ -1,10 +1,9 @@
-import {Injectable} from '@angular/core';
-import {Actions, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {AppState} from '@state';
+import { Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { AppState } from '@state';
 import * as imageFileActions from './imageFile.actions';
 import * as imageFileSelectors from './imageFile.selectors';
-
 
 @Injectable()
 export class ImageFileFacade {
@@ -18,15 +17,24 @@ export class ImageFileFacade {
 
   constructor(
     private store: Store<AppState>,
-    private actions: Actions
-  ) {
+    private actions: Actions,
+  ) {}
+
+  public createImageFile(payload: {
+    imageFileType: string;
+    targetId: string;
+    imageUrl?: string;
+    file?: FormData;
+  }): void {
+    this.store.dispatch(imageFileActions.createImageFile({ payload }));
   }
 
-  public createImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): void {
-    this.store.dispatch(imageFileActions.createImageFile({payload}));
-  }
-
-  public updateImageFile(payload: { imageFileType: string, targetId: string, imageUrl?: string, file?: FormData }): void {
-    this.store.dispatch(imageFileActions.updateImageFile({payload}));
+  public updateImageFile(payload: {
+    imageFileType: string;
+    targetId: string;
+    imageUrl?: string;
+    file?: FormData;
+  }): void {
+    this.store.dispatch(imageFileActions.updateImageFile({ payload }));
   }
 }

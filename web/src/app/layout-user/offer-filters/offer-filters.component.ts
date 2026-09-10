@@ -1,8 +1,8 @@
-import {Component, input, OnDestroy, OnInit, output} from '@angular/core';
-import {CommonFacade} from '@state/common';
-import {ReplaySubject} from 'rxjs';
-import {animate, state, style, transition, trigger} from '@angular/animations';
-import {DatepickerCustomHeaderComponent} from '@shared/datepicker-custom-header/datepicker-custom-header.component';
+import { Component, input, OnDestroy, OnInit, output } from '@angular/core';
+import { CommonFacade } from '@state/common';
+import { ReplaySubject } from 'rxjs';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+import { DatepickerCustomHeaderComponent } from '@shared/datepicker-custom-header/datepicker-custom-header.component';
 import moment from 'moment-timezone';
 
 @Component({
@@ -11,8 +11,8 @@ import moment from 'moment-timezone';
   styleUrl: './offer-filters.component.scss',
   animations: [
     trigger('filtersAnimation', [
-      state('hidden', style({height: '0px', opacity: 0, overflow: 'hidden'})),
-      state('visible', style({height: '*', opacity: 1})),
+      state('hidden', style({ height: '0px', opacity: 0, overflow: 'hidden' })),
+      state('visible', style({ height: '*', opacity: 1 })),
       transition('hidden <=> visible', animate('300ms ease-in-out')),
     ]),
   ],
@@ -25,17 +25,14 @@ export class OfferFiltersComponent implements OnInit, OnDestroy {
 
   readonly exampleHeader = DatepickerCustomHeaderComponent;
 
-  public today =  new Date();
+  public today = new Date();
 
   public isFiltersVisible = false;
 
-  public companies$ = this.commonFacade.companies$
-  public destinations$ = this.commonFacade.destinations$
+  public companies$ = this.commonFacade.companies$;
+  public destinations$ = this.commonFacade.destinations$;
 
-  constructor(
-    private readonly commonFacade: CommonFacade,
-  ) {
-  }
+  constructor(private readonly commonFacade: CommonFacade) {}
 
   public ngOnInit() {
     this.commonFacade.getCompanies();

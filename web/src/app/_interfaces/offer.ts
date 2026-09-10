@@ -1,11 +1,11 @@
-import {Itinerary} from './itinerary';
-import {Company} from './company';
-import {ImageFile, PdfFile} from './file';
-import {Ship} from './ship';
-import {Category} from './category';
-import {Destination} from './destination';
-import {User} from './user';
-import {ShareStats} from './shareStats';
+import { Itinerary } from './itinerary';
+import { Company } from './company';
+import { ImageFile, PdfFile } from './file';
+import { Ship } from './ship';
+import { Category } from './category';
+import { Destination } from './destination';
+import { User } from './user';
+import { ShareStats } from './shareStats';
 
 export interface Offer {
   id: string;
@@ -26,14 +26,14 @@ export interface Offer {
   pdfFile: PdfFile;
   pdfFileId: string;
   destinations: Destination[];
-  categories: Category[]
+  categories: Category[];
   itinerary: Itinerary[];
   shareStats: ShareStats;
   sharedStatId: string;
-  createdBy: User,
-  createdById: string
-  updatedBy: User,
-  updatedById: string
+  createdBy: User;
+  createdById: string;
+  updatedBy: User;
+  updatedById: string;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
@@ -45,7 +45,7 @@ export interface OfferScrapper {
   endDate: string;
   price: number;
   itinerary: Itinerary[];
-  scrappedShipName: string
-  scrappedImageFileURL: string
-  scrappedPdfFileURL: string
+  scrappedShipName: string;
+  scrappedImageFileURL: string;
+  scrappedPdfFileURL: string;
 }

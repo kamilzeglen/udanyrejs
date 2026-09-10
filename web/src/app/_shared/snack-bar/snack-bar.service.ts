@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {MatSnackBar, MatSnackBarRef} from '@angular/material/snack-bar';
-import {SnackBarComponent} from './snack-bar.component';
+import { Injectable } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
+import { SnackBarComponent } from './snack-bar.component';
 
 @Injectable({
   providedIn: 'root',
@@ -16,10 +16,7 @@ export class SnackbarService {
   private defaultPanelClass = 'snack-notify';
   private snackRef: MatSnackBarRef<SnackBarComponent>;
 
-  constructor(
-    private readonly snack: MatSnackBar,
-  ) {
-  }
+  constructor(private readonly snack: MatSnackBar) {}
 
   public showWarning(message: string): void {
     this.open(message, this.panelClassesByMessageType.warning);
@@ -37,7 +34,7 @@ export class SnackbarService {
     const allPanelClasses = [this.defaultPanelClass, panelClass];
 
     this.snackRef = this.snack.openFromComponent(SnackBarComponent, {
-      data: {message},
+      data: { message },
       horizontalPosition: 'end',
       verticalPosition: 'top',
       panelClass: allPanelClasses,

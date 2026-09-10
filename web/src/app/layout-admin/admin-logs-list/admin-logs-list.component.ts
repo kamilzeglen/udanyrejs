@@ -1,8 +1,8 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ReplaySubject, takeUntil} from 'rxjs';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {AllDeviceInfo} from '@interfaces';
-import {CommonFacade} from '@state/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReplaySubject, takeUntil } from 'rxjs';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
+import { AllDeviceInfo } from '@interfaces';
+import { CommonFacade } from '@state/common';
 
 @Component({
   selector: 'app-admin-logs-list',
@@ -14,34 +14,28 @@ export class AdminLogsListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public logs = this.commonFacade.logs$
-  public loading$ = this.commonFacade.loading$
+  public logs = this.commonFacade.logs$;
+  public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = [
-    'id',
-    'message',
-    'createdBy',
-    'createdAt',
-  ];
+  public allColumns: string[] = ['id', 'message', 'createdBy', 'createdAt'];
 
   public columnsToDisplay: string[];
 
   constructor(
     private readonly commonFacade: CommonFacade,
     private readonly deviceInfoService: DeviceInfoService,
-  ) {
-  }
+  ) {}
 
   public ngOnInit() {
     this.deviceInfo = this.deviceInfoService.getInfo();
 
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
       this.deviceInfo = info;
     });
 
     this.columnsToDisplay = this.getColumnsToDisplay();
 
-    this.commonFacade.getLogs()
+    this.commonFacade.getLogs();
   }
 
   public ngOnDestroy(): void {

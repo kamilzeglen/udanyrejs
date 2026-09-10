@@ -10,4 +10,3 @@ export * from './category';
 export * from './destination';
 export * from './search';
 export * from './sub-menu-item';
-

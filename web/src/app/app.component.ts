@@ -1,14 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
+import { Component, OnInit } from '@angular/core';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  constructor(private readonly deviceInfoService: DeviceInfoService) {
-  }
+  constructor(private readonly deviceInfoService: DeviceInfoService) {}
 
   ngOnInit() {
     this.deviceInfoService.startObservingDevice();

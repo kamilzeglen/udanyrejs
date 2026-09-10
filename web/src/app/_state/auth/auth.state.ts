@@ -1,5 +1,4 @@
-import {User} from '@interfaces';
-
+import { User } from '@interfaces';
 
 export type AuthState = Readonly<{
   loading: boolean;

@@ -4,22 +4,22 @@
 .offer-filters-wrapper {
   place-items: end;
 
-  @include media(">1600px") {
+  @include media('>1600px') {
     position: sticky;
     margin: 30px 30px;
     top: 20px;
     z-index: 10;
   }
 
-  @include media("<=1600px") {
+  @include media('<=1600px') {
     justify-items: center;
   }
 
-  @include media("<=1400px") {
+  @include media('<=1400px') {
     max-width: 500px;
   }
 
-  @include media("<=phone") {
+  @include media('<=phone') {
     margin: 0 20px;
   }
 
@@ -33,7 +33,7 @@
     text-align: center;
     align-content: center;
 
-    @include media(">1600px") {
+    @include media('>1600px') {
       height: 80px;
       width: 80px;
       margin-bottom: 20px;
@@ -41,7 +41,7 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    @include media("<=1600px") {
+    @include media('<=1600px') {
       display: flex;
       align-items: center;
     }
@@ -68,7 +68,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
 
-    @include media("<=1600px") {
+    @include media('<=1600px') {
       margin-bottom: 30px;
     }
 
@@ -94,13 +94,13 @@
   .filter-toggle-text {
     padding-right: 10px;
 
-    @include media(">1600px") {
+    @include media('>1600px') {
       display: none;
     }
   }
 
   .close-button {
-    @include media(">1600px") {
+    @include media('>1600px') {
       display: none;
     }
 
@@ -125,7 +125,7 @@
   }
 
   .filter-title {
-    @include media("<=1400px") {
+    @include media('<=1400px') {
       display: none;
     }
   }

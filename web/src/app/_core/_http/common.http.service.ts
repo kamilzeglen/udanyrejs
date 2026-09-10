@@ -1,21 +1,17 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {environment} from '@environment';
-import {Category, Company, Destination, Ship} from '@interfaces';
-import {Log} from '../../_interfaces/log';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '@environment';
+import { Category, Company, Destination, Ship } from '@interfaces';
+import { Log } from '../../_interfaces/log';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommonHttpService {
-
   private API_URL = environment.API_URL;
 
-  constructor(
-    private http: HttpClient
-  ) {
-  }
+  constructor(private http: HttpClient) {}
 
   // =========
   // Companies
@@ -36,7 +32,7 @@ export class CommonHttpService {
     return this.http.post<Company>(url, payload.formData);
   }
 
-  public updateCompany(payload: { id: string, formData: Partial<Company> }): Observable<Company> {
+  public updateCompany(payload: { id: string; formData: Partial<Company> }): Observable<Company> {
     const url = `${this.API_URL}/company/` + payload.id;
     return this.http.patch<Company>(url, payload.formData);
   }
@@ -50,7 +46,7 @@ export class CommonHttpService {
   // Ships
   // =========
 
-  public getShips(payload: {companyId: string}): Observable<Ship[]> {
+  public getShips(payload: { companyId: string }): Observable<Ship[]> {
     const url = `${this.API_URL}/ship/` + payload.companyId;
     return this.http.get<Ship[]>(url);
   }
@@ -70,7 +66,7 @@ export class CommonHttpService {
     return this.http.post<Ship>(url, payload.formData);
   }
 
-  public updateShip(payload: { id: string, formData: FormData }): Observable<Ship> {
+  public updateShip(payload: { id: string; formData: FormData }): Observable<Ship> {
     const url = `${this.API_URL}/ship/` + payload.id;
     return this.http.patch<Ship>(url, payload.formData);
   }
@@ -99,7 +95,7 @@ export class CommonHttpService {
     return this.http.post<Category>(url, payload.formData);
   }
 
-  public updateCategory(payload: { id: string, formData: FormData }): Observable<Category> {
+  public updateCategory(payload: { id: string; formData: FormData }): Observable<Category> {
     const url = `${this.API_URL}/category/` + payload.id;
     return this.http.patch<Category>(url, payload.formData);
   }
@@ -128,7 +124,7 @@ export class CommonHttpService {
     return this.http.post<Destination>(url, payload.formData);
   }
 
-  public updateDestination(payload: { id: string, formData: FormData }): Observable<Destination> {
+  public updateDestination(payload: { id: string; formData: FormData }): Observable<Destination> {
     const url = `${this.API_URL}/destination/` + payload.id;
     return this.http.patch<Destination>(url, payload.formData);
   }

@@ -1,29 +1,29 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, filter, merge, of, ReplaySubject, take, takeUntil} from 'rxjs';
-import {Company} from '@interfaces';
-import {CommonFacade} from '@state/common';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
-import {RouterFacade} from '@state/router';
-import {ActivatedRoute} from '@angular/router';
-import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
-import {ImageFileFacade} from '@state/imageFile';
-import {map, switchMap} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, filter, merge, of, ReplaySubject, take, takeUntil } from 'rxjs';
+import { Company } from '@interfaces';
+import { CommonFacade } from '@state/common';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { RouterFacade } from '@state/router';
+import { ActivatedRoute } from '@angular/router';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { ImageFileFacade } from '@state/imageFile';
+import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-company-add-edit',
   templateUrl: './admin-company-add-edit.component.html',
-  styleUrl: './admin-company-add-edit.component.scss'
+  styleUrl: './admin-company-add-edit.component.scss',
 })
 export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  public mode: "EDIT" | "ADD" = 'ADD';
+  public mode: 'EDIT' | 'ADD' = 'ADD';
   public editingCompany: Company;
 
   public isInitializing: boolean = false;
 
-  public imageFile: File
+  public imageFile: File;
   public companyForm: FormGroup;
   public priceIncludesArray: FormArray;
   public priceExcludesArray: FormArray;
@@ -36,8 +36,7 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly imageFileFacade: ImageFileFacade,
-  ) {
-  }
+  ) {}
 
   public ngOnInit(): void {
     this.isInitializing = true;
@@ -57,35 +56,34 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       this.editingCompany = company.company;
 
       if (!this.editingCompany) {
-        this.snackService.showError('Nie znaleziono firmy')
-        this.router.changeRoute({linkParams: ['/admin/companies']});
+        this.snackService.showError('Nie znaleziono firmy');
+        this.router.changeRoute({ linkParams: ['/admin/companies'] });
       }
 
       if (this.editingCompany) {
         this.companyForm.patchValue(this.editingCompany);
 
         if (this.editingCompany.priceIncludes) {
-          this.editingCompany.priceIncludes.forEach(include => {
-          this.priceIncludesArray.push(this.fb.control(include, Validators.required));
-        });
+          this.editingCompany.priceIncludes.forEach((include) => {
+            this.priceIncludesArray.push(this.fb.control(include, Validators.required));
+          });
         }
 
         if (this.editingCompany.priceExcludes) {
-          this.editingCompany.priceExcludes.forEach(exclude => {
+          this.editingCompany.priceExcludes.forEach((exclude) => {
             this.priceExcludesArray.push(this.fb.control(exclude, Validators.required));
           });
         }
       }
 
       this.isInitializing = false;
-    })
+    });
 
-
-    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
+    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
       const companyId = paramMap.get('companyId');
       if (companyId) {
         this.mode = 'EDIT';
-        this.commonFacade.getCompany({id: companyId});
+        this.commonFacade.getCompany({ id: companyId });
       } else {
         this.isInitializing = false;
       }
@@ -93,16 +91,16 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
 
     this.commonFacade.createCompanyError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
-    })
+    });
 
     this.commonFacade.updateCompanyError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas aktualizowania oferty');
-    })
+    });
 
     this.commonFacade.createCompanySuccess$
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(({company}) => {
+        switchMap(({ company }) => {
           if (!this.imageFile) {
             return of([true]);
           }
@@ -114,7 +112,7 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
 
           return combineLatest([merge(createImageSuccess$, createImageError$)]);
         }),
-        filter(([imageResult]) => imageResult !== undefined)
+        filter(([imageResult]) => imageResult !== undefined),
       )
       .subscribe(([imageResult]) => {
         if (imageResult) {
@@ -123,13 +121,13 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
           this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
         }
 
-        this.router.changeRoute({linkParams: ['/admin/companies']});
+        this.router.changeRoute({ linkParams: ['/admin/companies'] });
       });
 
     this.commonFacade.updateCompanySuccess$
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(({company}) => {
+        switchMap(({ company }) => {
           if (!this.imageFile) {
             return of([true]);
           }
@@ -141,28 +139,29 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
 
           return combineLatest([merge(updateImageSuccess$, updateImageError$)]);
         }),
-        filter(([imageResult]) => imageResult !== undefined)
+        filter(([imageResult]) => imageResult !== undefined),
       )
       .subscribe(([imageResult]) => {
         if (imageResult) {
           this.snackService.showInfo('Pomyślnie zaktualizowano firmę');
         } else {
-          this.snackService.showError('Firma została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu');
+          this.snackService.showError(
+            'Firma została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu',
+          );
         }
 
-        this.router.changeRoute({linkParams: ['/admin/companies']});
-      })
-
+        this.router.changeRoute({ linkParams: ['/admin/companies'] });
+      });
 
     this.commonFacade.updateCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie zaktualizowano firmę')
-      this.router.changeRoute({linkParams: ['/admin/companies']});
-    })
+      this.snackService.showInfo('Pomyślnie zaktualizowano firmę');
+      this.router.changeRoute({ linkParams: ['/admin/companies'] });
+    });
 
     this.commonFacade.deleteCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto firmę")
-      this.router.changeRoute({linkParams: ['/admin/companies']});
-    })
+      this.snackService.showInfo('Pomyślnie usunięto firmę');
+      this.router.changeRoute({ linkParams: ['/admin/companies'] });
+    });
   }
 
   public ngOnDestroy(): void {
@@ -184,53 +183,52 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const payload = {...this.companyForm.value};
+    const payload = { ...this.companyForm.value };
     for (const key in payload) {
       if (payload[key] === '' || payload[key] === null) {
         delete payload[key];
       }
     }
 
-    if (this.mode === "ADD") {
-      this.commonFacade.createCompany({formData: payload});
+    if (this.mode === 'ADD') {
+      this.commonFacade.createCompany({ formData: payload });
     }
 
-    if (this.mode === "EDIT") {
-      const id = this.editingCompany.id
-      this.commonFacade.updateCompany({id, formData: payload});
+    if (this.mode === 'EDIT') {
+      const id = this.editingCompany.id;
+      this.commonFacade.updateCompany({ id, formData: payload });
     }
   }
 
   public createImageFile(companyId: string): void {
-    const formData = new FormData()
+    const formData = new FormData();
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.createImageFile({imageFileType: 'company', targetId: companyId, file: formData})
+    this.imageFileFacade.createImageFile({ imageFileType: 'company', targetId: companyId, file: formData });
   }
 
   public updateImageFile(companyId: string): void {
-    const formData = new FormData()
+    const formData = new FormData();
     formData.append('imageFile', this.imageFile);
-    this.imageFileFacade.updateImageFile({imageFileType: 'company', targetId: companyId, file: formData})
+    this.imageFileFacade.updateImageFile({ imageFileType: 'company', targetId: companyId, file: formData });
   }
 
   public deleteCompany(): void {
     if (this.editingCompany) {
       this.confirmationModalService
         .open({
-          message: "Jesteś pewny że chcesz usunąć ofertę: " + this.editingCompany.name + "?"
+          message: 'Jesteś pewny że chcesz usunąć ofertę: ' + this.editingCompany.name + '?',
         })
         .afterClosed()
         .pipe(take(1))
-        .subscribe(res => {
+        .subscribe((res) => {
           if (!res) {
             return;
           }
 
-          this.commonFacade.deleteCompany({id: this.editingCompany.id})
+          this.commonFacade.deleteCompany({ id: this.editingCompany.id });
         });
     }
   }
-
 
   addPriceInclude(): void {
     this.priceIncludesArray.push(this.fb.control(''));
@@ -248,8 +246,7 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
     this.priceExcludesArray.removeAt(index);
   }
 
-
   public goBack(): void {
-    this.router.changeRoute({linkParams: ['/admin/companies']});
+    this.router.changeRoute({ linkParams: ['/admin/companies'] });
   }
 }

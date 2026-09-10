@@ -1,9 +1,8 @@
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'layout-admin',
+  selector: 'app-layout-admin',
   templateUrl: './layout-admin.component.html',
-  styleUrl: './layout-admin.component.scss'
+  styleUrl: './layout-admin.component.scss',
 })
-export class LayoutAdminComponent {
-}
+export class LayoutAdminComponent {}

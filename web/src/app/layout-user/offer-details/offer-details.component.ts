@@ -1,20 +1,20 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ReplaySubject, takeUntil} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
-import {OfferFacade} from '@state/offer';
-import {AllDeviceInfo, Itinerary, Offer} from '@interfaces';
-import {environment} from '@environment';
-import {Location} from '@angular/common';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {RouterFacade} from '@state/router';
-import {PdfFileFacade} from '@state/pdfFile';
-import {Meta, Title} from '@angular/platform-browser';
-import {ShareStatsFacade} from '@state/shareStats';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReplaySubject, takeUntil } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { OfferFacade } from '@state/offer';
+import { AllDeviceInfo, Itinerary, Offer } from '@interfaces';
+import { environment } from '@environment';
+import { Location } from '@angular/common';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
+import { RouterFacade } from '@state/router';
+import { PdfFileFacade } from '@state/pdfFile';
+import { Meta, Title } from '@angular/platform-browser';
+import { ShareStatsFacade } from '@state/shareStats';
 
 @Component({
   selector: 'app-offer-details',
   templateUrl: './offer-details.component.html',
-  styleUrl: './offer-details.component.scss'
+  styleUrl: './offer-details.component.scss',
 })
 export class OfferDetailsComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
@@ -23,9 +23,9 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   public API_URL = environment.API_URL;
 
-  public offer: Offer
+  public offer: Offer;
   public loading: boolean = true;
-  public itineraryData: Itinerary[]
+  public itineraryData: Itinerary[];
 
   constructor(
     private readonly activatedRoute: ActivatedRoute,
@@ -37,36 +37,34 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly titleService: Title,
     private readonly metaService: Meta,
-    private readonly shareStatsFacade: ShareStatsFacade
+    private readonly shareStatsFacade: ShareStatsFacade,
   ) {
     this.titleService.setTitle(`UdanyRejs - Szczegóły oferty`);
     this.metaService.updateTag({
       name: 'description',
-      content: `Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`
+      content: `Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`,
     });
   }
 
   ngOnInit() {
     this.deviceInfo = this.deviceInfoService.getInfo();
 
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
       this.deviceInfo = info;
     });
 
-    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({offer}) => {
+    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ offer }) => {
       this.offer = offer;
       this.loading = false;
 
       this.titleService.setTitle(`UdanyRejs - ${offer.name} `);
       this.metaService.updateTag({
         name: 'description',
-        content: `Sprawdź szczegóły rejsu: ${offer.name}. Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`
+        content: `Sprawdź szczegóły rejsu: ${offer.name}. Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`,
       });
 
-
-      const itineraryData = typeof this.offer.itinerary === 'string'
-        ? JSON.parse(this.offer.itinerary)
-        : this.offer.itinerary;
+      const itineraryData =
+        typeof this.offer.itinerary === 'string' ? JSON.parse(this.offer.itinerary) : this.offer.itinerary;
 
       if (Array.isArray(itineraryData)) {
         this.itineraryData = itineraryData.map((day: any) => {
@@ -75,29 +73,32 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
             date: day.date,
             city: day.city,
             arrivalTime: day.arrivalTime,
-            departureTime: day.departureTime
+            departureTime: day.departureTime,
           };
         });
       } else {
         console.error('Itinerary is not a valid array:', this.offer.itinerary);
       }
-    })
+    });
 
-    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
+    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
       const offerId = paramMap.get('offerId');
 
       if (!offerId) {
-        return
+        return;
       }
 
-      this.routerFacade.getPreviousUrl().pipe(takeUntil(this.destroy$)).subscribe(previousUrl => {
-        if (previousUrl?.includes('/offers')) {
-          this.shareStatsFacade.updateShareStats({platform: 'web', offerId: offerId});
-        }
-      });
+      this.routerFacade
+        .getPreviousUrl()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((previousUrl) => {
+          if (previousUrl?.includes('/offers')) {
+            this.shareStatsFacade.updateShareStats({ platform: 'web', offerId: offerId });
+          }
+        });
 
-      this.offerFacade.getOffer({id: offerId})
-    })
+      this.offerFacade.getOffer({ id: offerId });
+    });
   }
 
   public ngOnDestroy(): void {
@@ -110,10 +111,10 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }
 
   public redirectToContact(id: string): void {
-    this.routerFacade.changeRoute({linkParams: ['/contact/', id]});
+    this.routerFacade.changeRoute({ linkParams: ['/contact/', id] });
   }
 
   public downloadPdfFile(id: string): void {
-    this.pdfFileFacade.downloadPdfFile({pdfFileId: id})
+    this.pdfFileFacade.downloadPdfFile({ pdfFileId: id });
   }
 }

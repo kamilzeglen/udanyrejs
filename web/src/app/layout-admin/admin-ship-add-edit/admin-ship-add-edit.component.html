@@ -3,62 +3,67 @@
     <button (click)="goBack()">Powrót</button>
   </div>
 
-  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+  <h1 class="title">{{ mode === 'EDIT' ? 'Edycja' : 'Dodawanie' }}</h1>
 
   <form [formGroup]="shipForm">
-
     <!-- Sekcja Dane dotyczące firmy -->
     <section class="section data-section">
       <h2>Dane dotyczące firmy</h2>
 
       <div class="form-group">
         <label for="name">Nazwa statku:</label>
-        <input id="name" formControlName="name" type="text" placeholder="Nazwa firmy"/>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa firmy" />
       </div>
 
       <div class="form-group">
         <label for="description">Opis statku: (HTML)</label>
-        <textarea id="description" formControlName="description" type="text" placeholder="Opis firmy"  rows="10"></textarea>
+        <textarea
+          id="description"
+          formControlName="description"
+          type="text"
+          placeholder="Opis firmy"
+          rows="10"
+        ></textarea>
       </div>
 
       <div class="form-group">
         <label for="yearBuilt">Rok powstania:</label>
-        <input id="yearBuilt" formControlName="yearBuilt" type="number" placeholder="Rok powstania"/>
+        <input id="yearBuilt" formControlName="yearBuilt" type="number" placeholder="Rok powstania" />
       </div>
 
       <div class="form-group">
         <label for="length">Długość: (m)</label>
-        <input id="length" formControlName="length" type="number" placeholder="Długość"/>
+        <input id="length" formControlName="length" type="number" placeholder="Długość" />
       </div>
 
       <div class="form-group">
         <label for="width">Szerokość: (m)</label>
-        <input id="width" formControlName="width" type="number" placeholder="Szerokość"/>
+        <input id="width" formControlName="width" type="number" placeholder="Szerokość" />
       </div>
 
       <div class="form-group">
         <label for="tonnage">Tonaż: (t)</label>
-        <input id="tonnage" formControlName="tonnage" type="number" placeholder="Tonaż"/>
+        <input id="tonnage" formControlName="tonnage" type="number" placeholder="Tonaż" />
       </div>
 
       <div class="form-group">
         <label for="passengersDecks">Pokłady pasażerskie:</label>
-        <input id="passengersDecks" formControlName="passengersDecks" type="number" placeholder="Pokłady pasażerskie"/>
+        <input id="passengersDecks" formControlName="passengersDecks" type="number" placeholder="Pokłady pasażerskie" />
       </div>
 
       <div class="form-group">
         <label for="passengers">Pasażerowie:</label>
-        <input id="passengers" formControlName="passengers" type="number" placeholder="Pasażerowie"/>
+        <input id="passengers" formControlName="passengers" type="number" placeholder="Pasażerowie" />
       </div>
 
       <div class="form-group">
         <label for="crew">Załoga:</label>
-        <input id="crew" formControlName="crew" type="number" placeholder="Załoga"/>
+        <input id="crew" formControlName="crew" type="number" placeholder="Załoga" />
       </div>
 
       <div class="form-group">
         <label for="currency">Obowiązująca waluta:</label>
-        <input id="currency" formControlName="currency" type="text" placeholder="Waluta"/>
+        <input id="currency" formControlName="currency" type="text" placeholder="Waluta" />
       </div>
 
       <div class="form-group">
@@ -72,23 +77,17 @@
 
       <div class="form-group">
         <label for="imageUpload">Załaduj obrazek (png, jpg, jpeg):</label>
-        <input
-          id="imageUpload"
-          type="file"
-          accept=".png, .jpg, .jpeg"
-          (change)="onImageFileChange($event)"
-        />
-        <div class="current-file" *ngIf="editingShip?.imageFile?.originalName"><b>Aktualny plik</b>: {{editingShip.imageFile.originalName}} <mat-icon>check_circle</mat-icon></div>
+        <input id="imageUpload" type="file" accept=".png, .jpg, .jpeg" (change)="onImageFileChange($event)" />
+        <div class="current-file" *ngIf="editingShip?.imageFile?.originalName">
+          <b>Aktualny plik</b>: {{ editingShip.imageFile.originalName }} <mat-icon>check_circle</mat-icon>
+        </div>
       </div>
-
     </section>
 
-    <button *ngIf="mode === 'EDIT'" (click)="deleteShip()" mat-raised-button class="deleteShip">
-      Usuń statek
-    </button>
+    <button *ngIf="mode === 'EDIT'" (click)="deleteShip()" mat-raised-button class="deleteShip">Usuń statek</button>
 
     <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="shipForm.invalid">
-      {{ mode === 'ADD' ? "Dodaj statek" : "Zaktualizuj statek" }}
+      {{ mode === 'ADD' ? 'Dodaj statek' : 'Zaktualizuj statek' }}
     </button>
   </form>
 </div>

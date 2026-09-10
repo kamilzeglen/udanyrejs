@@ -1,28 +1,24 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {Offer, SearchOffersPayload} from '@interfaces';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Offer, SearchOffersPayload } from '@interfaces';
 import { environment } from '@environment';
-import {PaginatedResponse} from '../../_interfaces/http';
+import { PaginatedResponse } from '../../_interfaces/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OffersHttpService {
-
   private API_URL = environment.API_URL;
 
-  constructor(
-    private http: HttpClient
-  ) {
-  }
+  constructor(private http: HttpClient) {}
 
   public getOffers(payload?: Partial<SearchOffersPayload>): Observable<PaginatedResponse<Offer>> {
     const url = `${this.API_URL}/offers/search`;
     return this.http.post<PaginatedResponse<Offer>>(url, payload);
   }
 
-  public getOffer(payload: {id: string}): Observable<Offer> {
+  public getOffer(payload: { id: string }): Observable<Offer> {
     const url = `${this.API_URL}/offers/details/` + payload.id;
     return this.http.get<Offer>(url);
   }
@@ -32,22 +28,22 @@ export class OffersHttpService {
     return this.http.post<Offer>(url, payload.formData);
   }
 
-  public updateOffer(payload: { id: string, formData: Partial<Offer> }): Observable<Offer> {
+  public updateOffer(payload: { id: string; formData: Partial<Offer> }): Observable<Offer> {
     const url = `${this.API_URL}/offers/` + payload.id;
     return this.http.patch<Offer>(url, payload.formData);
   }
 
-  public deleteOffer(payload: {id: string}): Observable<boolean> {
+  public deleteOffer(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/offers/` + payload.id;
     return this.http.delete<boolean>(url);
   }
 
-  public deactivateOffer(payload: {id: string}): Observable<boolean> {
+  public deactivateOffer(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/offers/` + payload.id + '/deactivate';
     return this.http.get<boolean>(url);
   }
 
-  public activateOffer(payload: {id: string}): Observable<boolean> {
+  public activateOffer(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/offers/` + payload.id + '/activate';
     return this.http.get<boolean>(url);
   }

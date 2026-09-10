@@ -1,10 +1,9 @@
-import {Injectable} from '@angular/core';
-import {Actions, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {AppState} from '@state';
+import { Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { AppState } from '@state';
 import * as pdfFileActions from './pdfFile.actions';
 import * as pdfFileSelectors from './pdfFile.selectors';
-
 
 @Injectable()
 export class PdfFileFacade {
@@ -18,19 +17,18 @@ export class PdfFileFacade {
 
   constructor(
     private store: Store<AppState>,
-    private actions: Actions
-  ) {
+    private actions: Actions,
+  ) {}
+
+  public createPdfFile(payload: { pdfFileType: string; targetId: string; pdfUrl?: string; file?: FormData }): void {
+    this.store.dispatch(pdfFileActions.createPdfFile({ payload }));
   }
 
-  public createPdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): void {
-    this.store.dispatch(pdfFileActions.createPdfFile({payload}));
-  }
-
-  public updatePdfFile(payload: { pdfFileType: string, targetId: string, pdfUrl?: string, file?: FormData }): void {
-    this.store.dispatch(pdfFileActions.updatePdfFile({payload}));
+  public updatePdfFile(payload: { pdfFileType: string; targetId: string; pdfUrl?: string; file?: FormData }): void {
+    this.store.dispatch(pdfFileActions.updatePdfFile({ payload }));
   }
 
   public downloadPdfFile(payload: { pdfFileId: string }): void {
-    this.store.dispatch(pdfFileActions.downloadPdfFile({payload}));
+    this.store.dispatch(pdfFileActions.downloadPdfFile({ payload }));
   }
 }

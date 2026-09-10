@@ -1,23 +1,38 @@
-<a class="offer-card" [routerLink]="['/offers/details', offer().id]" [class.recommended]="offer().isRecommended" [class.no-margin]="index() === 0">
+<a
+  class="offer-card"
+  [routerLink]="['/offers/details', offer().id]"
+  [class.recommended]="offer().isRecommended"
+  [class.no-margin]="index() === 0"
+>
   <!-- Zawieszka -->
   <div class="offer-badge new" *ngIf="isNewOffer(offer().createdAt)">Nowe</div>
-  <div class="offer-badge promotion" *ngIf="offer().isRecommended ">Polecamy</div>
+  <div class="offer-badge promotion" *ngIf="offer().isRecommended">Polecamy</div>
 
   <!-- Logo firmy -->
   <div class="logo-container" *ngIf="offer().company?.imageFile?.name">
-    <img src="{{API_URL + '/companies/images/' + offer().company.imageFile.name}}" alt="Logo armatora - {{offer().company.name}}" class="company-logo"/>
+    <img
+      src="{{ API_URL + '/companies/images/' + offer().company.imageFile.name }}"
+      alt="Logo armatora - {{ offer().company.name }}"
+      class="company-logo"
+    />
   </div>
 
   <!-- Zdjęcie -->
   <div class="image-container" *ngIf="offer().imageFile">
-    <img [src]="API_URL + '/offers/images/' + offer().imageFile.name" alt='Zdjęcie oferty - {{offer().name}}' class="ship-image"/>
+    <img
+      [src]="API_URL + '/offers/images/' + offer().imageFile.name"
+      alt="Zdjęcie oferty - {{ offer().name }}"
+      class="ship-image"
+    />
   </div>
 
   <!-- Opis oferty -->
   <div class="offer-details">
     <h2 class="offer-title">{{ offer().name }}</h2>
-    <p><strong>Termin</strong>: {{ offer().startDate | date: 'dd.MM.yyyy' }} - {{ offer().endDate | date: 'dd.MM.yyyy' }}</p>
+    <p>
+      <strong>Termin</strong>: {{ offer().startDate | date: 'dd.MM.yyyy' }} - {{ offer().endDate | date: 'dd.MM.yyyy' }}
+    </p>
     <p><strong>Statek</strong>: {{ offer().ship.name }}</p>
-    <p><strong>Cena od</strong>: {{ offer().price | currency: '&#8364;' : 'symbol' : '0.0' }} </p>
+    <p><strong>Cena od</strong>: {{ offer().price | currency: '&#8364;' : 'symbol' : '0.0' }}</p>
   </div>
 </a>

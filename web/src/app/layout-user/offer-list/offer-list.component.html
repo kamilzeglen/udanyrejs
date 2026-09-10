@@ -1,12 +1,10 @@
 <div>
   <div class="offers-wrapper">
-
     <div class="left-side">
-        <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+      <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
     </div>
 
     <div class="offers" *ngIf="offers$ | async as offers">
-
       <div class="filters-mobile">
         <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
       </div>
@@ -24,21 +22,21 @@
             [pageSize]="pageSize"
             [pageSizeOptions]="pageSizeOptions"
             [pageIndex]="currPage$ | async"
-            (page)="pageChanged($event)">
+            (page)="pageChanged($event)"
+          >
           </mat-paginator>
         </div>
       </div>
 
       <!-- Komunikat o braku ofert -->
       <ng-template #noOffers>
-        <div class="no-offers" *ngIf="!(loading$ | async)">
+        <div class="no-offers" *ngIf="(loading$ | async) === false">
           <p>Nie znaleziono ofert spełniających wybrane kryteria.</p>
         </div>
       </ng-template>
     </div>
 
-    <div class="right-side">
-    </div>
+    <div class="right-side"></div>
   </div>
 </div>
 

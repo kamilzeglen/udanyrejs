@@ -1,4 +1,4 @@
-import {Offer} from './offer';
+import { Offer } from './offer';
 
 export interface Destination {
   id: string;

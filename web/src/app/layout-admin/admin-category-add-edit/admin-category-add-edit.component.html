@@ -3,54 +3,57 @@
     <button (click)="goBack()">Powrót</button>
   </div>
 
-  <h1 class="title">{{ mode === "EDIT" ? "Edycja" : "Dodawanie" }}</h1>
+  <h1 class="title">{{ mode === 'EDIT' ? 'Edycja' : 'Dodawanie' }}</h1>
 
   <form [formGroup]="categoryForm">
-
     <!-- Sekcja Dane dotyczące firmy -->
     <section class="section data-section">
       <h2>Dane dotyczące firmy</h2>
 
       <div class="form-group">
         <label for="name">Nazwa firmy:</label>
-        <input id="name" formControlName="name" type="text" placeholder="Nazwa kategorii"/>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa kategorii" />
       </div>
 
       <div class="form-group">
         <label for="url">URL kategorii:</label>
-        <input id="url" formControlName="url" type="text" placeholder="URL kategorii"/>
+        <input id="url" formControlName="url" type="text" placeholder="URL kategorii" />
       </div>
 
       <div class="form-group">
         <label for="position">Pozycja kategorii:</label>
-        <input id="position" formControlName="position" type="number" placeholder="Pozycja kategorii"/>
+        <input id="position" formControlName="position" type="number" placeholder="Pozycja kategorii" />
       </div>
 
       <div class="form-group">
-        <label>Data początkowa:</label>
+        <label for="startDate">Data początkowa:</label>
         <mat-form-field class="start-date" appearance="outline">
           <input
+            id="startDate"
             matInput
             [matDatepicker]="startDate"
             placeholder="Data początkowa"
             formControlName="startDate"
             (focus)="startDate.open()"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
           <mat-datepicker #startDate></mat-datepicker>
         </mat-form-field>
       </div>
 
       <div class="form-group">
-        <label>Data końcowa:</label>
+        <label for="endDate">Data końcowa:</label>
         <mat-form-field class="end-date" appearance="outline">
           <input
+            id="endDate"
             matInput
             [matDatepicker]="endDate"
             placeholder="Data początkowa"
             formControlName="endDate"
             (focus)="endDate.open()"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
           <mat-datepicker #endDate></mat-datepicker>
         </mat-form-field>
@@ -63,17 +66,14 @@
       <div class="form-group">
         <mat-checkbox formControlName="isVisible">Oferta widzialna:</mat-checkbox>
       </div>
-
-
     </section>
 
     <button *ngIf="mode === 'EDIT'" (click)="deleteCompany()" mat-raised-button class="delete-category">
       Usuń firmę
     </button>
 
-    <button (click)="submitForm()" mat-raised-button color="primary" type="submit"
-            [disabled]="categoryForm.invalid">
-      {{ mode === 'ADD' ? "Dodaj kategorie" : "Zaktualizuj kategorie" }}
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="categoryForm.invalid">
+      {{ mode === 'ADD' ? 'Dodaj kategorie' : 'Zaktualizuj kategorie' }}
     </button>
   </form>
 </div>

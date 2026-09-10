@@ -10,7 +10,7 @@ import { SnackbarService } from './snack-bar.service';
 export class SnackBarComponent {
   constructor(
     @Inject(MAT_SNACK_BAR_DATA) public data: any,
-    private readonly snackBarService: SnackbarService
+    private readonly snackBarService: SnackbarService,
   ) {}
 
   public close(): void {

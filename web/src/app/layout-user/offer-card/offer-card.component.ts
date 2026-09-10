@@ -1,11 +1,11 @@
-import {Component, input} from '@angular/core';
-import {Offer} from '@interfaces';
-import {environment} from '@environment';
+import { Component, input } from '@angular/core';
+import { Offer } from '@interfaces';
+import { environment } from '@environment';
 
 @Component({
   selector: 'app-offer-card',
   templateUrl: './offer-card.component.html',
-  styleUrl: './offer-card.component.scss'
+  styleUrl: './offer-card.component.scss',
 })
 export class OfferCardComponent {
   public readonly index = input<number>();

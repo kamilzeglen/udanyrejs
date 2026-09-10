@@ -1,21 +1,25 @@
 <div class="offer-filters-wrapper">
-  <div class="filter-toggle" (click)="toggleFilters()">
+  <div
+    class="filter-toggle"
+    role="button"
+    tabindex="0"
+    (click)="toggleFilters()"
+    (keydown.enter)="toggleFilters()"
+    (keydown.space)="toggleFilters()"
+  >
     <div class="filter-toggle-text">Filtry</div>
     <mat-icon>tune</mat-icon>
   </div>
 
-  <div
-    class="filters"
-    [class.visible]="isFiltersVisible"
-    [class.hidden]="!isFiltersVisible"
-  >
+  <div class="filters" [class.visible]="isFiltersVisible" [class.hidden]="!isFiltersVisible">
     <h3 class="filter-title">Filtry rejsów</h3>
 
     <div>
       <div class="udanyrejs-field">
-        <label class="input-label">Data początkowa</label>
+        <label class="input-label" for="filterStartDate">Data początkowa</label>
         <mat-form-field class="start-date">
           <input
+            id="filterStartDate"
             matInput
             [matDatepicker]="startDatePicker"
             placeholder="Data początkowa"
@@ -24,12 +28,14 @@
             (focus)="startDatePicker.open()"
             [min]="today"
             [max]="filters().endDate"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
           <mat-datepicker-toggle
             matSuffix
             *ngIf="filters().startDate"
-            (click)="onFilterChange('startDate', null); $event.stopPropagation()">
+            (click)="onFilterChange('startDate', null); $event.stopPropagation()"
+          >
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
           <mat-datepicker #startDatePicker [calendarHeaderComponent]="exampleHeader"></mat-datepicker>
@@ -37,9 +43,10 @@
       </div>
 
       <div class="udanyrejs-field">
-        <label class="input-label">Data końcowa</label>
+        <label class="input-label" for="filterEndDate">Data końcowa</label>
         <mat-form-field class="start-date">
           <input
+            id="filterEndDate"
             matInput
             [matDatepicker]="endDatePicker"
             placeholder="Data końcowa"
@@ -47,12 +54,14 @@
             (ngModelChange)="onFilterChange('endDate', $event)"
             (focus)="endDatePicker.open()"
             [min]="today"
-            readonly/>
+            readonly
+          />
           <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
           <mat-datepicker-toggle
             matSuffix
             *ngIf="filters().endDate"
-            (click)="onFilterChange('endDate', null); $event.stopPropagation()">
+            (click)="onFilterChange('endDate', null); $event.stopPropagation()"
+          >
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
           <mat-datepicker #endDatePicker [calendarHeaderComponent]="exampleHeader"></mat-datepicker>
@@ -61,53 +70,47 @@
 
       <!-- Armator -->
       <div class="udanyrejs-field">
-        <label class="input-label">Armator</label>
+        <label class="input-label" for="filterCompany">Armator</label>
         <ng-select
+          labelForId="filterCompany"
           [items]="companies$ | async"
           bindLabel="name"
           bindValue="id"
           appendTo="body"
           [ngModel]="filters().companyIdList"
           (ngModelChange)="onFilterChange('companyIdList', $event)"
-          [placeholder]="
-                  filters().companyIdList.length
-                    ? 'Wybrani armatorzy'
-                    : 'Wybierz armatorów'
-                "
+          [placeholder]="filters().companyIdList.length ? 'Wybrani armatorzy' : 'Wybierz armatorów'"
           [multiple]="true"
           [searchable]="false"
           [closeOnSelect]="false"
-          [clearable]="true">
+          [clearable]="true"
+        >
         </ng-select>
       </div>
 
       <!-- Destination -->
       <div class="udanyrejs-field">
-        <label class="input-label">Kierunek</label>
+        <label class="input-label" for="filterDestination">Kierunek</label>
         <ng-select
+          labelForId="filterDestination"
           [items]="destinations$ | async"
           bindLabel="name"
           bindValue="id"
           appendTo="body"
           [ngModel]="filters().destinationIdList"
           (ngModelChange)="onFilterChange('destinationIdList', $event)"
-          [placeholder]="
-                  filters().destinationIdList.length
-                    ? 'Wybrany kierunek'
-                    : 'Wybierz kierunek'
-                "
+          [placeholder]="filters().destinationIdList.length ? 'Wybrany kierunek' : 'Wybierz kierunek'"
           [multiple]="true"
           [searchable]="false"
           [closeOnSelect]="false"
-          [clearable]="true">
+          [clearable]="true"
+        >
         </ng-select>
       </div>
 
       <div class="close-button">
         <button (click)="toggleFilters()">Zamknij</button>
       </div>
-
     </div>
   </div>
-
 </div>

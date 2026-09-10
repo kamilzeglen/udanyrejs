@@ -1,47 +1,47 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {combineLatest, filter, merge, Observable, of, ReplaySubject, take, takeUntil} from 'rxjs';
-import {CommonFacade} from '@state/common';
-import {OfferFacade} from 'src/app/_state/offer';
-import {RouterFacade} from '@state/router';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
-import {ActivatedRoute} from '@angular/router';
-import {Offer} from '@interfaces';
-import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
-import {ImageFileFacade} from '@state/imageFile';
-import {PdfFileFacade} from '@state/pdfFile';
-import {map, switchMap} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, filter, merge, Observable, of, ReplaySubject, take, takeUntil } from 'rxjs';
+import { CommonFacade } from '@state/common';
+import { OfferFacade } from 'src/app/_state/offer';
+import { RouterFacade } from '@state/router';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { ActivatedRoute } from '@angular/router';
+import { Offer } from '@interfaces';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { ImageFileFacade } from '@state/imageFile';
+import { PdfFileFacade } from '@state/pdfFile';
+import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
   templateUrl: './admin-offer-add-edit.component.html',
-  styleUrl: './admin-offer-add-edit.component.scss'
+  styleUrl: './admin-offer-add-edit.component.scss',
 })
 export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  public mode: "EDIT" | "ADD" = 'ADD';
+  public mode: 'EDIT' | 'ADD' = 'ADD';
   public editingOffer: Offer;
 
   public isInitializing: boolean = false;
 
-  public companies$ = this.commonFacade.companies$
-  public ships$ = this.commonFacade.ships$
-  public destinations$ = this.commonFacade.destinations$
-  public categories$ = this.commonFacade.categories$
+  public companies$ = this.commonFacade.companies$;
+  public ships$ = this.commonFacade.ships$;
+  public destinations$ = this.commonFacade.destinations$;
+  public categories$ = this.commonFacade.categories$;
 
   public offerForm: FormGroup;
   public itineraryArray: FormArray;
 
   public scrappedData: boolean;
 
-  public imageFile: File
-  public imageUrl: string
-  public scrappedImageFile: boolean
+  public imageFile: File;
+  public imageUrl: string;
+  public scrappedImageFile: boolean;
 
-  public pdfFile: File
-  public pdfUrl: string
-  public scrappedPdfFile: boolean
+  public pdfFile: File;
+  public pdfUrl: string;
+  public scrappedPdfFile: boolean;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -53,8 +53,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.isInitializing = true;
@@ -76,63 +75,71 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     this.itineraryArray = this.offerForm.get('itinerary') as FormArray;
 
-    this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({offer}) => {
+    this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({ offer }) => {
       this.editingOffer = offer;
 
       if (!this.editingOffer) {
-        this.snackService.showError('Nie znaleziono oferty')
-        this.router.changeRoute({linkParams: ['/admin/offers']});
+        this.snackService.showError('Nie znaleziono oferty');
+        this.router.changeRoute({ linkParams: ['/admin/offers'] });
       }
 
       if (this.editingOffer) {
-        this.patchValues(this.editingOffer)
+        this.patchValues(this.editingOffer);
       }
 
       this.isInitializing = false;
-    })
+    });
 
-    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe(paramMap => {
+    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
       const offerId = paramMap.get('offerId');
       if (offerId) {
         this.mode = 'EDIT';
-        this.offerFacade.getOffer({id: offerId});
+        this.offerFacade.getOffer({ id: offerId });
       } else {
         this.isInitializing = false;
       }
     });
 
-    this.offerForm.get('companyId')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.offerForm
+      .get('companyId')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const companyId = this.offerForm.get('companyId').value;
+        if (companyId) {
+          this.commonFacade.getShips(companyId);
+        }
+      });
 
-      const companyId = this.offerForm.get('companyId').value
-      if (companyId) {
-        this.commonFacade.getShips(companyId)
-      }
-    });
+    this.offerForm
+      .get('startDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.isInitializing) {
+          this.updateItineraryDays();
+        }
+      });
 
-    this.offerForm.get('startDate')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (!this.isInitializing) {
-        this.updateItineraryDays();
-      }
-    });
-
-    this.offerForm.get('endDate')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      if (!this.isInitializing) {
-        this.updateItineraryDays();
-      }
-    });
+    this.offerForm
+      .get('endDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.isInitializing) {
+          this.updateItineraryDays();
+        }
+      });
 
     this.offerFacade.createOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas dodawania oferty');
-    })
+    });
 
     this.offerFacade.updateOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Wystąpił błąd podczas aktualizowania oferty');
-    })
+    });
 
     this.offerFacade.createOfferSuccess$
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(({offer}) => {
+        switchMap(({ offer }) => {
           const observables: Observable<boolean>[] = [];
 
           if (this.imageFile || this.imageUrl) {
@@ -155,7 +162,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
           return combineLatest(observables);
         }),
-        filter((results) => results.every((result) => result !== undefined))
+        filter((results) => results.every((result) => result !== undefined)),
       )
       .subscribe((results) => {
         if (results.every((result) => result)) {
@@ -164,14 +171,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           this.snackService.showError('Oferta została dodana, ale wystąpił problem podczas przesyłania pliku obrazu');
         }
 
-        this.router.changeRoute({linkParams: ['/admin/offers']});
+        this.router.changeRoute({ linkParams: ['/admin/offers'] });
       });
-
 
     this.offerFacade.updateOfferSuccess$
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(({offer}) => {
+        switchMap(({ offer }) => {
           const observables: Observable<boolean>[] = [];
 
           if (this.imageFile || this.imageUrl) {
@@ -194,32 +200,34 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
           return combineLatest(observables);
         }),
-        filter((results) => results.every((result) => result !== undefined))
+        filter((results) => results.every((result) => result !== undefined)),
       )
       .subscribe((results) => {
         if (results.every((result) => result)) {
           this.snackService.showInfo('Pomyślnie zaktualizowano ofertę');
         } else {
-          this.snackService.showError('Oferta została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu');
+          this.snackService.showError(
+            'Oferta została zaktualizowana, ale wystąpił problem podczas przesyłania pliku obrazu',
+          );
         }
 
-        this.router.changeRoute({linkParams: ['/admin/offers']});
+        this.router.changeRoute({ linkParams: ['/admin/offers'] });
       });
 
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto ofertę")
-      this.router.changeRoute({linkParams: ['/admin/offers']});
-    })
+      this.snackService.showInfo('Pomyślnie usunięto ofertę');
+      this.router.changeRoute({ linkParams: ['/admin/offers'] });
+    });
 
     this.offerFacade.activateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie aktywowano ofertę")
-      this.router.changeRoute({linkParams: ['/admin/offers']});
-    })
+      this.snackService.showInfo('Pomyślnie aktywowano ofertę');
+      this.router.changeRoute({ linkParams: ['/admin/offers'] });
+    });
 
     this.offerFacade.deactivateOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie dezaktywowano ofertę")
-      this.router.changeRoute({linkParams: ['/admin/offers']});
-    })
+      this.snackService.showInfo('Pomyślnie dezaktywowano ofertę');
+      this.router.changeRoute({ linkParams: ['/admin/offers'] });
+    });
 
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
@@ -262,7 +270,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       date: [this.getDateForItinerary(startDate, dayNumber)],
       city: [''],
       arrivalTime: [''],
-      departureTime: ['']
+      departureTime: [''],
     });
     this.itineraryArray.push(dayGroup);
   }
@@ -296,20 +304,20 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const payload = {...this.offerForm.value};
+    const payload = { ...this.offerForm.value };
     for (const key in payload) {
       if (payload[key] === '' || payload[key] === null) {
         delete payload[key];
       }
     }
 
-    if (this.mode === "ADD") {
-      this.offerFacade.createOffer({formData: payload});
+    if (this.mode === 'ADD') {
+      this.offerFacade.createOffer({ formData: payload });
     }
 
-    if (this.mode === "EDIT") {
-      const id = this.editingOffer.id
-      this.offerFacade.updateOffer({id, formData: payload});
+    if (this.mode === 'EDIT') {
+      const id = this.editingOffer.id;
+      this.offerFacade.updateOffer({ id, formData: payload });
     }
   }
 
@@ -318,7 +326,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.imageFileFacade.createImageFile({
         imageFileType: 'offer',
         targetId: offerId,
-        imageUrl: this.imageUrl
+        imageUrl: this.imageUrl,
       });
     }
     if (this.imageFile) {
@@ -328,7 +336,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.imageFileFacade.createImageFile({
         imageFileType: 'offer',
         targetId: offerId,
-        file: formData
+        file: formData,
       });
     }
   }
@@ -338,7 +346,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.pdfFileFacade.createPdfFile({
         pdfFileType: 'offer',
         targetId: offerId,
-        pdfUrl: this.pdfUrl
+        pdfUrl: this.pdfUrl,
       });
     }
     if (this.pdfFile) {
@@ -348,7 +356,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.pdfFileFacade.createPdfFile({
         pdfFileType: 'offer',
         targetId: offerId,
-        file: formData
+        file: formData,
       });
     }
   }
@@ -358,7 +366,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.imageFileFacade.updateImageFile({
         imageFileType: 'offer',
         targetId: offerId,
-        imageUrl: this.imageUrl
+        imageUrl: this.imageUrl,
       });
     }
     if (this.imageFile) {
@@ -368,7 +376,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.imageFileFacade.updateImageFile({
         imageFileType: 'offer',
         targetId: offerId,
-        file: formData
+        file: formData,
       });
     }
   }
@@ -378,7 +386,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.pdfFileFacade.updatePdfFile({
         pdfFileType: 'offer',
         targetId: offerId,
-        pdfUrl: this.pdfUrl
+        pdfUrl: this.pdfUrl,
       });
     }
     if (this.pdfFile) {
@@ -388,7 +396,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.pdfFileFacade.updatePdfFile({
         pdfFileType: 'offer',
         targetId: offerId,
-        file: formData
+        file: formData,
       });
     }
   }
@@ -397,16 +405,16 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (this.editingOffer) {
       this.confirmationModalService
         .open({
-          message: "Jesteś pewny że chcesz usunąć ofertę: " + this.editingOffer.name + "?"
+          message: 'Jesteś pewny że chcesz usunąć ofertę: ' + this.editingOffer.name + '?',
         })
         .afterClosed()
         .pipe(take(1))
-        .subscribe(res => {
+        .subscribe((res) => {
           if (!res) {
             return;
           }
 
-          this.offerFacade.deleteOffer({id: this.editingOffer.id})
+          this.offerFacade.deleteOffer({ id: this.editingOffer.id });
         });
     }
   }
@@ -415,16 +423,16 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (this.editingOffer) {
       this.confirmationModalService
         .open({
-          message: "Jesteś pewny że chcesz dezaktywować ofertę: " + this.editingOffer.name + "?"
+          message: 'Jesteś pewny że chcesz dezaktywować ofertę: ' + this.editingOffer.name + '?',
         })
         .afterClosed()
         .pipe(take(1))
-        .subscribe(res => {
+        .subscribe((res) => {
           if (!res) {
             return;
           }
 
-          this.offerFacade.deactivateOffer({id: this.editingOffer.id})
+          this.offerFacade.deactivateOffer({ id: this.editingOffer.id });
         });
     }
   }
@@ -433,16 +441,16 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (this.editingOffer) {
       this.confirmationModalService
         .open({
-          message: "Jesteś pewny że chcesz aktywować ofertę: " + this.editingOffer.name + "?"
+          message: 'Jesteś pewny że chcesz aktywować ofertę: ' + this.editingOffer.name + '?',
         })
         .afterClosed()
         .pipe(take(1))
-        .subscribe(res => {
+        .subscribe((res) => {
           if (!res) {
             return;
           }
 
-          this.offerFacade.activateOffer({id: this.editingOffer.id})
+          this.offerFacade.activateOffer({ id: this.editingOffer.id });
         });
     }
   }
@@ -457,11 +465,9 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     // Dodanie itinerary, jeśli istnieje
     if (data?.itinerary) {
-      this.itineraryArray.clear()
+      this.itineraryArray.clear();
 
-      const itineraryData = typeof data.itinerary === 'string'
-        ? JSON.parse(data.itinerary)
-        : data.itinerary;
+      const itineraryData = typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary;
 
       if (Array.isArray(itineraryData)) {
         itineraryData.forEach((day, index) => {
@@ -476,11 +482,9 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         });
       }
     }
-
   }
 
-
   public goBack(): void {
-    this.router.changeRoute({linkParams: ['/admin/offers']});
+    this.router.changeRoute({ linkParams: ['/admin/offers'] });
   }
 }

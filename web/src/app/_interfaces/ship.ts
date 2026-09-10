@@ -1,7 +1,7 @@
-import {Company} from './company';
-import {Offer} from './offer';
-import {ImageFile} from './file';
-import {User} from './user';
+import { Company } from './company';
+import { Offer } from './offer';
+import { ImageFile } from './file';
+import { User } from './user';
 
 export interface Ship {
   id: string;
@@ -20,10 +20,10 @@ export interface Ship {
   companyId: string;
   imageFile: ImageFile;
   imageFileId: string;
-  createdBy: User,
-  createdById: string
-  updatedBy: User,
-  updatedById: string
+  createdBy: User;
+  createdById: string;
+  updatedBy: User;
+  updatedById: string;
   createdAt: Date | string;
   updatedAt: Date | string;
   deletedAt: Date | string;

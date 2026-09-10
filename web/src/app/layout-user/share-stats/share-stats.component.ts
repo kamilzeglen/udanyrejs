@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ShareStatsFacade} from '@state/shareStats';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ShareStatsFacade } from '@state/shareStats';
 
 @Component({
   selector: 'app-share-stats',
@@ -14,16 +14,15 @@ export class ShareStatsComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly shareStatsFacade: ShareStatsFacade
-  ) {
-  }
+    private readonly shareStatsFacade: ShareStatsFacade,
+  ) {}
 
   ngOnInit(): void {
     // Pobranie parametrów z URL
     this.platform = this.route.snapshot.paramMap.get('platform')!;
     this.offerId = this.route.snapshot.paramMap.get('offerId')!;
 
-    this.shareStatsFacade.updateShareStats({platform: this.platform, offerId: this.offerId});
+    this.shareStatsFacade.updateShareStats({ platform: this.platform, offerId: this.offerId });
 
     this.redirectToOfferPage();
   }
@@ -33,5 +32,4 @@ export class ShareStatsComponent implements OnInit {
     const offerUrl = `/offers/details/${this.offerId}`;
     window.location.replace(offerUrl);
   }
-
 }

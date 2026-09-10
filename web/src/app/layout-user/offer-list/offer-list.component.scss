@@ -9,7 +9,7 @@
   .offers {
     width: 600px;
 
-    @include media("<=1400px") {
+    @include media('<=1400px') {
       width: 500px;
     }
 
@@ -39,17 +39,17 @@
   .right-side {
     min-width: 500px;
 
-    @include media(">2000px") {
+    @include media('>2000px') {
       margin: 0 50px;
     }
 
-    @include media("<=1600px") {
+    @include media('<=1600px') {
       display: none;
     }
   }
 
   .filters-mobile {
-    @include media(">1600px") {
+    @include media('>1600px') {
       display: none;
     }
   }

@@ -32,7 +32,8 @@
           margin-bottom: 5px;
         }
 
-        input, textarea {
+        input,
+        textarea {
           width: 100%;
           padding: 10px;
           border: 1px solid $border-color;
@@ -85,7 +86,7 @@
       padding: 15px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
-      @include media("<=phone") {
+      @include media('<=phone') {
         width: 95vw;
       }
 

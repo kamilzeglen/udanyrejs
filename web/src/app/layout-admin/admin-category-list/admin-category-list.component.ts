@@ -1,11 +1,11 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ReplaySubject, take, takeUntil} from 'rxjs';
-import {DeviceInfoService} from '@shared/device-info/device-info.service';
-import {AllDeviceInfo, Category} from '@interfaces';
-import {CommonFacade} from '@state/common';
-import {RouterFacade} from '@state/router';
-import {ConfirmationModalService} from '@shared/confirmation-modal/confirmation-modal.service';
-import {SnackbarService} from '@shared/snack-bar/snack-bar.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { DeviceInfoService } from '@shared/device-info/device-info.service';
+import { AllDeviceInfo, Category } from '@interfaces';
+import { CommonFacade } from '@state/common';
+import { RouterFacade } from '@state/router';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 
 @Component({
   selector: 'app-admin-category-list',
@@ -17,8 +17,8 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public categories$ = this.commonFacade.categories$
-  public loading$ = this.commonFacade.loading$
+  public categories$ = this.commonFacade.categories$;
+  public loading$ = this.commonFacade.loading$;
 
   public allColumns: string[] = [
     'id',
@@ -43,24 +43,23 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
-  ) {
-  }
+  ) {}
 
   public ngOnInit() {
     this.deviceInfo = this.deviceInfoService.getInfo();
 
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe(info => {
+    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
       this.deviceInfo = info;
     });
 
     this.columnsToDisplay = this.getColumnsToDisplay();
 
     this.commonFacade.deleteCategorySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo("Pomyślnie usunięto kategorie")
-      this.commonFacade.getCategories()
-    })
+      this.snackService.showInfo('Pomyślnie usunięto kategorie');
+      this.commonFacade.getCategories();
+    });
 
-    this.commonFacade.getCategories()
+    this.commonFacade.getCategories();
   }
 
   public ngOnDestroy(): void {
@@ -69,28 +68,28 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
   }
 
   public addCategory(): void {
-    const linkParams = ["/admin/categories/add/"]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/categories/add/'];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editCategory(category: Category): void {
-    const linkParams = ["/admin/categories/edit/" + category.id]
-    this.routerFacade.changeRoute({linkParams})
+    const linkParams = ['/admin/categories/edit/' + category.id];
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public deleteCategory(category: Category): void {
     this.confirmationModalService
       .open({
-        message: "Jesteś pewny że chcesz usunąć kategorie: " + category.name + "?"
+        message: 'Jesteś pewny że chcesz usunąć kategorie: ' + category.name + '?',
       })
       .afterClosed()
       .pipe(take(1))
-      .subscribe(res => {
+      .subscribe((res) => {
         if (!res) {
           return;
         }
 
-        this.commonFacade.deleteCategory({id: category.id})
+        this.commonFacade.deleteCategory({ id: category.id });
       });
   }
 

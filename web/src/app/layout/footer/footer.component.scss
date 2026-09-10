@@ -55,7 +55,7 @@
       display: flex;
       gap: 15px;
 
-      @include media("<=phone") {
+      @include media('<=phone') {
         width: 100%;
       }
 

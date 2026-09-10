@@ -16,11 +16,11 @@
   text-decoration: none;
   color: inherit;
 
-  @include media(">=1600px") {
+  @include media('>=1600px') {
     margin: 30px 0;
   }
 
-  @include media("<1600px") {
+  @include media('<1600px') {
     margin: 0 0 30px 0;
 
     &.no-margin {
@@ -28,17 +28,17 @@
     }
   }
 
-  @include media("<1400px") {
+  @include media('<1400px') {
     max-width: 500px;
   }
 
-  @include media("<=phone") {
+  @include media('<=phone') {
     width: unset;
     margin: 20px;
   }
 
   &.recommended {
-    @include media("<=1400px") {
+    @include media('<=1400px') {
       border-color: $tertiary-color;
     }
   }
@@ -72,7 +72,6 @@
     }
   }
 
-
   .offer-details {
     padding: 20px;
     background-color: $background-color;
@@ -82,10 +81,10 @@
       margin-bottom: 10px;
       color: #333;
 
-      @include media("<=desktop") {
+      @include media('<=desktop') {
         font-size: 22px;
       }
-      @include media("<=phone") {
+      @include media('<=phone') {
         font-size: 20px;
       }
     }
@@ -95,10 +94,10 @@
       color: #666;
       margin: 8px 0;
 
-      @include media("<=desktop") {
+      @include media('<=desktop') {
         font-size: 16px;
       }
-      @include media("<=phone") {
+      @include media('<=phone') {
         font-size: 14px;
       }
 
@@ -109,9 +108,7 @@
   }
 
   .offer-badge {
-
-
-    @include media(">1400px") {
+    @include media('>1400px') {
       position: absolute;
       width: 200px;
       height: 30px;
@@ -143,7 +140,7 @@
       }
     }
 
-    @include media("<=1400px") {
+    @include media('<=1400px') {
       background-color: $tertiary-color;
       color: white;
       font-size: 16px;

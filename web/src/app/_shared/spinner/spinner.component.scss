@@ -7,7 +7,7 @@ app-spinner {
   width: 5vw;
   height: 5vw;
 
-  @include media("<=phone") {
+  @include media('<=phone') {
     width: 50%;
     height: 50%;
   }
@@ -19,7 +19,6 @@ app-spinner {
   border-radius: 50%;
   animation: spin 2s linear infinite;
 }
-
 
 @keyframes spin {
   from {

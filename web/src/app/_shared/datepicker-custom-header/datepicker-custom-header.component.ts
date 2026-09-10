@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {MatCalendar} from '@angular/material/datepicker';
-import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
-import {BehaviorSubject, startWith, Subject, takeUntil} from 'rxjs';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import { MatCalendar } from '@angular/material/datepicker';
+import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { BehaviorSubject, startWith, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-datepicker-custom-header',
@@ -9,7 +9,7 @@ import {BehaviorSubject, startWith, Subject, takeUntil} from 'rxjs';
   styleUrl: './datepicker-custom-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DatepickerCustomHeaderComponent {
+export class DatepickerCustomHeaderComponent implements OnDestroy {
   private readonly _calendar = inject<MatCalendar<Date>>(MatCalendar);
   private readonly _dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
   private readonly _dateFormats = inject(MAT_DATE_FORMATS);

@@ -1,12 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Actions, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {AppState} from '@state';
+import { Injectable } from '@angular/core';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { AppState } from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
-import {Category, Company} from '@interfaces';
-import {filter, Observable, tap} from 'rxjs';
-
+import { Category, Company } from '@interfaces';
+import { filter, Observable, tap } from 'rxjs';
 
 @Injectable()
 export class CommonFacade {
@@ -65,59 +64,57 @@ export class CommonFacade {
   public getLogsSuccess$ = this.actions.pipe(ofType(commonActions.getLogsSuccess));
   public getLogsError$ = this.actions.pipe(ofType(commonActions.getLogsError));
 
-
   constructor(
     private store: Store<AppState>,
-    private actions: Actions
-  ) {
-  }
+    private actions: Actions,
+  ) {}
 
   public getCompanies(): void {
     this.store.dispatch(commonActions.getCompanies());
   }
 
   public getCompany(payload: { id: string }): void {
-    this.store.dispatch(commonActions.getCompany({payload}));
+    this.store.dispatch(commonActions.getCompany({ payload }));
   }
 
   public createCompany(payload: { formData: Partial<Company> }): void {
-    this.store.dispatch(commonActions.createCompany({payload}));
+    this.store.dispatch(commonActions.createCompany({ payload }));
   }
 
-  public updateCompany(payload: { id: string, formData: Partial<Company> }): void {
-    this.store.dispatch(commonActions.updateCompany({payload}));
+  public updateCompany(payload: { id: string; formData: Partial<Company> }): void {
+    this.store.dispatch(commonActions.updateCompany({ payload }));
   }
 
   public deleteCompany(payload: { id: string }): void {
-    this.store.dispatch(commonActions.deleteCompany({payload}));
+    this.store.dispatch(commonActions.deleteCompany({ payload }));
   }
 
   public getShips(companyId: string): void {
-    this.store.dispatch(commonActions.getShips({companyId}));
+    this.store.dispatch(commonActions.getShips({ companyId }));
   }
 
   public getShipById(payload: { id: string }): void {
-    this.store.dispatch(commonActions.getShipById({payload}));
+    this.store.dispatch(commonActions.getShipById({ payload }));
   }
 
   public getShipByName(payload: { name: string }): void {
-    this.store.dispatch(commonActions.getShipByName({payload}));
+    this.store.dispatch(commonActions.getShipByName({ payload }));
   }
 
   public createShip(payload: { formData: FormData }): void {
-    this.store.dispatch(commonActions.createShip({payload}));
+    this.store.dispatch(commonActions.createShip({ payload }));
   }
 
-  public updateShip(payload: { id: string, formData: FormData }): void {
-    this.store.dispatch(commonActions.updateShip({payload}));
+  public updateShip(payload: { id: string; formData: FormData }): void {
+    this.store.dispatch(commonActions.updateShip({ payload }));
   }
 
   public deleteShip(payload: { id: string }): void {
-    this.store.dispatch(commonActions.deleteShip({payload}));
+    this.store.dispatch(commonActions.deleteShip({ payload }));
   }
 
   public getCategory(payload: { id: string }): void {
-    this.store.dispatch(commonActions.getCategory({payload}));
+    this.store.dispatch(commonActions.getCategory({ payload }));
   }
 
   public getCategories(): void {
@@ -125,30 +122,30 @@ export class CommonFacade {
   }
 
   public createCategory(payload: { formData: FormData }): void {
-    this.store.dispatch(commonActions.createCategory({payload}));
+    this.store.dispatch(commonActions.createCategory({ payload }));
   }
 
-  public updateCategory(payload: { id: string, formData: FormData }): void {
-    this.store.dispatch(commonActions.updateCategory({payload}));
+  public updateCategory(payload: { id: string; formData: FormData }): void {
+    this.store.dispatch(commonActions.updateCategory({ payload }));
   }
 
   public deleteCategory(payload: { id: string }): void {
-    this.store.dispatch(commonActions.deleteCategory({payload}));
+    this.store.dispatch(commonActions.deleteCategory({ payload }));
   }
 
   public getCategories$(): Observable<Category[]> {
     return this.store.select(commonSelectors.selectCategories).pipe(
-      tap(categories => {
+      tap((categories) => {
         if (!categories || !categories.length) {
           this.getCategories();
         }
       }),
-      filter(categories => {
+      filter((categories) => {
         if (categories === null || !categories.length) {
           return false;
         }
         return true;
-      })
+      }),
     );
   }
 
@@ -157,19 +154,19 @@ export class CommonFacade {
   }
 
   public getDestination(payload: { id: string }): void {
-    this.store.dispatch(commonActions.getDestination({payload}));
+    this.store.dispatch(commonActions.getDestination({ payload }));
   }
 
   public createDestination(payload: { formData: FormData }): void {
-    this.store.dispatch(commonActions.createDestination({payload}));
+    this.store.dispatch(commonActions.createDestination({ payload }));
   }
 
-  public updateDestination(payload: { id: string, formData: FormData }): void {
-    this.store.dispatch(commonActions.updateDestination({payload}));
+  public updateDestination(payload: { id: string; formData: FormData }): void {
+    this.store.dispatch(commonActions.updateDestination({ payload }));
   }
 
   public deleteDestination(payload: { id: string }): void {
-    this.store.dispatch(commonActions.deleteDestination({payload}));
+    this.store.dispatch(commonActions.deleteDestination({ payload }));
   }
 
   public getLogs(): void {
