@@ -14,6 +14,7 @@ export class CommonFacade {
   public destinations$ = this.store.select(commonSelectors.selectDestinations);
   public categories$ = this.store.select(commonSelectors.selectCategories);
   public logs$ = this.store.select(commonSelectors.selectLogs);
+  public cabinTypes$ = this.store.select(commonSelectors.selectCabinTypes);
   public loading$ = this.store.select(commonSelectors.selectLoading);
 
   public getShipsSuccess$ = this.actions.pipe(ofType(commonActions.getShipsSuccess));
@@ -63,6 +64,13 @@ export class CommonFacade {
 
   public getLogsSuccess$ = this.actions.pipe(ofType(commonActions.getLogsSuccess));
   public getLogsError$ = this.actions.pipe(ofType(commonActions.getLogsError));
+
+  public getCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.getCabinTypesSuccess));
+  public getCabinTypesError$ = this.actions.pipe(ofType(commonActions.getCabinTypesError));
+  public createCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.createCabinTypeSuccess));
+  public createCabinTypeError$ = this.actions.pipe(ofType(commonActions.createCabinTypeError));
+  public updateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.updateCabinTypeSuccess));
+  public updateCabinTypeError$ = this.actions.pipe(ofType(commonActions.updateCabinTypeError));
 
   constructor(
     private store: Store<AppState>,
@@ -171,5 +179,17 @@ export class CommonFacade {
 
   public getLogs(): void {
     this.store.dispatch(commonActions.getLogs());
+  }
+
+  public getCabinTypes(companyId: string): void {
+    this.store.dispatch(commonActions.getCabinTypes({ companyId }));
+  }
+
+  public createCabinType(payload: { formData: FormData }): void {
+    this.store.dispatch(commonActions.createCabinType({ payload }));
+  }
+
+  public updateCabinType(payload: { id: string; formData: FormData }): void {
+    this.store.dispatch(commonActions.updateCabinType({ payload }));
   }
 }

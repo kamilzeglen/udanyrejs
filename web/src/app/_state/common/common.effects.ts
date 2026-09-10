@@ -363,4 +363,52 @@ export class CommonEffects {
       }),
     ),
   );
+
+  getCabinTypes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCabinTypes),
+      switchMap(({ companyId }) => {
+        return this.http.getCabinTypes({ companyId }).pipe(
+          map((cabinTypes) => {
+            return commonActions.getCabinTypesSuccess({ cabinTypes });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.getCabinTypesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  createCabinType$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCabinType),
+      switchMap(({ payload }) => {
+        return this.http.createCabinType(payload).pipe(
+          map((cabinType) => {
+            return commonActions.createCabinTypeSuccess({ cabinType });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.createCabinTypeError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  updateCabinType$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateCabinType),
+      switchMap(({ payload }) => {
+        return this.http.updateCabinType(payload).pipe(
+          map((cabinType) => {
+            return commonActions.updateCabinTypeSuccess({ cabinType });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.updateCabinTypeError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
 }

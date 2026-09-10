@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environment';
-import { Category, Company, Destination, Ship } from '@interfaces';
+import { CabinType, Category, Company, Destination, Ship } from '@interfaces';
 import { Log } from '../../_interfaces/log';
 
 @Injectable({
@@ -141,5 +141,24 @@ export class CommonHttpService {
   public getLogs(): Observable<Log[]> {
     const url = `${this.API_URL}/log/`;
     return this.http.get<Log[]>(url);
+  }
+
+  // =========
+  // Cabin types
+  // =========
+
+  public getCabinTypes(payload: { companyId: string }): Observable<CabinType[]> {
+    const url = `${this.API_URL}/cabin-type/` + payload.companyId;
+    return this.http.get<CabinType[]>(url);
+  }
+
+  public createCabinType(payload: { formData: FormData }): Observable<CabinType> {
+    const url = `${this.API_URL}/cabin-type/`;
+    return this.http.post<CabinType>(url, payload.formData);
+  }
+
+  public updateCabinType(payload: { id: string; formData: FormData }): Observable<CabinType> {
+    const url = `${this.API_URL}/cabin-type/` + payload.id;
+    return this.http.patch<CabinType>(url, payload.formData);
   }
 }

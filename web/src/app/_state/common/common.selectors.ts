@@ -10,3 +10,4 @@ export const selectShips = createSelector(selectCommonState, (state) => state.sh
 export const selectCategories = createSelector(selectCommonState, (state) => state.categories);
 export const selectLogs = createSelector(selectCommonState, (state) => state.logs);
 export const selectDestinations = createSelector(selectCommonState, (state) => state.destinations);
+export const selectCabinTypes = createSelector(selectCommonState, (state) => state.cabinTypes);

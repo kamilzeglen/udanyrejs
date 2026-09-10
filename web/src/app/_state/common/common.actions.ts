@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Category, Company, Destination, Ship } from '@interfaces';
+import { CabinType, Category, Company, Destination, Ship } from '@interfaces';
 import { Log } from '../../_interfaces/log';
 
 export const getCompanies = createAction('[Common] Get Companies');
@@ -143,3 +143,27 @@ export const deleteDestinationError = createAction(
   '[Common] Delete Destination Error',
   props<{ errorMessage: string }>(),
 );
+
+export const getCabinTypes = createAction('[Common] Get Cabin Types', props<{ companyId: string }>());
+export const getCabinTypesSuccess = createAction(
+  '[Common] Get Cabin Types Success',
+  props<{ cabinTypes: CabinType[] }>(),
+);
+export const getCabinTypesError = createAction('[Common] Get Cabin Types Error', props<{ errorMessage: string }>());
+
+export const createCabinType = createAction('[Common] Create Cabin Type', props<{ payload: { formData: FormData } }>());
+export const createCabinTypeSuccess = createAction(
+  '[Common] Create Cabin Type Success',
+  props<{ cabinType: CabinType }>(),
+);
+export const createCabinTypeError = createAction('[Common] Create Cabin Type Error', props<{ errorMessage: string }>());
+
+export const updateCabinType = createAction(
+  '[Common] Update Cabin Type',
+  props<{ payload: { id: string; formData: FormData } }>(),
+);
+export const updateCabinTypeSuccess = createAction(
+  '[Common] Update Cabin Type Success',
+  props<{ cabinType: CabinType }>(),
+);
+export const updateCabinTypeError = createAction('[Common] Update Cabin Type Error', props<{ errorMessage: string }>());
