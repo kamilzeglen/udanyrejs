@@ -16,7 +16,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 40 })
+  @Column({ type: 'varchar', length: 40, unique: true })
   email: string;
 
   @Column({ type: 'varchar' })
@@ -24,6 +24,14 @@ export class User {
 
   @Column({ default: false })
   isActive: boolean;
+
+  // Hash (nie surowy token) refresh tokenu bieżącej sesji - null gdy
+  // użytkownik nie jest zalogowany / po wylogowaniu.
+  @Column({ type: 'varchar', nullable: true })
+  refreshTokenHash: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  refreshTokenExpiresAt: Date;
 
   @ManyToOne(() => Role, (role) => role.users, {
     eager: false,
