@@ -1,8 +1,11 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, ObjectLiteral, Repository } from 'typeorm';
+import { DataSource, EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
+import { OfferTerm } from './offer-term.entity';
+import { OfferTermPrice } from './offer-term-price.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
+import { OfferTermDto } from './dto/offer-term.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
 import { UserService } from '@modules/user/user.service';
 import { CompanyService } from '@modules/company/company.service';
@@ -10,6 +13,7 @@ import { ShipService } from '@modules/ship/ship.service';
 import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
 import { DestinationService } from '@modules/destination/destination.service';
 import { CategoryService } from '@modules/category/category.service';
+import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
@@ -36,6 +40,7 @@ export class OfferService {
     private readonly shipService: ShipService,
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
+    private readonly cabinTypeService: CabinTypeService,
     private readonly logService: LogService,
   ) {}
 
@@ -218,30 +223,14 @@ export class OfferService {
     createOfferDto: CreateOfferDto,
     reqCreatedBy: User,
   ): Promise<Offer> {
-    const { companyId, shipId, destinations, categories, ...createUserData } =
-      createOfferDto;
-
-    const existingOffer = await this.offerRepository
-      .createQueryBuilder('offer')
-      .where('offer.startDate = :startDate', {
-        startDate: createUserData.startDate,
-      })
-      .andWhere('offer.endDate = :endDate', { endDate: createUserData.endDate })
-      .andWhere('offer.companyId = :companyId', { companyId })
-      .andWhere('offer.shipId = :shipId', { shipId })
-      .getOne();
-
-    if (existingOffer) {
-      this.logger.warn(
-        `Rejected duplicate offer for company=${companyId} ship=${shipId} startDate=${createUserData.startDate} endDate=${createUserData.endDate}`,
-      );
-      throw new AppException(API_ERRORS.OFFER_DUPLICATE, {
-        companyId,
-        shipId,
-        startDate: createUserData.startDate,
-        endDate: createUserData.endDate,
-      });
-    }
+    const {
+      companyId,
+      shipId,
+      destinations,
+      categories,
+      terms,
+      ...createUserData
+    } = createOfferDto;
 
     const requestUser = await this.userService.findOneByEmail(
       reqCreatedBy.email,
@@ -255,6 +244,8 @@ export class OfferService {
     const destinationEntities = destinations?.length
       ? await this.destinationService.findByIds(destinations)
       : [];
+
+    await this.assertCabinTypesExist(terms);
 
     const offer = await this.dataSource.transaction(async (manager) => {
       let newOffer = new Offer();
@@ -281,6 +272,8 @@ export class OfferService {
       if (destinationEntities.length) {
         newOffer.destinations = destinationEntities;
       }
+
+      await this.saveOfferTerms(manager, newOffer.id, terms);
 
       return manager.save(newOffer);
     });
@@ -435,5 +428,63 @@ export class OfferService {
     );
     this.logger.log(`Activated offer ${offer.id} (${offer.name})`);
     return true;
+  }
+
+  private async assertCabinTypesExist(terms: OfferTermDto[]): Promise<void> {
+    const cabinTypeIds = Array.from(
+      new Set(
+        terms.flatMap((term) => term.prices.map((price) => price.cabinTypeId)),
+      ),
+    );
+
+    const foundCabinTypes = await this.cabinTypeService.findByIds(cabinTypeIds);
+
+    if (foundCabinTypes.length !== cabinTypeIds.length) {
+      throw new AppException(API_ERRORS.CABIN_TYPE_NOT_FOUND, { cabinTypeIds });
+    }
+  }
+
+  private async saveOfferTerms(
+    manager: EntityManager,
+    offerId: string,
+    terms: OfferTermDto[],
+  ): Promise<void> {
+    for (const termDto of terms) {
+      const term = manager.create(OfferTerm, {
+        offerId,
+        startDate: termDto.startDate,
+        endDate: termDto.endDate,
+      });
+      const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);
+
+      const prices = termDto.prices.map((priceDto) =>
+        manager.create(OfferTermPrice, {
+          offerTermId: savedTerm.id,
+          cabinTypeId: priceDto.cabinTypeId,
+          price: priceDto.price,
+        }),
+      );
+      await manager.save(prices);
+    }
+  }
+
+  private async saveTermOrThrowOnDuplicate(
+    manager: EntityManager,
+    term: OfferTerm,
+  ): Promise<OfferTerm> {
+    try {
+      return await manager.save(term);
+    } catch (error) {
+      // Kod '23505' to unique_violation w Postgresie - unikalny indeks
+      // (offerId, startDate, endDate) z Task 1 złapał duplikat terminu.
+      if (error?.code === '23505') {
+        throw new AppException(API_ERRORS.OFFER_TERM_DUPLICATE, {
+          offerId: term.offerId,
+          startDate: term.startDate,
+          endDate: term.endDate,
+        });
+      }
+      throw error;
+    }
   }
 }
