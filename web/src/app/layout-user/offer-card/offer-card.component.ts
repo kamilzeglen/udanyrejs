@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { Offer } from '@interfaces';
+import { OfferSearchResult } from '@interfaces';
 import { environment } from '@environment';
 
 @Component({
@@ -9,7 +9,7 @@ import { environment } from '@environment';
 })
 export class OfferCardComponent {
   public readonly index = input<number>();
-  public readonly offer = input<Offer>();
+  public readonly offer = input<OfferSearchResult>();
 
   public API_URL = environment.API_URL;
 

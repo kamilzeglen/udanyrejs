@@ -1,6 +1,7 @@
 <a
   class="offer-card"
   [routerLink]="['/offers/details', offer().id]"
+  [queryParams]="{ termId: offer().termId }"
   [class.recommended]="offer().isRecommended"
   [class.no-margin]="index() === 0"
 >
@@ -33,6 +34,6 @@
       <strong>Termin</strong>: {{ offer().startDate | date: 'dd.MM.yyyy' }} - {{ offer().endDate | date: 'dd.MM.yyyy' }}
     </p>
     <p><strong>Statek</strong>: {{ offer().ship.name }}</p>
-    <p><strong>Cena od</strong>: {{ offer().price / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</p>
+    <p><strong>Cena od</strong>: {{ offer().fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</p>
   </div>
 </a>
