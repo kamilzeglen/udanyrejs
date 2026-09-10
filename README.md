@@ -160,9 +160,7 @@ Per-application details live in [api/readme.md](api/readme.md) and [web/README.m
 
 ## Screenshots
 
-<!--
-Add screenshots after first deploy.
-Example:
-### Offer list
-![Offer list](https://i.imgur.com/example.png)
--->
+<img width="3840" height="2160" alt="1" src="https://github.com/user-attachments/assets/ac6e1800-a21a-4d3d-80a1-8169c46fb59f" />
+<img width="3840" height="2160" alt="2" src="https://github.com/user-attachments/assets/7fe4cbf1-35f1-449a-953d-98388b544b72" />
+<img width="3840" height="2160" alt="3" src="https://github.com/user-attachments/assets/257177aa-6d59-4dd1-a2a2-f54c4bd29526" />
+<img width="3840" height="2160" alt="4" src="https://github.com/user-attachments/assets/2cc29aeb-b327-4a19-8ec8-52c301af66a8" />
