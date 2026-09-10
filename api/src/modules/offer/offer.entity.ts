@@ -7,6 +7,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -20,6 +21,7 @@ import { Ship } from '@modules/ship/ship.entity';
 import { Destination } from '@modules/destination/destination.entity';
 import { Category } from '@modules/category/category.entity';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 
 @Entity()
 export class Offer {
@@ -59,15 +61,8 @@ export class Offer {
   @Column({ type: 'uuid', nullable: false })
   shipId: string;
 
-  // Cena w groszach (najmniejsza jednostka waluty) - nie w złotych.
-  @Column('integer')
-  price: number;
-
-  @Column()
-  startDate: Date;
-
-  @Column()
-  endDate: Date;
+  @OneToMany(() => OfferTerm, (term) => term.offer)
+  terms: OfferTerm[];
 
   @OneToOne(() => ImageFile, (imageFile) => imageFile.offer, {
     eager: true,

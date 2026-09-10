@@ -66,6 +66,16 @@ export const API_ERRORS = {
     HttpStatus.BAD_REQUEST,
     'An offer with this company, ship and dates already exists',
   ),
+  CABIN_TYPE_NOT_FOUND: defineError(
+    'CABIN_TYPE_NOT_FOUND',
+    HttpStatus.NOT_FOUND,
+    'Cabin type not found',
+  ),
+  OFFER_TERM_DUPLICATE: defineError(
+    'OFFER_TERM_DUPLICATE',
+    HttpStatus.BAD_REQUEST,
+    'This offer already has a term with the same dates',
+  ),
 
   COMPANY_NOT_FOUND: defineError(
     'COMPANY_NOT_FOUND',
