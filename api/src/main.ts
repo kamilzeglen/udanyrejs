@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import * as crypto from 'crypto';
+import helmet from 'helmet';
+import { AllExceptionsFilter } from '@core/filters/http-exception.filter';
 
 if (!global.crypto) {
   (global as any).crypto = {
@@ -19,13 +21,18 @@ if (!parsedConfig.parsed && !process.env.APP_PORT) {
 const config = { ...process.env, ...parsedConfig.parsed };
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const { APP_PORT, WEB_URL } = config;
 
-  const allowedOrigins = [
-    process.env.WEB_URL || 'http://localhost:4200',
-  ];
+  const allowedOrigins = [process.env.WEB_URL || 'http://localhost:4200'];
 
   const app = await NestFactory.create(AppModule);
+
+  // Za reverse proxy (nginx-proxy-manager) jest dokładnie jeden pośredniczący
+  // serwer - bez tego throttling/CORS/IP-logging liczyłyby adres proxy, nie klienta.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+  app.use(helmet());
   app.enableCors({
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
@@ -38,8 +45,8 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  console.log('APP port: ', APP_PORT);
-  console.log('Allowing origin: ', WEB_URL);
+  logger.log(`APP port: ${APP_PORT}`);
+  logger.log(`Allowing origin: ${WEB_URL}`);
 
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -52,6 +59,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   await app.listen(APP_PORT || 3000);
 }

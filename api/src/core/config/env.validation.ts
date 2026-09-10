@@ -1,0 +1,33 @@
+import * as Joi from 'joi';
+
+export const envValidationSchema = Joi.object({
+  APP_ENV: Joi.string().required(),
+  APP_PORT: Joi.number().required(),
+  WEB_URL: Joi.string().uri().required(),
+
+  DAYS_BEFORE_INACTIVE: Joi.number().required(),
+
+  JWT_SECRET: Joi.string().min(16).required(),
+  JWT_EXPIRATION_SECONDS: Joi.number().required(),
+
+  HTTPS_ENABLED: Joi.string().valid('ENABLED', 'DISABLED').required(),
+  DOMAINS_WHITELIST: Joi.string().required(),
+
+  DATABASE_HOST: Joi.string().required(),
+  DATABASE_PORT: Joi.number().required(),
+  DATABASE_USERNAME: Joi.string().required(),
+  DATABASE_PASSWORD: Joi.string().required(),
+  DATABASE_NAME: Joi.string().required(),
+  DB_SYNC: Joi.string().valid('true', 'false').required(),
+
+  MAIL_HOST: Joi.string().required(),
+  MAIL_PORT: Joi.number().required(),
+  MAIL_USER: Joi.string().required(),
+  MAIL_PASSWORD: Joi.string().required(),
+  MAIL_SECURE: Joi.string().valid('true', 'false').required(),
+
+  OFFERS_IMAGES_PATH: Joi.string().required(),
+  SHIPS_IMAGES_PATH: Joi.string().required(),
+  COMPANIES_IMAGES_PATH: Joi.string().required(),
+  OFFERS_PDFS_PATH: Joi.string().required(),
+}).unknown(true);

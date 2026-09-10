@@ -22,12 +22,23 @@ import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LogModule } from '@modules/log/log.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { envValidationSchema } from '@core/config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: envValidationSchema,
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60_000,
+        limit: 60,
+      },
+    ]),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -45,26 +56,30 @@ import { LogModule } from '@modules/log/log.module';
         } as TypeOrmModuleAsyncOptions;
       },
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: 'ssl0.ovh.net',
-        port: 465,
-        secure: true,
-        auth: {
-          user: 'XYZ',
-          pass: 'XYZ',
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get('MAIL_HOST'),
+          port: configService.get('MAIL_PORT'),
+          secure: configService.get('MAIL_SECURE') === 'true',
+          auth: {
+            user: configService.get('MAIL_USER'),
+            pass: configService.get('MAIL_PASSWORD'),
+          },
         },
-      },
-      defaults: {
-        from: '"No Reply" <noreplay@udanyrejs.pl>',
-      },
-      template: {
-        dir: join(__dirname, 'templates'),
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
+        defaults: {
+          from: '"No Reply" <noreplay@udanyrejs.pl>',
         },
-      },
+        template: {
+          dir: join(__dirname, 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
     ServeStaticModule.forRootAsync({
       useFactory: () => [
@@ -95,11 +110,16 @@ import { LogModule } from '@modules/log/log.module';
     DestinationModule,
     PdfFileModule,
     ShipModule,
-    ShipModule,
     EmailModule,
     LogModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
