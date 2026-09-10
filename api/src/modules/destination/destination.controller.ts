@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DestinationService } from './destination.service';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { Destination } from '@modules/destination/destination.entity';
 import { CreateDestinationDto } from '@modules/destination/dto/create-destination.dto';
 import { UpdateDestinationDto } from '@modules/destination/dto/update-destination.dto';

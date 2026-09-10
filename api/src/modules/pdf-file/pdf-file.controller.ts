@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { PdfFileService } from './pdf-file.service';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PdfFileType } from '../../interfaces/save-update-file-types';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';

@@ -12,7 +12,7 @@ import {
 import { OfferService } from './offer.service';
 import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
 import { Offer } from '@modules/offer/offer.entity';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { PaginationResp } from '../../interfaces/pagination-response';
 

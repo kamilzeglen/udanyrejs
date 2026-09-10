@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ImageFileService } from './image-file.service';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageFileType } from '../../interfaces/save-update-file-types';
 import { ImageFile } from '@modules/image-file/image-file.entity';

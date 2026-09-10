@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { Company } from '@modules/company/company.entity';
 import { UpdateCompanyDto } from '@modules/company/dto/update-company.dto';
 import { CreateCompanyDto } from '@modules/company/dto/create-company.dto';

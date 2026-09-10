@@ -1,12 +1,18 @@
-import {CanActivate, ExecutionContext, Injectable, UnauthorizedException} from '@nestjs/common';
-import {JwtService} from '@nestjs/jwt';
-import {Request} from 'express';
-
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {
-  }
+  private readonly logger = new Logger(AuthGuard.name);
+
+  constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -15,13 +21,13 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
     try {
-      request['user'] = await this.jwtService.verifyAsync(
-        token,
-        {
-          secret: process.env.JWT_SECRET
-        }
+      request['user'] = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Rejected request with invalid/expired token on ${request.method} ${request.url}: ${error.message}`,
       );
-    } catch {
       throw new UnauthorizedException();
     }
     return true;
@@ -31,7 +37,9 @@ export class AuthGuard implements CanActivate {
     const cookies = request.headers.cookie;
     if (cookies) {
       const cookiePairs = cookies.split('; ');
-      const tokenPair = cookiePairs.find(pair => pair.startsWith('access_token='));
+      const tokenPair = cookiePairs.find((pair) =>
+        pair.startsWith('access_token='),
+      );
       if (tokenPair) {
         return tokenPair.split('=')[1];
       }

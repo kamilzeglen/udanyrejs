@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category } from '@modules/category/category.entity';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { UpdateCategoryDto } from '@modules/category/dto/update-category.dto';
 import { CreateCategoryDto } from '@modules/category/dto/create-category.dto';
 

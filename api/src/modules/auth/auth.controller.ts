@@ -13,7 +13,8 @@ import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
-import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +45,7 @@ export class AuthController {
     return req.user;
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('/register')
   async register(@Body() registerDto: RegisterDto): Promise<User> {
     return this.authService.register({
@@ -52,6 +54,7 @@ export class AuthController {
     });
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('/login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<any> {
     const loginResponse = await this.authService.login(loginDto);

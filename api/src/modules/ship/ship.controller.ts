@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ShipService } from './ship.service';
-import { AuthGuard } from '@modules/auth/guards/auth.guard';
+import { AuthGuard } from '@core/guards/auth.guard';
 import { UpdateShipDto } from '@modules/ship/dto/update-ship.dto';
 import { CreateShipDto } from '@modules/ship/dto/create-ship.dto';
 import { Ship } from '@modules/ship/ship.entity';
