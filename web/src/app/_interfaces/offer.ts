@@ -6,6 +6,7 @@ import { Category } from './category';
 import { Destination } from './destination';
 import { User } from './user';
 import { ShareStats } from './shareStats';
+import { OfferTerm } from './offer-term';
 
 export interface Offer {
   id: string;
@@ -16,12 +17,9 @@ export interface Offer {
   isRecommended: boolean;
   company: Company;
   companyId: string;
-  // Cena w groszach (najmniejsza jednostka waluty), nie w złotych.
-  price: number;
   ship: Ship;
   shipId: string;
-  startDate: string;
-  endDate: string;
+  terms: OfferTerm[];
   imageFile: ImageFile;
   imageFileId: string;
   pdfFile: PdfFile;
