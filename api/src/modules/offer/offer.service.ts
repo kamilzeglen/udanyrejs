@@ -203,7 +203,11 @@ export class OfferService {
       .distinct(true)
       .skip(offset)
       .take(limit)
-      .orderBy(orderColumnAlias, orderDir.toUpperCase() as any, 'NULLS LAST');
+      .orderBy(
+        `"${orderColumnAlias}"`,
+        orderDir.toUpperCase() as any,
+        'NULLS LAST',
+      );
 
     const rawIdRows = await idQuery.getRawMany<{
       termId: string;
