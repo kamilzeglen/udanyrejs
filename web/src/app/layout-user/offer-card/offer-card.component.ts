@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {Offer} from '@interfaces';
 import {environment} from '@environment';
 
@@ -8,8 +8,8 @@ import {environment} from '@environment';
   styleUrl: './offer-card.component.scss'
 })
 export class OfferCardComponent {
-  @Input() index: number;
-  @Input() offer: Offer;
+  public readonly index = input<number>();
+  public readonly offer = input<Offer>();
 
   public API_URL = environment.API_URL;
 

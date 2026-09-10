@@ -25,6 +25,8 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
 
   public imageFile: File
   public companyForm: FormGroup;
+  public priceIncludesArray: FormArray;
+  public priceExcludesArray: FormArray;
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -47,6 +49,9 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
       priceIncludes: this.fb.array([], Validators.required),
       priceExcludes: this.fb.array([], Validators.required),
     });
+
+    this.priceIncludesArray = this.companyForm.get('priceIncludes') as FormArray;
+    this.priceExcludesArray = this.companyForm.get('priceExcludes') as FormArray;
 
     this.commonFacade.getCompanySuccess$.pipe(take(1)).subscribe((company) => {
       this.editingCompany = company.company;
@@ -226,14 +231,6 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-
-  get priceIncludesArray(): FormArray {
-    return this.companyForm.get('priceIncludes') as FormArray;
-  }
-
-  get priceExcludesArray(): FormArray {
-    return this.companyForm.get('priceExcludes') as FormArray;
-  }
 
   addPriceInclude(): void {
     this.priceIncludesArray.push(this.fb.control(''));

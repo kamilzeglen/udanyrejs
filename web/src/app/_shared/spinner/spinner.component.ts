@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 
 @Component({
   selector: 'app-spinner',
@@ -6,5 +6,5 @@ import {Component, Input} from '@angular/core';
   styleUrl: './spinner.component.scss'
 })
 export class SpinnerComponent {
-  @Input() size: number = 50;
+  public readonly size = input<number>(50);
 }

@@ -31,6 +31,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public categories$ = this.commonFacade.categories$
 
   public offerForm: FormGroup;
+  public itineraryArray: FormArray;
 
   public scrappedData: boolean;
 
@@ -72,6 +73,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       endDate: ['', Validators.required],
       itinerary: this.fb.array([]),
     });
+
+    this.itineraryArray = this.offerForm.get('itinerary') as FormArray;
 
     this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({offer}) => {
       this.editingOffer = offer;
@@ -226,10 +229,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.destroy$.next(true);
     this.destroy$.complete();
-  }
-
-  get itineraryArray(): FormArray {
-    return this.offerForm.get('itinerary') as FormArray;
   }
 
   public updateItineraryDays(): void {

@@ -1,25 +1,27 @@
-import {Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {MatCalendar} from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
-import {startWith, Subject, takeUntil} from 'rxjs';
+import {BehaviorSubject, startWith, Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-datepicker-custom-header',
   templateUrl: './datepicker-custom-header.component.html',
-  styleUrl: './datepicker-custom-header.component.scss'
+  styleUrl: './datepicker-custom-header.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DatepickerCustomHeaderComponent {
-  private _calendar = inject<MatCalendar<Date>>(MatCalendar);
-  private _dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
-  private _dateFormats = inject(MAT_DATE_FORMATS);
+  private readonly _calendar = inject<MatCalendar<Date>>(MatCalendar);
+  private readonly _dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
+  private readonly _dateFormats = inject(MAT_DATE_FORMATS);
 
-  private _destroyed = new Subject<void>();
+  private readonly _destroyed = new Subject<void>();
 
-  readonly periodLabel = signal('');
+  private readonly periodLabel = new BehaviorSubject('');
+  public readonly periodLabel$ = this.periodLabel.asObservable();
 
   constructor() {
     this._calendar.stateChanges.pipe(startWith(null), takeUntil(this._destroyed)).subscribe(() => {
-      this.periodLabel.set(
+      this.periodLabel.next(
         this._dateAdapter
           .format(this._calendar.activeDate, this._dateFormats.display.monthYearLabel)
           .toLocaleUpperCase(),

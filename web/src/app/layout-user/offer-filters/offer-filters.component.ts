@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, input, OnDestroy, OnInit, output} from '@angular/core';
 import {CommonFacade} from '@state/common';
 import {ReplaySubject} from 'rxjs';
 import {animate, state, style, transition, trigger} from '@angular/animations';
@@ -20,8 +20,8 @@ import moment from 'moment-timezone';
 export class OfferFiltersComponent implements OnInit, OnDestroy {
   private destroy$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
 
-  @Input() filters: { [key: string]: any } = {};
-  @Output() filterChanged = new EventEmitter<{ key: string; value: any }>();
+  public readonly filters = input<{ [key: string]: any }>({});
+  public readonly filterChanged = output<{ key: string; value: any }>();
 
   readonly exampleHeader = DatepickerCustomHeaderComponent;
 

@@ -19,16 +19,16 @@
             matInput
             [matDatepicker]="startDatePicker"
             placeholder="Data początkowa"
-            [ngModel]="filters.startDate"
+            [ngModel]="filters().startDate"
             (ngModelChange)="onFilterChange('startDate', $event)"
             (focus)="startDatePicker.open()"
             [min]="today"
-            [max]="filters.endDate"
+            [max]="filters().endDate"
             readonly/>
           <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
           <mat-datepicker-toggle
             matSuffix
-            *ngIf="filters.startDate"
+            *ngIf="filters().startDate"
             (click)="onFilterChange('startDate', null); $event.stopPropagation()">
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
@@ -43,7 +43,7 @@
             matInput
             [matDatepicker]="endDatePicker"
             placeholder="Data końcowa"
-            [ngModel]="filters.endDate"
+            [ngModel]="filters().endDate"
             (ngModelChange)="onFilterChange('endDate', $event)"
             (focus)="endDatePicker.open()"
             [min]="today"
@@ -51,7 +51,7 @@
           <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
           <mat-datepicker-toggle
             matSuffix
-            *ngIf="filters.endDate"
+            *ngIf="filters().endDate"
             (click)="onFilterChange('endDate', null); $event.stopPropagation()">
             <mat-icon matDatepickerToggleIcon>clear</mat-icon>
           </mat-datepicker-toggle>
@@ -67,10 +67,10 @@
           bindLabel="name"
           bindValue="id"
           appendTo="body"
-          [ngModel]="filters.companyIdList"
+          [ngModel]="filters().companyIdList"
           (ngModelChange)="onFilterChange('companyIdList', $event)"
           [placeholder]="
-                  filters.companyIdList.length
+                  filters().companyIdList.length
                     ? 'Wybrani armatorzy'
                     : 'Wybierz armatorów'
                 "
@@ -89,10 +89,10 @@
           bindLabel="name"
           bindValue="id"
           appendTo="body"
-          [ngModel]="filters.destinationIdList"
+          [ngModel]="filters().destinationIdList"
           (ngModelChange)="onFilterChange('destinationIdList', $event)"
           [placeholder]="
-                  filters.destinationIdList.length
+                  filters().destinationIdList.length
                     ? 'Wybrany kierunek'
                     : 'Wybierz kierunek'
                 "
