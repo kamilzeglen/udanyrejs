@@ -14,6 +14,7 @@ import { PdfFileModule } from '@modules/pdf-file/pdf-file.module';
 import { ShipModule } from '@modules/ship/ship.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { CategoryModule } from '@modules/category/category.module';
+import { CabinTypeModule } from '@modules/cabin-type/cabin-type.module';
 import { DestinationModule } from '@modules/destination/destination.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -108,6 +109,7 @@ import { envValidationSchema } from '@core/config/env.validation';
     CompanyModule,
     ImageFileModule,
     CategoryModule,
+    CabinTypeModule,
     DestinationModule,
     PdfFileModule,
     ShipModule,
