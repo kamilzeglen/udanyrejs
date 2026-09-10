@@ -1,16 +1,15 @@
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
-  IsDateString,
-  IsInt,
   IsOptional,
   IsString,
   IsUUID,
-  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ItineraryDayDto } from './itinerary-day.dto';
+import { OfferTermDto } from './offer-term.dto';
 
 export class CreateOfferDto {
   @IsString()
@@ -39,19 +38,14 @@ export class CreateOfferDto {
   @IsOptional()
   categories?: string[];
 
-  // Cena w groszach (najmniejsza jednostka waluty), nie w złotych.
-  @IsInt()
-  @Min(0)
-  price: number;
-
   @IsUUID()
   shipId: string;
 
-  @IsDateString()
-  startDate: Date;
-
-  @IsDateString()
-  endDate: Date;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => OfferTermDto)
+  terms: OfferTermDto[];
 
   @IsString()
   @IsOptional()
