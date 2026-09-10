@@ -30,6 +30,8 @@ export class OfferService {
   constructor(
     @InjectRepository(Offer)
     private offerRepository: Repository<Offer>,
+    @InjectRepository(OfferTerm)
+    private readonly offerTermRepository: Repository<OfferTerm>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     @Inject(forwardRef(() => ImageFileService))
@@ -103,9 +105,17 @@ export class OfferService {
     return queryBuilder.getMany();
   }
 
-  async searchOffers(
-    searchOffersDto: SearchOffersDto,
-  ): Promise<{ data: Partial<Offer>[]; pagination: PaginationResp }> {
+  async searchOffers(searchOffersDto: SearchOffersDto): Promise<{
+    data: Array<
+      Partial<Offer> & {
+        termId: string;
+        startDate: Date;
+        endDate: Date;
+        fromPrice: number;
+      }
+    >;
+    pagination: PaginationResp;
+  }> {
     const {
       orderBy,
       orderDir,
@@ -121,9 +131,6 @@ export class OfferService {
 
     const whereClauses: string[] = [];
     const whereParams: ObjectLiteral = {};
-    const orderByWithAlias = orderBy.includes('.')
-      ? orderBy
-      : `offer.${orderBy}`;
 
     if (category === 'recommended') {
       whereClauses.push('offer.isRecommended = :isRecommended');
@@ -147,12 +154,12 @@ export class OfferService {
     }
 
     if (startDate) {
-      whereClauses.push('offer.startDate >= :startDate');
+      whereClauses.push('term.startDate >= :startDate');
       whereParams.startDate = startDate;
     }
 
     if (endDate) {
-      whereClauses.push('offer.endDate <= :endDate');
+      whereClauses.push('term.endDate <= :endDate');
       whereParams.endDate = endDate;
     }
 
@@ -161,8 +168,81 @@ export class OfferService {
       whereParams.destinationIdList = destinationIdList;
     }
 
-    const dbQuery = this.offerRepository
-      .createQueryBuilder('offer')
+    const whereSql = whereClauses.join(' AND ');
+    const orderByExpression = this.resolveTermOrderBy(orderBy);
+    // Postgres wymaga, żeby przy SELECT DISTINCT każda kolumna z ORDER BY
+    // była też w liście SELECT. Tu selectujemy tylko "termId" i "fromPrice",
+    // więc każde inne pole sortowania (offer.name, term.startDate, ...)
+    // trzeba dołożyć do SELECT pod własnym aliasem ("orderValue") i sortować
+    // po TYM aliasie, nigdy po surowym wyrażeniu.
+    const orderColumnAlias =
+      orderByExpression === 'fromPrice' ? 'fromPrice' : 'orderValue';
+
+    let idQueryBuilder = this.offerTermRepository
+      .createQueryBuilder('term')
+      .innerJoin('term.offer', 'offer')
+      .leftJoin('offer.categories', 'category')
+      .leftJoin('offer.destinations', 'destination')
+      .select('term.id', 'termId')
+      .addSelect((subQuery) => {
+        return subQuery
+          .select('MIN(price.price)', 'min')
+          .from(OfferTermPrice, 'price')
+          .where('price.offerTermId = term.id');
+      }, 'fromPrice');
+
+    if (orderColumnAlias === 'orderValue') {
+      idQueryBuilder = idQueryBuilder.addSelect(
+        orderByExpression,
+        'orderValue',
+      );
+    }
+
+    const idQuery = idQueryBuilder
+      .where(whereSql, whereParams)
+      .distinct(true)
+      .skip(offset)
+      .take(limit)
+      .orderBy(orderColumnAlias, orderDir.toUpperCase() as any, 'NULLS LAST');
+
+    const rawIdRows = await idQuery.getRawMany<{
+      termId: string;
+      fromPrice: string | null;
+    }>();
+    const orderedTermIds = rawIdRows.map((row) => row.termId);
+    const fromPriceByTermId = new Map(
+      rawIdRows.map((row) => [
+        row.termId,
+        row.fromPrice === null ? null : Number(row.fromPrice),
+      ]),
+    );
+
+    const countRow = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .innerJoin('term.offer', 'offer')
+      .leftJoin('offer.categories', 'category')
+      .leftJoin('offer.destinations', 'destination')
+      .select('COUNT(DISTINCT term.id)', 'count')
+      .where(whereSql, whereParams)
+      .getRawOne<{ count: string }>();
+    const count = Number(countRow.count);
+
+    const pagination: PaginationResp = {
+      limit,
+      offset,
+      orderDir,
+      orderBy: orderByExpression,
+      all: count,
+      count: orderedTermIds.length,
+    };
+
+    if (!orderedTermIds.length) {
+      return { data: [], pagination };
+    }
+
+    const terms = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .innerJoinAndSelect('term.offer', 'offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('offer.ship', 'ship')
       .leftJoinAndSelect('ship.company', 'shipCompany')
@@ -173,53 +253,57 @@ export class OfferService {
       .leftJoinAndSelect('offer.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
       .leftJoinAndSelect('offer.shareStats', 'shareStats')
-      .where(whereClauses.join(' AND '), whereParams)
-      .select([
-        'offer.id',
-        'offer.name',
-        'offer.price',
-        'offer.offerUrl',
-        'offer.isActive',
-        'offer.isRecommended',
-        'offer.startDate',
-        'offer.endDate',
-        'offer.company',
-        'offer.createdAt',
-        'offer.updatedAt',
-        'offerImageFile.id',
-        'offerImageFile.name',
-        'offerImageFile.path',
-        'pdfFile.id',
-        'pdfFile.name',
-        'pdfFile.path',
-        'ship.id',
-        'ship.name',
-        'company.id',
-        'company.name',
-        'companyImageFile.id',
-        'companyImageFile.name',
-        'companyImageFile.path',
-        'shipImageFile.id',
-        'shipImageFile.name',
-        'shipImageFile.path',
-        'shareStats',
-      ])
-      .skip(offset)
-      .take(limit)
-      .orderBy(orderByWithAlias, orderDir.toUpperCase() as any, 'NULLS LAST');
+      .where('term.id IN (:...termIds)', { termIds: orderedTermIds })
+      .getMany();
 
-    const [offers, count] = await dbQuery.getManyAndCount();
+    const termById = new Map(terms.map((term) => [term.id, term]));
+
+    const data = orderedTermIds
+      .map((termId) => termById.get(termId))
+      .filter((term): term is OfferTerm => Boolean(term))
+      .map((term) =>
+        this.mapTermToSearchResult(
+          term,
+          fromPriceByTermId.get(term.id) ?? null,
+        ),
+      );
+
+    return { data, pagination };
+  }
+
+  private resolveTermOrderBy(orderBy: string): string {
+    if (orderBy === 'startDate' || orderBy === 'endDate') {
+      return `term.${orderBy}`;
+    }
+    if (orderBy === 'price') {
+      return 'fromPrice';
+    }
+    if (orderBy.includes('.')) {
+      return orderBy;
+    }
+    return `offer.${orderBy}`;
+  }
+
+  private mapTermToSearchResult(
+    term: OfferTerm,
+    fromPrice: number | null,
+  ): Partial<Offer> & {
+    termId: string;
+    startDate: Date;
+    endDate: Date;
+    fromPrice: number;
+  } {
+    const offerFields: Partial<Offer> & { terms?: OfferTerm[] } = {
+      ...term.offer,
+    };
+    delete offerFields.terms;
 
     return {
-      data: offers,
-      pagination: {
-        limit,
-        offset,
-        orderDir,
-        orderBy: orderByWithAlias,
-        all: count,
-        count: offers.length,
-      },
+      ...offerFields,
+      termId: term.id,
+      startDate: term.startDate,
+      endDate: term.endDate,
+      fromPrice,
     };
   }
 

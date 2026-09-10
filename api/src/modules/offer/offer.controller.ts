@@ -14,16 +14,13 @@ import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
 import { Offer } from '@modules/offer/offer.entity';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
-import { PaginationResp } from '../../interfaces/pagination-response';
 
 @Controller('offers')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
   @Post('/search')
-  async searchOffers(
-    @Body() searchOfferDto: SearchOffersDto,
-  ): Promise<{ data: Partial<Offer>[]; pagination: PaginationResp }> {
+  async searchOffers(@Body() searchOfferDto: SearchOffersDto) {
     return await this.offerService.searchOffers(searchOfferDto);
   }
 

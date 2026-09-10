@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, getDataSourceToken } from '@nestjs/typeorm';
 import { OfferService } from './offer.service';
 import { Offer } from './offer.entity';
+import { OfferTerm } from './offer-term.entity';
 import { ImageFileService } from '@modules/image-file/image-file.service';
 import { UserService } from '@modules/user/user.service';
 import { CompanyService } from '@modules/company/company.service';
@@ -49,11 +50,18 @@ describe('OfferService', () => {
         getOne: jest.fn().mockResolvedValue(null),
       })),
     };
+    const offerTermRepositoryMock = {
+      createQueryBuilder: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OfferService,
         { provide: getRepositoryToken(Offer), useValue: offerRepositoryMock },
+        {
+          provide: getRepositoryToken(OfferTerm),
+          useValue: offerTermRepositoryMock,
+        },
         { provide: getDataSourceToken(), useValue: dataSource },
         { provide: ImageFileService, useValue: {} },
         {
@@ -312,6 +320,128 @@ describe('OfferService', () => {
       offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
 
       await expect(service.findActiveOffers()).resolves.toEqual([]);
+    });
+  });
+
+  describe('searchOffers', () => {
+    const buildTermQueryBuilder = (
+      overrides: Partial<Record<string, jest.Mock>> = {},
+    ) => {
+      const qb: any = {
+        innerJoin: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        distinct: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([]),
+        getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
+        getMany: jest.fn().mockResolvedValue([]),
+        ...overrides,
+      };
+      return qb;
+    };
+
+    const baseSearchDto = {
+      orderBy: 'createdAt',
+      orderDir: 'asc' as const,
+      offset: 0,
+      limit: 10,
+    };
+
+    it('returns one row per matching term, not one row per offer', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const idQuery = buildTermQueryBuilder({
+        getRawMany: jest.fn().mockResolvedValue([
+          { termId: 'term-1', fromPrice: '285000' },
+          { termId: 'term-2', fromPrice: '300000' },
+        ]),
+      });
+      const countQuery = buildTermQueryBuilder({
+        getRawOne: jest.fn().mockResolvedValue({ count: '2' }),
+      });
+      const hydrationQuery = buildTermQueryBuilder({
+        getMany: jest.fn().mockResolvedValue([
+          {
+            id: 'term-1',
+            startDate: new Date('2027-01-10'),
+            endDate: new Date('2027-01-17'),
+            offer: { id: 'offer-1', name: 'Rejs A' },
+          },
+          {
+            id: 'term-2',
+            startDate: new Date('2027-02-10'),
+            endDate: new Date('2027-02-17'),
+            offer: { id: 'offer-1', name: 'Rejs A' },
+          },
+        ]),
+      });
+      offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery)
+        .mockReturnValueOnce(hydrationQuery);
+
+      const result = await service.searchOffers(baseSearchDto as any);
+
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toEqual(
+        expect.objectContaining({ termId: 'term-1', fromPrice: 285000 }),
+      );
+      expect(result.data[1]).toEqual(
+        expect.objectContaining({ termId: 'term-2', fromPrice: 300000 }),
+      );
+      expect(result.pagination.all).toBe(2);
+    });
+
+    it('returns an empty page without querying for hydration when no term matches', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const idQuery = buildTermQueryBuilder({
+        getRawMany: jest.fn().mockResolvedValue([]),
+      });
+      const countQuery = buildTermQueryBuilder({
+        getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
+      });
+      offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery);
+
+      const result = await service.searchOffers(baseSearchDto as any);
+
+      expect(result.data).toEqual([]);
+      expect(result.pagination.all).toBe(0);
+      expect(offerTermRepository.createQueryBuilder).toHaveBeenCalledTimes(2);
+    });
+
+    it('filters by term dates, not by the removed offer dates', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const idQuery = buildTermQueryBuilder({
+        getRawMany: jest.fn().mockResolvedValue([]),
+      });
+      const countQuery = buildTermQueryBuilder({
+        getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
+      });
+      offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery);
+
+      await service.searchOffers({
+        ...baseSearchDto,
+        startDate: new Date('2027-01-01'),
+        endDate: new Date('2027-12-31'),
+      } as any);
+
+      expect(idQuery.where).toHaveBeenCalledWith(
+        expect.stringContaining('term.startDate >= :startDate'),
+        expect.objectContaining({
+          startDate: new Date('2027-01-01'),
+          endDate: new Date('2027-12-31'),
+        }),
+      );
     });
   });
 });
