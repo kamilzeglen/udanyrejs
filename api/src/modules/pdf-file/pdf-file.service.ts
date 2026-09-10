@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
@@ -10,6 +10,12 @@ import { PdfFileType } from '../../interfaces/save-update-file-types';
 import { User } from '@modules/user/user.entity';
 import * as process from 'node:process';
 import axios from 'axios';
+import {
+  detectPdfExtension,
+  PDF_MAX_BYTES,
+} from '@core/files/file-validation.util';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class PdfFileService {
@@ -38,12 +44,16 @@ export class PdfFileService {
     }
 
     if (!file) {
-      throw new Error('No file provided for updating');
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
-    const extname = path.extname(file.originalname).toLowerCase();
+    if (file.buffer.length > PDF_MAX_BYTES) {
+      throw new AppException(API_ERRORS.FILE_TOO_LARGE_PDF);
+    }
+
+    const extname = detectPdfExtension(file.buffer);
     if (!extname) {
-      throw new Error('Unable to determine file extension');
+      throw new AppException(API_ERRORS.UNSUPPORTED_PDF_TYPE);
     }
 
     const fileName = `${targetId}${extname}`;
@@ -86,7 +96,7 @@ export class PdfFileService {
     }
 
     if (!file) {
-      throw new Error('No file provided for updating');
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     if (requestUser === 'SYSTEM') {
@@ -96,9 +106,13 @@ export class PdfFileService {
         .getOne();
     }
 
-    const extname = path.extname(file.originalname).toLowerCase();
+    if (file.buffer.length > PDF_MAX_BYTES) {
+      throw new AppException(API_ERRORS.FILE_TOO_LARGE_PDF);
+    }
+
+    const extname = detectPdfExtension(file.buffer);
     if (!extname) {
-      throw new Error('Unable to determine file extension');
+      throw new AppException(API_ERRORS.UNSUPPORTED_PDF_TYPE);
     }
 
     const fileName = `${targetId}${extname}`;
@@ -139,7 +153,7 @@ export class PdfFileService {
 
   async removePdfFile(filePath: string): Promise<boolean> {
     if (!filePath) {
-      throw new Error('Path not found');
+      throw new AppException(API_ERRORS.FILE_PATH_MISSING);
     }
 
     try {
@@ -150,7 +164,7 @@ export class PdfFileService {
       }
     } catch (err) {
       this.logger.error(`Failed to delete file: ${err.message}`);
-      throw new Error('Failed to delete the physical file');
+      throw new AppException(API_ERRORS.FILE_DELETE_FAILED);
     }
 
     return true;
@@ -158,7 +172,11 @@ export class PdfFileService {
 
   async downloadPdfFromUrl(url: string): Promise<Express.Multer.File> {
     try {
-      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        maxContentLength: PDF_MAX_BYTES,
+        maxBodyLength: PDF_MAX_BYTES,
+      });
       const fileBuffer = Buffer.from(response.data, 'binary');
       const extname = path.extname(url).toLowerCase() || '.pdf';
       const fileName = `${Date.now()}${extname}`;
@@ -172,7 +190,7 @@ export class PdfFileService {
       this.logger.error(
         `Failed to download PDF from URL ${url}: ${error.message}`,
       );
-      throw new BadRequestException('Failed to download PDF from URL');
+      throw new AppException(API_ERRORS.FILE_DOWNLOAD_FAILED);
     }
   }
 

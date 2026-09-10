@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as path from 'path';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,12 @@ import { Offer } from '@modules/offer/offer.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Company } from '@modules/company/company.entity';
 import axios from 'axios';
+import {
+  detectImageExtension,
+  IMAGE_MAX_BYTES,
+} from '@core/files/file-validation.util';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class ImageFileService {
@@ -52,12 +58,16 @@ export class ImageFileService {
     }
 
     if (!file) {
-      throw new Error('No file provided for updating');
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
-    const extname = path.extname(file.originalname).toLowerCase();
+    if (file.buffer.length > IMAGE_MAX_BYTES) {
+      throw new AppException(API_ERRORS.FILE_TOO_LARGE_IMAGE);
+    }
+
+    const extname = detectImageExtension(file.buffer);
     if (!extname) {
-      throw new Error('Unable to determine file extension');
+      throw new AppException(API_ERRORS.UNSUPPORTED_IMAGE_TYPE);
     }
 
     const fileName = `${targetId}${extname}`;
@@ -155,12 +165,16 @@ export class ImageFileService {
     }
 
     if (!file) {
-      throw new Error('No file provided for updating');
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
-    const extname = path.extname(file.originalname).toLowerCase();
+    if (file.buffer.length > IMAGE_MAX_BYTES) {
+      throw new AppException(API_ERRORS.FILE_TOO_LARGE_IMAGE);
+    }
+
+    const extname = detectImageExtension(file.buffer);
     if (!extname) {
-      throw new Error('Unable to determine file extension');
+      throw new AppException(API_ERRORS.UNSUPPORTED_IMAGE_TYPE);
     }
 
     const fileName = `${targetId}${extname}`;
@@ -225,7 +239,7 @@ export class ImageFileService {
 
   async removeImageFile(filePath: string): Promise<boolean> {
     if (!filePath) {
-      throw new Error('Path not found');
+      throw new AppException(API_ERRORS.FILE_PATH_MISSING);
     }
 
     try {
@@ -236,7 +250,7 @@ export class ImageFileService {
       }
     } catch (err) {
       this.logger.error(`Failed to delete file: ${err.message}`);
-      throw new Error('Failed to delete the physical file');
+      throw new AppException(API_ERRORS.FILE_DELETE_FAILED);
     }
 
     return true;
@@ -244,7 +258,11 @@ export class ImageFileService {
 
   async downloadImageFromUrl(url: string): Promise<Express.Multer.File> {
     try {
-      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      const response = await axios.get(url, {
+        responseType: 'arraybuffer',
+        maxContentLength: IMAGE_MAX_BYTES,
+        maxBodyLength: IMAGE_MAX_BYTES,
+      });
       const fileBuffer = Buffer.from(response.data, 'binary');
       const extname = path.extname(url).toLowerCase() || '.jpg';
       const fileName = `${Date.now()}${extname}`;
@@ -258,7 +276,7 @@ export class ImageFileService {
       this.logger.error(
         `Failed to download image from URL ${url}: ${error.message}`,
       );
-      throw new BadRequestException('Failed to download image from URL');
+      throw new AppException(API_ERRORS.FILE_DOWNLOAD_FAILED);
     }
   }
 }

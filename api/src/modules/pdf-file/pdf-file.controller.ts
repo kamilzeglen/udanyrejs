@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,6 +21,27 @@ import { Response } from 'express';
 import * as fs from 'node:fs';
 import { UpdatePdfFileDto } from '@modules/pdf-file/dto/update-pdf-file.dto';
 import { LogService } from '@modules/log/log.service';
+import {
+  ALLOWED_PDF_MIME_TYPES,
+  PDF_MAX_BYTES,
+} from '@core/files/file-validation.util';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
+
+const pdfUploadInterceptorOptions = {
+  limits: { fileSize: PDF_MAX_BYTES },
+  fileFilter: (
+    req: unknown,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
+    if (!ALLOWED_PDF_MIME_TYPES.includes(file.mimetype)) {
+      callback(new AppException(API_ERRORS.UNSUPPORTED_PDF_TYPE), false);
+      return;
+    }
+    callback(null, true);
+  },
+};
 
 @Controller('pdf-file')
 export class PdfFileController {
@@ -32,7 +52,7 @@ export class PdfFileController {
 
   @UseGuards(AuthGuard)
   @Post('/:pdfFileType/:targetId')
-  @UseInterceptors(FileInterceptor('pdfFile'))
+  @UseInterceptors(FileInterceptor('pdfFile', pdfUploadInterceptorOptions))
   async createOfferImageFile(
     @Param('pdfFileType') pdfFileType: PdfFileType,
     @Param('targetId') targetId: string,
@@ -41,9 +61,7 @@ export class PdfFileController {
     @Req() req: { user: any },
   ): Promise<PdfFile> {
     if (!file && !createPdfFileDto.pdfUrl) {
-      throw new BadRequestException(
-        'No file provided. Please upload a valid file or url.',
-      );
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     let pdfFile: Express.Multer.File | string;
@@ -67,7 +85,7 @@ export class PdfFileController {
 
   @UseGuards(AuthGuard)
   @Patch('/:pdfFileType/:targetId')
-  @UseInterceptors(FileInterceptor('pdfFile'))
+  @UseInterceptors(FileInterceptor('pdfFile', pdfUploadInterceptorOptions))
   async updateOfferImageFile(
     @Param('pdfFileType') pdfFileType: PdfFileType,
     @Param('targetId') targetId: string,
@@ -76,9 +94,7 @@ export class PdfFileController {
     @Req() req: { user: any },
   ): Promise<PdfFile> {
     if (!file && !updatePdfFileDto.pdfUrl) {
-      throw new BadRequestException(
-        'No file provided. Please upload a valid file or url.',
-      );
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     let pdfFile: Express.Multer.File | string;
@@ -105,7 +121,7 @@ export class PdfFileController {
     const filePath = this.pdfFileService.getPdfPath(id);
 
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: 'File not found' });
+      throw new AppException(API_ERRORS.FILE_NOT_FOUND, { id });
     }
 
     await this.logService.createLog('Pobrano PDF (' + id + ')', 'SYSTEM');

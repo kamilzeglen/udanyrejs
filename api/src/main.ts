@@ -48,8 +48,11 @@ async function bootstrap() {
   logger.log(`APP port: ${APP_PORT}`);
   logger.log(`Allowing origin: ${WEB_URL}`);
 
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  // Zwykłe żądania JSON/urlencoded nie noszą plików (te idą przez multer,
+  // patrz limity FileInterceptor w image-file/pdf-file), więc dostają dużo
+  // niższy limit niż poprzednie 50mb.
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.useGlobalPipes(
     new ValidationPipe({
       disableErrorMessages: false,

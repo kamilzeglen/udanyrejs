@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Param,
@@ -17,6 +16,27 @@ import { ImageFileType } from '../../interfaces/save-update-file-types';
 import { ImageFile } from '@modules/image-file/image-file.entity';
 import { CreateImageFileDto } from '@modules/image-file/dto/create-image-file.dto';
 import { UpdateImageFileDto } from '@modules/image-file/dto/update-image-file.dto';
+import {
+  ALLOWED_IMAGE_MIME_TYPES,
+  IMAGE_MAX_BYTES,
+} from '@core/files/file-validation.util';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
+
+const imageUploadInterceptorOptions = {
+  limits: { fileSize: IMAGE_MAX_BYTES },
+  fileFilter: (
+    req: unknown,
+    file: Express.Multer.File,
+    callback: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
+    if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.mimetype)) {
+      callback(new AppException(API_ERRORS.UNSUPPORTED_IMAGE_TYPE), false);
+      return;
+    }
+    callback(null, true);
+  },
+};
 
 @Controller('image-file')
 export class ImageFileController {
@@ -24,7 +44,7 @@ export class ImageFileController {
 
   @UseGuards(AuthGuard)
   @Post('/:imageFileType/:targetId')
-  @UseInterceptors(FileInterceptor('imageFile'))
+  @UseInterceptors(FileInterceptor('imageFile', imageUploadInterceptorOptions))
   async createOfferImageFile(
     @Param('imageFileType') imageFileType: ImageFileType,
     @Param('targetId') targetId: string,
@@ -33,9 +53,7 @@ export class ImageFileController {
     @Req() req: { user: any },
   ): Promise<ImageFile> {
     if (!file && !createImageFileDto.imageUrl) {
-      throw new BadRequestException(
-        'No file provided. Please upload a valid file or url.',
-      );
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     let imageFile: Express.Multer.File | string;
@@ -59,7 +77,7 @@ export class ImageFileController {
 
   @UseGuards(AuthGuard)
   @Patch('/:imageFileType/:targetId')
-  @UseInterceptors(FileInterceptor('imageFile'))
+  @UseInterceptors(FileInterceptor('imageFile', imageUploadInterceptorOptions))
   async updateOfferImageFile(
     @Param('imageFileType') imageFileType: ImageFileType,
     @Param('targetId') targetId: string,
@@ -68,9 +86,7 @@ export class ImageFileController {
     @Req() req: { user: any },
   ): Promise<ImageFile> {
     if (!file && !updateImageFileDto.imageUrl) {
-      throw new BadRequestException(
-        'No file provided. Please upload a valid file or url.',
-      );
+      throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     let imageFile: Express.Multer.File | string;
