@@ -152,6 +152,11 @@ export class CommonHttpService {
     return this.http.get<CabinType[]>(url);
   }
 
+  public getAllCabinTypes(): Observable<CabinType[]> {
+    const url = `${this.API_URL}/cabin-type`;
+    return this.http.get<CabinType[]>(url);
+  }
+
   public createCabinType(payload: { formData: FormData }): Observable<CabinType> {
     const url = `${this.API_URL}/cabin-type/`;
     return this.http.post<CabinType>(url, payload.formData);
@@ -160,5 +165,15 @@ export class CommonHttpService {
   public updateCabinType(payload: { id: string; formData: FormData }): Observable<CabinType> {
     const url = `${this.API_URL}/cabin-type/` + payload.id;
     return this.http.patch<CabinType>(url, payload.formData);
+  }
+
+  public deactivateCabinType(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/cabin-type/` + payload.id + '/deactivate';
+    return this.http.get<boolean>(url);
+  }
+
+  public activateCabinType(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/cabin-type/` + payload.id + '/activate';
+    return this.http.get<boolean>(url);
   }
 }

@@ -117,6 +117,25 @@ const reducer = createReducer(
     errorMessage,
     cabinTypes: [],
   })),
+
+  on(commonActions.getAllCabinTypes, (state) => ({
+    ...state,
+    loading: true,
+    errorMessage: null,
+    allCabinTypes: [],
+  })),
+  on(commonActions.getAllCabinTypesSuccess, (state, { cabinTypes }) => ({
+    ...state,
+    loading: false,
+    errorMessage: null,
+    allCabinTypes: cabinTypes,
+  })),
+  on(commonActions.getAllCabinTypesError, (state, { errorMessage }) => ({
+    ...state,
+    loading: false,
+    errorMessage,
+    allCabinTypes: [],
+  })),
 );
 
 export function commonReducer(state: CommonState | undefined, action: Action): CommonState {

@@ -151,6 +151,16 @@ export const getCabinTypesSuccess = createAction(
 );
 export const getCabinTypesError = createAction('[Common] Get Cabin Types Error', props<{ errorMessage: string }>());
 
+export const getAllCabinTypes = createAction('[Common] Get All Cabin Types');
+export const getAllCabinTypesSuccess = createAction(
+  '[Common] Get All Cabin Types Success',
+  props<{ cabinTypes: CabinType[] }>(),
+);
+export const getAllCabinTypesError = createAction(
+  '[Common] Get All Cabin Types Error',
+  props<{ errorMessage: string }>(),
+);
+
 export const createCabinType = createAction('[Common] Create Cabin Type', props<{ payload: { formData: FormData } }>());
 export const createCabinTypeSuccess = createAction(
   '[Common] Create Cabin Type Success',
@@ -167,3 +177,17 @@ export const updateCabinTypeSuccess = createAction(
   props<{ cabinType: CabinType }>(),
 );
 export const updateCabinTypeError = createAction('[Common] Update Cabin Type Error', props<{ errorMessage: string }>());
+
+export const deactivateCabinType = createAction('[Common] Deactivate Cabin Type', props<{ payload: { id: string } }>());
+export const deactivateCabinTypeSuccess = createAction('[Common] Deactivate Cabin Type Success');
+export const deactivateCabinTypeError = createAction(
+  '[Common] Deactivate Cabin Type Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const activateCabinType = createAction('[Common] Activate Cabin Type', props<{ payload: { id: string } }>());
+export const activateCabinTypeSuccess = createAction('[Common] Activate Cabin Type Success');
+export const activateCabinTypeError = createAction(
+  '[Common] Activate Cabin Type Error',
+  props<{ errorMessage: string }>(),
+);

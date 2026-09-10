@@ -27,6 +27,15 @@ export class CabinTypeService {
       .getMany();
   }
 
+  async findAll(): Promise<CabinType[]> {
+    return await this.cabinTypeRepository
+      .createQueryBuilder('cabinType')
+      .leftJoinAndSelect('cabinType.company', 'company')
+      .orderBy('company.name', 'ASC')
+      .addOrderBy('cabinType.name', 'ASC')
+      .getMany();
+  }
+
   async findOneById(id: string): Promise<CabinType> {
     return await this.cabinTypeRepository
       .createQueryBuilder('cabinType')

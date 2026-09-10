@@ -380,6 +380,22 @@ export class CommonEffects {
     ),
   );
 
+  getAllCabinTypes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getAllCabinTypes),
+      switchMap(() => {
+        return this.http.getAllCabinTypes().pipe(
+          map((cabinTypes) => {
+            return commonActions.getAllCabinTypesSuccess({ cabinTypes });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.getAllCabinTypesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   createCabinType$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.createCabinType),
@@ -406,6 +422,38 @@ export class CommonEffects {
           }),
           catchError((errorMessage) => {
             return of(commonActions.updateCabinTypeError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  deactivateCabinType$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deactivateCabinType),
+      switchMap(({ payload }) => {
+        return this.http.deactivateCabinType(payload).pipe(
+          map(() => {
+            return commonActions.deactivateCabinTypeSuccess();
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.deactivateCabinTypeError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  activateCabinType$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.activateCabinType),
+      switchMap(({ payload }) => {
+        return this.http.activateCabinType(payload).pipe(
+          map(() => {
+            return commonActions.activateCabinTypeSuccess();
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.activateCabinTypeError({ errorMessage }));
           }),
         );
       }),

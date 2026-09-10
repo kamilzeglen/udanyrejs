@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterFacade } from '@state/router';
 import { CommonFacade } from '@state/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
-import { ReplaySubject, takeUntil } from 'rxjs';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
 import { AllDeviceInfo, CabinType } from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-cabin-type-list',
@@ -14,11 +15,8 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  public companies$ = this.commonFacade.companies$;
-  public cabinTypes$ = this.commonFacade.cabinTypes$;
+  public cabinTypesGroups$ = this.commonFacade.cabinTypesGroupedByCompany$;
   public loading$ = this.commonFacade.loading$;
-
-  public selectedCompany: string;
 
   public deviceInfo: AllDeviceInfo;
 
@@ -31,6 +29,7 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
     private readonly deviceInfoService: DeviceInfoService,
     private readonly routerFacade: RouterFacade,
     private readonly snackService: SnackbarService,
+    private readonly confirmationModalService: ConfirmationModalService,
   ) {}
 
   public ngOnInit() {
@@ -44,15 +43,33 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.createCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie dodano rodzaj kabiny');
-      this.changedCompany(this.selectedCompany);
+      this.commonFacade.getAllCabinTypes();
     });
 
     this.commonFacade.updateCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie zaktualizowano rodzaj kabiny');
-      this.changedCompany(this.selectedCompany);
+      this.commonFacade.getAllCabinTypes();
     });
 
-    this.commonFacade.getCompanies();
+    this.commonFacade.deactivateCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo('Pomyślnie dezaktywowano rodzaj kabiny');
+      this.commonFacade.getAllCabinTypes();
+    });
+
+    this.commonFacade.deactivateCabinTypeError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas dezaktywowania rodzaju kabiny');
+    });
+
+    this.commonFacade.activateCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo('Pomyślnie aktywowano rodzaj kabiny');
+      this.commonFacade.getAllCabinTypes();
+    });
+
+    this.commonFacade.activateCabinTypeError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Wystąpił błąd podczas aktywowania rodzaju kabiny');
+    });
+
+    this.commonFacade.getAllCabinTypes();
   }
 
   public ngOnDestroy(): void {
@@ -61,11 +78,8 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
   }
 
   public addCabinType(): void {
-    if (!this.selectedCompany) {
-      return;
-    }
     const linkParams = ['/admin/cabin-types/add/'];
-    this.routerFacade.changeRoute({ linkParams, extras: { queryParams: { companyId: this.selectedCompany } } });
+    this.routerFacade.changeRoute({ linkParams });
   }
 
   public editCabinType(cabinType: CabinType): void {
@@ -73,7 +87,35 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
     this.routerFacade.changeRoute({ linkParams });
   }
 
-  public changedCompany(companyId: string): void {
-    this.commonFacade.getCabinTypes(companyId);
+  public deactivateCabinType(cabinType: CabinType): void {
+    this.confirmationModalService
+      .open({
+        message: 'Jesteś pewny że chcesz dezaktywować rodzaj kabiny: ' + cabinType.name + '?',
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+
+        this.commonFacade.deactivateCabinType({ id: cabinType.id });
+      });
+  }
+
+  public activateCabinType(cabinType: CabinType): void {
+    this.confirmationModalService
+      .open({
+        message: 'Jesteś pewny że chcesz aktywować rodzaj kabiny: ' + cabinType.name + '?',
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+
+        this.commonFacade.activateCabinType({ id: cabinType.id });
+      });
   }
 }

@@ -15,6 +15,7 @@ export class CommonFacade {
   public categories$ = this.store.select(commonSelectors.selectCategories);
   public logs$ = this.store.select(commonSelectors.selectLogs);
   public cabinTypes$ = this.store.select(commonSelectors.selectCabinTypes);
+  public cabinTypesGroupedByCompany$ = this.store.select(commonSelectors.selectCabinTypesGroupedByCompany);
   public loading$ = this.store.select(commonSelectors.selectLoading);
 
   public getShipsSuccess$ = this.actions.pipe(ofType(commonActions.getShipsSuccess));
@@ -67,10 +68,16 @@ export class CommonFacade {
 
   public getCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.getCabinTypesSuccess));
   public getCabinTypesError$ = this.actions.pipe(ofType(commonActions.getCabinTypesError));
+  public getAllCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.getAllCabinTypesSuccess));
+  public getAllCabinTypesError$ = this.actions.pipe(ofType(commonActions.getAllCabinTypesError));
   public createCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.createCabinTypeSuccess));
   public createCabinTypeError$ = this.actions.pipe(ofType(commonActions.createCabinTypeError));
   public updateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.updateCabinTypeSuccess));
   public updateCabinTypeError$ = this.actions.pipe(ofType(commonActions.updateCabinTypeError));
+  public deactivateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.deactivateCabinTypeSuccess));
+  public deactivateCabinTypeError$ = this.actions.pipe(ofType(commonActions.deactivateCabinTypeError));
+  public activateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.activateCabinTypeSuccess));
+  public activateCabinTypeError$ = this.actions.pipe(ofType(commonActions.activateCabinTypeError));
 
   constructor(
     private store: Store<AppState>,
@@ -185,11 +192,23 @@ export class CommonFacade {
     this.store.dispatch(commonActions.getCabinTypes({ companyId }));
   }
 
+  public getAllCabinTypes(): void {
+    this.store.dispatch(commonActions.getAllCabinTypes());
+  }
+
   public createCabinType(payload: { formData: FormData }): void {
     this.store.dispatch(commonActions.createCabinType({ payload }));
   }
 
   public updateCabinType(payload: { id: string; formData: FormData }): void {
     this.store.dispatch(commonActions.updateCabinType({ payload }));
+  }
+
+  public deactivateCabinType(payload: { id: string }): void {
+    this.store.dispatch(commonActions.deactivateCabinType({ payload }));
+  }
+
+  public activateCabinType(payload: { id: string }): void {
+    this.store.dispatch(commonActions.activateCabinType({ payload }));
   }
 }

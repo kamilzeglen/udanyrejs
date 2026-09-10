@@ -8,6 +8,7 @@ export type CommonState = Readonly<{
   categories: Category[];
   destinations: Destination[];
   cabinTypes: CabinType[];
+  allCabinTypes: CabinType[];
 
   loading: boolean;
   errorMessage: string;
@@ -20,6 +21,7 @@ export const initialState: CommonState = {
   categories: null,
   destinations: null,
   cabinTypes: null,
+  allCabinTypes: null,
 
   loading: false,
   errorMessage: null,

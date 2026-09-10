@@ -25,6 +25,11 @@ export class CabinTypeController {
     return await this.cabinTypeService.findOneById(cabinTypeId);
   }
 
+  @Get('/')
+  async getAllCabinTypes(): Promise<CabinType[]> {
+    return await this.cabinTypeService.findAll();
+  }
+
   @Get('/:companyId')
   async getCabinTypesByCompany(
     @Param('companyId') companyId: string,
