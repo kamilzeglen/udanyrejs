@@ -50,11 +50,6 @@
       </div>
 
       <div class="form-group">
-        <label for="price">Cena: (Euro)</label>
-        <input id="price" formControlName="price" type="number" placeholder="Cena" />
-      </div>
-
-      <div class="form-group">
         <label for="companyId">Firma:</label>
         <mat-select formControlName="companyId" id="companyId" placeholder="Firma" [disabled]="!companies$">
           <mat-option *ngFor="let company of companies$ | async" [value]="company.id">
@@ -70,42 +65,6 @@
             {{ ship.name }}
           </mat-option>
         </mat-select>
-      </div>
-
-      <div class="form-group">
-        <label for="startDate">Data początkowa:</label>
-        <mat-form-field class="start-date" appearance="outline">
-          <input
-            id="startDate"
-            matInput
-            [max]="offerForm.get('endDate')?.value || null"
-            [matDatepicker]="startDate"
-            placeholder="Data początkowa"
-            formControlName="startDate"
-            (focus)="startDate.open()"
-            readonly
-          />
-          <mat-datepicker-toggle matSuffix [for]="startDate"></mat-datepicker-toggle>
-          <mat-datepicker #startDate></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <div class="form-group">
-        <label for="endDate">Data końcowa:</label>
-        <mat-form-field class="end-date" appearance="outline">
-          <input
-            id="endDate"
-            matInput
-            [min]="offerForm.get('startDate')?.value || null"
-            [matDatepicker]="endDate"
-            placeholder="Data początkowa"
-            formControlName="endDate"
-            (focus)="endDate.open()"
-            readonly
-          />
-          <mat-datepicker-toggle matSuffix [for]="endDate"></mat-datepicker-toggle>
-          <mat-datepicker #endDate></mat-datepicker>
-        </mat-form-field>
       </div>
 
       <div class="form-group">
@@ -141,6 +100,77 @@
           <b>Aktualny plik</b>: {{ editingOffer.pdfFile.originalName }} <mat-icon>check_circle</mat-icon>
         </div>
       </div>
+    </section>
+
+    <!-- Sekcja Terminy rejsu -->
+    <section class="section terms-section">
+      <h2>Terminy rejsu</h2>
+      <div formArrayName="terms">
+        <div
+          *ngFor="let term of termsArray.controls; let termIndex = index"
+          [formGroupName]="termIndex"
+          class="term-item"
+        >
+          <div class="term-header">
+            <h3>Termin {{ termIndex + 1 }}</h3>
+            <button type="button" (click)="removeTerm(termIndex)">Usuń termin</button>
+          </div>
+
+          <div class="form-group">
+            <label [attr.for]="'termStartDate' + termIndex">Data początkowa:</label>
+            <mat-form-field appearance="outline">
+              <input
+                [id]="'termStartDate' + termIndex"
+                matInput
+                [matDatepicker]="termStartDatePicker"
+                formControlName="startDate"
+                (focus)="termStartDatePicker.open()"
+                readonly
+              />
+              <mat-datepicker-toggle matSuffix [for]="termStartDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #termStartDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="form-group">
+            <label [attr.for]="'termEndDate' + termIndex">Data końcowa:</label>
+            <mat-form-field appearance="outline">
+              <input
+                [id]="'termEndDate' + termIndex"
+                matInput
+                [matDatepicker]="termEndDatePicker"
+                formControlName="endDate"
+                (focus)="termEndDatePicker.open()"
+                readonly
+              />
+              <mat-datepicker-toggle matSuffix [for]="termEndDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #termEndDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div formArrayName="prices" class="term-prices">
+            <div
+              *ngFor="let priceGroup of $any(term).get('prices').controls; let priceIndex = index"
+              [formGroupName]="priceIndex"
+              class="term-price-item"
+            >
+              <mat-select formControlName="cabinTypeId" placeholder="Rodzaj kabiny" [disabled]="!cabinTypes$">
+                <mat-option *ngFor="let cabinType of cabinTypes$ | async" [value]="cabinType.id">
+                  {{ cabinType.name }}
+                </mat-option>
+              </mat-select>
+
+              <input formControlName="price" type="number" placeholder="Cena (Euro)" />
+
+              <button type="button" (click)="removeTermPrice(termIndex, priceIndex)">Usuń cenę</button>
+            </div>
+
+            <button type="button" (click)="addTermPrice(termIndex)">Dodaj cenę dla kabiny</button>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" (click)="addTerm()">Dodaj termin</button>
     </section>
 
     <!-- Sekcja Plan Podróży -->

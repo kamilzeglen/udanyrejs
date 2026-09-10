@@ -32,6 +32,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public offerForm: FormGroup;
   public itineraryArray: FormArray;
+  public termsArray: FormArray;
+  public cabinTypes$ = this.commonFacade.cabinTypes$;
 
   public scrappedData: boolean;
 
@@ -63,17 +65,16 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       syncData: [true],
       isRecommended: [false],
       name: ['', Validators.required],
-      price: [null, Validators.required],
       companyId: ['', Validators.required],
       destinations: [''],
       categories: [''],
       shipId: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+      terms: this.fb.array([]),
       itinerary: this.fb.array([]),
     });
 
     this.itineraryArray = this.offerForm.get('itinerary') as FormArray;
+    this.termsArray = this.offerForm.get('terms') as FormArray;
 
     this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({ offer }) => {
       this.editingOffer = offer;
@@ -107,24 +108,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         const companyId = this.offerForm.get('companyId').value;
         if (companyId) {
           this.commonFacade.getShips(companyId);
-        }
-      });
-
-    this.offerForm
-      .get('startDate')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (!this.isInitializing) {
-          this.updateItineraryDays();
-        }
-      });
-
-    this.offerForm
-      .get('endDate')
-      ?.valueChanges.pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (!this.isInitializing) {
-          this.updateItineraryDays();
+          this.commonFacade.getCabinTypes(companyId);
         }
       });
 
@@ -240,14 +224,72 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   }
 
   public updateItineraryDays(): void {
-    const startDate = new Date(this.offerForm.get('startDate')?.value);
-    const endDate = new Date(this.offerForm.get('endDate')?.value);
+    if (!this.termsArray.length) {
+      return;
+    }
+
+    const firstTerm = this.termsArray.at(0);
+    const startDate = new Date(firstTerm.get('startDate')?.value);
+    const endDate = new Date(firstTerm.get('endDate')?.value);
 
     if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
       const timeDifference = endDate.getTime() - startDate.getTime();
       const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0);
       this.adjustItineraryDays(nights, startDate);
     }
+  }
+
+  public addTerm(): void {
+    const termGroup = this.fb.group({
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+      prices: this.fb.array([]),
+    });
+
+    this.termsArray.push(termGroup);
+
+    if (this.termsArray.length === 1) {
+      this.subscribeToFirstTermDates(termGroup);
+    }
+  }
+
+  public removeTerm(termIndex: number): void {
+    this.termsArray.removeAt(termIndex);
+  }
+
+  public addTermPrice(termIndex: number): void {
+    const pricesArray = this.termsArray.at(termIndex).get('prices') as FormArray;
+    pricesArray.push(
+      this.fb.group({
+        cabinTypeId: ['', Validators.required],
+        price: [null, Validators.required],
+      }),
+    );
+  }
+
+  public removeTermPrice(termIndex: number, priceIndex: number): void {
+    const pricesArray = this.termsArray.at(termIndex).get('prices') as FormArray;
+    pricesArray.removeAt(priceIndex);
+  }
+
+  private subscribeToFirstTermDates(termGroup: FormGroup): void {
+    termGroup
+      .get('startDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.isInitializing) {
+          this.updateItineraryDays();
+        }
+      });
+
+    termGroup
+      .get('endDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (!this.isInitializing) {
+          this.updateItineraryDays();
+        }
+      });
   }
 
   public adjustItineraryDays(nights: number, startDate: Date): void {
@@ -312,8 +354,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
 
     // Formularz operuje na cenie w złotych, backend przechowuje ją w groszach.
-    if (payload.price !== undefined) {
-      payload.price = Math.round(Number(payload.price) * 100);
+    if (payload.terms) {
+      payload.terms = payload.terms.map((term: any) => ({
+        ...term,
+        prices: (term.prices || []).map((priceRow: any) => ({
+          ...priceRow,
+          price: Math.round(Number(priceRow.price) * 100),
+        })),
+      }));
     }
 
     if (this.mode === 'ADD') {
@@ -463,11 +511,33 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public patchValues(data: Partial<Offer>): void {
     this.offerForm.patchValue({
       ...data,
-      // Backend przechowuje cenę w groszach, formularz operuje na złotych.
-      price: Number(data.price) / 100,
       destinations: data?.destinations?.map((destinations: any) => destinations.id),
       categories: data?.categories?.map((categories: any) => categories.id),
     });
+
+    if (data?.terms) {
+      this.termsArray.clear();
+
+      data.terms.forEach((term) => {
+        const termGroup = this.fb.group({
+          startDate: [term.startDate],
+          endDate: [term.endDate],
+          prices: this.fb.array(
+            (term.prices || []).map((priceRow) =>
+              this.fb.group({
+                cabinTypeId: [priceRow.cabinType?.id ?? priceRow.cabinTypeId, Validators.required],
+                price: [Number(priceRow.price) / 100, Validators.required],
+              }),
+            ),
+          ),
+        });
+        this.termsArray.push(termGroup);
+      });
+
+      if (this.termsArray.length) {
+        this.subscribeToFirstTermDates(this.termsArray.at(0) as FormGroup);
+      }
+    }
 
     // Dodanie itinerary, jeśli istnieje
     if (data?.itinerary) {
