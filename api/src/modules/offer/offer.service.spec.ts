@@ -255,4 +255,63 @@ describe('OfferService', () => {
       ).rejects.toThrow(AppException);
     });
   });
+
+  describe('findOneById', () => {
+    it('joins terms, their prices and cabin types', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const joins: string[] = [];
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn((relation: string) => {
+          joins.push(relation);
+          return queryBuilder;
+        }),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({ id: 'offer-1' }),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await service.findOneById('offer-1');
+
+      expect(joins).toEqual(
+        expect.arrayContaining([
+          'offer.terms',
+          'terms.prices',
+          'termPrices.cabinType',
+        ]),
+      );
+    });
+  });
+
+  describe('findActiveOffers', () => {
+    it('filters by term start date instead of the removed offer.startDate column', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const queryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await service.findActiveOffers({ lessThan: new Date('2027-01-01') });
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('offer_term'),
+        {
+          lessThan: new Date('2027-01-01'),
+        },
+      );
+    });
+
+    it('does not throw when called without opts', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const queryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await expect(service.findActiveOffers()).resolves.toEqual([]);
+    });
+  });
 });

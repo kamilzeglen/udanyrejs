@@ -54,6 +54,9 @@ export class OfferService {
       .leftJoinAndSelect('offer.destinations', 'destinations')
       .leftJoinAndSelect('offer.categories', 'categories')
       .leftJoinAndSelect('offer.shareStats', 'shareStats')
+      .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.prices', 'termPrices')
+      .leftJoinAndSelect('termPrices.cabinType', 'cabinType')
       .leftJoinAndSelect('offer.createdBy', 'createdBy')
       .leftJoinAndSelect('offer.updatedBy', 'updatedBy')
       .where('offer.id = :id', { id })
@@ -73,10 +76,11 @@ export class OfferService {
       .createQueryBuilder('offer')
       .where('offer.isActive = :isActive', { isActive: true });
 
-    if (opts.lessThan) {
-      queryBuilder.andWhere('offer.startDate <= :lessThan', {
-        lessThan: opts.lessThan,
-      });
+    if (opts?.lessThan) {
+      queryBuilder.andWhere(
+        'EXISTS (SELECT 1 FROM offer_term term WHERE term."offerId" = offer.id AND term."startDate" <= :lessThan)',
+        { lessThan: opts.lessThan },
+      );
     }
 
     return queryBuilder.getMany();
