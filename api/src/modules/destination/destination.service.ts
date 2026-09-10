@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Destination } from '@modules/destination/destination.entity';
@@ -7,6 +7,8 @@ import { CreateDestinationDto } from '@modules/destination/dto/create-destinatio
 import { UserService } from '@modules/user/user.service';
 import { UpdateDestinationDto } from '@modules/destination/dto/update-destination.dto';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class DestinationService {
@@ -67,7 +69,7 @@ export class DestinationService {
       .getOne();
 
     if (!destination) {
-      throw new NotFoundException(`Destination with ID ${id} not found`);
+      throw new AppException(API_ERRORS.DESTINATION_NOT_FOUND, { id });
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
@@ -99,7 +101,9 @@ export class DestinationService {
       .getOne();
 
     if (!destination) {
-      throw new Error('Destination not found');
+      throw new AppException(API_ERRORS.DESTINATION_NOT_FOUND, {
+        id: destinationId,
+      });
     }
 
     await this.logService.createLog(

@@ -1,11 +1,4 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
@@ -23,6 +16,8 @@ import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { PaginationResp } from '../../interfaces/pagination-response';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class OfferService {
@@ -240,9 +235,12 @@ export class OfferService {
       this.logger.warn(
         `Rejected duplicate offer for company=${companyId} ship=${shipId} startDate=${createUserData.startDate} endDate=${createUserData.endDate}`,
       );
-      throw new BadRequestException(
-        'Oferta o tej nazwie i datach już istnieje.',
-      );
+      throw new AppException(API_ERRORS.OFFER_DUPLICATE, {
+        companyId,
+        shipId,
+        startDate: createUserData.startDate,
+        endDate: createUserData.endDate,
+      });
     }
 
     const requestUser = await this.userService.findOneByEmail(
@@ -311,7 +309,7 @@ export class OfferService {
       .getOne();
 
     if (!offer) {
-      throw new NotFoundException(`Offer with ID ${id} not found`);
+      throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id });
     }
 
     const requestUser = await this.userService.findOneByEmail(
@@ -354,7 +352,7 @@ export class OfferService {
       .getOne();
 
     if (!offer) {
-      throw new NotFoundException(`Offer with ID ${offerID} not found`);
+      throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerID });
     }
 
     await this.dataSource.transaction(async (manager) => {
@@ -404,7 +402,7 @@ export class OfferService {
     const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
-      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+      throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerId });
     }
 
     offer.isActive = false;
@@ -424,7 +422,7 @@ export class OfferService {
     const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
-      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+      throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerId });
     }
 
     offer.isActive = true;

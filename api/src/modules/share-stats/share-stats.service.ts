@@ -1,13 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer } from '@modules/offer/offer.entity';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class ShareStatsService {
@@ -46,12 +44,14 @@ export class ShareStatsService {
       .where('offer.id = :offerId', { offerId })
       .getOne();
     if (!offer || !offer.shareStatsId) {
-      throw new NotFoundException('Oferta lub statystyki nie istnieją');
+      throw new AppException(API_ERRORS.OFFER_OR_SHARE_STATS_NOT_FOUND, {
+        offerId,
+      });
     }
 
     const shareStats = await this.findOneById(offer.shareStatsId);
     if (!shareStats) {
-      throw new NotFoundException('Statystyki udostępniania nie istnieją');
+      throw new AppException(API_ERRORS.SHARE_STATS_NOT_FOUND, { offerId });
     }
 
     switch (platform) {
@@ -68,7 +68,9 @@ export class ShareStatsService {
         shareStats.tiktokClicks++;
         break;
       default:
-        throw new BadRequestException('Nieobsługiwana platforma');
+        throw new AppException(API_ERRORS.SHARE_STATS_UNSUPPORTED_PLATFORM, {
+          platform,
+        });
     }
 
     if (platform === 'web') {

@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Ship } from '@modules/ship/ship.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +8,8 @@ import { UpdateShipDto } from '@modules/ship/dto/update-ship.dto';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class ShipService {
@@ -78,7 +75,7 @@ export class ShipService {
       .getOne();
 
     if (!ship) {
-      throw new NotFoundException(`Ship with ID ${id} not found`);
+      throw new AppException(API_ERRORS.SHIP_NOT_FOUND, { id });
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
@@ -104,7 +101,7 @@ export class ShipService {
       .getOne();
 
     if (!ship) {
-      throw new Error('Ship not found');
+      throw new AppException(API_ERRORS.SHIP_NOT_FOUND, { id: shipId });
     }
 
     if (ship.imageFile) {

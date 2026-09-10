@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '@modules/category/category.entity';
@@ -7,6 +7,8 @@ import { UserService } from '@modules/user/user.service';
 import { CreateCategoryDto } from '@modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@modules/category/dto/update-category.dto';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class CategoryService {
@@ -82,7 +84,7 @@ export class CategoryService {
       .getOne();
 
     if (!category) {
-      throw new NotFoundException(`Category with ID ${id} not found`);
+      throw new AppException(API_ERRORS.CATEGORY_NOT_FOUND, { id });
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
@@ -110,7 +112,7 @@ export class CategoryService {
       .getOne();
 
     if (!category) {
-      throw new Error('Category not found');
+      throw new AppException(API_ERRORS.CATEGORY_NOT_FOUND, { id: categoryId });
     }
 
     await this.logService.createLog(

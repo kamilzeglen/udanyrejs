@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Company } from './company.entity';
@@ -13,6 +8,8 @@ import { UserService } from '@modules/user/user.service';
 import { CreateCompanyDto } from '@modules/company/dto/create-company.dto';
 import { UpdateCompanyDto } from '@modules/company/dto/update-company.dto';
 import { LogService } from '@modules/log/log.service';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class CompanyService {
@@ -75,7 +72,7 @@ export class CompanyService {
       .getOne();
 
     if (!company) {
-      throw new NotFoundException(`Company with ID ${id} not found`);
+      throw new AppException(API_ERRORS.COMPANY_NOT_FOUND, { id });
     }
 
     const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
@@ -101,7 +98,7 @@ export class CompanyService {
       .getOne();
 
     if (!company) {
-      throw new Error('Company not found');
+      throw new AppException(API_ERRORS.COMPANY_NOT_FOUND, { id: companyID });
     }
 
     if (company.imageFile) {
