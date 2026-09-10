@@ -180,4 +180,79 @@ describe('OfferService', () => {
       service.createOffer(validCreateDto as any, requestUser),
     ).rejects.toThrow(AppException);
   });
+
+  describe('updateOffer', () => {
+    const existingOffer = {
+      id: 'offer-1',
+      name: 'Stara nazwa',
+      company: { id: 'company-1' },
+      ship: { id: 'ship-1' },
+    };
+
+    beforeEach(() => {
+      const offerRepository = (service as any).offerRepository;
+      offerRepository.createQueryBuilder.mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(existingOffer),
+      });
+    });
+
+    it('replaces all existing terms when new terms are provided', async () => {
+      cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
+
+      await service.updateOffer(
+        'offer-1',
+        {
+          companyId: 'company-1',
+          shipId: 'ship-1',
+          terms: [
+            {
+              startDate: '2027-05-01',
+              endDate: '2027-05-08',
+              prices: [{ cabinTypeId: 'cabin-1', price: 200000 }],
+            },
+          ],
+        } as any,
+        requestUser,
+      );
+
+      expect(transactionManager.delete).toHaveBeenCalledWith(
+        expect.anything(),
+        { offerId: 'offer-1' },
+      );
+      // 1 zapis oferty + 1 termin + 1 cena = 3.
+      expect(transactionManager.save).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not touch terms when the update omits them', async () => {
+      await service.updateOffer(
+        'offer-1',
+        { companyId: 'company-1', shipId: 'ship-1', name: 'Nowa nazwa' } as any,
+        requestUser,
+      );
+
+      expect(transactionManager.delete).not.toHaveBeenCalled();
+      expect(cabinTypeService.findByIds).not.toHaveBeenCalled();
+    });
+
+    it('throws OFFER_NOT_FOUND for a missing offer', async () => {
+      const offerRepository = (service as any).offerRepository;
+      offerRepository.createQueryBuilder.mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      });
+
+      await expect(
+        service.updateOffer(
+          'missing-offer',
+          { companyId: 'company-1', shipId: 'ship-1' } as any,
+          requestUser,
+        ),
+      ).rejects.toThrow(AppException);
+    });
+  });
 });

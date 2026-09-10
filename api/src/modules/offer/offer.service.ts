@@ -291,8 +291,14 @@ export class OfferService {
     updateOfferDto: UpdateOfferDto,
     reqCreatedBy: User,
   ): Promise<Offer> {
-    const { companyId, shipId, destinations, categories, ...updateOfferData } =
-      updateOfferDto;
+    const {
+      companyId,
+      shipId,
+      destinations,
+      categories,
+      terms,
+      ...updateOfferData
+    } = updateOfferDto;
 
     const offer = await this.offerRepository
       .createQueryBuilder('offer')
@@ -303,6 +309,10 @@ export class OfferService {
 
     if (!offer) {
       throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id });
+    }
+
+    if (terms?.length) {
+      await this.assertCabinTypesExist(terms);
     }
 
     const requestUser = await this.userService.findOneByEmail(
@@ -327,12 +337,26 @@ export class OfferService {
         await this.destinationService.findByIds(destinations);
     }
 
-    await this.logService.createLog(
-      'Zaktualizowano ofertę: ' + offer.name + ' (' + offer.id + ')',
-      reqCreatedBy.email,
-    );
-    this.logger.log(`Updated offer ${offer.id} (${offer.name})`);
-    return this.offerRepository.save(offer);
+    return this.dataSource.transaction(async (manager) => {
+      const savedOffer = await manager.save(offer);
+
+      if (terms?.length) {
+        await manager.delete(OfferTerm, { offerId: savedOffer.id });
+        await this.saveOfferTerms(manager, savedOffer.id, terms);
+      }
+
+      await this.logService.createLog(
+        'Zaktualizowano ofertę: ' +
+          savedOffer.name +
+          ' (' +
+          savedOffer.id +
+          ')',
+        reqCreatedBy.email,
+      );
+      this.logger.log(`Updated offer ${savedOffer.id} (${savedOffer.name})`);
+
+      return savedOffer;
+    });
   }
 
   async removeOffer(offerID: string, reqCreatedBy: User): Promise<boolean> {
