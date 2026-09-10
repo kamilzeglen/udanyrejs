@@ -41,4 +41,26 @@ export class UserService {
       .where('user.email = :email', { email })
       .getOne();
   }
+
+  async setRefreshToken(
+    userId: string,
+    refreshTokenHash: string,
+    refreshTokenExpiresAt: Date,
+  ): Promise<void> {
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ refreshTokenHash, refreshTokenExpiresAt })
+      .where('id = :userId', { userId })
+      .execute();
+  }
+
+  async clearRefreshToken(userId: string): Promise<void> {
+    await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ refreshTokenHash: null, refreshTokenExpiresAt: null })
+      .where('id = :userId', { userId })
+      .execute();
+  }
 }

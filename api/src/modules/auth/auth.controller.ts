@@ -2,19 +2,21 @@ import {
   Body,
   Controller,
   Get,
-  InternalServerErrorException,
   Post,
   Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService, AuthSession } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 import { User } from '../user/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { Throttle } from '@nestjs/throttler';
+import { AppException } from '@core/errors/app-exception';
+import { API_ERRORS } from '@core/errors/api-errors';
+import { extractCookie } from '@core/utils/cookie.util';
 
 @Controller('auth')
 export class AuthController {
@@ -22,26 +24,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('/myself')
-  async getProfile(
-    @Request() req: { user: User },
-    @Res({ passthrough: true }) res,
-  ) {
-    const result = await this.authService.createToken(req.user);
-    if (!result.access_token) {
-      throw new InternalServerErrorException('ERROR_GENERATING_SECURITY_TOKEN');
-    }
-
-    res.cookie('access_token', result.access_token, {
-      expires: new Date(
-        new Date().getTime() +
-          Number(process.env.JWT_EXPIRATION_SECONDS) * 1000,
-      ),
-      sameSite: process.env.HTTPS_ENABLED === 'ENABLED' ? 'none' : 'strict',
-      httpOnly: true,
-      secure: process.env.HTTPS_ENABLED === 'ENABLED',
-      domain: process.env.DOMAINS_WHITELIST,
-    });
-
+  async getProfile(@Request() req: { user: User }) {
     return req.user;
   }
 
@@ -56,19 +39,78 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('/login')
-  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<any> {
-    const loginResponse = await this.authService.login(loginDto);
-    res.cookie('access_token', loginResponse.access_token, {
+  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
+    const session = await this.authService.login(loginDto);
+    this.setAuthCookies(res, session);
+    res.send({ access_token: session.accessToken });
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('/refresh')
+  async refresh(@Request() req, @Res() res: Response): Promise<void> {
+    const refreshToken = extractCookie(req, 'refresh_token');
+    if (!refreshToken) {
+      throw new AppException(API_ERRORS.REFRESH_TOKEN_INVALID);
+    }
+
+    const session = await this.authService.refreshSession(refreshToken);
+    this.setAuthCookies(res, session);
+    res.send({ access_token: session.accessToken });
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/logout')
+  async logout(
+    @Request() req: { user: { sub: string } },
+    @Res() res: Response,
+  ): Promise<void> {
+    await this.authService.logout(req.user.sub);
+    this.clearAuthCookies(res);
+    res.send({ success: true });
+  }
+
+  private setAuthCookies(res: Response, session: AuthSession): void {
+    const secure = process.env.HTTPS_ENABLED === 'ENABLED';
+    const sameSite = secure ? 'none' : 'strict';
+
+    res.cookie('access_token', session.accessToken, {
       expires: new Date(
-        new Date().getTime() +
-          Number(process.env.JWT_EXPIRATION_SECONDS) * 1000,
+        Date.now() + Number(process.env.JWT_EXPIRATION_SECONDS) * 1000,
       ),
-      sameSite: process.env.HTTPS_ENABLED === 'ENABLED' ? 'none' : 'strict',
+      sameSite,
       httpOnly: true,
-      secure: process.env.HTTPS_ENABLED === 'ENABLED',
+      secure,
       domain: process.env.DOMAINS_WHITELIST,
     });
 
-    return res.send({ access_token: loginResponse.access_token });
+    // Refresh token wraca do serwera wyłącznie na ścieżce /auth (refresh,
+    // logout) - nie ma powodu wysyłać go z każdym żądaniem do API.
+    res.cookie('refresh_token', session.refreshToken, {
+      expires: session.refreshTokenExpiresAt,
+      sameSite,
+      httpOnly: true,
+      secure,
+      domain: process.env.DOMAINS_WHITELIST,
+      path: '/auth',
+    });
+  }
+
+  private clearAuthCookies(res: Response): void {
+    const secure = process.env.HTTPS_ENABLED === 'ENABLED';
+    const sameSite = secure ? 'none' : 'strict';
+
+    res.clearCookie('access_token', {
+      sameSite,
+      httpOnly: true,
+      secure,
+      domain: process.env.DOMAINS_WHITELIST,
+    });
+    res.clearCookie('refresh_token', {
+      sameSite,
+      httpOnly: true,
+      secure,
+      domain: process.env.DOMAINS_WHITELIST,
+      path: '/auth',
+    });
   }
 }

@@ -21,4 +21,14 @@ export class AuthHttpService {
     const url = `${this.API_URL}/auth/login`;
     return this.http.post<User>(url, payload, { withCredentials: true });
   }
+
+  public refresh(): Observable<{ access_token: string }> {
+    const url = `${this.API_URL}/auth/refresh`;
+    return this.http.post<{ access_token: string }>(url, {}, { withCredentials: true });
+  }
+
+  public logout(): Observable<{ success: boolean }> {
+    const url = `${this.API_URL}/auth/logout`;
+    return this.http.post<{ success: boolean }>(url, {}, { withCredentials: true });
+  }
 }
