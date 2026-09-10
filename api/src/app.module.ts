@@ -30,6 +30,10 @@ import { envValidationSchema } from '@core/config/env.validation';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: envValidationSchema,
+      // Zbiera wszystkie brakujące/błędne zmienne naraz zamiast zatrzymywać
+      // się na pierwszej - jeden nieudany deploy pokazuje cały problem,
+      // nie tylko jego pierwszy objaw.
+      validationOptions: { abortEarly: false },
     }),
     ThrottlerModule.forRoot([
       {

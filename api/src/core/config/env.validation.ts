@@ -5,7 +5,9 @@ export const envValidationSchema = Joi.object({
   APP_PORT: Joi.number().required(),
   WEB_URL: Joi.string().uri().required(),
 
-  DAYS_BEFORE_INACTIVE: Joi.number().required(),
+  // Nieużywana obecnie w kodzie (żaden serwis jej nie czyta) - opcjonalna,
+  // żeby nie wymagać od produkcji ustawiania zmiennej pod martwą funkcję.
+  DAYS_BEFORE_INACTIVE: Joi.number().default(7),
 
   JWT_SECRET: Joi.string().min(16).required(),
   JWT_EXPIRATION_SECONDS: Joi.number().required(),
