@@ -23,6 +23,9 @@ FROM node:18-alpine AS runner
 # Ustawienie katalogu roboczego
 WORKDIR /api
 
+# curl jest potrzebny wyłącznie do HEALTHCHECK poniżej
+RUN apk add --no-cache curl
+
 # Instalacja tylko produkcyjnych zależności
 COPY package*.json ./
 RUN npm install --production --legacy-peer-deps
@@ -36,6 +39,10 @@ COPY /src/typeorm.ts ./src/
 
 # Port, na którym działa aplikacja
 EXPOSE 5006
+
+# Healthcheck sprawdza realny endpoint aplikacji (w tym połączenie z bazą, patrz /health)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:5006/health || exit 1
 
 # Uruchamianie aplikacji z migracjami
 CMD ["sh", "-c", "npm run migration:run && node dist/main"]

@@ -31,5 +31,9 @@ COPY --from=builder /web/dist/web/browser /usr/share/nginx/html
 # Port, na którym działa aplikacja
 EXPOSE 80
 
+# Healthcheck sprawdza, czy nginx faktycznie serwuje aplikację
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost/ || exit 1
+
 # Uruchomienie Nginx
 CMD ["nginx", "-g", "daemon off;"]
