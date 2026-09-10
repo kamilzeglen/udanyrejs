@@ -13,6 +13,8 @@ import { AdminDestinationAddEditComponent } from './admin-destination-add-edit/a
 import { AdminCompanyAddEditComponent } from './admin-company-add-edit/admin-company-add-edit.component';
 import { AdminCategoryAddEditComponent } from './admin-category-add-edit/admin-category-add-edit.component';
 import { AdminLogsListComponent } from './admin-logs-list/admin-logs-list.component';
+import { AdminCabinTypeListComponent } from './admin-cabin-type-list/admin-cabin-type-list.component';
+import { AdminCabinTypeAddEditComponent } from './admin-cabin-type-add-edit/admin-cabin-type-add-edit.component';
 
 const routes: Routes = [
   {
@@ -91,6 +93,18 @@ const routes: Routes = [
       {
         path: 'logs',
         component: AdminLogsListComponent,
+      },
+      {
+        path: 'cabin-types',
+        component: AdminCabinTypeListComponent,
+      },
+      {
+        path: 'cabin-types/add',
+        component: AdminCabinTypeAddEditComponent,
+      },
+      {
+        path: 'cabin-types/edit/:cabinTypeId',
+        component: AdminCabinTypeAddEditComponent,
       },
     ],
   },

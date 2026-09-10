@@ -1,0 +1,35 @@
+<div class="admin-cabin-type-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === 'EDIT' ? 'Edycja' : 'Dodawanie' }}</h1>
+
+  <form [formGroup]="cabinTypeForm">
+    <section class="section data-section">
+      <h2>Dane rodzaju kabiny</h2>
+
+      <div class="form-group">
+        <label for="name">Nazwa:</label>
+        <input id="name" formControlName="name" type="text" placeholder="np. Balkonowa" />
+      </div>
+
+      <div class="form-group">
+        <label for="companyId">Firma:</label>
+        <mat-select formControlName="companyId" id="companyId" placeholder="Firma" [disabled]="!companies$">
+          <mat-option *ngFor="let company of companies$ | async" [value]="company.id">
+            {{ company.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="form-group">
+        <mat-checkbox formControlName="isActive">Aktywna:</mat-checkbox>
+      </div>
+    </section>
+
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="cabinTypeForm.invalid">
+      {{ mode === 'ADD' ? 'Dodaj rodzaj kabiny' : 'Zaktualizuj rodzaj kabiny' }}
+    </button>
+  </form>
+</div>
