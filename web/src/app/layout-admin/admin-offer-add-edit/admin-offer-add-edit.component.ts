@@ -34,6 +34,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public itineraryArray: FormArray;
   public termsArray: FormArray;
   public cabinTypes$ = this.commonFacade.cabinTypes$;
+  public termsDisabledCabinTypeIds: Record<string, boolean>[][] = [];
 
   public scrappedData: boolean;
 
@@ -75,6 +76,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     this.itineraryArray = this.offerForm.get('itinerary') as FormArray;
     this.termsArray = this.offerForm.get('terms') as FormArray;
+
+    this.termsArray.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.recomputeDisabledCabinTypes();
+    });
 
     this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({ offer }) => {
       this.editingOffer = offer;
@@ -270,6 +275,27 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public removeTermPrice(termIndex: number, priceIndex: number): void {
     const pricesArray = this.termsArray.at(termIndex).get('prices') as FormArray;
     pricesArray.removeAt(priceIndex);
+  }
+
+  private recomputeDisabledCabinTypes(): void {
+    this.termsDisabledCabinTypeIds = this.termsArray.controls.map((termGroup) => {
+      const pricesArray = termGroup.get('prices') as FormArray;
+      const selectedCabinTypeIds = pricesArray.controls.map((priceGroup) => priceGroup.get('cabinTypeId')?.value);
+
+      return pricesArray.controls.map((priceGroup, rowIndex) => {
+        const disabledCabinTypeIds: Record<string, boolean> = {};
+
+        selectedCabinTypeIds.forEach((cabinTypeId, otherRowIndex) => {
+          const isOwnRow = otherRowIndex === rowIndex;
+          if (!cabinTypeId || isOwnRow) {
+            return;
+          }
+          disabledCabinTypeIds[cabinTypeId] = true;
+        });
+
+        return disabledCabinTypeIds;
+      });
+    });
   }
 
   private subscribeToFirstTermDates(termGroup: FormGroup): void {
