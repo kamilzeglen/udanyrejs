@@ -18,7 +18,7 @@
       </div>
       <div class="element highlight">
         <div class="element-label">Cena od:</div>
-        <div class="element-value">{{ offer.price | currency: '&#8364;' : 'symbol' : '0.0' }}</div>
+        <div class="element-value">{{ offer.price / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</div>
       </div>
     </div>
 

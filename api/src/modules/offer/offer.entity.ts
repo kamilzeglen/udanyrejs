@@ -59,7 +59,8 @@ export class Offer {
   @Column({ type: 'uuid', nullable: false })
   shipId: string;
 
-  @Column('decimal')
+  // Cena w groszach (najmniejsza jednostka waluty) - nie w złotych.
+  @Column('integer')
   price: number;
 
   @Column()

@@ -2,10 +2,11 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
-  IsNumber,
+  IsInt,
   IsOptional,
   IsString,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -38,7 +39,9 @@ export class CreateOfferDto {
   @IsOptional()
   categories?: string[];
 
-  @IsNumber()
+  // Cena w groszach (najmniejsza jednostka waluty), nie w złotych.
+  @IsInt()
+  @Min(0)
   price: number;
 
   @IsUUID()

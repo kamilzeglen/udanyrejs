@@ -311,6 +311,11 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Formularz operuje na cenie w złotych, backend przechowuje ją w groszach.
+    if (payload.price !== undefined) {
+      payload.price = Math.round(Number(payload.price) * 100);
+    }
+
     if (this.mode === 'ADD') {
       this.offerFacade.createOffer({ formData: payload });
     }
@@ -458,7 +463,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public patchValues(data: Partial<Offer>): void {
     this.offerForm.patchValue({
       ...data,
-      price: Number(data.price),
+      // Backend przechowuje cenę w groszach, formularz operuje na złotych.
+      price: Number(data.price) / 100,
       destinations: data?.destinations?.map((destinations: any) => destinations.id),
       categories: data?.categories?.map((categories: any) => categories.id),
     });

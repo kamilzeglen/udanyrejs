@@ -16,6 +16,7 @@ export interface Offer {
   isRecommended: boolean;
   company: Company;
   companyId: string;
+  // Cena w groszach (najmniejsza jednostka waluty), nie w złotych.
   price: number;
   ship: Ship;
   shipId: string;
