@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
@@ -13,6 +13,8 @@ import axios from 'axios';
 
 @Injectable()
 export class PdfFileService {
+  private readonly logger = new Logger(PdfFileService.name);
+
   constructor(
     @InjectRepository(PdfFile)
     private pdfFileRepository: Repository<PdfFile>,
@@ -144,10 +146,10 @@ export class PdfFileService {
       if (existsSync(filePath)) {
         await fs.unlink(filePath);
       } else {
-        console.error(`File does not exist: ${filePath}`);
+        this.logger.error(`File does not exist: ${filePath}`);
       }
     } catch (err) {
-      console.error(`Failed to delete file: ${err.message}`);
+      this.logger.error(`Failed to delete file: ${err.message}`);
       throw new Error('Failed to delete the physical file');
     }
 
@@ -166,7 +168,10 @@ export class PdfFileService {
         buffer: fileBuffer,
         mimetype: response.headers['content-type'],
       } as Express.Multer.File;
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `Failed to download PDF from URL ${url}: ${error.message}`,
+      );
       throw new BadRequestException('Failed to download PDF from URL');
     }
   }

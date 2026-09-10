@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +14,8 @@ import { LogService } from '@modules/log/log.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -22,6 +25,9 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<User> {
     const user = await this.userService.findOneByEmail(registerDto.email);
     if (user) {
+      this.logger.warn(
+        `Rejected registration - email already exists: ${registerDto.email}`,
+      );
       throw new NotAcceptableException('User already exists');
     }
 
@@ -39,6 +45,7 @@ export class AuthService {
       'Dodano konto:' + registerDto.email,
       'SYSTEM',
     );
+    this.logger.log(`Registered new account: ${registerDto.email}`);
 
     return this.userService.createUser({
       email: registerDto.email,
@@ -49,6 +56,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{ access_token: string }> {
     const user = await this.userService.findOneByEmail(loginDto.email);
     if (!user) {
+      this.logger.warn(
+        `Failed login attempt - unknown email: ${loginDto.email}`,
+      );
       throw new UnauthorizedException('USER_NOT_EXIST');
     }
 
@@ -57,10 +67,16 @@ export class AuthService {
       user.password,
     );
     if (!passwordValid) {
+      this.logger.warn(
+        `Failed login attempt - wrong password: ${loginDto.email}`,
+      );
       throw new UnauthorizedException('PASSWORD_NOT_MATCH');
     }
 
     if (!user.isActive) {
+      this.logger.warn(
+        `Failed login attempt - inactive account: ${loginDto.email}`,
+      );
       throw new UnauthorizedException('USER_IS_NOT_ACTIVE');
     }
 
@@ -69,6 +85,7 @@ export class AuthService {
         'Zalogowano na konto: ' + loginDto.email,
         'SYSTEM',
       );
+      this.logger.log(`Successful login: ${loginDto.email}`);
 
       const access_token = await this.createToken(user);
       return {

@@ -6,8 +6,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectLiteral, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, ObjectLiteral, Repository } from 'typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -20,10 +20,9 @@ import { CategoryService } from '@modules/category/category.service';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
-import { ShareStatsService } from '@modules/share-stats/share-stats.service';
+import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { PaginationResp } from '../../interfaces/pagination-response';
 import { LogService } from '@modules/log/log.service';
-import { PdfFileType } from '../../interfaces/save-update-file-types';
 
 @Injectable()
 export class OfferService {
@@ -32,6 +31,8 @@ export class OfferService {
   constructor(
     @InjectRepository(Offer)
     private offerRepository: Repository<Offer>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @Inject(forwardRef(() => ImageFileService))
     private readonly imageFileService: ImageFileService,
     private readonly pdfFileService: PdfFileService,
@@ -40,7 +41,6 @@ export class OfferService {
     private readonly shipService: ShipService,
     private readonly categoryService: CategoryService,
     private readonly destinationService: DestinationService,
-    private readonly shareStatsService: ShareStatsService,
     private readonly logService: LogService,
   ) {}
 
@@ -97,21 +97,6 @@ export class OfferService {
     }
 
     return queryBuilder.getMany();
-  }
-
-  async deactivate(offer: Offer): Promise<Offer> {
-    offer.isActive = false;
-    return await this.offerRepository.save(offer);
-  }
-
-  async activate(offer: Offer): Promise<Offer> {
-    offer.isActive = true;
-    return await this.offerRepository.save(offer);
-  }
-
-  async updatedBy(offer: Offer, user: User): Promise<Offer> {
-    offer.updatedBy = user;
-    return await this.offerRepository.save(offer);
   }
 
   async searchOffers(
@@ -252,6 +237,9 @@ export class OfferService {
       .getOne();
 
     if (existingOffer) {
+      this.logger.warn(
+        `Rejected duplicate offer for company=${companyId} ship=${shipId} startDate=${createUserData.startDate} endDate=${createUserData.endDate}`,
+      );
       throw new BadRequestException(
         'Oferta o tej nazwie i datach już istnieje.',
       );
@@ -263,33 +251,48 @@ export class OfferService {
     const company = await this.companyService.findOneById(companyId);
     const ship = await this.shipService.findOneById(shipId);
 
-    let offer = new Offer();
-    Object.assign(offer, createUserData, {
-      company,
-      ship,
-      createdBy: requestUser,
+    const categoryEntities = categories?.length
+      ? await this.categoryService.findByIds(categories)
+      : [];
+    const destinationEntities = destinations?.length
+      ? await this.destinationService.findByIds(destinations)
+      : [];
+
+    const offer = await this.dataSource.transaction(async (manager) => {
+      let newOffer = new Offer();
+      Object.assign(newOffer, createUserData, {
+        company,
+        ship,
+        createdBy: requestUser,
+      });
+
+      newOffer = await manager.save(newOffer);
+
+      const shareStats = new ShareStats();
+      shareStats.offerId = newOffer.id;
+      shareStats.facebookClicks = 0;
+      shareStats.instagramClicks = 0;
+      shareStats.tiktokClicks = 0;
+      const savedShareStats = await manager.save(shareStats);
+
+      newOffer.shareStatsId = savedShareStats.id;
+
+      if (categoryEntities.length) {
+        newOffer.categories = categoryEntities;
+      }
+      if (destinationEntities.length) {
+        newOffer.destinations = destinationEntities;
+      }
+
+      return manager.save(newOffer);
     });
-
-    offer = await this.offerRepository.save(offer);
-
-    const shareStats = await this.shareStatsService.createForOffer(offer);
-
-    offer.shareStatsId = shareStats.id;
-    offer = await this.offerRepository.save(offer);
-
-    if (categories?.length) {
-      offer.categories = await this.categoryService.findByIds(categories);
-    }
-    if (destinations?.length) {
-      offer.destinations =
-        await this.destinationService.findByIds(destinations);
-    }
 
     await this.logService.createLog(
       'Dodano ofertę: ' + offer.name,
       reqCreatedBy.email,
     );
-    return this.offerRepository.save(offer);
+    this.logger.log(`Created offer ${offer.id} (${offer.name})`);
+    return offer;
   }
 
   async updateOffer(
@@ -337,6 +340,7 @@ export class OfferService {
       'Zaktualizowano ofertę: ' + offer.name + ' (' + offer.id + ')',
       reqCreatedBy.email,
     );
+    this.logger.log(`Updated offer ${offer.id} (${offer.name})`);
     return this.offerRepository.save(offer);
   }
 
@@ -350,23 +354,35 @@ export class OfferService {
       .getOne();
 
     if (!offer) {
-      throw new Error('Offer not found');
+      throw new NotFoundException(`Offer with ID ${offerID} not found`);
     }
 
-    await this.offerRepository
-      .createQueryBuilder()
-      .delete()
-      .from('offer_destinations')
-      .where('offerId = :offerID', { offerID })
-      .execute();
+    await this.dataSource.transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('offer_destinations')
+        .where('offerId = :offerID', { offerID })
+        .execute();
 
-    await this.offerRepository
-      .createQueryBuilder()
-      .delete()
-      .from('offer_categories')
-      .where('offerId = :offerID', { offerID })
-      .execute();
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('offer_categories')
+        .where('offerId = :offerID', { offerID })
+        .execute();
 
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from(Offer)
+        .where('id = :offerID', { offerID })
+        .execute();
+    });
+
+    // Sprzątanie plików wykonujemy dopiero po zatwierdzonej transakcji SQL —
+    // osierocony plik na dysku jest mniej szkodliwy niż usunięty rekord przy
+    // błędzie w połowie transakcji.
     if (offer.imageFile) {
       await this.imageFileService.removeImageFile(offer.imageFile.path);
     }
@@ -375,17 +391,11 @@ export class OfferService {
       await this.pdfFileService.removePdfFile(offer.pdfFile.path);
     }
 
-    await this.offerRepository
-      .createQueryBuilder()
-      .delete()
-      .from(Offer)
-      .where('id = :offerID', { offerID })
-      .execute();
-
     await this.logService.createLog(
       'Usunięto ofertę: ' + offer.name + ' (' + offer.id + ')',
       reqCreatedBy.email,
     );
+    this.logger.log(`Removed offer ${offer.id} (${offer.name})`);
     return true;
   }
 
@@ -397,13 +407,15 @@ export class OfferService {
       throw new NotFoundException(`Offer with ID ${offerId} not found`);
     }
 
-    this.deactivate(offer);
-    this.updatedBy(offer, user);
+    offer.isActive = false;
+    offer.updatedBy = user;
+    await this.offerRepository.save(offer);
 
     await this.logService.createLog(
       'Dezaktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
       reqCreatedBy.email,
     );
+    this.logger.log(`Deactivated offer ${offer.id} (${offer.name})`);
     return true;
   }
 
@@ -415,13 +427,15 @@ export class OfferService {
       throw new NotFoundException(`Offer with ID ${offerId} not found`);
     }
 
-    this.activate(offer);
-    this.updatedBy(offer, user);
+    offer.isActive = true;
+    offer.updatedBy = user;
+    await this.offerRepository.save(offer);
 
     await this.logService.createLog(
       'Aktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
       reqCreatedBy.email,
     );
+    this.logger.log(`Activated offer ${offer.id} (${offer.name})`);
     return true;
   }
 }

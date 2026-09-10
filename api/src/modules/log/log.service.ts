@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Log } from '@modules/log/log.entity';
@@ -7,6 +7,8 @@ import { UserService } from '@modules/user/user.service';
 
 @Injectable()
 export class LogService {
+  private readonly logger = new Logger(LogService.name);
+
   constructor(
     @InjectRepository(Log)
     private logRepository: Repository<Log>,
@@ -40,6 +42,10 @@ export class LogService {
       const log = this.logRepository.create({ message, createdBy: user });
       await this.logRepository.save(log);
     } catch (error) {
+      this.logger.error(
+        `Failed to persist audit log entry "${message}": ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Błąd zapisu loga: ${error.message}`);
     }
   }
