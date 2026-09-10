@@ -82,3 +82,7 @@ fabric.properties
 .deploy/
 backups/
 
+# Claude Code project rules (local only)
+.claude/
+CLAUDE.md
+
