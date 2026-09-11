@@ -1,3 +1,60 @@
+@import '../../../scss/variables.scss';
+
 .admin-offer-draft-list {
   padding: 1rem;
+
+  .title {
+    margin: 10px 0 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+}
+
+.custom-table {
+  margin: 0 20px;
+  border-collapse: collapse;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: $white;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .row {
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba($grey, 0.05);
+    }
+  }
+
+  mat-icon {
+    cursor: pointer;
+  }
+
+  .icon-edit {
+    color: $neutral;
+    margin-right: 8px;
+  }
+
+  .icon-delete {
+    color: $negative;
+  }
+
+  .unmatched-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: $negative;
+    background: rgba($negative, 0.08);
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .empty-state {
+    padding: 32px;
+    text-align: center;
+    color: $grey;
+  }
 }

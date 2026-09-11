@@ -192,4 +192,8 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
 
     this.offerFacade.createOffer({ formData: payload });
   }
+
+  public goBack(): void {
+    this.router.changeRoute({ linkParams: ['/admin/offers/discover/drafts'] });
+  }
 }

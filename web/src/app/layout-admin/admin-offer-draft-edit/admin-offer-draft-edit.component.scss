@@ -1,7 +1,126 @@
+@import '../../../scss/variables';
+
 .admin-offer-draft-edit {
-  padding: 1rem;
+  .title {
+    margin: 10px 0;
+    justify-self: center;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  form {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    padding-left: 10px;
+    margin-bottom: 20px;
+  }
+
+  .section {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    padding: 15px;
+  }
 
   .form-group {
-    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .term-card {
+    border: 1px solid $border-color;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: $white;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .term-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid $border-color;
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: $primary-color;
+    }
+  }
+
+  .term-card__dates {
+    font-size: 14px;
+    color: $grey;
+  }
+
+  .term-card__source-link {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: $tertiary-color;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .term-prices {
+    background: $background-color;
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .term-prices__label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: $grey;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 10px;
+  }
+
+  .term-price-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    mat-select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    input {
+      width: 160px;
+      flex-shrink: 0;
+    }
+
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  .submit-button {
+    display: flex;
+    margin: 20px auto 0;
+    padding: 12px 30px;
+    font-size: 18px;
   }
 }

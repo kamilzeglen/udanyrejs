@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { interval, ReplaySubject, take, takeUntil } from 'rxjs';
 import { DiscoverFacade } from '@state/discover';
 import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
@@ -12,9 +12,13 @@ import { ScrapedOfferDraft } from '@interfaces';
   styleUrl: './admin-offer-draft-list.component.scss',
 })
 export class AdminOfferDraftListComponent implements OnInit, OnDestroy {
+  private static readonly POLL_INTERVAL_MS = 5000;
+
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
   public drafts$ = this.discoverFacade.drafts$;
+
+  public readonly columnsToDisplay = ['name', 'shipName', 'company', 'terms', 'actions'];
 
   constructor(
     private readonly discoverFacade: DiscoverFacade,
@@ -30,6 +34,10 @@ export class AdminOfferDraftListComponent implements OnInit, OnDestroy {
     });
 
     this.discoverFacade.getDrafts();
+
+    interval(AdminOfferDraftListComponent.POLL_INTERVAL_MS)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.discoverFacade.getDrafts());
   }
 
   public ngOnDestroy(): void {
@@ -40,6 +48,10 @@ export class AdminOfferDraftListComponent implements OnInit, OnDestroy {
   public editDraft(draft: ScrapedOfferDraft): void {
     const linkParams = ['/admin/offers/discover/drafts/' + draft.id];
     this.routerFacade.changeRoute({ linkParams });
+  }
+
+  public goToDiscoverTrigger(): void {
+    this.routerFacade.changeRoute({ linkParams: ['/admin/offers/discover'] });
   }
 
   public discardDraft(draft: ScrapedOfferDraft): void {

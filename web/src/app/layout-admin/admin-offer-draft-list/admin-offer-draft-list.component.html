@@ -1,27 +1,47 @@
 <div class="admin-offer-draft-list">
-  <h2>Poczekalnia ofert ze scrapera</h2>
+  <div class="back-button">
+    <button (click)="goToDiscoverTrigger()">Powrót</button>
+  </div>
 
-  <table *ngIf="drafts$ | async as drafts">
-    <thead>
-      <tr>
-        <th>Nazwa</th>
-        <th>Statek</th>
-        <th>Armator (rejsy4you)</th>
-        <th>Terminy</th>
-        <th>Akcje</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let draft of drafts">
-        <td>{{ draft.name }}</td>
-        <td>{{ draft.shipName }}</td>
-        <td>{{ draft.companyNameRaw }} <span *ngIf="!draft.matchedCompanyId">(brak dopasowania)</span></td>
-        <td>{{ draft.terms.length }}</td>
-        <td>
-          <button (click)="editDraft(draft)">Edytuj i importuj</button>
-          <button (click)="discardDraft(draft)">Odrzuć</button>
+  <h1 class="title">Poczekalnia ofert ze scrapera</h1>
+
+  <div class="mat-elevation-z8 custom-table" *ngIf="drafts$ | async as drafts">
+    <table mat-table [dataSource]="drafts" *ngIf="drafts.length > 0">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nazwa</th>
+        <td mat-cell *matCellDef="let draft">{{ draft.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="shipName">
+        <th mat-header-cell *matHeaderCellDef>Statek</th>
+        <td mat-cell *matCellDef="let draft">{{ draft.shipName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="company">
+        <th mat-header-cell *matHeaderCellDef>Armator (rejsy4you)</th>
+        <td mat-cell *matCellDef="let draft">
+          {{ draft.companyNameRaw }}
+          <span class="unmatched-badge" *ngIf="!draft.matchedCompanyId">brak dopasowania</span>
         </td>
-      </tr>
-    </tbody>
-  </table>
+      </ng-container>
+
+      <ng-container matColumnDef="terms">
+        <th mat-header-cell *matHeaderCellDef>Terminy</th>
+        <td mat-cell *matCellDef="let draft">{{ draft.terms.length }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Akcje</th>
+        <td mat-cell *matCellDef="let draft">
+          <mat-icon class="icon-edit" (click)="editDraft(draft); $event.stopPropagation()">edit</mat-icon>
+          <mat-icon class="icon-delete" (click)="discardDraft(draft); $event.stopPropagation()">delete</mat-icon>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr mat-row *matRowDef="let row; columns: columnsToDisplay" class="row" (click)="editDraft(row)"></tr>
+    </table>
+
+    <div class="empty-state" *ngIf="drafts.length === 0">Brak ofert oczekujących na import.</div>
+  </div>
 </div>
