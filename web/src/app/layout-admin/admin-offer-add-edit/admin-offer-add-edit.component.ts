@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { combineLatest, filter, merge, Observable, of, ReplaySubject, take, takeUntil } from 'rxjs';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { combineLatest, filter, merge, Observable, of, ReplaySubject, startWith, take, takeUntil } from 'rxjs';
 import { CommonFacade } from '@state/common';
 import { OfferFacade } from 'src/app/_state/offer';
 import { RouterFacade } from '@state/router';
@@ -14,6 +14,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
 import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
 import { resolveMissingCategoryIds } from '@core/utils/import-missing-categories.util';
+import { filterCitiesByFragment } from '@core/utils/filter-cities-by-fragment.util';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -36,6 +37,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public offerForm: FormGroup;
   public itineraryArray: FormArray;
+  public itineraryCityOptions: Observable<City[]>[] = [];
   public termsArray: FormArray;
   public cabinTypes$ = this.commonFacade.cabinTypes$;
   public termsDisabledCabinTypeIds: Record<string, boolean>[][] = [];
@@ -344,6 +346,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     } else if (nights < currentDays) {
       for (let i = currentDays - 1; i >= nights; i--) {
         this.itineraryArray.removeAt(i);
+        this.itineraryCityOptions.splice(i, 1);
       }
     }
   }
@@ -357,6 +360,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       departureTime: [''],
     });
     this.itineraryArray.push(dayGroup);
+    this.itineraryCityOptions.push(this.buildCityOptionsStream(dayGroup.get('city')));
+  }
+
+  private buildCityOptionsStream(cityControl: AbstractControl): Observable<City[]> {
+    return combineLatest([this.cities$, cityControl.valueChanges.pipe(startWith(cityControl.value))]).pipe(
+      map(([cities, fragment]) => filterCitiesByFragment(cities ?? [], fragment ?? '')),
+    );
   }
 
   public getDateForItinerary(startDate: Date, dayNumber: number): string {
@@ -596,6 +606,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     // Dodanie itinerary, jeśli istnieje
     if (data?.itinerary) {
       this.itineraryArray.clear();
+      this.itineraryCityOptions = [];
 
       const itineraryData = typeof data.itinerary === 'string' ? JSON.parse(data.itinerary) : data.itinerary;
 
@@ -609,6 +620,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
             departureTime: [day.departureTime || null],
           });
           this.itineraryArray.push(dayGroup);
+          this.itineraryCityOptions.push(this.buildCityOptionsStream(dayGroup.get('city')));
         });
       }
     }
@@ -703,6 +715,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   private applyScrapedItinerary(itinerary: OfferScrapper['itinerary']): void {
     this.itineraryArray.clear();
+    this.itineraryCityOptions = [];
     itinerary.forEach((day) => {
       const dayGroup = this.fb.group({
         day: [day.day],
@@ -712,6 +725,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         departureTime: [day.departureTime],
       });
       this.itineraryArray.push(dayGroup);
+      this.itineraryCityOptions.push(this.buildCityOptionsStream(dayGroup.get('city')));
     });
   }
 

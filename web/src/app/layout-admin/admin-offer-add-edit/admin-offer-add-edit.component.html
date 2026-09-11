@@ -251,7 +251,7 @@
               [matAutocomplete]="cityAuto"
             />
             <mat-autocomplete #cityAuto="matAutocomplete">
-              <mat-option *ngFor="let city of cities$ | async" [value]="city.name">
+              <mat-option *ngFor="let city of itineraryCityOptions[i] | async" [value]="city.name">
                 {{ city.name }}
               </mat-option>
             </mat-autocomplete>
