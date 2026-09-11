@@ -117,6 +117,11 @@ export const API_ERRORS = {
     HttpStatus.NOT_FOUND,
     'Destination not found',
   ),
+  CITY_NOT_FOUND: defineError(
+    'CITY_NOT_FOUND',
+    HttpStatus.NOT_FOUND,
+    'City not found',
+  ),
 
   OFFER_OR_SHARE_STATS_NOT_FOUND: defineError(
     'OFFER_OR_SHARE_STATS_NOT_FOUND',
