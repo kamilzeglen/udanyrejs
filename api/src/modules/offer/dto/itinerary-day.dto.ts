@@ -11,7 +11,8 @@ export class ItineraryDayDto {
   day: number;
 
   @IsDateString()
-  date: string;
+  @IsOptional()
+  date?: string;
 
   @IsString()
   @IsNotEmpty()
