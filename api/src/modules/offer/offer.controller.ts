@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -24,13 +25,22 @@ import { ScrapeOfferDto } from '@modules/offer/dto/scrape-offer.dto';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
 import { OfferSyncService } from './offer-sync.service';
+import { OfferDiscoveryService } from './offer-discovery.service';
+import { DiscoverOffersDto } from '@modules/offer/dto/discover-offers.dto';
+import { ScrapedOfferDraft } from '@modules/offer/scraped-offer-draft.entity';
+import { CompanyService } from '@modules/company/company.service';
+import { Company } from '@modules/company/company.entity';
 
 @Controller('offers')
 export class OfferController {
+  private readonly logger = new Logger(OfferController.name);
+
   constructor(
     private readonly offerService: OfferService,
     private readonly scraperClientService: ScraperClientService,
     private readonly offerSyncService: OfferSyncService,
+    private readonly offerDiscoveryService: OfferDiscoveryService,
+    private readonly companyService: CompanyService,
   ) {}
 
   @Post('/search')
@@ -54,6 +64,54 @@ export class OfferController {
     }
 
     return this.scraperClientService.fullScrap(scrapeOfferDto.url);
+  }
+
+  @Throttle({ default: { limit: 2, ttl: 60_000 } })
+  @UseGuards(AuthGuard)
+  @Post('/discover')
+  async discoverOffers(
+    @Body() discoverOffersDto: DiscoverOffersDto,
+    @Req() req: { user: any },
+  ): Promise<{ started: boolean }> {
+    const companies = await Promise.all(
+      discoverOffersDto.companyIds.map((id) =>
+        this.companyService.findOneById(id),
+      ),
+    );
+    const companyNames = companies
+      .filter((company): company is Company => Boolean(company))
+      .map((company) => company.name);
+
+    this.offerDiscoveryService
+      .runDiscovery(companyNames, discoverOffersDto.count, req.user.email)
+      .catch((error) => {
+        this.logger.error(`Discovery run failed: ${(error as Error).message}`);
+      });
+
+    return { started: true };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/discover/drafts')
+  async listDiscoveryDrafts(): Promise<ScrapedOfferDraft[]> {
+    return this.offerDiscoveryService.listPendingDrafts();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/discover/drafts/:draftId')
+  async getDiscoveryDraft(
+    @Param('draftId') draftId: string,
+  ): Promise<ScrapedOfferDraft> {
+    return this.offerDiscoveryService.getDraftById(draftId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('/discover/drafts/:draftId')
+  async deleteDiscoveryDraft(
+    @Param('draftId') draftId: string,
+    @Req() req: { user: any },
+  ): Promise<boolean> {
+    return this.offerDiscoveryService.deleteDraft(draftId, req.user.email);
   }
 
   @Get('/:category')

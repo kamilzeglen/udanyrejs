@@ -5,8 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Offer } from './offer.entity';
 import { OfferTerm } from './offer-term.entity';
 import { OfferTermPrice } from './offer-term-price.entity';
+import { ScrapedOfferDraft } from './scraped-offer-draft.entity';
 import { OfferSyncService } from './offer-sync.service';
 import { OfferSyncCron } from './offer-sync.cron';
+import { OfferDiscoveryService } from './offer-discovery.service';
 import { ImageFileModule } from '@modules/image-file/image-file.module';
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
@@ -22,7 +24,12 @@ import { ScraperClientModule } from '@core/scraper-client/scraper-client.module'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Offer, OfferTerm, OfferTermPrice]),
+    TypeOrmModule.forFeature([
+      Offer,
+      OfferTerm,
+      OfferTermPrice,
+      ScrapedOfferDraft,
+    ]),
     ImageFileModule,
     PdfFileModule,
     UserModule,
@@ -37,7 +44,12 @@ import { ScraperClientModule } from '@core/scraper-client/scraper-client.module'
     ScraperClientModule,
   ],
   controllers: [OfferController],
-  providers: [OfferService, OfferSyncService, OfferSyncCron],
+  providers: [
+    OfferService,
+    OfferSyncService,
+    OfferSyncCron,
+    OfferDiscoveryService,
+  ],
   exports: [OfferService],
 })
 export class OfferModule {}
