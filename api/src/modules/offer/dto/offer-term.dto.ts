@@ -3,6 +3,8 @@ import {
   IsArray,
   IsDateString,
   IsInt,
+  IsOptional,
+  IsString,
   IsUUID,
   Min,
   ValidateNested,
@@ -11,7 +13,16 @@ import { Type } from 'class-transformer';
 
 export class OfferTermPriceDto {
   @IsUUID()
-  cabinTypeId: string;
+  @IsOptional()
+  cabinTypeId?: string;
+
+  // Gdy cabinTypeId nie jest podane, rodzaj kabiny o tej nazwie zostaje
+  // znaleziony (dopasowanie bez rozróżniania wielkości liter) albo utworzony
+  // dla danej firmy - używane przy imporcie ze scrapera, gdy strona źródłowa
+  // ma kabinę, której jeszcze nie ma w systemie.
+  @IsString()
+  @IsOptional()
+  cabinTypeName?: string;
 
   // Cena w groszach (najmniejsza jednostka waluty), nie w złotych.
   @IsInt()
@@ -25,6 +36,10 @@ export class OfferTermDto {
 
   @IsDateString()
   endDate: string;
+
+  @IsString()
+  @IsOptional()
+  sourceUrl?: string;
 
   @IsArray()
   @ArrayMinSize(1)

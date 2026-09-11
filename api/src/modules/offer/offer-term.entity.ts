@@ -33,6 +33,9 @@ export class OfferTerm {
   @Column()
   endDate: Date;
 
+  @Column({ type: 'varchar', nullable: true })
+  sourceUrl: string;
+
   @OneToMany(() => OfferTermPrice, (price) => price.offerTerm)
   prices: OfferTermPrice[];
 

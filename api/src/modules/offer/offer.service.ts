@@ -14,6 +14,8 @@ import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
 import { DestinationService } from '@modules/destination/destination.service';
 import { CategoryService } from '@modules/category/category.service';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
+import { CabinType } from '@modules/cabin-type/cabin-type.entity';
+import { OfferTermPriceDto } from '@modules/offer/dto/offer-term.dto';
 import { UpdateOfferDto } from '@modules/offer/dto/update-offer.dto';
 import { User } from '@modules/user/user.entity';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
@@ -68,6 +70,9 @@ export class OfferService {
   async findAllWithURL(): Promise<Offer[]> {
     return await this.offerRepository
       .createQueryBuilder('offer')
+      .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.prices', 'prices')
+      .leftJoinAndSelect('prices.cabinType', 'cabinType')
       .where('offer.offerUrl IS NOT NULL')
       .andWhere('offer.isActive = :isActive', { isActive: true })
       .getMany();
@@ -365,7 +370,7 @@ export class OfferService {
         newOffer.destinations = destinationEntities;
       }
 
-      await this.saveOfferTerms(manager, newOffer.id, terms);
+      await this.saveOfferTerms(manager, newOffer.id, companyId, terms);
 
       return manager.save(newOffer);
     });
@@ -434,7 +439,7 @@ export class OfferService {
 
       if (terms?.length) {
         await manager.delete(OfferTerm, { offerId: savedOffer.id });
-        await this.saveOfferTerms(manager, savedOffer.id, terms);
+        await this.saveOfferTerms(manager, savedOffer.id, companyId, terms);
       }
 
       await this.logService.createLog(
@@ -549,9 +554,15 @@ export class OfferService {
   private async assertCabinTypesExist(terms: OfferTermDto[]): Promise<void> {
     const cabinTypeIds = Array.from(
       new Set(
-        terms.flatMap((term) => term.prices.map((price) => price.cabinTypeId)),
+        terms
+          .flatMap((term) => term.prices.map((price) => price.cabinTypeId))
+          .filter((cabinTypeId): cabinTypeId is string => !!cabinTypeId),
       ),
     );
+
+    if (cabinTypeIds.length === 0) {
+      return;
+    }
 
     const foundCabinTypes = await this.cabinTypeService.findByIds(cabinTypeIds);
 
@@ -563,6 +574,7 @@ export class OfferService {
   private async saveOfferTerms(
     manager: EntityManager,
     offerId: string,
+    companyId: string,
     terms: OfferTermDto[],
   ): Promise<void> {
     for (const termDto of terms) {
@@ -570,18 +582,60 @@ export class OfferService {
         offerId,
         startDate: termDto.startDate,
         endDate: termDto.endDate,
+        sourceUrl: termDto.sourceUrl,
       });
       const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);
 
-      const prices = termDto.prices.map((priceDto) =>
-        manager.create(OfferTermPrice, {
-          offerTermId: savedTerm.id,
-          cabinTypeId: priceDto.cabinTypeId,
-          price: priceDto.price,
-        }),
-      );
+      const prices = [];
+      for (const priceDto of termDto.prices) {
+        const cabinTypeId = await this.resolveCabinTypeId(
+          manager,
+          companyId,
+          priceDto,
+        );
+        prices.push(
+          manager.create(OfferTermPrice, {
+            offerTermId: savedTerm.id,
+            cabinTypeId,
+            price: priceDto.price,
+          }),
+        );
+      }
       await manager.save(prices);
     }
+  }
+
+  private async resolveCabinTypeId(
+    manager: EntityManager,
+    companyId: string,
+    priceDto: OfferTermPriceDto,
+  ): Promise<string> {
+    if (priceDto.cabinTypeId) {
+      return priceDto.cabinTypeId;
+    }
+
+    if (!priceDto.cabinTypeName) {
+      throw new AppException(API_ERRORS.CABIN_TYPE_IDENTIFIER_REQUIRED);
+    }
+
+    const existingCabinType = await manager
+      .createQueryBuilder(CabinType, 'cabinType')
+      .where('cabinType.companyId = :companyId', { companyId })
+      .andWhere('LOWER(cabinType.name) = LOWER(:name)', {
+        name: priceDto.cabinTypeName,
+      })
+      .getOne();
+
+    if (existingCabinType) {
+      return existingCabinType.id;
+    }
+
+    const newCabinType = manager.create(CabinType, {
+      companyId,
+      name: priceDto.cabinTypeName,
+    });
+    const savedCabinType = await manager.save(newCabinType);
+    return savedCabinType.id;
   }
 
   private async saveTermOrThrowOnDuplicate(

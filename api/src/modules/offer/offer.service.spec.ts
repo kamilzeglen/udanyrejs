@@ -11,6 +11,7 @@ import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
 import { DestinationService } from '@modules/destination/destination.service';
 import { CategoryService } from '@modules/category/category.service';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
+import { CabinType } from '@modules/cabin-type/cabin-type.entity';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { User } from '@modules/user/user.entity';
@@ -22,6 +23,7 @@ describe('OfferService', () => {
     save: jest.Mock;
     create: jest.Mock;
     delete: jest.Mock;
+    createQueryBuilder: jest.Mock;
   };
   let dataSource: { transaction: jest.Mock };
 
@@ -36,6 +38,11 @@ describe('OfferService', () => {
       ),
       create: jest.fn((_entityClass, data) => data),
       delete: jest.fn().mockResolvedValue(undefined),
+      createQueryBuilder: jest.fn(() => ({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      })),
     };
     dataSource = {
       transaction: jest.fn((callback) => callback(transactionManager)),
@@ -187,6 +194,87 @@ describe('OfferService', () => {
     await expect(
       service.createOffer(validCreateDto as any, requestUser),
     ).rejects.toThrow(AppException);
+  });
+
+  it('creates a new cabin type for the company when a price gives a name instead of an id', async () => {
+    cabinTypeService.findByIds.mockResolvedValue([]);
+
+    const dto = {
+      name: 'Rejs testowy',
+      companyId: 'company-1',
+      shipId: 'ship-1',
+      terms: [
+        {
+          startDate: '2027-01-10',
+          endDate: '2027-01-17',
+          prices: [{ cabinTypeName: 'zewnętrzna z oknem', price: 100000 }],
+        },
+      ],
+    };
+
+    await service.createOffer(dto as any, requestUser);
+
+    expect(transactionManager.createQueryBuilder).toHaveBeenCalledWith(
+      CabinType,
+      'cabinType',
+    );
+    expect(transactionManager.create).toHaveBeenCalledWith(CabinType, {
+      companyId: 'company-1',
+      name: 'zewnętrzna z oknem',
+    });
+  });
+
+  it('reuses an existing cabin type found by a case-insensitive name match', async () => {
+    cabinTypeService.findByIds.mockResolvedValue([]);
+    const existingCabinTypeQuery = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue({ id: 'existing-cabin-type' }),
+    };
+    transactionManager.createQueryBuilder.mockReturnValue(
+      existingCabinTypeQuery,
+    );
+
+    const dto = {
+      name: 'Rejs testowy',
+      companyId: 'company-1',
+      shipId: 'ship-1',
+      terms: [
+        {
+          startDate: '2027-01-10',
+          endDate: '2027-01-17',
+          prices: [{ cabinTypeName: 'Wewnętrzna', price: 100000 }],
+        },
+      ],
+    };
+
+    await service.createOffer(dto as any, requestUser);
+
+    const createdEntities = transactionManager.create.mock.calls.map(
+      (call) => call[0],
+    );
+    expect(createdEntities).not.toContain(CabinType);
+  });
+
+  it('throws when a price provides neither cabinTypeId nor cabinTypeName', async () => {
+    cabinTypeService.findByIds.mockResolvedValue([]);
+
+    const dto = {
+      name: 'Rejs testowy',
+      companyId: 'company-1',
+      shipId: 'ship-1',
+      terms: [
+        {
+          startDate: '2027-01-10',
+          endDate: '2027-01-17',
+          prices: [{ price: 100000 }],
+        },
+      ],
+    };
+
+    await expect(service.createOffer(dto as any, requestUser)).rejects.toThrow(
+      AppException,
+    );
   });
 
   describe('updateOffer', () => {
