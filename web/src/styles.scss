@@ -47,8 +47,10 @@ textarea {
 /* Buttons */
 .back-button,
 .add-button {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
   margin: 1rem 0;
-  text-align: center;
 
   button {
     padding: 12px 20px;
