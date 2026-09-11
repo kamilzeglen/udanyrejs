@@ -6,13 +6,14 @@ import { OfferFacade } from 'src/app/_state/offer';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ActivatedRoute } from '@angular/router';
-import { City, Offer, OfferScrapper } from '@interfaces';
+import { Category, City, Offer, OfferScrapper } from '@interfaces';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { map, switchMap } from 'rxjs/operators';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
 import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
+import { resolveMissingCategoryIds } from '@core/utils/import-missing-categories.util';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -741,5 +742,33 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     });
 
     this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
+  }
+
+  public importMissingCategories(): void {
+    let categories: Category[] = [];
+    this.categories$.pipe(take(1)).subscribe((value) => {
+      categories = value ?? [];
+    });
+
+    const termRanges = this.termsArray.controls
+      .map((termGroup) => ({
+        startDate: termGroup.get('startDate')?.value as string,
+        endDate: termGroup.get('endDate')?.value as string,
+      }))
+      .filter((term) => !!term.startDate && !!term.endDate);
+
+    const currentCategoryIds: string[] = this.offerForm.get('categories')?.value ?? [];
+    const missingCategoryIds = resolveMissingCategoryIds(termRanges, categories, currentCategoryIds);
+
+    if (missingCategoryIds.length === 0) {
+      this.snackService.showInfo('Brak nowych kategorii do zaimportowania');
+      return;
+    }
+
+    this.offerForm.patchValue({
+      categories: [...currentCategoryIds, ...missingCategoryIds],
+    });
+
+    this.snackService.showInfo('Zaimportowano ' + missingCategoryIds.length + ' kategori(e/i)');
   }
 }
