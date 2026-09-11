@@ -32,7 +32,7 @@ async function bootstrap() {
   // serwer - bez tego throttling/CORS/IP-logging liczyłyby adres proxy, nie klienta.
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.enableCors({
     origin: (origin, callback) => {
       if (allowedOrigins.includes(origin) || !origin) {
