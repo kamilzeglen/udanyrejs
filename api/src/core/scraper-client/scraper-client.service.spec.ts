@@ -64,4 +64,26 @@ describe('ScraperClientService', () => {
     );
     expect(result).toEqual({ available: true, cabinPrices: [] });
   });
+
+  it('posts to /discover-offers with shipownerNames and count', async () => {
+    const response = {
+      data: {
+        urls: ['https://rejsy4you.pl/rejs/1_x_1'],
+        unmatchedNames: ['Nieznany'],
+      },
+    } as AxiosResponse;
+    httpService.post.mockReturnValue(of(response));
+
+    const result = await service.discoverOffers(['MSC Cruises'], 5);
+
+    expect(httpService.post).toHaveBeenCalledWith(
+      'http://scraper:5010/discover-offers',
+      { shipownerNames: ['MSC Cruises'], count: 5 },
+      { headers: { 'X-Internal-Token': 'secret-token' } },
+    );
+    expect(result).toEqual({
+      urls: ['https://rejsy4you.pl/rejs/1_x_1'],
+      unmatchedNames: ['Nieznany'],
+    });
+  });
 });

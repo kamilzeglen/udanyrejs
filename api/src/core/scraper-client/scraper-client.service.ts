@@ -37,6 +37,11 @@ export interface PriceCheckResponse {
   cabinPrices: ScrapedCabinPrice[];
 }
 
+export interface DiscoverOffersResponse {
+  urls: string[];
+  unmatchedNames: string[];
+}
+
 @Injectable()
 export class ScraperClientService {
   private readonly baseUrl = process.env.SCRAPER_URL;
@@ -61,6 +66,21 @@ export class ScraperClientService {
       this.httpService.post<PriceCheckResponse>(
         `${this.baseUrl}/price-check`,
         { url },
+        { headers: { 'X-Internal-Token': this.internalToken } },
+      ),
+    );
+
+    return response.data;
+  }
+
+  public async discoverOffers(
+    shipownerNames: string[],
+    count: number,
+  ): Promise<DiscoverOffersResponse> {
+    const response = await firstValueFrom(
+      this.httpService.post<DiscoverOffersResponse>(
+        `${this.baseUrl}/discover-offers`,
+        { shipownerNames, count },
         { headers: { 'X-Internal-Token': this.internalToken } },
       ),
     );
