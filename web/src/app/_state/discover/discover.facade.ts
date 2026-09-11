@@ -8,6 +8,7 @@ import * as discoverSelectors from './discover.selectors';
 @Injectable()
 export class DiscoverFacade {
   public starting$ = this.store.select(discoverSelectors.selectStarting);
+  public drafts$ = this.store.select(discoverSelectors.selectDrafts);
 
   public startDiscoverySuccess$ = this.actions.pipe(ofType(discoverActions.startDiscoverySuccess));
   public startDiscoveryError$ = this.actions.pipe(ofType(discoverActions.startDiscoveryError));

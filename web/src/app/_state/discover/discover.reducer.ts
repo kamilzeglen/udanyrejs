@@ -19,6 +19,14 @@ const reducer = createReducer(
     starting: false,
     errorMessage,
   })),
+
+  on(discoverActions.getDraftsSuccess, (state, { drafts }) => ({
+    ...state,
+    drafts,
+  })),
+  on(discoverActions.deleteDraftSuccess, (state) => ({
+    ...state,
+  })),
 );
 
 export function discoverReducer(state: DiscoverState | undefined, action: Action): DiscoverState {

@@ -1,0 +1,27 @@
+<div class="admin-offer-draft-list">
+  <h2>Poczekalnia ofert ze scrapera</h2>
+
+  <table *ngIf="drafts$ | async as drafts">
+    <thead>
+      <tr>
+        <th>Nazwa</th>
+        <th>Statek</th>
+        <th>Armator (rejsy4you)</th>
+        <th>Terminy</th>
+        <th>Akcje</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let draft of drafts">
+        <td>{{ draft.name }}</td>
+        <td>{{ draft.shipName }}</td>
+        <td>{{ draft.companyNameRaw }} <span *ngIf="!draft.matchedCompanyId">(brak dopasowania)</span></td>
+        <td>{{ draft.terms.length }}</td>
+        <td>
+          <button (click)="editDraft(draft)">Edytuj i importuj</button>
+          <button (click)="discardDraft(draft)">Odrzuć</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
