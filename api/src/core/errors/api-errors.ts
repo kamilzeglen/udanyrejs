@@ -91,6 +91,11 @@ export const API_ERRORS = {
     HttpStatus.BAD_REQUEST,
     'Provided URL is not on the allowed scrape hosts list',
   ),
+  SCRAPED_OFFER_DRAFT_NOT_FOUND: defineError(
+    'SCRAPED_OFFER_DRAFT_NOT_FOUND',
+    HttpStatus.NOT_FOUND,
+    'Scraped offer draft not found',
+  ),
 
   COMPANY_NOT_FOUND: defineError(
     'COMPANY_NOT_FOUND',
