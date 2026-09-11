@@ -9,6 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
@@ -40,6 +41,7 @@ const materialModules = [
   MatSnackBarModule,
   MatSortModule,
   MatSelectModule,
+  MatAutocompleteModule,
   MatPaginatorModule,
   MatStepperModule,
   MatRadioModule,

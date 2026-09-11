@@ -234,7 +234,18 @@
 
           <div class="itinerary-input">
             <label [attr.for]="'itineraryCity' + i">Port:</label>
-            <input [id]="'itineraryCity' + i" type="text" formControlName="city" placeholder="Port docelowy" />
+            <input
+              [id]="'itineraryCity' + i"
+              type="text"
+              formControlName="city"
+              placeholder="Port docelowy"
+              [matAutocomplete]="cityAuto"
+            />
+            <mat-autocomplete #cityAuto="matAutocomplete">
+              <mat-option *ngFor="let city of cities$ | async" [value]="city.name">
+                {{ city.name }}
+              </mat-option>
+            </mat-autocomplete>
           </div>
 
           <div class="itinerary-input">
