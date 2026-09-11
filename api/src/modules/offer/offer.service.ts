@@ -24,6 +24,7 @@ import { PaginationResp } from '../../interfaces/pagination-response';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
+import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 
 @Injectable()
 export class OfferService {
@@ -46,6 +47,7 @@ export class OfferService {
     private readonly destinationService: DestinationService,
     private readonly cabinTypeService: CabinTypeService,
     private readonly logService: LogService,
+    private readonly itineraryCityResolverService: ItineraryCityResolverService,
   ) {}
 
   async findOneById(id: string): Promise<Offer> {
@@ -342,6 +344,11 @@ export class OfferService {
       ? await this.destinationService.findByIds(destinations)
       : [];
 
+    createUserData.itinerary = await this.itineraryCityResolverService.resolve(
+      createUserData.itinerary,
+      reqCreatedBy.email,
+    );
+
     await this.assertCabinTypesExist(terms);
 
     const offer = await this.dataSource.transaction(async (manager) => {
@@ -417,6 +424,11 @@ export class OfferService {
     );
     const company = await this.companyService.findOneById(companyId);
     const ship = await this.shipService.findOneById(shipId);
+
+    updateOfferData.itinerary = await this.itineraryCityResolverService.resolve(
+      updateOfferData.itinerary,
+      reqCreatedBy.email,
+    );
 
     Object.assign(offer, {
       ...updateOfferData,

@@ -15,6 +15,7 @@ import { CabinType } from '@modules/cabin-type/cabin-type.entity';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { User } from '@modules/user/user.entity';
+import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 
 describe('OfferService', () => {
   let service: OfferService;
@@ -102,6 +103,12 @@ describe('OfferService', () => {
         {
           provide: LogService,
           useValue: { createLog: jest.fn().mockResolvedValue(undefined) },
+        },
+        {
+          provide: ItineraryCityResolverService,
+          useValue: {
+            resolve: jest.fn((itinerary) => Promise.resolve(itinerary)),
+          },
         },
       ],
     }).compile();

@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  IsNotEmpty,
+} from 'class-validator';
 
 export class ItineraryDayDto {
   @IsNumber()
@@ -8,8 +14,8 @@ export class ItineraryDayDto {
   date: string;
 
   @IsString()
-  @IsOptional()
-  city?: string;
+  @IsNotEmpty()
+  city: string;
 
   @IsString()
   @IsOptional()

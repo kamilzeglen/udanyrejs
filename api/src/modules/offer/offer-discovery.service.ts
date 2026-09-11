@@ -12,6 +12,7 @@ import { LogService } from '@modules/log/log.service';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
+import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 
 @Injectable()
 export class OfferDiscoveryService {
@@ -29,6 +30,7 @@ export class OfferDiscoveryService {
     private readonly shipService: ShipService,
     private readonly cabinTypeService: CabinTypeService,
     private readonly logService: LogService,
+    private readonly itineraryCityResolverService: ItineraryCityResolverService,
   ) {}
 
   public async runDiscovery(
@@ -199,6 +201,11 @@ export class OfferDiscoveryService {
       ? await this.cabinTypeService.findAllByCompany(matchedCompanyId)
       : [];
 
+    const resolvedItinerary = await this.itineraryCityResolverService.resolve(
+      scraped.itinerary,
+      actorEmail,
+    );
+
     const terms = scraped.terms.map((term) => ({
       startDate: term.startDate,
       endDate: term.endDate,
@@ -218,7 +225,7 @@ export class OfferDiscoveryService {
       matchedShipId,
       imageUrl: scraped.imageUrl || null,
       pdfUrl: scraped.pdfUrl || null,
-      itinerary: scraped.itinerary,
+      itinerary: resolvedItinerary,
       terms,
       sourceUrl: url,
     });

@@ -10,6 +10,7 @@ import { ShipService } from '@modules/ship/ship.service';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
+import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 
 function buildQueryBuilderMock(result: unknown[]) {
   return {
@@ -37,6 +38,7 @@ describe('OfferDiscoveryService', () => {
   let shipService: { findShipsByCompany: jest.Mock };
   let cabinTypeService: { findAllByCompany: jest.Mock };
   let logService: { createLog: jest.Mock };
+  let itineraryCityResolverService: { resolve: jest.Mock };
 
   beforeEach(async () => {
     draftRepository = {
@@ -55,6 +57,9 @@ describe('OfferDiscoveryService', () => {
     shipService = { findShipsByCompany: jest.fn().mockResolvedValue([]) };
     cabinTypeService = { findAllByCompany: jest.fn().mockResolvedValue([]) };
     logService = { createLog: jest.fn().mockResolvedValue(undefined) };
+    itineraryCityResolverService = {
+      resolve: jest.fn((itinerary) => Promise.resolve(itinerary)),
+    };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -73,6 +78,10 @@ describe('OfferDiscoveryService', () => {
         { provide: ShipService, useValue: shipService },
         { provide: CabinTypeService, useValue: cabinTypeService },
         { provide: LogService, useValue: logService },
+        {
+          provide: ItineraryCityResolverService,
+          useValue: itineraryCityResolverService,
+        },
       ],
     }).compile();
 
