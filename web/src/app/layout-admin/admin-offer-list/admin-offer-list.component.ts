@@ -147,6 +147,11 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.routerFacade.changeRoute({ linkParams });
   }
 
+  public openDiscoverTrigger(): void {
+    const linkParams = ['/admin/offers/discover'];
+    this.routerFacade.changeRoute({ linkParams });
+  }
+
   public editShip(shipId: string): void {
     const linkParams = ['/admin/ships/edit/' + shipId];
     this.routerFacade.changeRoute({ linkParams });

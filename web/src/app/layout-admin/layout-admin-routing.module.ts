@@ -15,6 +15,7 @@ import { AdminCategoryAddEditComponent } from './admin-category-add-edit/admin-c
 import { AdminLogsListComponent } from './admin-logs-list/admin-logs-list.component';
 import { AdminCabinTypeListComponent } from './admin-cabin-type-list/admin-cabin-type-list.component';
 import { AdminCabinTypeAddEditComponent } from './admin-cabin-type-add-edit/admin-cabin-type-add-edit.component';
+import { AdminOfferDiscoverTriggerComponent } from './admin-offer-discover-trigger/admin-offer-discover-trigger.component';
 
 const routes: Routes = [
   {
@@ -37,6 +38,10 @@ const routes: Routes = [
       {
         path: 'offers/edit/:offerId',
         component: AdminOfferAddEditComponent,
+      },
+      {
+        path: 'offers/discover',
+        component: AdminOfferDiscoverTriggerComponent,
       },
       {
         path: 'companies',

@@ -1,0 +1,21 @@
+<div class="admin-offer-discover-trigger">
+  <h2>Import ofert ze scrapera</h2>
+
+  <form [formGroup]="triggerForm" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="count">Liczba ofert:</label>
+      <input id="count" formControlName="count" type="number" min="1" max="100" />
+    </div>
+
+    <div class="form-group" *ngIf="companies$ | async as companies">
+      <label for="companyIds">Dozwoleni armatorzy:</label>
+      <mat-select formControlName="companyIds" id="companyIds" placeholder="Armatorzy" multiple>
+        <mat-option *ngFor="let company of companies" [value]="company.id">
+          {{ company.name }}
+        </mat-option>
+      </mat-select>
+    </div>
+
+    <button type="submit" [disabled]="triggerForm.invalid || (starting$ | async)">Uruchom wyszukiwanie</button>
+  </form>
+</div>
