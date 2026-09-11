@@ -3,7 +3,6 @@
 .navbar {
   display: flex;
   justify-content: center;
-  border-bottom: 1px solid $cruise-border;
   background: $white;
   font-family: $cruise-font;
 }
@@ -16,9 +15,8 @@
   padding: 0 32px;
 }
 .wave {
-  width: 140px;
+  width: 150px;
   height: auto;
-  opacity: 0.65;
 }
 .navbar-content {
   display: flex;
@@ -39,12 +37,9 @@
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+  transition: color 0.15s ease;
   @include cruise-focus;
-  &:hover,
-  &.active {
-    color: $primary-color;
-  }
-  &.active::after {
+  &::after {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -52,7 +47,17 @@
     height: 3px;
     border-radius: 2px;
     background: $primary-color;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
     content: '';
+  }
+  &:hover,
+  &.active {
+    color: $primary-color;
+  }
+  &:hover::after,
+  &.active::after {
+    transform: scaleX(1);
   }
 }
 .logo-container {
@@ -60,7 +65,11 @@
   align-items: center;
   margin: 0 22px;
   padding: 12px 0;
+  transition: transform 0.15s ease;
   @include cruise-focus;
+  &:hover {
+    transform: scale(1.04);
+  }
 }
 .logo {
   width: auto;
