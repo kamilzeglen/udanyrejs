@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -8,7 +9,10 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { CabinTypeService } from './cabin-type.service';
+import {
+  CabinTypeService,
+  CabinTypeWithOffersCount,
+} from './cabin-type.service';
 import { CabinType } from './cabin-type.entity';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { CreateCabinTypeDto } from './dto/create-cabin-type.dto';
@@ -26,7 +30,7 @@ export class CabinTypeController {
   }
 
   @Get('/')
-  async getAllCabinTypes(): Promise<CabinType[]> {
+  async getAllCabinTypes(): Promise<CabinTypeWithOffersCount[]> {
     return await this.cabinTypeService.findAll();
   }
 
@@ -64,23 +68,11 @@ export class CabinTypeController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('/:cabinTypeId/deactivate')
-  async deactivateCabinType(
+  @Delete('/:cabinTypeId')
+  async removeCabinType(
     @Param('cabinTypeId') cabinTypeId: string,
     @Req() req: { user: any },
   ): Promise<boolean> {
-    return await this.cabinTypeService.deactivateCabinType(
-      cabinTypeId,
-      req.user,
-    );
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('/:cabinTypeId/activate')
-  async activateCabinType(
-    @Param('cabinTypeId') cabinTypeId: string,
-    @Req() req: { user: any },
-  ): Promise<boolean> {
-    return await this.cabinTypeService.activateCabinType(cabinTypeId, req.user);
+    return await this.cabinTypeService.removeCabinType(cabinTypeId, req.user);
   }
 }

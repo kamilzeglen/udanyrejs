@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CabinType } from './cabin-type.entity';
+import { OfferTermPrice } from '@modules/offer/offer-term-price.entity';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
 import { CreateCabinTypeDto } from './dto/create-cabin-type.dto';
@@ -9,6 +10,10 @@ import { UpdateCabinTypeDto } from './dto/update-cabin-type.dto';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
+
+export interface CabinTypeWithOffersCount extends CabinType {
+  offersCount: number;
+}
 
 @Injectable()
 export class CabinTypeService {
@@ -27,13 +32,20 @@ export class CabinTypeService {
       .getMany();
   }
 
-  async findAll(): Promise<CabinType[]> {
-    return await this.cabinTypeRepository
+  async findAll(): Promise<CabinTypeWithOffersCount[]> {
+    const cabinTypes = await this.cabinTypeRepository
       .createQueryBuilder('cabinType')
       .leftJoinAndSelect('cabinType.company', 'company')
       .orderBy('company.name', 'ASC')
       .addOrderBy('cabinType.name', 'ASC')
       .getMany();
+
+    const offersCountByCabinTypeId = await this.getOffersCountByCabinTypeId();
+
+    return cabinTypes.map((cabinType) => ({
+      ...cabinType,
+      offersCount: offersCountByCabinTypeId.get(cabinType.id) ?? 0,
+    }));
   }
 
   async findOneById(id: string): Promise<CabinType> {
@@ -96,47 +108,51 @@ export class CabinTypeService {
     return saved;
   }
 
-  async deactivateCabinType(id: string, reqCreatedBy: User): Promise<boolean> {
+  async removeCabinType(id: string, reqCreatedBy: User): Promise<boolean> {
     const cabinType = await this.findOneById(id);
 
     if (!cabinType) {
       throw new AppException(API_ERRORS.CABIN_TYPE_NOT_FOUND, { id });
     }
 
-    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
-    cabinType.isActive = false;
-    cabinType.updatedBy = updatedBy;
-    await this.cabinTypeRepository.save(cabinType);
+    const offersCount = await this.countOffersUsingCabinType(id);
+
+    if (offersCount > 0) {
+      throw new AppException(API_ERRORS.CABIN_TYPE_IN_USE, { id, offersCount });
+    }
+
+    await this.cabinTypeRepository.delete(id);
 
     await this.logService.createLog(
-      'Dezaktywowano rodzaj kabiny: ' +
-        cabinType.name +
-        ' (' +
-        cabinType.id +
-        ')',
+      'Usunięto rodzaj kabiny: ' + cabinType.name + ' (' + cabinType.id + ')',
       reqCreatedBy.email,
     );
 
     return true;
   }
 
-  async activateCabinType(id: string, reqCreatedBy: User): Promise<boolean> {
-    const cabinType = await this.findOneById(id);
+  private async countOffersUsingCabinType(
+    cabinTypeId: string,
+  ): Promise<number> {
+    const result = await this.cabinTypeRepository.manager
+      .createQueryBuilder(OfferTermPrice, 'price')
+      .innerJoin('price.offerTerm', 'term')
+      .select('COUNT(DISTINCT term.offerId)', 'count')
+      .where('price.cabinTypeId = :cabinTypeId', { cabinTypeId })
+      .getRawOne<{ count: string }>();
 
-    if (!cabinType) {
-      throw new AppException(API_ERRORS.CABIN_TYPE_NOT_FOUND, { id });
-    }
+    return Number(result?.count ?? 0);
+  }
 
-    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
-    cabinType.isActive = true;
-    cabinType.updatedBy = updatedBy;
-    await this.cabinTypeRepository.save(cabinType);
+  private async getOffersCountByCabinTypeId(): Promise<Map<string, number>> {
+    const rows = await this.cabinTypeRepository.manager
+      .createQueryBuilder(OfferTermPrice, 'price')
+      .innerJoin('price.offerTerm', 'term')
+      .select('price.cabinTypeId', 'cabinTypeId')
+      .addSelect('COUNT(DISTINCT term.offerId)', 'count')
+      .groupBy('price.cabinTypeId')
+      .getRawMany<{ cabinTypeId: string; count: string }>();
 
-    await this.logService.createLog(
-      'Aktywowano rodzaj kabiny: ' + cabinType.name + ' (' + cabinType.id + ')',
-      reqCreatedBy.email,
-    );
-
-    return true;
+    return new Map(rows.map((row) => [row.cabinTypeId, Number(row.count)]));
   }
 }

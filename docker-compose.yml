@@ -27,6 +27,17 @@ services:
             - postgres_default
             - udanyrejs_default
 
+    udanyrejs-scraper:
+        build:
+            context: ./scraper
+            dockerfile: Dockerfile
+        container_name: udanyrejs-scraper
+        env_file:
+            - scraper/.env
+        restart: always
+        networks:
+            - udanyrejs_default
+
 networks:
     nginx-proxy-manager_default:
         external: true

@@ -71,10 +71,25 @@ export const API_ERRORS = {
     HttpStatus.NOT_FOUND,
     'Cabin type not found',
   ),
+  CABIN_TYPE_IDENTIFIER_REQUIRED: defineError(
+    'CABIN_TYPE_IDENTIFIER_REQUIRED',
+    HttpStatus.BAD_REQUEST,
+    'Each price row must provide either a cabinTypeId or a cabinTypeName',
+  ),
+  CABIN_TYPE_IN_USE: defineError(
+    'CABIN_TYPE_IN_USE',
+    HttpStatus.BAD_REQUEST,
+    'Cannot delete a cabin type that is used by at least one offer',
+  ),
   OFFER_TERM_DUPLICATE: defineError(
     'OFFER_TERM_DUPLICATE',
     HttpStatus.BAD_REQUEST,
     'This offer already has a term with the same dates',
+  ),
+  SCRAPE_URL_NOT_ALLOWED: defineError(
+    'SCRAPE_URL_NOT_ALLOWED',
+    HttpStatus.BAD_REQUEST,
+    'Provided URL is not on the allowed scrape hosts list',
   ),
 
   COMPANY_NOT_FOUND: defineError(
