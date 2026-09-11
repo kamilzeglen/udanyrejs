@@ -57,4 +57,8 @@ export class AdminOfferDiscoverTriggerComponent implements OnInit, OnDestroy {
 
     this.discoverFacade.startDiscovery(this.triggerForm.value);
   }
+
+  public openDrafts(): void {
+    this.router.changeRoute({ linkParams: ['/admin/offers/discover/drafts'] });
+  }
 }

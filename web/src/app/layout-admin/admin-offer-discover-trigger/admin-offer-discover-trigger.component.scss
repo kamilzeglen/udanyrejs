@@ -1,7 +1,32 @@
+@import '../../../scss/variables';
+
 .admin-offer-discover-trigger {
   padding: 1rem;
 
+  .title {
+    margin: 10px 0 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  form {
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
   .form-group {
-    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .submit-button {
+    display: flex;
+    margin: 20px auto 0;
+    padding: 12px 30px;
+    font-size: 18px;
   }
 }
