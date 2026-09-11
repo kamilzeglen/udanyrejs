@@ -10,6 +10,8 @@ import { AdminShipListComponent } from './admin-ship-list/admin-ship-list.compon
 import { AdminCategoryListComponent } from './admin-category-list/admin-category-list.component';
 import { AdminDestinationListComponent } from './admin-destination-list/admin-destination-list.component';
 import { AdminDestinationAddEditComponent } from './admin-destination-add-edit/admin-destination-add-edit.component';
+import { AdminCityListComponent } from './admin-city-list/admin-city-list.component';
+import { AdminCityAddEditComponent } from './admin-city-add-edit/admin-city-add-edit.component';
 import { AdminCompanyAddEditComponent } from './admin-company-add-edit/admin-company-add-edit.component';
 import { AdminCategoryAddEditComponent } from './admin-category-add-edit/admin-category-add-edit.component';
 import { AdminLogsListComponent } from './admin-logs-list/admin-logs-list.component';
@@ -104,6 +106,18 @@ const routes: Routes = [
       {
         path: 'destinations/edit/:destinationId',
         component: AdminDestinationAddEditComponent,
+      },
+      {
+        path: 'cities',
+        component: AdminCityListComponent,
+      },
+      {
+        path: 'cities/add',
+        component: AdminCityAddEditComponent,
+      },
+      {
+        path: 'cities/edit/:cityId',
+        component: AdminCityAddEditComponent,
       },
       {
         path: 'logs',

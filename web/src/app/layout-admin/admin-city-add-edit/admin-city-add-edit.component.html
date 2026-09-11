@@ -1,0 +1,35 @@
+<div class="admin-company-add-edit">
+  <div class="back-button">
+    <button (click)="goBack()">Powrót</button>
+  </div>
+
+  <h1 class="title">{{ mode === 'EDIT' ? 'Edycja' : 'Dodawanie' }}</h1>
+
+  <form [formGroup]="cityForm" (ngSubmit)="submitForm()">
+    <section class="section data-section">
+      <h2>Dane miasta</h2>
+
+      <div class="form-group">
+        <label for="name">Nazwa miasta:</label>
+        <input id="name" formControlName="name" type="text" placeholder="Nazwa miasta" />
+      </div>
+
+      <div class="form-group" *ngIf="destinations$ | async as destinations">
+        <label for="destinations">Regiony</label>
+        <mat-select formControlName="destinations" id="destinations" placeholder="Regiony" multiple>
+          <mat-option *ngFor="let destination of destinations" [value]="destination.id">
+            {{ destination.name }}
+          </mat-option>
+        </mat-select>
+      </div>
+    </section>
+
+    <button *ngIf="mode === 'EDIT'" (click)="deleteCity()" mat-raised-button class="delete-destination" type="button">
+      Usuń miasto
+    </button>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="cityForm.invalid">
+      {{ mode === 'ADD' ? 'Dodaj miasto' : 'Zaktualizuj miasto' }}
+    </button>
+  </form>
+</div>

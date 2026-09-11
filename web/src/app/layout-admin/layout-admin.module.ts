@@ -10,6 +10,8 @@ import { AdminShipAddEditComponent } from './admin-ship-add-edit/admin-ship-add-
 import { AdminCategoryListComponent } from './admin-category-list/admin-category-list.component';
 import { AdminDestinationListComponent } from './admin-destination-list/admin-destination-list.component';
 import { AdminDestinationAddEditComponent } from './admin-destination-add-edit/admin-destination-add-edit.component';
+import { AdminCityListComponent } from './admin-city-list/admin-city-list.component';
+import { AdminCityAddEditComponent } from './admin-city-add-edit/admin-city-add-edit.component';
 import { AdminCompanyAddEditComponent } from './admin-company-add-edit/admin-company-add-edit.component';
 import { AdminCategoryAddEditComponent } from './admin-category-add-edit/admin-category-add-edit.component';
 import { AdminLogsListComponent } from './admin-logs-list/admin-logs-list.component';
@@ -31,6 +33,8 @@ const components = [
   AdminShipAddEditComponent,
   AdminDestinationListComponent,
   AdminDestinationAddEditComponent,
+  AdminCityListComponent,
+  AdminCityAddEditComponent,
   AdminLogsListComponent,
   AdminCabinTypeListComponent,
   AdminCabinTypeAddEditComponent,
