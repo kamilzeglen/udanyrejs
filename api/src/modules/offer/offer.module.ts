@@ -9,6 +9,7 @@ import { ScrapedOfferDraft } from './scraped-offer-draft.entity';
 import { OfferSyncService } from './offer-sync.service';
 import { OfferSyncCron } from './offer-sync.cron';
 import { OfferDiscoveryService } from './offer-discovery.service';
+import { ItineraryCityResolverService } from './itinerary-city-resolver.service';
 import { ImageFileModule } from '@modules/image-file/image-file.module';
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
@@ -21,6 +22,7 @@ import { ShareStatsModule } from '@modules/share-stats/share-stats.module';
 import { CabinTypeModule } from '@modules/cabin-type/cabin-type.module';
 import { HttpModule } from '@nestjs/axios';
 import { ScraperClientModule } from '@core/scraper-client/scraper-client.module';
+import { CityModule } from '@modules/city/city.module';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { ScraperClientModule } from '@core/scraper-client/scraper-client.module'
     CabinTypeModule,
     HttpModule,
     ScraperClientModule,
+    CityModule,
   ],
   controllers: [OfferController],
   providers: [
@@ -49,6 +52,7 @@ import { ScraperClientModule } from '@core/scraper-client/scraper-client.module'
     OfferSyncService,
     OfferSyncCron,
     OfferDiscoveryService,
+    ItineraryCityResolverService,
   ],
   exports: [OfferService],
 })
