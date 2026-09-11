@@ -12,3 +12,4 @@ export * from './search';
 export * from './sub-menu-item';
 export * from './cabin-type';
 export * from './offer-term';
+export * from './scraped-offer-draft';
