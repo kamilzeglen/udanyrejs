@@ -96,6 +96,46 @@ export class CityService {
     return await this.cityRepository.save(city);
   }
 
+  async findOrCreateByName(name: string, actorEmail: string): Promise<City> {
+    const trimmedName = name.trim();
+
+    const existing = await this.cityRepository
+      .createQueryBuilder('city')
+      .where('LOWER(city.name) = LOWER(:name)', { name: trimmedName })
+      .getOne();
+
+    if (existing) {
+      return existing;
+    }
+
+    const createdBy = await this.userService.findOneByEmail(actorEmail);
+    const city = this.cityRepository.create({
+      name: trimmedName,
+      destinations: [],
+      createdBy,
+    });
+
+    await this.logService.createLog(
+      'Automatycznie dodano miasto: ' + trimmedName,
+      actorEmail,
+    );
+
+    try {
+      return await this.cityRepository.save(city);
+    } catch (error) {
+      const raceWinner = await this.cityRepository
+        .createQueryBuilder('city')
+        .where('LOWER(city.name) = LOWER(:name)', { name: trimmedName })
+        .getOne();
+
+      if (raceWinner) {
+        return raceWinner;
+      }
+
+      throw error;
+    }
+  }
+
   async removeCity(cityId: string, reqCreatedBy: User): Promise<boolean> {
     const city = await this.cityRepository
       .createQueryBuilder('city')
