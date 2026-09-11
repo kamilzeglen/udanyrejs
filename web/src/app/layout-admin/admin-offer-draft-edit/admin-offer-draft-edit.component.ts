@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReplaySubject, takeUntil } from 'rxjs';
+import { ReplaySubject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CommonFacade } from '@state/common';
 import { DiscoverFacade } from '@state/discover';
@@ -9,7 +9,8 @@ import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { ScrapedOfferDraft } from '@interfaces';
+import { City, ScrapedOfferDraft } from '@interfaces';
+import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
 
 @Component({
   selector: 'app-admin-offer-draft-edit',
@@ -25,6 +26,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
   public companies$ = this.commonFacade.companies$;
   public ships$ = this.commonFacade.ships$;
   public destinations$ = this.commonFacade.destinations$;
+  public cities$ = this.commonFacade.cities$;
   public categories$ = this.commonFacade.categories$;
   public cabinTypes$ = this.commonFacade.cabinTypes$;
 
@@ -104,6 +106,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
+    this.commonFacade.getCities();
   }
 
   public ngOnDestroy(): void {
@@ -195,5 +198,34 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
 
   public goBack(): void {
     this.router.changeRoute({ linkParams: ['/admin/offers/discover/drafts'] });
+  }
+
+  public importMissingDestinations(): void {
+    let cities: City[] = [];
+    this.cities$.pipe(take(1)).subscribe((value) => {
+      cities = value ?? [];
+    });
+
+    const cityNames = Array.from(
+      new Set(
+        this.itineraryArray.controls
+          .map((dayGroup) => ((dayGroup.get('city')?.value as string) ?? '').trim())
+          .filter((name) => name.length > 0),
+      ),
+    );
+
+    const currentDestinationIds: string[] = this.draftForm.get('destinations')?.value ?? [];
+    const missingDestinationIds = resolveMissingDestinationIds(cityNames, cities, currentDestinationIds);
+
+    if (missingDestinationIds.length === 0) {
+      this.snackService.showInfo('Brak nowych regionów do zaimportowania');
+      return;
+    }
+
+    this.draftForm.patchValue({
+      destinations: [...currentDestinationIds, ...missingDestinationIds],
+    });
+
+    this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
   }
 }
