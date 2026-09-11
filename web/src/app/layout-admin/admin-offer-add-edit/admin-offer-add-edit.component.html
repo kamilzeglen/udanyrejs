@@ -10,6 +10,23 @@
     <section class="section data-section">
       <h2>Dane dotyczące rejsu</h2>
 
+      <div class="form-group offer-url-group">
+        <label for="offerUrl">Adres URL oferty:</label>
+        <input id="offerUrl" formControlName="offerUrl" type="text" placeholder="https://..." />
+        <button
+          type="button"
+          class="import-button"
+          (click)="scrapeOfferUrl()"
+          [disabled]="!offerForm.get('offerUrl')?.value || (scraping$ | async)"
+        >
+          {{ (scraping$ | async) ? 'Importowanie...' : 'Importuj' }}
+        </button>
+      </div>
+
+      <div class="scraped-banner" *ngIf="scrappedData">
+        Dane zaimportowane ze strony źródłowej — sprawdź je przed zapisaniem oferty.
+      </div>
+
       <div class="form-group">
         <mat-checkbox formControlName="isRecommended">Oferta polecana:</mat-checkbox>
       </div>
@@ -167,6 +184,10 @@
                   {{ cabinType.name }}
                 </mat-option>
               </mat-select>
+
+              <span class="scraped-label-hint" *ngIf="priceGroup.get('cabinTypeName')?.value">
+                (zostanie utworzony nowy rodzaj kabiny: {{ priceGroup.get('cabinTypeName')?.value }})
+              </span>
 
               <input formControlName="price" type="number" placeholder="Cena (Euro)" />
 

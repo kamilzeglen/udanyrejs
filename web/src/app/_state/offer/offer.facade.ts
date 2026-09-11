@@ -24,6 +24,9 @@ export class OfferFacade {
   public activateOfferError$ = this.actions.pipe(ofType(offerActions.activateOfferError));
   public deactivateOfferSuccess$ = this.actions.pipe(ofType(offerActions.deactivateOfferSuccess));
   public deactivateOfferError$ = this.actions.pipe(ofType(offerActions.deactivateOfferError));
+  public scraping$ = this.store.select(offerSelectors.selectScraping);
+  public scrapeOfferSuccess$ = this.actions.pipe(ofType(offerActions.scrapeOfferSuccess));
+  public scrapeOfferError$ = this.actions.pipe(ofType(offerActions.scrapeOfferError));
 
   constructor(
     private store: Store<AppState>,
@@ -56,5 +59,9 @@ export class OfferFacade {
 
   public activateOffer(payload: { id: string }): void {
     this.store.dispatch(offerActions.activateOffer({ payload }));
+  }
+
+  public scrapeOffer(payload: { url: string }): void {
+    this.store.dispatch(offerActions.scrapeOffer({ payload }));
   }
 }

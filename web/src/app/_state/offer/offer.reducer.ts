@@ -23,6 +23,19 @@ const reducer = createReducer(
     errorMessage,
     offers: [],
   })),
+
+  on(offerActions.scrapeOffer, (state) => ({
+    ...state,
+    scraping: true,
+  })),
+  on(offerActions.scrapeOfferSuccess, (state) => ({
+    ...state,
+    scraping: false,
+  })),
+  on(offerActions.scrapeOfferError, (state) => ({
+    ...state,
+    scraping: false,
+  })),
 );
 
 export function offerReducer(state: OfferState | undefined, action: Action): OfferState {

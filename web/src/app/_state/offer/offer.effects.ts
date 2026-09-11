@@ -124,4 +124,20 @@ export class OfferEffects {
       }),
     ),
   );
+
+  scrapeOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.scrapeOffer),
+      switchMap(({ payload }) => {
+        return this.http.scrapeOffer(payload).pipe(
+          map((scrapedOffer) => {
+            return offerActions.scrapeOfferSuccess({ scrapedOffer });
+          }),
+          catchError((errorMessage) => {
+            return of(offerActions.scrapeOfferError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
 }

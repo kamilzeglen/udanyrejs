@@ -6,11 +6,12 @@ import { OfferFacade } from 'src/app/_state/offer';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ActivatedRoute } from '@angular/router';
-import { Offer } from '@interfaces';
+import { Offer, OfferScrapper } from '@interfaces';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { map, switchMap } from 'rxjs/operators';
+import { findBestMatch } from '@core/utils/fuzzy-match.util';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -45,6 +46,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public pdfFile: File;
   public pdfUrl: string;
   public scrappedPdfFile: boolean;
+
+  public scraping$ = this.offerFacade.scraping$;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -218,6 +221,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.router.changeRoute({ linkParams: ['/admin/offers'] });
     });
 
+    this.offerFacade.scrapeOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ scrapedOffer }) => {
+      this.applyScrapedData(scrapedOffer);
+    });
+
+    this.offerFacade.scrapeOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się zaimportować danych z podanego adresu URL');
+    });
+
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
@@ -268,6 +279,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.fb.group({
         cabinTypeId: ['', Validators.required],
         price: [null, Validators.required],
+        cabinTypeName: [''],
       }),
     );
   }
@@ -383,10 +395,22 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (payload.terms) {
       payload.terms = payload.terms.map((term: any) => ({
         ...term,
-        prices: (term.prices || []).map((priceRow: any) => ({
-          ...priceRow,
-          price: Math.round(Number(priceRow.price) * 100),
-        })),
+        prices: (term.prices || []).map((priceRow: any) => {
+          const price = {
+            ...priceRow,
+            price: Math.round(Number(priceRow.price) * 100),
+          };
+
+          if (!price.cabinTypeId) {
+            delete price.cabinTypeId;
+          }
+
+          if (!price.cabinTypeName) {
+            delete price.cabinTypeName;
+          }
+
+          return price;
+        }),
       }));
     }
 
@@ -588,5 +612,102 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public goBack(): void {
     this.router.changeRoute({ linkParams: ['/admin/offers'] });
+  }
+
+  public scrapeOfferUrl(): void {
+    const url = this.offerForm.get('offerUrl')?.value;
+    if (!url) {
+      return;
+    }
+
+    this.offerFacade.scrapeOffer({ url });
+  }
+
+  public applyScrapedData(scrapedOffer: OfferScrapper): void {
+    this.offerForm.patchValue({ name: scrapedOffer.name });
+    this.applyScrapedItinerary(scrapedOffer.itinerary);
+    this.applyScrapedFiles(scrapedOffer);
+    this.scrappedData = true;
+
+    const companyId = this.matchCompany(scrapedOffer.companyName);
+
+    if (!companyId) {
+      this.applyScrapedTerms(scrapedOffer, []);
+      return;
+    }
+
+    // getShips/getCabinTypes dla nowego companyId są już wywoływane przez
+    // subskrypcję companyId.valueChanges poniżej (ustawioną w ngOnInit) —
+    // tutaj tylko czekamy na świeże dane zamiast czytać nieaktualny stan
+    // sprzed przełączenia firmy.
+    this.commonFacade.getShipsSuccess$.pipe(takeUntil(this.destroy$), take(1)).subscribe(({ ships }) => {
+      const shipId = findBestMatch(scrapedOffer.shipName, ships ?? []);
+      if (shipId) {
+        this.offerForm.patchValue({ shipId });
+      }
+    });
+
+    this.commonFacade.getCabinTypesSuccess$.pipe(takeUntil(this.destroy$), take(1)).subscribe(({ cabinTypes }) => {
+      this.applyScrapedTerms(scrapedOffer, cabinTypes ?? []);
+    });
+
+    this.offerForm.patchValue({ companyId });
+  }
+
+  private applyScrapedFiles(scrapedOffer: OfferScrapper): void {
+    if (scrapedOffer.imageUrl) {
+      this.imageUrl = scrapedOffer.imageUrl;
+      this.scrappedImageFile = true;
+    }
+
+    if (scrapedOffer.pdfUrl) {
+      this.pdfUrl = scrapedOffer.pdfUrl;
+      this.scrappedPdfFile = true;
+    }
+  }
+
+  private matchCompany(companyName: string): string {
+    let matchedCompanyId: string = null;
+    this.companies$.pipe(take(1)).subscribe((companies) => {
+      matchedCompanyId = findBestMatch(companyName, companies ?? []);
+    });
+    return matchedCompanyId;
+  }
+
+  private applyScrapedTerms(scrapedOffer: OfferScrapper, cabinTypes: { id: string; name: string }[]): void {
+    this.termsArray.clear();
+
+    scrapedOffer.terms.forEach((term) => {
+      const termGroup = this.fb.group({
+        startDate: [term.startDate],
+        endDate: [term.endDate],
+        sourceUrl: [term.sourceUrl],
+        prices: this.fb.array(
+          term.cabinPrices.map((cabinPrice) => {
+            const cabinTypeId = findBestMatch(cabinPrice.label, cabinTypes) ?? '';
+            return this.fb.group({
+              cabinTypeId: [cabinTypeId],
+              price: [cabinPrice.price, Validators.required],
+              cabinTypeName: [cabinTypeId ? '' : cabinPrice.label],
+            });
+          }),
+        ),
+      });
+      this.termsArray.push(termGroup);
+    });
+  }
+
+  private applyScrapedItinerary(itinerary: OfferScrapper['itinerary']): void {
+    this.itineraryArray.clear();
+    itinerary.forEach((day) => {
+      const dayGroup = this.fb.group({
+        day: [day.day],
+        date: [day.date],
+        city: [day.city],
+        arrivalTime: [day.arrivalTime],
+        departureTime: [day.departureTime],
+      });
+      this.itineraryArray.push(dayGroup);
+    });
   }
 }

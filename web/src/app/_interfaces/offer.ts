@@ -38,13 +38,32 @@ export interface Offer {
   deletedAt: Date;
 }
 
-export interface OfferScrapper {
-  name: string;
+export interface OfferScrapperCabinPrice {
+  label: string;
+  price: number;
+}
+
+export interface OfferScrapperTerm {
   startDate: string;
   endDate: string;
-  price: number;
-  itinerary: Itinerary[];
-  scrappedShipName: string;
-  scrappedImageFileURL: string;
-  scrappedPdfFileURL: string;
+  sourceUrl: string;
+  cabinPrices: OfferScrapperCabinPrice[];
+}
+
+export interface OfferScrapperItineraryDay {
+  day: number;
+  date: string;
+  city: string;
+  arrivalTime: string;
+  departureTime: string;
+}
+
+export interface OfferScrapper {
+  name: string;
+  shipName: string;
+  companyName: string;
+  imageUrl: string;
+  pdfUrl: string;
+  itinerary: OfferScrapperItineraryDay[];
+  terms: OfferScrapperTerm[];
 }
