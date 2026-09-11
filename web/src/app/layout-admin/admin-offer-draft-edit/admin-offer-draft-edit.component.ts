@@ -9,8 +9,9 @@ import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { City, ScrapedOfferDraft } from '@interfaces';
+import { Category, City, ScrapedOfferDraft } from '@interfaces';
 import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
+import { resolveMissingCategoryIds } from '@core/utils/import-missing-categories.util';
 
 @Component({
   selector: 'app-admin-offer-draft-edit',
@@ -227,5 +228,33 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     });
 
     this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
+  }
+
+  public importMissingCategories(): void {
+    let categories: Category[] = [];
+    this.categories$.pipe(take(1)).subscribe((value) => {
+      categories = value ?? [];
+    });
+
+    const termRanges = this.termsArray.controls
+      .map((termGroup) => ({
+        startDate: termGroup.get('startDate')?.value as string,
+        endDate: termGroup.get('endDate')?.value as string,
+      }))
+      .filter((term) => !!term.startDate && !!term.endDate);
+
+    const currentCategoryIds: string[] = this.draftForm.get('categories')?.value ?? [];
+    const missingCategoryIds = resolveMissingCategoryIds(termRanges, categories, currentCategoryIds);
+
+    if (missingCategoryIds.length === 0) {
+      this.snackService.showInfo('Brak nowych kategorii do zaimportowania');
+      return;
+    }
+
+    this.draftForm.patchValue({
+      categories: [...currentCategoryIds, ...missingCategoryIds],
+    });
+
+    this.snackService.showInfo('Zaimportowano ' + missingCategoryIds.length + ' kategori(e/i)');
   }
 }

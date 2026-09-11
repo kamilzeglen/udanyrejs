@@ -52,6 +52,14 @@
             {{ category.name }}
           </mat-option>
         </mat-select>
+        <button
+          type="button"
+          class="import-button"
+          [disabled]="termsArray.controls.length === 0"
+          (click)="importMissingCategories()"
+        >
+          Zaimportuj brakujące dane — Kategorie
+        </button>
       </div>
     </section>
 
