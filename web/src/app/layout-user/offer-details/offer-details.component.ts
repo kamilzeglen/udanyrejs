@@ -27,6 +27,8 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   public loading: boolean = true;
   public itineraryData: Itinerary[];
 
+  private loadedOfferId: string;
+
   public selectedTermId: string;
   public selectedTermStartDate: string;
   public selectedTermEndDate: string;
@@ -63,6 +65,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       const termId = queryParamMap.get('termId');
       if (termId) {
         this.selectedTermId = termId;
+        this.updateSelectedTermSnapshot();
       }
     });
 
@@ -116,6 +119,11 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         return;
       }
 
+      if (offerId === this.loadedOfferId) {
+        return;
+      }
+      this.loadedOfferId = offerId;
+
       this.routerFacade
         .getPreviousUrl()
         .pipe(takeUntil(this.destroy$))
@@ -144,11 +152,6 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   public downloadPdfFile(id: string): void {
     this.pdfFileFacade.downloadPdfFile({ pdfFileId: id });
-  }
-
-  public selectTerm(termId: string): void {
-    this.selectedTermId = termId;
-    this.updateSelectedTermSnapshot();
   }
 
   public getDefaultTermId(terms: { id: string; startDate: string }[]): string {
