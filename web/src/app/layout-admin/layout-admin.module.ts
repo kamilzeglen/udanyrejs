@@ -17,6 +17,7 @@ import { AdminCabinTypeListComponent } from './admin-cabin-type-list/admin-cabin
 import { AdminCabinTypeAddEditComponent } from './admin-cabin-type-add-edit/admin-cabin-type-add-edit.component';
 import { AdminOfferDiscoverTriggerComponent } from './admin-offer-discover-trigger/admin-offer-discover-trigger.component';
 import { AdminOfferDraftListComponent } from './admin-offer-draft-list/admin-offer-draft-list.component';
+import { AdminOfferDraftEditComponent } from './admin-offer-draft-edit/admin-offer-draft-edit.component';
 
 const components = [
   LayoutAdminComponent,
@@ -35,6 +36,7 @@ const components = [
   AdminCabinTypeAddEditComponent,
   AdminOfferDiscoverTriggerComponent,
   AdminOfferDraftListComponent,
+  AdminOfferDraftEditComponent,
 ];
 
 @NgModule({
