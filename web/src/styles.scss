@@ -10,17 +10,17 @@
 
 html,
 body {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: clip;
 }
 
 app-root {
-  width: 100vw;
-  height: 100vh;
+  display: block;
+  width: 100%;
+  min-height: 100vh;
   padding: 0;
   margin: 0;
 }
@@ -70,11 +70,6 @@ textarea {
       background-color: $primary-color;
     }
   }
-}
-
-html,
-body {
-  height: 100%;
 }
 
 body {

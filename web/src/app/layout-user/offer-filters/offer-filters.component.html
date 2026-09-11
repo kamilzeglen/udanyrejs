@@ -1,28 +1,27 @@
 <div class="offer-filters-wrapper">
-  <div
+  <button
+    type="button"
     class="filter-toggle"
-    role="button"
-    tabindex="0"
+    [attr.aria-expanded]="isFiltersVisible"
+    aria-controls="cruise-filters"
     (click)="toggleFilters()"
-    (keydown.enter)="toggleFilters()"
-    (keydown.space)="toggleFilters()"
   >
-    <div class="filter-toggle-text">Filtry</div>
+    <span class="filter-toggle-text">Filtry rejsów</span>
     <mat-icon>tune</mat-icon>
-  </div>
+  </button>
 
-  <div class="filters" [class.visible]="isFiltersVisible" [class.hidden]="!isFiltersVisible">
-    <h3 class="filter-title">Filtry rejsów</h3>
+  <div id="cruise-filters" class="filters" [class.visible]="isFiltersVisible">
+    <h2 class="filter-title">Dopasuj swój rejs</h2>
 
     <div>
       <div class="udanyrejs-field">
-        <label class="input-label" for="filterStartDate">Data początkowa</label>
-        <mat-form-field class="start-date">
+        <label class="input-label" for="filterStartDate">Wyjazd nie wcześniej niż</label>
+        <mat-form-field class="start-date" appearance="outline" subscriptSizing="dynamic">
           <input
             id="filterStartDate"
             matInput
             [matDatepicker]="startDatePicker"
-            placeholder="Data początkowa"
+            placeholder="Wybierz datę"
             [ngModel]="filters().startDate"
             (ngModelChange)="onFilterChange('startDate', $event)"
             (focus)="startDatePicker.open()"
@@ -43,13 +42,13 @@
       </div>
 
       <div class="udanyrejs-field">
-        <label class="input-label" for="filterEndDate">Data końcowa</label>
-        <mat-form-field class="start-date">
+        <label class="input-label" for="filterEndDate">Powrót nie później niż</label>
+        <mat-form-field class="start-date" appearance="outline" subscriptSizing="dynamic">
           <input
             id="filterEndDate"
             matInput
             [matDatepicker]="endDatePicker"
-            placeholder="Data końcowa"
+            placeholder="Wybierz datę"
             [ngModel]="filters().endDate"
             (ngModelChange)="onFilterChange('endDate', $event)"
             (focus)="endDatePicker.open()"
@@ -68,7 +67,6 @@
         </mat-form-field>
       </div>
 
-      <!-- Armator -->
       <div class="udanyrejs-field">
         <label class="input-label" for="filterCompany">Armator</label>
         <ng-select
@@ -88,7 +86,6 @@
         </ng-select>
       </div>
 
-      <!-- Destination -->
       <div class="udanyrejs-field">
         <label class="input-label" for="filterDestination">Kierunek</label>
         <ng-select
@@ -109,7 +106,7 @@
       </div>
 
       <div class="close-button">
-        <button (click)="toggleFilters()">Zamknij</button>
+        <button type="button" (click)="toggleFilters()">Pokaż oferty</button>
       </div>
     </div>
   </div>

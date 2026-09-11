@@ -1,132 +1,133 @@
-@import '../../../scss/variables';
-@import '../../../scss/breakpoints';
+@import '../../../scss/cruise-theme';
 
+:host {
+  display: block;
+  font-family: $cruise-font;
+}
 .offer-filters-wrapper {
-  place-items: end;
-
-  @include media('>1600px') {
-    position: sticky;
-    margin: 30px 30px;
-    top: 20px;
-    z-index: 10;
+  padding: 24px 20px;
+  border: 1px solid $cruise-border;
+  border-radius: $cruise-radius;
+  background: $white;
+}
+.filter-title {
+  margin: 0 0 26px;
+  color: $secondary-color;
+  font-size: 18px;
+  font-weight: 600;
+}
+.filter-toggle,
+.close-button {
+  display: none;
+}
+.udanyrejs-field {
+  margin-bottom: 22px;
+  &:last-of-type {
+    margin-bottom: 0;
   }
-
-  @include media('<=1600px') {
-    justify-items: center;
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: $cruise-muted;
+    font-size: 13px;
+    font-weight: 500;
   }
-
-  @include media('<=1400px') {
-    max-width: 500px;
+}
+:host ::ng-deep {
+  .mat-mdc-form-field {
+    --mat-form-field-container-text-size: 14px;
+    --mat-form-field-container-height: 48px;
+    --mat-form-field-container-vertical-padding: 12px;
+    --mdc-outlined-text-field-outline-color: #dce7e9;
+    --mdc-outlined-text-field-focus-outline-color: #005c66;
+    --mdc-outlined-text-field-container-shape: 7px;
   }
-
-  @include media('<=phone') {
-    margin: 0 20px;
+  .mat-mdc-form-field-infix {
+    min-width: 0;
   }
-
-  .filter-toggle {
-    cursor: pointer;
-    color: $primary-color;
-    border: none;
-    padding: 20px;
-    border-radius: 50%;
-    font-size: 20px;
-    text-align: center;
-    align-content: center;
-
-    @include media('>1600px') {
-      height: 80px;
-      width: 80px;
-      margin-bottom: 20px;
-      background-color: $background-color;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  input.mat-mdc-input-element {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .mat-mdc-icon-button {
+    width: 36px;
+    height: 40px;
+    padding: 8px 6px;
+  }
+  .ng-select {
+    height: auto;
+    margin-bottom: 0;
+    font-family: $cruise-font;
+    .ng-select-container {
+      min-height: 48px;
+      height: auto;
+      border: 1px solid $cruise-border;
+      border-radius: 7px;
+      background: $white;
     }
-
-    @include media('<=1600px') {
+    &.ng-select-focused .ng-select-container {
+      border-color: $primary-color;
+      box-shadow: 0 0 0 1px $primary-color;
+    }
+    .ng-placeholder {
       display: flex;
       align-items: center;
-    }
-
-    ::ng-deep {
-      mat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 30px;
-        font-weight: 500;
-        align-content: center;
-      }
-    }
-  }
-
-  .filters {
-    overflow: hidden;
-    transition: opacity 0.5s ease;
-    opacity: 0;
-    background-color: $background-color;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-
-    @include media('<=1600px') {
-      margin-bottom: 30px;
-    }
-
-    &.visible {
       height: auto;
-      opacity: 1;
+      min-height: 36px;
+      padding: 0 !important;
+      font-family: $cruise-font;
+      font-size: 14px;
+      font-weight: 400 !important;
     }
-
-    &.hidden {
-      opacity: 0;
-      display: none;
-      margin-bottom: 0;
+    .ng-has-value .ng-placeholder {
+      display: none !important;
     }
-
-    h3 {
-      text-align: center;
-      font-size: 1.25rem;
-      color: #333;
-      margin-bottom: 20px;
+    .ng-arrow-wrapper {
+      width: 22px;
     }
-  }
-
-  .filter-toggle-text {
-    padding-right: 10px;
-
-    @include media('>1600px') {
-      display: none;
+    .ng-value {
+      white-space: normal;
+    }
+    .ng-value-container {
+      min-width: 0;
     }
   }
-
-  .close-button {
-    @include media('>1600px') {
-      display: none;
-    }
-
-    margin-top: 2rem;
-    text-align: center;
-
-    button {
-      width: 80%;
-      height: 40px;
-      background-color: $primary-color;
-      color: white;
-      border: none;
-      font-size: 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: $primary-color;
-      }
-    }
+}
+@media (max-width: 1000px) {
+  .offer-filters-wrapper {
+    padding: 0;
   }
-
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 54px;
+    padding: 14px 20px;
+    border: 0;
+    border-radius: $cruise-radius;
+    background: $white;
+    color: $primary-color;
+    font: 600 15px $cruise-font;
+    cursor: pointer;
+    @include cruise-focus;
+  }
   .filter-title {
-    @include media('<=1400px') {
-      display: none;
+    display: none;
+  }
+  .filters {
+    display: none;
+    padding: 8px 20px 20px;
+    &.visible {
+      display: block;
+    }
+  }
+  .close-button {
+    display: block;
+    button {
+      @include cruise-button;
+      width: 100%;
     }
   }
 }

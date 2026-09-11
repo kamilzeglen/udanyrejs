@@ -1,23 +1,47 @@
-@import '../../../scss/variables';
+@import '../../../scss/cruise-theme';
 
 .submenu {
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   min-height: 40px;
-  height: auto;
-  background-image: linear-gradient($primary-color, #002b4f);
+  padding: 0;
+  background: linear-gradient($primary-color, $secondary-color);
+  font-family: $cruise-font;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 25px;
+  color: $white;
   font-size: 16px;
   font-weight: 600;
-  padding: 10px 0;
-  justify-content: center;
-
-  .submenu-item {
-    padding: 0 25px;
+  line-height: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  &:hover,
+  &.active {
+    background: rgba($white, 0.1);
   }
-
-  a:link,
-  a:visited {
-    color: $white;
-    text-align: center;
-    align-content: center;
+  &:focus-visible {
+    outline: 2px solid $white;
+    outline-offset: -4px;
+  }
+}
+.mobile-link {
+  display: none;
+}
+@media (max-width: 600px) {
+  .submenu {
+    padding: 0 4px;
+  }
+  .nav-link {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  .mobile-link {
+    display: flex;
   }
 }

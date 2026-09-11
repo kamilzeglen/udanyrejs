@@ -1,0 +1,45 @@
+@import 'variables';
+
+$cruise-background: #f3f7f8;
+$cruise-border: #dce7e9;
+$cruise-muted: #5c707a;
+$cruise-accent: #c94218;
+$cruise-tint: #eaf5f6;
+$cruise-radius: 12px;
+$cruise-font: Roboto, 'Helvetica Neue', sans-serif;
+
+@mixin cruise-card {
+  padding: 32px;
+  background: $white;
+  border: 1px solid $cruise-border;
+  border-radius: $cruise-radius;
+}
+
+@mixin cruise-focus {
+  &:focus-visible {
+    outline: 3px solid $primary-color;
+    outline-offset: 4px;
+  }
+}
+
+@mixin cruise-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: $cruise-accent;
+  color: $white;
+  font: 600 15px/1.4 $cruise-font;
+  text-decoration: none;
+  cursor: pointer;
+  @include cruise-focus;
+
+  &:hover {
+    background: #ad3512;
+    color: $white;
+  }
+}

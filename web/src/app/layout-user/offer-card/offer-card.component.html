@@ -3,37 +3,57 @@
   [routerLink]="['/offers/details', offer().id]"
   [queryParams]="{ termId: offer().termId }"
   [class.recommended]="offer().isRecommended"
-  [class.no-margin]="index() === 0"
 >
-  <!-- Zawieszka -->
-  <div class="offer-badge new" *ngIf="isNewOffer(offer().createdAt)">Nowe</div>
-  <div class="offer-badge promotion" *ngIf="offer().isRecommended">Polecamy</div>
-
-  <!-- Logo firmy -->
-  <div class="logo-container" *ngIf="offer().company?.imageFile?.name">
+  <div class="image-container">
     <img
-      src="{{ API_URL + '/companies/images/' + offer().company.imageFile.name }}"
-      alt="Logo armatora - {{ offer().company.name }}"
-      class="company-logo"
-    />
-  </div>
-
-  <!-- Zdjęcie -->
-  <div class="image-container" *ngIf="offer().imageFile">
-    <img
+      crossorigin="anonymous"
+      *ngIf="offer().imageFile && imageFailed === false; else imagePlaceholder"
       [src]="API_URL + '/offers/images/' + offer().imageFile.name"
-      alt="Zdjęcie oferty - {{ offer().name }}"
-      class="ship-image"
+      alt="{{ offer().name }}"
+      [attr.loading]="index() === 0 ? 'eager' : 'lazy'"
+      class="cruise-image"
+      (error)="imageFailed = true"
     />
+    <ng-template #imagePlaceholder><mat-icon class="image-placeholder">directions_boat</mat-icon></ng-template>
+    <span class="ribbon-badge" *ngIf="isNew">Nowość</span>
+    <div class="offer-badges">
+      <span class="offer-badge promotion" *ngIf="offer().isRecommended">Polecamy</span>
+    </div>
   </div>
-
-  <!-- Opis oferty -->
-  <div class="offer-details">
-    <h2 class="offer-title">{{ offer().name }}</h2>
-    <p>
-      <strong>Termin</strong>: {{ offer().startDate | date: 'dd.MM.yyyy' }} - {{ offer().endDate | date: 'dd.MM.yyyy' }}
-    </p>
-    <p><strong>Statek</strong>: {{ offer().ship.name }}</p>
-    <p><strong>Cena od</strong>: {{ offer().fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</p>
+  <div class="offer-content">
+    <div class="company">
+      <img
+        crossorigin="anonymous"
+        *ngIf="offer().company?.imageFile?.name && companyLogoFailed === false"
+        [src]="API_URL + '/companies/images/' + offer().company.imageFile.name"
+        alt="{{ offer().company.name }}"
+        class="company-logo"
+        (error)="companyLogoFailed = true"
+      />
+      <span
+        *ngIf="
+          companyLogoFailed ||
+          offer().company?.imageFile?.name === null ||
+          offer().company?.imageFile?.name === undefined
+        "
+        >{{ offer().company?.name }}</span
+      >
+    </div>
+    <h2>{{ offer().name }}</h2>
+    <div class="offer-facts">
+      <p>
+        <mat-icon>calendar_today</mat-icon
+        ><span>{{ offer().startDate | date: 'dd.MM.yyyy' }} – {{ offer().endDate | date: 'dd.MM.yyyy' }}</span>
+      </p>
+      <p>
+        <mat-icon>directions_boat</mat-icon><span>{{ offer().ship.name }}</span>
+      </p>
+    </div>
+    <div class="offer-bottom">
+      <div class="price">
+        <span>Cena od</span><strong>{{ offer().fromPrice / 100 | currency: 'EUR' : 'symbol' : '0.0' }}</strong>
+      </div>
+      <span class="view-offer">Zobacz rejs</span>
+    </div>
   </div>
 </a>

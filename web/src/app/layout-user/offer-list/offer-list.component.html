@@ -1,43 +1,43 @@
-<div>
-  <div class="offers-wrapper">
-    <div class="left-side">
-      <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+<section class="offers-page">
+  <header class="page-heading">
+    <div>
+      <h1>Znajdź swój następny rejs</h1>
+      <p>Wybierz kierunek, odkryj nowe miejsca i wypłyń z nami.</p>
     </div>
-
-    <div class="offers" *ngIf="offers$ | async as offers">
-      <div class="filters-mobile">
-        <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+    <span class="results-count" *ngIf="(loading$ | async) === false"
+      >Dostępne oferty: {{ (pagination$ | async)?.all }}</span
+    >
+  </header>
+  <div class="offers-wrapper">
+    <aside class="filters-panel" aria-label="Filtry rejsów">
+      <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
+    </aside>
+    <div class="offers" *ngIf="offers$ | async as offers" [attr.aria-busy]="loading$ | async">
+      <div class="offer-items" *ngIf="offers.length > 0; else noOffers">
+        <app-offer-card
+          *ngFor="let offer of offers; index as offerIndex"
+          [index]="offerIndex"
+          [offer]="offer"
+        ></app-offer-card>
       </div>
-
-      <div *ngIf="offers.length > 0; else noOffers">
-        <div *ngFor="let offer of offers; index as offerIndex">
-          <app-offer-card [index]="offerIndex" [offer]="offer"></app-offer-card>
-        </div>
-
-        <div class="paginator-wrapper">
-          <mat-paginator
-            *ngIf="(loading$ | async) === false"
-            [hidePageSize]="false"
-            [length]="(pagination$ | async)?.all"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="pageSizeOptions"
-            [pageIndex]="currPage$ | async"
-            (page)="pageChanged($event)"
-          >
-          </mat-paginator>
-        </div>
-      </div>
-
-      <!-- Komunikat o braku ofert -->
+      <mat-paginator
+        *ngIf="offers.length > 0 && (loading$ | async) === false"
+        [hidePageSize]="true"
+        [length]="(pagination$ | async)?.all"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="currPage$ | async"
+        (page)="pageChanged($event)"
+        aria-label="Strony ofert rejsów"
+      ></mat-paginator>
       <ng-template #noOffers>
-        <div class="no-offers" *ngIf="(loading$ | async) === false">
-          <p>Nie znaleziono ofert spełniających wybrane kryteria.</p>
+        <div class="no-offers" *ngIf="(loading$ | async) === false" role="status">
+          <mat-icon>travel_explore</mat-icon>
+          <h2>Nie znaleźliśmy pasującego rejsu</h2>
+          <p>Zmień termin lub kierunek w filtrach, aby zobaczyć inne oferty.</p>
         </div>
       </ng-template>
     </div>
-
-    <div class="right-side"></div>
   </div>
-</div>
-
+</section>
 <app-spinner *ngIf="(loading$ | async) === true" appAutoSpinner [size]="75"></app-spinner>

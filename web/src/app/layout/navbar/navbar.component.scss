@@ -1,117 +1,106 @@
-@import '../../../scss/variables';
-@import '../../../scss/breakpoints';
+@import '../../../scss/cruise-theme';
 
 .navbar {
-  border-bottom: 4px solid $primary-color;
-  flex-shrink: 0; // Zapobiega zmniejszaniu nagłówka
   display: flex;
   justify-content: center;
-  padding: 0;
-
-  .navbar-container {
-    max-width: 1280px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 100%;
-    padding: 0 20px;
-
-    @include media('<=phone') {
-      padding: unset;
-    }
+  border-bottom: 1px solid $cruise-border;
+  background: $white;
+  font-family: $cruise-font;
+}
+.navbar-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 32px;
+}
+.wave {
+  width: 140px;
+  height: auto;
+  opacity: 0.65;
+}
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  min-height: 96px;
+  flex: 1;
+}
+.nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 0;
+  color: $secondary-color;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  @include cruise-focus;
+  &:hover,
+  &.active {
+    color: $primary-color;
   }
-
+  &.active::after {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: $primary-color;
+    content: '';
+  }
+}
+.logo-container {
+  display: flex;
+  align-items: center;
+  margin: 0 22px;
+  padding: 12px 0;
+  @include cruise-focus;
+}
+.logo {
+  width: auto;
+  height: 60px;
+}
+@media (max-width: 1100px) {
   .wave {
-    height: 32px;
-
-    @include media('<=1200px') {
-      display: none;
-    }
-
-    &.wave-left {
-      padding-right: 0;
-    }
-
-    &.wave-right {
-      padding-left: 0;
-    }
+    width: 90px;
   }
-
-  @keyframes wave-animation {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(5px);
-    }
-  }
-
   .navbar-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
+    gap: 24px;
   }
-
-  .nav-link {
-    font-size: 18px;
-    font-weight: 600;
-    padding: 0 20px;
-    color: $text-color;
-    text-shadow: grey 1px 1px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    transition:
-      color 0.3s ease,
-      transform 0.3s ease;
-
-    @include media('<=400px') {
-      padding: 0 10px;
-    }
-
-    &:hover {
-      color: darken($secondary-color, 10%);
-      transform: scale(1.1);
-
-      i[nz-icon] {
-        color: lighten($secondary-color, 10%);
-        transform: scale(1.2);
-      }
-    }
-
-    i[nz-icon] {
-      transition:
-        transform 0.3s ease,
-        color 0.3s ease;
-    }
-  }
-
   .logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0 40px;
-    padding: 10px 0;
-    position: relative;
-
-    @include media('<=phone') {
-      margin: 0 20px;
-    }
-
-    .logo {
-      height: 60px;
-      transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
-
-      @include media('<=phone') {
-        height: 50px;
-      }
-
-      &:hover {
-        transform: scale(1.05);
-      }
-    }
+    margin: 0 8px;
+  }
+}
+@media (max-width: 800px) {
+  .wave {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .navbar-container {
+    padding: 0 20px;
+  }
+  .navbar-content {
+    min-height: 84px;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .desktop-link {
+    display: none;
+  }
+  .logo-container {
+    margin: 0;
+  }
+  .logo {
+    height: 52px;
+  }
+  .nav-link {
+    font-size: 14px;
   }
 }
