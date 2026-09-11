@@ -6,12 +6,13 @@ import { OfferFacade } from 'src/app/_state/offer';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ActivatedRoute } from '@angular/router';
-import { Offer, OfferScrapper } from '@interfaces';
+import { City, Offer, OfferScrapper } from '@interfaces';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { map, switchMap } from 'rxjs/operators';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
+import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -29,6 +30,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public companies$ = this.commonFacade.companies$;
   public ships$ = this.commonFacade.ships$;
   public destinations$ = this.commonFacade.destinations$;
+  public cities$ = this.commonFacade.cities$;
   public categories$ = this.commonFacade.categories$;
 
   public offerForm: FormGroup;
@@ -232,6 +234,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     this.commonFacade.getCompanies();
     this.commonFacade.getCategories();
     this.commonFacade.getDestinations();
+    this.commonFacade.getCities();
   }
 
   public ngOnDestroy(): void {
@@ -709,5 +712,34 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       });
       this.itineraryArray.push(dayGroup);
     });
+  }
+
+  public importMissingDestinations(): void {
+    let cities: City[] = [];
+    this.cities$.pipe(take(1)).subscribe((value) => {
+      cities = value ?? [];
+    });
+
+    const cityNames = Array.from(
+      new Set(
+        this.itineraryArray.controls
+          .map((dayGroup) => ((dayGroup.get('city')?.value as string) ?? '').trim())
+          .filter((name) => name.length > 0),
+      ),
+    );
+
+    const currentDestinationIds: string[] = this.offerForm.get('destinations')?.value ?? [];
+    const missingDestinationIds = resolveMissingDestinationIds(cityNames, cities, currentDestinationIds);
+
+    if (missingDestinationIds.length === 0) {
+      this.snackService.showInfo('Brak nowych regionów do zaimportowania');
+      return;
+    }
+
+    this.offerForm.patchValue({
+      destinations: [...currentDestinationIds, ...missingDestinationIds],
+    });
+
+    this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
   }
 }
