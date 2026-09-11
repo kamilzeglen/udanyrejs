@@ -139,14 +139,23 @@
     <section class="section terms-section">
       <h2>Terminy rejsu</h2>
       <div formArrayName="terms">
-        <div
+        <mat-expansion-panel
           *ngFor="let term of termsArray.controls; let termIndex = index"
           [formGroupName]="termIndex"
           class="term-card"
         >
+          <mat-expansion-panel-header>
+            <mat-panel-title>Termin {{ termIndex + 1 }}</mat-panel-title>
+            <mat-panel-description>
+              {{ term.get('startDate')?.value | date: 'dd.MM.yyyy' }} –
+              {{ term.get('endDate')?.value | date: 'dd.MM.yyyy' }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
           <div class="term-card__header">
-            <h3>Termin {{ termIndex + 1 }}</h3>
-            <button type="button" class="term-card__remove" (click)="removeTerm(termIndex)">Usuń termin</button>
+            <button type="button" class="term-card__remove" (click)="removeTerm(termIndex); $event.stopPropagation()">
+              Usuń termin
+            </button>
           </div>
 
           <div class="term-card__dates">
@@ -216,7 +225,7 @@
               Dodaj cenę dla kabiny
             </button>
           </div>
-        </div>
+        </mat-expansion-panel>
       </div>
 
       <button type="button" class="terms-section__add" (click)="addTerm()">Dodaj termin</button>

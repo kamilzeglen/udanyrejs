@@ -40,36 +40,11 @@
   }
 
   .term-card {
-    border: 1px solid $border-color;
-    border-radius: 10px;
-    padding: 16px;
     margin-bottom: 20px;
-    background: $white;
 
     &:last-child {
       margin-bottom: 0;
     }
-  }
-
-  .term-card__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid $border-color;
-
-    h3 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: $primary-color;
-    }
-  }
-
-  .term-card__dates {
-    font-size: 14px;
-    color: $grey;
   }
 
   .term-card__source-link {

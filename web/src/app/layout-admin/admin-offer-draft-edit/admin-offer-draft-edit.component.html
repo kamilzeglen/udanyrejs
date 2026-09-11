@@ -67,17 +67,17 @@
       <h2>Terminy rejsu</h2>
 
       <div formArrayName="terms">
-        <div
+        <mat-expansion-panel
           *ngFor="let termGroup of termsArray.controls; let termIndex = index"
           [formGroupName]="termIndex"
           class="term-card"
         >
-          <div class="term-card__header">
-            <h3>Termin {{ termIndex + 1 }}</h3>
-            <span class="term-card__dates">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Termin {{ termIndex + 1 }}</mat-panel-title>
+            <mat-panel-description>
               {{ termGroup.get('startDate')?.value }} – {{ termGroup.get('endDate')?.value }}
-            </span>
-          </div>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
 
           <a
             class="term-card__source-link"
@@ -107,7 +107,7 @@
               <input formControlName="price" type="number" step="0.01" placeholder="Cena (Euro)" />
             </div>
           </div>
-        </div>
+        </mat-expansion-panel>
       </div>
     </section>
 
