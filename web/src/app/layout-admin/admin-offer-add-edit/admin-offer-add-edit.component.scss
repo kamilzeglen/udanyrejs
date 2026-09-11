@@ -102,13 +102,21 @@
       }
     }
 
-    .itinerary-input--day-label {
-      justify-content: flex-end;
+    .itinerary-day-label-spacer {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
     }
 
     .itinerary-day-label {
-      color: $primary-color;
+      padding: 10px;
+      font-size: 14px;
       font-weight: 600;
+      color: $primary-color;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      box-sizing: border-box;
     }
 
     &:last-child {

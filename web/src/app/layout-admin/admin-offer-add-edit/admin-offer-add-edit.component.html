@@ -236,7 +236,8 @@
       <h2>Plan Podróży</h2>
       <div formArrayName="itinerary">
         <div *ngFor="let day of itineraryArray.controls; let i = index" [formGroupName]="i" class="itinerary-item">
-          <div class="itinerary-input itinerary-input--day-label">
+          <div class="itinerary-input">
+            <span class="itinerary-day-label-spacer" aria-hidden="true">&nbsp;</span>
             <span class="itinerary-day-label">Dzień {{ i + 1 }}</span>
           </div>
 
