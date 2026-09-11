@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 export class CreateCabinTypeDto {
   @IsString()
@@ -6,8 +6,4 @@ export class CreateCabinTypeDto {
 
   @IsUUID()
   companyId: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isActive?: boolean;
 }

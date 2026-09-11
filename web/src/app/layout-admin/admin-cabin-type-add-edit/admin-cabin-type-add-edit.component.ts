@@ -38,7 +38,6 @@ export class AdminCabinTypeAddEditComponent implements OnInit, OnDestroy {
     this.cabinTypeForm = this.fb.group({
       name: ['', Validators.required],
       companyId: ['', Validators.required],
-      isActive: [true],
     });
 
     this.commonFacade.getCompanies();

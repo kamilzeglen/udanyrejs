@@ -41,11 +41,10 @@
     color: $negative;
     cursor: pointer;
     margin-left: 10px;
-  }
 
-  .icon-activate {
-    color: $positive;
-    cursor: pointer;
-    margin-left: 10px;
+    &.icon-disabled {
+      color: $grey;
+      cursor: not-allowed;
+    }
   }
 }

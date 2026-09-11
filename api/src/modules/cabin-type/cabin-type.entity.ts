@@ -26,9 +26,6 @@ export class CabinType {
   @Column({ type: 'uuid', nullable: false })
   companyId: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()
   createdBy: User;

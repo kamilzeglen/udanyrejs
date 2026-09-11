@@ -428,32 +428,16 @@ export class CommonEffects {
     ),
   );
 
-  deactivateCabinType$ = createEffect(() =>
+  deleteCabinType$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(commonActions.deactivateCabinType),
+      ofType(commonActions.deleteCabinType),
       switchMap(({ payload }) => {
-        return this.http.deactivateCabinType(payload).pipe(
+        return this.http.removeCabinType(payload).pipe(
           map(() => {
-            return commonActions.deactivateCabinTypeSuccess();
+            return commonActions.deleteCabinTypeSuccess();
           }),
           catchError((errorMessage) => {
-            return of(commonActions.deactivateCabinTypeError({ errorMessage }));
-          }),
-        );
-      }),
-    ),
-  );
-
-  activateCabinType$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(commonActions.activateCabinType),
-      switchMap(({ payload }) => {
-        return this.http.activateCabinType(payload).pipe(
-          map(() => {
-            return commonActions.activateCabinTypeSuccess();
-          }),
-          catchError((errorMessage) => {
-            return of(commonActions.activateCabinTypeError({ errorMessage }));
+            return of(commonActions.deleteCabinTypeError({ errorMessage }));
           }),
         );
       }),

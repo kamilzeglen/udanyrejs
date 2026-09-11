@@ -167,13 +167,8 @@ export class CommonHttpService {
     return this.http.patch<CabinType>(url, payload.formData);
   }
 
-  public deactivateCabinType(payload: { id: string }): Observable<boolean> {
-    const url = `${this.API_URL}/cabin-type/` + payload.id + '/deactivate';
-    return this.http.get<boolean>(url);
-  }
-
-  public activateCabinType(payload: { id: string }): Observable<boolean> {
-    const url = `${this.API_URL}/cabin-type/` + payload.id + '/activate';
-    return this.http.get<boolean>(url);
+  public removeCabinType(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/cabin-type/` + payload.id;
+    return this.http.delete<boolean>(url);
   }
 }

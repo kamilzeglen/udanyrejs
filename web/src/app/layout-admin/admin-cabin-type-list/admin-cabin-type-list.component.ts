@@ -20,7 +20,7 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public allColumns: string[] = ['id', 'name', 'isActive', 'actions'];
+  public allColumns: string[] = ['id', 'name', 'offersCount', 'actions'];
 
   public columnsToDisplay: string[];
 
@@ -51,22 +51,15 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
       this.commonFacade.getAllCabinTypes();
     });
 
-    this.commonFacade.deactivateCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie dezaktywowano rodzaj kabiny');
+    this.commonFacade.deleteCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showInfo('Pomyślnie usunięto rodzaj kabiny');
       this.commonFacade.getAllCabinTypes();
     });
 
-    this.commonFacade.deactivateCabinTypeError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showError('Wystąpił błąd podczas dezaktywowania rodzaju kabiny');
-    });
-
-    this.commonFacade.activateCabinTypeSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie aktywowano rodzaj kabiny');
-      this.commonFacade.getAllCabinTypes();
-    });
-
-    this.commonFacade.activateCabinTypeError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showError('Wystąpił błąd podczas aktywowania rodzaju kabiny');
+    this.commonFacade.deleteCabinTypeError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError(
+        'Nie udało się usunąć rodzaju kabiny — sprawdź, czy żadna oferta z niej nie korzysta',
+      );
     });
 
     this.commonFacade.getAllCabinTypes();
@@ -87,10 +80,21 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
     this.routerFacade.changeRoute({ linkParams });
   }
 
-  public deactivateCabinType(cabinType: CabinType): void {
+  public deleteCabinType(cabinType: CabinType): void {
+    if (cabinType.offersCount > 0) {
+      this.snackService.showError(
+        'Nie można usunąć rodzaju kabiny "' +
+          cabinType.name +
+          '" — korzysta z niej ' +
+          cabinType.offersCount +
+          ' ofert(a/y).',
+      );
+      return;
+    }
+
     this.confirmationModalService
       .open({
-        message: 'Jesteś pewny że chcesz dezaktywować rodzaj kabiny: ' + cabinType.name + '?',
+        message: 'Jesteś pewny że chcesz całkowicie usunąć rodzaj kabiny: ' + cabinType.name + '?',
       })
       .afterClosed()
       .pipe(take(1))
@@ -99,23 +103,7 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.commonFacade.deactivateCabinType({ id: cabinType.id });
-      });
-  }
-
-  public activateCabinType(cabinType: CabinType): void {
-    this.confirmationModalService
-      .open({
-        message: 'Jesteś pewny że chcesz aktywować rodzaj kabiny: ' + cabinType.name + '?',
-      })
-      .afterClosed()
-      .pipe(take(1))
-      .subscribe((confirmed) => {
-        if (!confirmed) {
-          return;
-        }
-
-        this.commonFacade.activateCabinType({ id: cabinType.id });
+        this.commonFacade.deleteCabinType({ id: cabinType.id });
       });
   }
 }

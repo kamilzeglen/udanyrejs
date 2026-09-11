@@ -74,10 +74,8 @@ export class CommonFacade {
   public createCabinTypeError$ = this.actions.pipe(ofType(commonActions.createCabinTypeError));
   public updateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.updateCabinTypeSuccess));
   public updateCabinTypeError$ = this.actions.pipe(ofType(commonActions.updateCabinTypeError));
-  public deactivateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.deactivateCabinTypeSuccess));
-  public deactivateCabinTypeError$ = this.actions.pipe(ofType(commonActions.deactivateCabinTypeError));
-  public activateCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.activateCabinTypeSuccess));
-  public activateCabinTypeError$ = this.actions.pipe(ofType(commonActions.activateCabinTypeError));
+  public deleteCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.deleteCabinTypeSuccess));
+  public deleteCabinTypeError$ = this.actions.pipe(ofType(commonActions.deleteCabinTypeError));
 
   constructor(
     private store: Store<AppState>,
@@ -204,11 +202,7 @@ export class CommonFacade {
     this.store.dispatch(commonActions.updateCabinType({ payload }));
   }
 
-  public deactivateCabinType(payload: { id: string }): void {
-    this.store.dispatch(commonActions.deactivateCabinType({ payload }));
-  }
-
-  public activateCabinType(payload: { id: string }): void {
-    this.store.dispatch(commonActions.activateCabinType({ payload }));
+  public deleteCabinType(payload: { id: string }): void {
+    this.store.dispatch(commonActions.deleteCabinType({ payload }));
   }
 }

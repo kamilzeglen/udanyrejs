@@ -6,11 +6,11 @@ export interface CabinType {
   name: string;
   company: Company;
   companyId: string;
-  isActive: boolean;
   createdBy: User;
   createdById: string;
   updatedBy: User;
   updatedById: string;
   createdAt: Date | string;
   updatedAt: Date | string;
+  offersCount?: number;
 }
