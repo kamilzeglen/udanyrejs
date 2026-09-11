@@ -102,6 +102,15 @@
       }
     }
 
+    .itinerary-input--day-label {
+      justify-content: flex-end;
+    }
+
+    .itinerary-day-label {
+      color: $primary-color;
+      font-weight: 600;
+    }
+
     &:last-child {
       margin-right: 0;
     }

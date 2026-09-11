@@ -257,7 +257,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
       const timeDifference = endDate.getTime() - startDate.getTime();
       const nights = Math.max(Math.ceil(timeDifference / (1000 * 60 * 60 * 24)) + 1, 0);
-      this.adjustItineraryDays(nights, startDate);
+      this.adjustItineraryDays(nights);
     }
   }
 
@@ -336,12 +336,12 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       });
   }
 
-  public adjustItineraryDays(nights: number, startDate: Date): void {
+  public adjustItineraryDays(nights: number): void {
     const currentDays = this.itineraryArray.length;
 
     if (nights > currentDays) {
       for (let i = currentDays; i < nights; i++) {
-        this.addItineraryDay(i + 1, startDate);
+        this.addItineraryDay(i + 1);
       }
     } else if (nights < currentDays) {
       for (let i = currentDays - 1; i >= nights; i--) {
@@ -351,10 +351,9 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  public addItineraryDay(dayNumber: number, startDate: Date): void {
+  public addItineraryDay(dayNumber: number): void {
     const dayGroup = this.fb.group({
       day: [dayNumber],
-      date: [this.getDateForItinerary(startDate, dayNumber)],
       city: [''],
       arrivalTime: [''],
       departureTime: [''],
@@ -367,12 +366,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     return combineLatest([this.cities$, cityControl.valueChanges.pipe(startWith(cityControl.value))]).pipe(
       map(([cities, fragment]) => filterCitiesByFragment(cities ?? [], fragment ?? '')),
     );
-  }
-
-  public getDateForItinerary(startDate: Date, dayNumber: number): string {
-    const newDate = new Date(startDate);
-    newDate.setDate(startDate.getDate() + dayNumber - 1);
-    return newDate.toISOString().split('T')[0];
   }
 
   public onImageFileChange(event: Event): void {
@@ -614,7 +607,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         itineraryData.forEach((day, index) => {
           const dayGroup = this.fb.group({
             day: [day.day || index + 1],
-            date: [day.date || null],
             city: [day.city || null],
             arrivalTime: [day.arrivalTime || null],
             departureTime: [day.departureTime || null],
@@ -719,7 +711,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     itinerary.forEach((day) => {
       const dayGroup = this.fb.group({
         day: [day.day],
-        date: [day.date],
         city: [day.city],
         arrivalTime: [day.arrivalTime],
         departureTime: [day.departureTime],
