@@ -2,7 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ReplaySubject, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OfferFacade } from '@state/offer';
-import { AllDeviceInfo, Itinerary, Offer } from '@interfaces';
+import { AllDeviceInfo, Offer } from '@interfaces';
+import { computeItineraryDate } from '@core/utils/compute-itinerary-date.util';
 import { environment } from '@environment';
 import { Location } from '@angular/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
@@ -25,7 +26,13 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   public offer: Offer;
   public loading: boolean = true;
-  public itineraryData: Itinerary[];
+  public itineraryViewModel: {
+    day: number;
+    date: Date | null;
+    city: string;
+    arrivalTime: string;
+    departureTime: string;
+  }[] = [];
 
   private loadedOfferId: string;
 
@@ -93,23 +100,6 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         this.selectedTermId = this.getDefaultTermId(this.termsViewModel);
       }
       this.updateSelectedTermSnapshot();
-
-      const itineraryData =
-        typeof this.offer.itinerary === 'string' ? JSON.parse(this.offer.itinerary) : this.offer.itinerary;
-
-      if (Array.isArray(itineraryData)) {
-        this.itineraryData = itineraryData.map((day: any) => {
-          return {
-            day: day.day,
-            date: day.date,
-            city: day.city,
-            arrivalTime: day.arrivalTime,
-            departureTime: day.departureTime,
-          };
-        });
-      } else {
-        console.error('Itinerary is not a valid array:', this.offer.itinerary);
-      }
     });
 
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
@@ -174,5 +164,30 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     this.selectedTermStartDate = term?.startDate ?? null;
     this.selectedTermEndDate = term?.endDate ?? null;
     this.selectedTermPrice = term?.fromPrice ?? null;
+    this.recomputeItineraryViewModel();
+  }
+
+  private recomputeItineraryViewModel(): void {
+    if (!this.offer) {
+      this.itineraryViewModel = [];
+      return;
+    }
+
+    const itineraryData =
+      typeof this.offer.itinerary === 'string' ? JSON.parse(this.offer.itinerary) : this.offer.itinerary;
+
+    if (!Array.isArray(itineraryData)) {
+      console.error('Itinerary is not a valid array:', this.offer.itinerary);
+      this.itineraryViewModel = [];
+      return;
+    }
+
+    this.itineraryViewModel = itineraryData.map((day: any) => ({
+      day: day.day,
+      date: computeItineraryDate(this.selectedTermStartDate, day.day),
+      city: day.city,
+      arrivalTime: day.arrivalTime,
+      departureTime: day.departureTime,
+    }));
   }
 }

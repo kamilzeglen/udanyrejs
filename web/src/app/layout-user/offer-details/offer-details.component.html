@@ -47,7 +47,7 @@
     </aside>
   </div>
   <div class="central-side">
-    <section class="itinerary-section" *ngIf="itineraryData?.length">
+    <section class="itinerary-section" *ngIf="itineraryViewModel?.length">
       <h2>Plan podróży</h2>
       <div class="table-scroll" tabindex="0" role="region" aria-label="Plan podróży — tabela przewijana">
         <table class="itinerary-table">
@@ -61,7 +61,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let stop of itineraryData; let i = index">
+            <tr *ngFor="let stop of itineraryViewModel; let i = index">
               <td>{{ i + 1 }}</td>
               <td>{{ (stop.date | date: 'dd.MM.yyyy') || '–' }}</td>
               <td>{{ stop.city || '–' }}</td>
