@@ -66,6 +66,9 @@ export function createDiscoverOffersRoute(config: ScraperConfig, queue: BrowserQ
 
         const raw = await queue.enqueue(async (page) => {
           await page.goto(listingUrl, { waitUntil: 'domcontentloaded' });
+          await page
+            .waitForSelector('cruiselist-item a.cruise-item__title', { timeout: config.listingRenderTimeoutMs })
+            .catch(() => undefined);
           return extractRawListingPage(page);
         }, `discover-offers page ${currentPage} (shipowner ${id})`);
 

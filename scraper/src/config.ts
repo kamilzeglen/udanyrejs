@@ -6,6 +6,7 @@ export interface ScraperConfig {
   minDelayMs: number;
   maxDelayMs: number;
   maxDiscoveryPagesPerHost: number;
+  listingRenderTimeoutMs: number;
 }
 
 function requireEnv(name: string): string {
@@ -30,5 +31,6 @@ export function loadConfig(): ScraperConfig {
     minDelayMs: Number(process.env.MIN_DELAY_MS ?? 2000),
     maxDelayMs: Number(process.env.MAX_DELAY_MS ?? 5000),
     maxDiscoveryPagesPerHost: Number(process.env.MAX_DISCOVERY_PAGES_PER_HOST ?? 20),
+    listingRenderTimeoutMs: Number(process.env.LISTING_RENDER_TIMEOUT_MS ?? 8000),
   };
 }

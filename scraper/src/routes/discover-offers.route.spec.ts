@@ -15,6 +15,7 @@ const config: ScraperConfig = {
   minDelayMs: 0,
   maxDelayMs: 0,
   maxDiscoveryPagesPerHost: 5,
+  listingRenderTimeoutMs: 0,
 };
 
 function buildApp(queue: BrowserQueue) {
@@ -28,7 +29,10 @@ describe('POST /discover-offers', () => {
   let queue: BrowserQueue;
 
   beforeEach(() => {
-    const fakePage = { goto: jest.fn().mockResolvedValue(undefined) };
+    const fakePage = {
+      goto: jest.fn().mockResolvedValue(undefined),
+      waitForSelector: jest.fn().mockResolvedValue(undefined),
+    };
     queue = { enqueue: jest.fn((task) => task(fakePage as never)) } as unknown as BrowserQueue;
   });
 

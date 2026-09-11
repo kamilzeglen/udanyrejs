@@ -18,6 +18,7 @@ const config: ScraperConfig = {
   minDelayMs: 0,
   maxDelayMs: 0,
   maxDiscoveryPagesPerHost: 5,
+  listingRenderTimeoutMs: 0,
 };
 
 describe('internalAuthMiddleware', () => {

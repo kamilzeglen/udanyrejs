@@ -9,6 +9,7 @@ const config: ScraperConfig = {
   minDelayMs: 20,
   maxDelayMs: 20,
   maxDiscoveryPagesPerHost: 5,
+  listingRenderTimeoutMs: 0,
 };
 
 describe('BrowserQueue', () => {
