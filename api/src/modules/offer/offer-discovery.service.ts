@@ -46,7 +46,7 @@ export class OfferDiscoveryService {
       );
     }
 
-    const newUrls = await this.filterOutExistingUrls(urls);
+    const newUrls = await this.filterOutExistingUrls(urls, actorEmail);
 
     for (const url of newUrls) {
       await this.discoverOneOffer(url, actorEmail);
@@ -96,7 +96,10 @@ export class OfferDiscoveryService {
     return true;
   }
 
-  private async filterOutExistingUrls(urls: string[]): Promise<string[]> {
+  private async filterOutExistingUrls(
+    urls: string[],
+    actorEmail: string,
+  ): Promise<string[]> {
     if (urls.length === 0) {
       return [];
     }
@@ -116,13 +119,54 @@ export class OfferDiscoveryService {
         .getMany(),
     ]);
 
-    const existingUrls = new Set<string>([
-      ...existingDrafts.map((draft) => draft.sourceUrl),
-      ...existingOffers.map((offer) => offer.offerUrl),
-      ...existingTerms.map((term) => term.sourceUrl),
-    ]);
+    const draftUrls = new Set(existingDrafts.map((draft) => draft.sourceUrl));
+    const offerUrls = new Set(existingOffers.map((offer) => offer.offerUrl));
+    const termUrls = new Set(existingTerms.map((term) => term.sourceUrl));
 
-    return urls.filter((url) => !existingUrls.has(url));
+    const newUrls: string[] = [];
+
+    for (const url of urls) {
+      const skipReason = this.describeExistingUrlReason(
+        url,
+        draftUrls,
+        offerUrls,
+        termUrls,
+      );
+
+      if (skipReason === null) {
+        newUrls.push(url);
+        continue;
+      }
+
+      this.logger.log(`Discovery: pomijam "${url}" - ${skipReason}.`);
+      await this.logService.createLog(
+        `Discovery: pominięto "${url}" - ${skipReason}.`,
+        actorEmail,
+      );
+    }
+
+    return newUrls;
+  }
+
+  private describeExistingUrlReason(
+    url: string,
+    draftUrls: Set<string>,
+    offerUrls: Set<string>,
+    termUrls: Set<string>,
+  ): string | null {
+    if (draftUrls.has(url)) {
+      return 'już czeka w poczekalni jako inny draft';
+    }
+
+    if (offerUrls.has(url)) {
+      return 'jest już zaimportowana jako aktywna oferta';
+    }
+
+    if (termUrls.has(url)) {
+      return 'jest już zaimportowana jako termin innej oferty';
+    }
+
+    return null;
   }
 
   private async discoverOneOffer(

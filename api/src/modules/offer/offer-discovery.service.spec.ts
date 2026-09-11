@@ -131,6 +131,14 @@ describe('OfferDiscoveryService', () => {
       expect(scraperClientService.fullScrap).toHaveBeenCalledWith(
         'https://rejsy4you.pl/rejs/2_x_2',
       );
+      expect(logService.createLog).toHaveBeenCalledWith(
+        expect.stringContaining('https://rejsy4you.pl/rejs/1_x_1'),
+        'admin@udanyrejs.pl',
+      );
+      expect(logService.createLog).toHaveBeenCalledWith(
+        expect.stringContaining('już czeka w poczekalni jako inny draft'),
+        'admin@udanyrejs.pl',
+      );
     });
 
     it('creates a draft with matched company, ship and cabin type ids', async () => {
