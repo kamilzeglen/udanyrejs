@@ -5,6 +5,7 @@ export interface ScraperConfig {
   maxTermsPerScrap: number;
   minDelayMs: number;
   maxDelayMs: number;
+  maxDiscoveryPagesPerHost: number;
 }
 
 function requireEnv(name: string): string {
@@ -28,5 +29,6 @@ export function loadConfig(): ScraperConfig {
     maxTermsPerScrap: Number(process.env.MAX_TERMS_PER_SCRAP ?? 100),
     minDelayMs: Number(process.env.MIN_DELAY_MS ?? 2000),
     maxDelayMs: Number(process.env.MAX_DELAY_MS ?? 5000),
+    maxDiscoveryPagesPerHost: Number(process.env.MAX_DISCOVERY_PAGES_PER_HOST ?? 20),
   };
 }

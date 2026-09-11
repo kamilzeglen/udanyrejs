@@ -10,6 +10,7 @@ const config: ScraperConfig = {
   maxTermsPerScrap: 100,
   minDelayMs: 0,
   maxDelayMs: 0,
+  maxDiscoveryPagesPerHost: 5,
 };
 
 describe('GET /health', () => {

@@ -5,6 +5,7 @@ import { createInternalAuthMiddleware } from './middleware/internal-auth.middlew
 import { BrowserQueue } from './scraping/browser-queue';
 import { createFullScrapRoute } from './routes/full-scrap.route';
 import { createPriceCheckRoute } from './routes/price-check.route';
+import { createDiscoverOffersRoute } from './routes/discover-offers.route';
 
 export function createApp(config: ScraperConfig, queue: BrowserQueue): Express {
   const app = express();
@@ -13,6 +14,7 @@ export function createApp(config: ScraperConfig, queue: BrowserQueue): Express {
   app.use(createInternalAuthMiddleware(config));
   app.use(createFullScrapRoute(config, queue));
   app.use(createPriceCheckRoute(config, queue));
+  app.use(createDiscoverOffersRoute(config, queue));
   return app;
 }
 
