@@ -22,12 +22,16 @@ export class CityService {
   ) {}
 
   async findAll(): Promise<City[]> {
-    return await this.cityRepository.createQueryBuilder('city').getMany();
+    return await this.cityRepository
+      .createQueryBuilder('city')
+      .leftJoinAndSelect('city.destinations', 'destinations')
+      .getMany();
   }
 
   async findOneByID(id: string): Promise<City> {
     return await this.cityRepository
       .createQueryBuilder('city')
+      .leftJoinAndSelect('city.destinations', 'destinations')
       .where('city.id = :id', { id })
       .getOne();
   }
