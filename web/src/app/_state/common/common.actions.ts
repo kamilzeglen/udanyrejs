@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { CabinType, Category, Company, Destination, Ship } from '@interfaces';
+import { CabinType, Category, City, Company, Destination, Ship } from '@interfaces';
 import { Log } from '../../_interfaces/log';
 
 export const getCompanies = createAction('[Common] Get Companies');
@@ -143,6 +143,29 @@ export const deleteDestinationError = createAction(
   '[Common] Delete Destination Error',
   props<{ errorMessage: string }>(),
 );
+
+export const getCity = createAction('[Common] Get City', props<{ payload: { id: string } }>());
+export const getCitySuccess = createAction('[Common] Get City Success', props<{ city: City }>());
+export const getCityError = createAction('[Common] Get City Error', props<{ errorMessage: string }>());
+
+export const getCities = createAction('[Common] Get Cities');
+export const getCitiesSuccess = createAction('[Common] Get Cities Success', props<{ cities: City[] }>());
+export const getCitiesError = createAction('[Common] Get Cities Error', props<{ errorMessage: string }>());
+
+export const createCity = createAction('[Common] Create City', props<{ payload: { formData: Partial<City> } }>());
+export const createCitySuccess = createAction('[Common] Create City Success', props<{ city: City }>());
+export const createCityError = createAction('[Common] Create City Error', props<{ errorMessage: string }>());
+
+export const updateCity = createAction(
+  '[Common] Update City',
+  props<{ payload: { id: string; formData: Partial<City> } }>(),
+);
+export const updateCitySuccess = createAction('[Common] Update City Success', props<{ city: City }>());
+export const updateCityError = createAction('[Common] Update City Error', props<{ errorMessage: string }>());
+
+export const deleteCity = createAction('[Common] Delete City', props<{ payload: { id: string } }>());
+export const deleteCitySuccess = createAction('[Common] Delete City Success');
+export const deleteCityError = createAction('[Common] Delete City Error', props<{ errorMessage: string }>());
 
 export const getCabinTypes = createAction('[Common] Get Cabin Types', props<{ companyId: string }>());
 export const getCabinTypesSuccess = createAction(

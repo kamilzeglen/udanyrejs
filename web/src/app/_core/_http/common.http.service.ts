@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '@environment';
-import { CabinType, Category, Company, Destination, Ship } from '@interfaces';
+import { CabinType, Category, City, Company, Destination, Ship } from '@interfaces';
 import { Log } from '../../_interfaces/log';
 
 @Injectable({
@@ -131,6 +131,35 @@ export class CommonHttpService {
 
   public deleteDestination(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/destination/` + payload.id;
+    return this.http.delete<boolean>(url);
+  }
+
+  // =========
+  // City
+  // =========
+
+  public getCities(): Observable<City[]> {
+    const url = `${this.API_URL}/city/`;
+    return this.http.get<City[]>(url);
+  }
+
+  public getCity(payload: { id: string }): Observable<City> {
+    const url = `${this.API_URL}/city/details/` + payload.id;
+    return this.http.get<City>(url);
+  }
+
+  public createCity(payload: { formData: Partial<City> }): Observable<City> {
+    const url = `${this.API_URL}/city/`;
+    return this.http.post<City>(url, payload.formData);
+  }
+
+  public updateCity(payload: { id: string; formData: Partial<City> }): Observable<City> {
+    const url = `${this.API_URL}/city/` + payload.id;
+    return this.http.patch<City>(url, payload.formData);
+  }
+
+  public deleteCity(payload: { id: string }): Observable<boolean> {
+    const url = `${this.API_URL}/city/` + payload.id;
     return this.http.delete<boolean>(url);
   }
 

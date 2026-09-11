@@ -348,6 +348,86 @@ export class CommonEffects {
     ),
   );
 
+  getCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCities),
+      switchMap(() => {
+        return this.http.getCities().pipe(
+          map((cities) => {
+            return commonActions.getCitiesSuccess({ cities });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.getCitiesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  getCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.getCity),
+      switchMap(({ payload }) => {
+        return this.http.getCity(payload).pipe(
+          map((city) => {
+            return commonActions.getCitySuccess({ city });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.getCityError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  createCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.createCity),
+      switchMap(({ payload }) => {
+        return this.http.createCity(payload).pipe(
+          map((city) => {
+            return commonActions.createCitySuccess({ city });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.createCityError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  updateCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.updateCity),
+      switchMap(({ payload }) => {
+        return this.http.updateCity(payload).pipe(
+          map((city) => {
+            return commonActions.updateCitySuccess({ city });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.updateCityError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  deleteCity$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.deleteCity),
+      switchMap(({ payload }) => {
+        return this.http.deleteCity(payload).pipe(
+          map(() => {
+            return commonActions.deleteCitySuccess();
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.deleteCityError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   getLogs$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getLogs),

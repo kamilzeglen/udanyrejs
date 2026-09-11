@@ -1,4 +1,4 @@
-import { CabinType, Company, Destination, Ship, Category } from '@interfaces';
+import { CabinType, City, Company, Destination, Ship, Category } from '@interfaces';
 import { Log } from '../../_interfaces/log';
 
 export type CommonState = Readonly<{
@@ -7,6 +7,7 @@ export type CommonState = Readonly<{
   logs: Log[];
   categories: Category[];
   destinations: Destination[];
+  cities: City[];
   cabinTypes: CabinType[];
   allCabinTypes: CabinType[];
 
@@ -20,6 +21,7 @@ export const initialState: CommonState = {
   logs: null,
   categories: null,
   destinations: null,
+  cities: null,
   cabinTypes: null,
   allCabinTypes: null,
 

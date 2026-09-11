@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
-import { Category, Company } from '@interfaces';
+import { Category, City, Company } from '@interfaces';
 import { filter, Observable, tap } from 'rxjs';
 
 @Injectable()
@@ -12,6 +12,7 @@ export class CommonFacade {
   public companies$ = this.store.select(commonSelectors.selectCompanies);
   public ships$ = this.store.select(commonSelectors.selectShips);
   public destinations$ = this.store.select(commonSelectors.selectDestinations);
+  public cities$ = this.store.select(commonSelectors.selectCities);
   public categories$ = this.store.select(commonSelectors.selectCategories);
   public logs$ = this.store.select(commonSelectors.selectLogs);
   public cabinTypes$ = this.store.select(commonSelectors.selectCabinTypes);
@@ -62,6 +63,17 @@ export class CommonFacade {
   public updateDestinationError$ = this.actions.pipe(ofType(commonActions.updateDestinationError));
   public deleteDestinationSuccess$ = this.actions.pipe(ofType(commonActions.deleteDestinationSuccess));
   public deleteDestinationError$ = this.actions.pipe(ofType(commonActions.deleteDestinationError));
+
+  public getCitiesSuccess$ = this.actions.pipe(ofType(commonActions.getCitiesSuccess));
+  public getCitiesError$ = this.actions.pipe(ofType(commonActions.getCitiesError));
+  public getCitySuccess$ = this.actions.pipe(ofType(commonActions.getCitySuccess));
+  public getCityError$ = this.actions.pipe(ofType(commonActions.getCityError));
+  public createCitySuccess$ = this.actions.pipe(ofType(commonActions.createCitySuccess));
+  public createCityError$ = this.actions.pipe(ofType(commonActions.createCityError));
+  public updateCitySuccess$ = this.actions.pipe(ofType(commonActions.updateCitySuccess));
+  public updateCityError$ = this.actions.pipe(ofType(commonActions.updateCityError));
+  public deleteCitySuccess$ = this.actions.pipe(ofType(commonActions.deleteCitySuccess));
+  public deleteCityError$ = this.actions.pipe(ofType(commonActions.deleteCityError));
 
   public getLogsSuccess$ = this.actions.pipe(ofType(commonActions.getLogsSuccess));
   public getLogsError$ = this.actions.pipe(ofType(commonActions.getLogsError));
@@ -180,6 +192,26 @@ export class CommonFacade {
 
   public deleteDestination(payload: { id: string }): void {
     this.store.dispatch(commonActions.deleteDestination({ payload }));
+  }
+
+  public getCities(): void {
+    this.store.dispatch(commonActions.getCities());
+  }
+
+  public getCity(payload: { id: string }): void {
+    this.store.dispatch(commonActions.getCity({ payload }));
+  }
+
+  public createCity(payload: { formData: Partial<City> }): void {
+    this.store.dispatch(commonActions.createCity({ payload }));
+  }
+
+  public updateCity(payload: { id: string; formData: Partial<City> }): void {
+    this.store.dispatch(commonActions.updateCity({ payload }));
+  }
+
+  public deleteCity(payload: { id: string }): void {
+    this.store.dispatch(commonActions.deleteCity({ payload }));
   }
 
   public getLogs(): void {

@@ -8,6 +8,7 @@ export * from './router';
 export * from './device-info';
 export * from './category';
 export * from './destination';
+export * from './city';
 export * from './search';
 export * from './sub-menu-item';
 export * from './cabin-type';
