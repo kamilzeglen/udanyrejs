@@ -33,3 +33,7 @@ export interface RawPriceCheckPage {
   pageFound: boolean;
   cabinGroupRows: RawCabinGroupRow[];
 }
+
+export interface RawListingPage {
+  offerHrefs: string[];
+}

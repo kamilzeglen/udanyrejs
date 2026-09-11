@@ -1,7 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
-import { dismissCookieBanner, extractRawOfferPage, extractRawPriceCheckPage } from './rejsy4you-extractor';
+import { dismissCookieBanner, extractRawOfferPage, extractRawPriceCheckPage, extractRawListingPage } from './rejsy4you-extractor';
 
 const fixtureHtml = fs.readFileSync(
   path.join(__dirname, '__fixtures__', 'rejsy4you-offer-page.html'),
@@ -74,5 +74,29 @@ describe('rejsy4you-extractor', () => {
     const raw = await extractRawPriceCheckPage(page);
     expect(raw.pageFound).toBe(true);
     expect(raw.cabinGroupRows).toHaveLength(3);
+  });
+
+  describe('extractRawListingPage', () => {
+    it('extracts one offer href per listing card', async () => {
+      const listingHtml = fs.readFileSync(
+        path.join(__dirname, '__fixtures__', 'rejsy4you-listing-page.html'),
+        'utf-8',
+      );
+      await page.setContent(listingHtml, { waitUntil: 'load' });
+
+      const raw = await extractRawListingPage(page);
+
+      expect(raw.offerHrefs).toHaveLength(2);
+      expect(raw.offerHrefs[0]).toContain('117581_wlochy-francja-hiszpania_233877');
+      expect(raw.offerHrefs[1]).toContain('109206_hiszpania-wlochy-francja_225102');
+    });
+
+    it('returns an empty list when the page has no offer cards', async () => {
+      await page.setContent('<html><body></body></html>', { waitUntil: 'load' });
+
+      const raw = await extractRawListingPage(page);
+
+      expect(raw.offerHrefs).toEqual([]);
+    });
   });
 });

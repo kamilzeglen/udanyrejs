@@ -1,5 +1,5 @@
 import { Page } from 'playwright';
-import { RawOfferPage, RawPriceCheckPage } from './raw-types';
+import { RawOfferPage, RawPriceCheckPage, RawListingPage } from './raw-types';
 
 export async function dismissCookieBanner(page: Page): Promise<void> {
   const acceptButton = page.locator('#c-p-bn');
@@ -80,4 +80,12 @@ export async function extractRawPriceCheckPage(page: Page): Promise<RawPriceChec
   });
 
   return { pageFound: true, cabinGroupRows };
+}
+
+export async function extractRawListingPage(page: Page): Promise<RawListingPage> {
+  return page.evaluate(() => {
+    const titleLinks = Array.from(document.querySelectorAll('cruiselist-item a.cruise-item__title'));
+    const offerHrefs = titleLinks.map((link) => (link as HTMLAnchorElement).href);
+    return { offerHrefs };
+  });
 }
