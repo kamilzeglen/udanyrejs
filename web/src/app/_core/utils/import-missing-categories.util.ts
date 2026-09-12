@@ -10,30 +10,21 @@ export interface CategoryWithDateRange {
 }
 
 export function resolveMissingCategoryIds(
-  termRanges: DateRange[],
+  termRange: DateRange,
   categories: CategoryWithDateRange[],
   currentCategoryIds: string[],
 ): string[] {
-  const matchedCategoryIds = new Set<string>();
+  const termStart = new Date(termRange.startDate).getTime();
+  const termEnd = new Date(termRange.endDate).getTime();
 
-  termRanges.forEach((term) => {
-    const termStart = new Date(term.startDate).getTime();
-    const termEnd = new Date(term.endDate).getTime();
-
-    categories.forEach((category) => {
-      if (!category.startDate || !category.endDate) {
-        return;
-      }
-
+  const matchedCategoryIds = categories
+    .filter((category) => !!category.startDate && !!category.endDate)
+    .filter((category) => {
       const categoryStart = new Date(category.startDate).getTime();
       const categoryEnd = new Date(category.endDate).getTime();
-      const overlaps = termStart <= categoryEnd && termEnd >= categoryStart;
+      return termStart <= categoryEnd && termEnd >= categoryStart;
+    })
+    .map((category) => category.id);
 
-      if (overlaps) {
-        matchedCategoryIds.add(category.id);
-      }
-    });
-  });
-
-  return Array.from(matchedCategoryIds).filter((categoryId) => !currentCategoryIds.includes(categoryId));
+  return matchedCategoryIds.filter((categoryId) => !currentCategoryIds.includes(categoryId));
 }
