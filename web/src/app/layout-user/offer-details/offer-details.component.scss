@@ -100,6 +100,7 @@
 .booking-price {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
   padding-top: 20px;
   margin-bottom: 24px;
@@ -308,13 +309,11 @@ h2 {
   font-weight: 500;
 }
 .footer-contact-box {
+  @include cruise-card;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 32px;
-  border-radius: $cruise-radius;
-  background: $cruise-tint;
   h2 {
     margin: 0 0 8px;
   }
@@ -368,7 +367,8 @@ h2 {
   .in-price-section,
   .description-section,
   .ship,
-  .other-terms-section {
+  .other-terms-section,
+  .footer-contact-box {
     padding: 22px 16px;
   }
   .itinerary-table th,
@@ -378,7 +378,6 @@ h2 {
   .footer-contact-box {
     flex-direction: column;
     align-items: stretch;
-    padding: 24px;
   }
   h2 {
     font-size: 23px;
