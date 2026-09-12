@@ -55,6 +55,11 @@
     height: 40px;
     padding: 8px 6px;
   }
+  .mat-mdc-form-field-icon-suffix {
+    display: flex;
+    align-items: center;
+    width: auto;
+  }
   .ng-select {
     height: auto;
     margin-bottom: 0;
