@@ -333,8 +333,13 @@
 
   .offer-url-group {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-end;
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
   }
 
   .scraped-banner {
