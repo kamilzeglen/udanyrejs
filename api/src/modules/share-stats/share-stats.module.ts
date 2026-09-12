@@ -3,10 +3,10 @@ import { ShareStatsService } from './share-stats.service';
 import { ShareStatsController } from './share-stats.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ShareStats, Offer])],
+  imports: [TypeOrmModule.forFeature([ShareStats, OfferTerm])],
   controllers: [ShareStatsController],
   providers: [ShareStatsService],
   exports: [ShareStatsService],

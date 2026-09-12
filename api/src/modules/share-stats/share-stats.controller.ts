@@ -5,11 +5,11 @@ import { ShareStatsService } from './share-stats.service';
 export class ShareStatsController {
   constructor(private readonly shareStatsService: ShareStatsService) {}
 
-  @Get(':platform/:offerId')
+  @Get(':platform/:offerId/:termId')
   async handleShare(
     @Param('platform') platform: string,
-    @Param('offerId') offerId: string,
+    @Param('termId') termId: string,
   ) {
-    return this.shareStatsService.update(platform, offerId);
+    return this.shareStatsService.update(platform, termId);
   }
 }

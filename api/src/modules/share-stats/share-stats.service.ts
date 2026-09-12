@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
@@ -12,8 +12,8 @@ export class ShareStatsService {
   constructor(
     @InjectRepository(ShareStats)
     private readonly shareStatsRepository: Repository<ShareStats>,
-    @InjectRepository(Offer)
-    private readonly offerRepository: Repository<Offer>,
+    @InjectRepository(OfferTerm)
+    private readonly offerTermRepository: Repository<OfferTerm>,
     private readonly logService: LogService,
   ) {}
 
@@ -28,30 +28,21 @@ export class ShareStatsService {
     return this.shareStatsRepository.save(shareStats);
   }
 
-  async createForOffer(offer: Offer): Promise<ShareStats> {
-    const shareStats = new ShareStats();
-    shareStats.offerId = offer.id;
-    shareStats.facebookClicks = 0;
-    shareStats.instagramClicks = 0;
-    shareStats.tiktokClicks = 0;
-
-    return await this.save(shareStats);
-  }
-
-  async update(platform: string, offerId: string): Promise<boolean> {
-    const offer = await this.offerRepository
-      .createQueryBuilder('offer')
-      .where('offer.id = :offerId', { offerId })
+  async update(platform: string, termId: string): Promise<boolean> {
+    const term = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .leftJoinAndSelect('term.offer', 'offer')
+      .where('term.id = :termId', { termId })
       .getOne();
-    if (!offer || !offer.shareStatsId) {
+    if (!term || !term.shareStatsId) {
       throw new AppException(API_ERRORS.OFFER_OR_SHARE_STATS_NOT_FOUND, {
-        offerId,
+        termId,
       });
     }
 
-    const shareStats = await this.findOneById(offer.shareStatsId);
+    const shareStats = await this.findOneById(term.shareStatsId);
     if (!shareStats) {
-      throw new AppException(API_ERRORS.SHARE_STATS_NOT_FOUND, { offerId });
+      throw new AppException(API_ERRORS.SHARE_STATS_NOT_FOUND, { termId });
     }
 
     switch (platform) {
@@ -75,15 +66,15 @@ export class ShareStatsService {
 
     if (platform === 'web') {
       await this.logService.createLog(
-        'Odwiedzono ogłoszenie: ' + offer.name + ' (' + offer.id + ')',
+        'Odwiedzono ogłoszenie: ' + term.offer.name + ' (' + term.offerId + ')',
         'SYSTEM',
       );
     } else {
       await this.logService.createLog(
         'Skorzystano z reflinka: ' +
-          offer.name +
+          term.offer.name +
           ' (' +
-          offer.id +
+          term.offerId +
           ') (' +
           platform.toUpperCase() +
           ')',
