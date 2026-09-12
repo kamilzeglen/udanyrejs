@@ -5,7 +5,7 @@ import { AppState } from '@state';
 import * as commonActions from './common.actions';
 import * as commonSelectors from './common.selectors';
 import { Category, City, Company } from '@interfaces';
-import { filter, Observable, tap } from 'rxjs';
+import { filter, map, Observable, tap } from 'rxjs';
 
 @Injectable()
 export class CommonFacade {
@@ -158,19 +158,18 @@ export class CommonFacade {
     this.store.dispatch(commonActions.deleteCategory({ payload }));
   }
 
+  // categories === null oznacza "jeszcze nie pobrano" - dopiero wtedy dociągamy dane.
+  // Po błędzie reducer ustawia categories na [] (nie null), więc warunek nie jest
+  // już spełniony i nie próbujemy pobierać ponownie w kółko przy każdej awarii serwera.
   public getCategories$(): Observable<Category[]> {
-    return this.store.select(commonSelectors.selectCategories).pipe(
-      tap((categories) => {
-        if (!categories || !categories.length) {
+    return this.store.select(commonSelectors.selectCommonState).pipe(
+      tap((state) => {
+        if (state.categories === null && state.loading === false) {
           this.getCategories();
         }
       }),
-      filter((categories) => {
-        if (categories === null || !categories.length) {
-          return false;
-        }
-        return true;
-      }),
+      map((state) => state.categories),
+      filter((categories) => categories !== null && categories.length > 0),
     );
   }
 
