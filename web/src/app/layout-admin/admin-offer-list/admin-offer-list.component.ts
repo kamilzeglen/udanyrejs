@@ -10,13 +10,21 @@ import { Pagination } from '../../_interfaces/http';
 import { GroupedOffer, groupOffersByOfferId } from './group-offers-by-offer';
 import { RowSelection } from '@shared/row-selection/row-selection';
 
-interface GroupedOfferRow extends GroupedOffer {
+interface TermRow extends OfferSearchResult {
   selected: boolean;
+}
+
+interface GroupedOfferRow extends Omit<GroupedOffer, 'terms'> {
+  terms: TermRow[];
+  selected: boolean;
+  termsHeaderChecked: boolean;
+  termsHeaderIndeterminate: boolean;
 }
 
 interface OfferListViewModel {
   groups: GroupedOfferRow[];
   selectedCount: number;
+  selectedTermCount: number;
   headerChecked: boolean;
   headerIndeterminate: boolean;
 }
@@ -53,10 +61,13 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public groupedOffers$ = this.offerFacade.offers$.pipe(map((offers) => (offers ? groupOffersByOfferId(offers) : [])));
 
   public readonly selection = new RowSelection();
+  public readonly termSelection = new RowSelection();
 
-  public viewModel$ = combineLatest([this.groupedOffers$, this.selection.selectedIds$]).pipe(
-    map(([groups, selectedIds]) => this.buildViewModel(groups, selectedIds)),
-  );
+  public viewModel$ = combineLatest([
+    this.groupedOffers$,
+    this.selection.selectedIds$,
+    this.termSelection.selectedIds$,
+  ]).pipe(map(([groups, selectedIds, selectedTermIds]) => this.buildViewModel(groups, selectedIds, selectedTermIds)));
 
   constructor(
     private readonly offerFacade: OfferFacade,
@@ -191,28 +202,88 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.routerFacade.changeRoute({ linkParams });
   }
 
-  public toggleSelectAll(groups: GroupedOfferRow[]): void {
-    const ids = groups.map((group) => group.offer.id);
-    const allSelected = groups.length > 0 && groups.every((group) => group.selected);
+  public toggleOfferSelection(group: GroupedOfferRow): void {
+    const termIds = group.terms.map((term) => term.termId);
 
-    if (allSelected) {
-      this.selection.deselectMany(ids);
+    this.selection.toggle(group.offer.id);
+
+    if (group.selected) {
+      this.termSelection.deselectMany(termIds);
       return;
     }
 
-    this.selection.selectMany(ids);
+    this.termSelection.selectMany(termIds);
   }
 
-  private buildViewModel(groups: GroupedOffer[], selectedIds: Set<string>): OfferListViewModel {
-    const rows = groups.map((group) => ({ ...group, selected: selectedIds.has(group.offer.id) }));
+  public toggleSelectAll(groups: GroupedOfferRow[]): void {
+    const offerIds = groups.map((group) => group.offer.id);
+    const termIds = groups.flatMap((group) => group.terms.map((term) => term.termId));
+    const allSelected = groups.length > 0 && groups.every((group) => group.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(offerIds);
+      this.termSelection.deselectMany(termIds);
+      return;
+    }
+
+    this.selection.selectMany(offerIds);
+    this.termSelection.selectMany(termIds);
+  }
+
+  public toggleSelectAllTerms(terms: TermRow[]): void {
+    const ids = terms.map((term) => term.termId);
+    const allSelected = terms.length > 0 && terms.every((term) => term.selected);
+
+    if (allSelected) {
+      this.termSelection.deselectMany(ids);
+      return;
+    }
+
+    this.termSelection.selectMany(ids);
+  }
+
+  public clearSelection(): void {
+    this.selection.clear();
+    this.termSelection.clear();
+  }
+
+  public trackByOfferId(_index: number, group: GroupedOfferRow): string {
+    return group.offer.id;
+  }
+
+  public trackByTermId(_index: number, term: TermRow): string {
+    return term.termId;
+  }
+
+  private buildViewModel(
+    groups: GroupedOffer[],
+    selectedIds: Set<string>,
+    selectedTermIds: Set<string>,
+  ): OfferListViewModel {
+    const rows = groups.map((group) => this.buildGroupRow(group, selectedIds, selectedTermIds));
     const allSelected = rows.length > 0 && rows.every((row) => row.selected);
     const someSelected = rows.some((row) => row.selected);
 
     return {
       groups: rows,
       selectedCount: selectedIds.size,
+      selectedTermCount: selectedTermIds.size,
       headerChecked: allSelected,
       headerIndeterminate: someSelected && !allSelected,
+    };
+  }
+
+  private buildGroupRow(group: GroupedOffer, selectedIds: Set<string>, selectedTermIds: Set<string>): GroupedOfferRow {
+    const terms = group.terms.map((term) => ({ ...term, selected: selectedTermIds.has(term.termId) }));
+    const allTermsSelected = terms.length > 0 && terms.every((term) => term.selected);
+    const someTermsSelected = terms.some((term) => term.selected);
+
+    return {
+      ...group,
+      terms,
+      selected: selectedIds.has(group.offer.id),
+      termsHeaderChecked: allTermsSelected,
+      termsHeaderIndeterminate: someTermsSelected && !allTermsSelected,
     };
   }
 

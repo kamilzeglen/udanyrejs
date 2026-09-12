@@ -3,36 +3,71 @@
 .list-toolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
   margin: 0 20px 16px;
+  padding: 10px 16px;
+  border: 1px solid rgba($grey, 0.3);
+  border-radius: 8px;
+  background: #fff;
 
-  select {
-    padding: 6px 10px;
-  }
-
-  .sort-direction {
+  .selection-controls {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1px solid $grey;
-    border-radius: 6px;
-    background: #fff;
-    cursor: pointer;
+    gap: 12px;
 
-    mat-icon {
+    .selected-count {
       color: $neutral;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .clear-selection {
+      padding: 4px 10px;
+      border: 1px solid rgba($grey, 0.3);
+      border-radius: 14px;
+      background: none;
+      color: $neutral;
+      font: inherit;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        border-color: $primary-color;
+        color: $primary-color;
+      }
     }
   }
-}
 
-.selection-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 20px 16px;
+  .sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    select {
+      padding: 6px 10px;
+    }
+
+    .sort-direction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid $grey;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+
+      mat-icon {
+        color: $neutral;
+      }
+    }
+  }
 }
 
 .offer-groups {
@@ -45,6 +80,11 @@
 
   .offer-select-checkbox {
     margin-right: 12px;
+  }
+
+  .offer-panel-content {
+    padding-left: 28px;
+    border-left: 3px solid rgba($primary-color, 0.15);
   }
 
   .inactive-group {
@@ -207,6 +247,13 @@
       color: $neutral;
       font-size: 13px;
       font-weight: 600;
+    }
+
+    .term-select-header,
+    .term-select-cell {
+      width: 1%;
+      padding-right: 0;
+      white-space: nowrap;
     }
 
     .term-row {

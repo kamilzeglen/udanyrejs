@@ -4,47 +4,61 @@
     <button (click)="openDiscoverTrigger()">Automatyczne szukanie ofert</button>
   </div>
 
-  <div class="list-toolbar">
-    <label for="sortBy">Sortuj:</label>
-    <select id="sortBy" [ngModel]="currentSortBy" (ngModelChange)="changeSortBy($event)">
-      <option *ngFor="let field of sortableFields" [value]="field.value">{{ field.label }}</option>
-    </select>
-    <button type="button" class="sort-direction" (click)="toggleSortDirection()">
-      <mat-icon>{{ currentSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
-    </button>
-  </div>
-
   <ng-container *ngIf="(loading$ | async) === false && (viewModel$ | async) as viewModel">
-    <div class="selection-toolbar" *ngIf="viewModel.groups.length > 0">
-      <mat-checkbox
-        [checked]="viewModel.headerChecked"
-        [indeterminate]="viewModel.headerIndeterminate"
-        (change)="toggleSelectAll(viewModel.groups)"
-      >
-        Zaznacz wszystkie
-      </mat-checkbox>
-      <span [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'">
-        {{ viewModel.selectedCount }} zaznaczonych
-      </span>
-      <button
-        type="button"
-        [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'"
-        (click)="selection.clear()"
-      >
-        Odznacz wszystko
-      </button>
+    <div class="list-toolbar">
+      <div class="selection-controls">
+        <mat-checkbox
+          [checked]="viewModel.headerChecked"
+          [indeterminate]="viewModel.headerIndeterminate"
+          [disabled]="viewModel.groups.length === 0"
+          (change)="toggleSelectAll(viewModel.groups)"
+        >
+          Zaznacz wszystkie
+        </mat-checkbox>
+        <span
+          class="selected-count"
+          [style.visibility]="viewModel.selectedCount > 0 || viewModel.selectedTermCount > 0 ? 'visible' : 'hidden'"
+        >
+          {{ viewModel.selectedCount }} {{ viewModel.selectedCount === 1 ? 'oferta' : 'ofert' }},
+          {{ viewModel.selectedTermCount }} {{ viewModel.selectedTermCount === 1 ? 'termin' : 'terminów' }}
+          zaznaczonych
+        </span>
+        <button
+          type="button"
+          class="clear-selection"
+          [style.visibility]="viewModel.selectedCount > 0 || viewModel.selectedTermCount > 0 ? 'visible' : 'hidden'"
+          (click)="clearSelection()"
+        >
+          Odznacz wszystko
+        </button>
+      </div>
+
+      <div class="sort-controls">
+        <label for="sortBy">Sortuj:</label>
+        <select id="sortBy" [ngModel]="currentSortBy" (ngModelChange)="changeSortBy($event)">
+          <option *ngFor="let field of sortableFields" [value]="field.value">{{ field.label }}</option>
+        </select>
+        <button type="button" class="sort-direction" (click)="toggleSortDirection()">
+          <mat-icon>{{ currentSortDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+        </button>
+      </div>
     </div>
 
     <mat-accordion class="offer-groups" multi="true">
-      <mat-expansion-panel *ngFor="let group of viewModel.groups" [class.inactive-group]="!group.offer.isActive">
+      <mat-expansion-panel
+        *ngFor="let group of viewModel.groups; trackBy: trackByOfferId"
+        [class.inactive-group]="!group.offer.isActive"
+      >
         <mat-expansion-panel-header>
-          <mat-checkbox
-            class="offer-select-checkbox"
-            [checked]="group.selected"
-            (change)="selection.toggle(group.offer.id)"
-            (click)="$event.stopPropagation()"
-          ></mat-checkbox>
-          <mat-panel-title>{{ group.offer.name }}</mat-panel-title>
+          <mat-panel-title>
+            <mat-checkbox
+              class="offer-select-checkbox"
+              [checked]="group.selected"
+              (change)="toggleOfferSelection(group)"
+              (click)="$event.stopPropagation()"
+            ></mat-checkbox>
+            {{ group.offer.name }}
+          </mat-panel-title>
           <mat-panel-description>
             {{ group.offer.company.name }} / {{ group.offer.ship.name }} — {{ group.terms.length }}
             {{ group.terms.length === 1 ? 'termin' : 'terminów' }} — Łącznie:
@@ -58,170 +72,186 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
 
-        <div class="offer-meta">
-          <div class="meta-links">
-            <button type="button" class="link" (click)="editCompany(group.offer.company.id)">
-              {{ group.offer.company.name }}
-            </button>
-            <button type="button" class="link" (click)="editShip(group.offer.ship.id)">
-              {{ group.offer.ship.name }}
-            </button>
-          </div>
-          <div class="meta-actions">
-            <mat-icon class="icon-edit" (click)="editOffer(group.offer)">edit</mat-icon>
-            <mat-icon
-              *ngIf="group.termsWithSourceCount > 0"
-              class="icon-sync"
-              [class.syncing]="(syncingOfferId$ | async) === group.offer.id"
-              matTooltip="Synchronizuj cenę, terminy i PDF ze stroną źródłową"
-              (click)="syncOffer(group.offer)"
-            >
-              sync
-            </mat-icon>
-            <mat-icon class="icon-delete" (click)="deleteOffer(group.offer)">delete</mat-icon>
-          </div>
-        </div>
-
-        <div class="offer-status">
-          <div class="status-group">
-            <span class="status-group-label">Łącznie dla trasy</span>
-            <div class="share-stats">
-              <span class="share-stat-total">
-                <i class="fab fa-chrome"></i>
-                <span>{{ group.totalShareStats.webClicks }}</span>
-              </span>
-              <span class="share-stat-total">
-                <i class="fab fa-facebook"></i>
-                <span>{{ group.totalShareStats.facebookClicks }}</span>
-              </span>
-              <span class="share-stat-total">
-                <i class="fab fa-instagram"></i>
-                <span>{{ group.totalShareStats.instagramClicks }}</span>
-              </span>
-              <span class="share-stat-total">
-                <i class="fab fa-tiktok"></i>
-                <span>{{ group.totalShareStats.tiktokClicks }}</span>
-              </span>
+        <div class="offer-panel-content">
+          <div class="offer-meta">
+            <div class="meta-links">
+              <button type="button" class="link" (click)="editCompany(group.offer.company.id)">
+                {{ group.offer.company.name }}
+              </button>
+              <button type="button" class="link" (click)="editShip(group.offer.ship.id)">
+                {{ group.offer.ship.name }}
+              </button>
+            </div>
+            <div class="meta-actions">
+              <mat-icon class="icon-edit" (click)="editOffer(group.offer)">edit</mat-icon>
+              <mat-icon
+                *ngIf="group.termsWithSourceCount > 0"
+                class="icon-sync"
+                [class.syncing]="(syncingOfferId$ | async) === group.offer.id"
+                matTooltip="Synchronizuj cenę, terminy i PDF ze stroną źródłową"
+                (click)="syncOffer(group.offer)"
+              >
+                sync
+              </mat-icon>
+              <mat-icon class="icon-delete" (click)="deleteOffer(group.offer)">delete</mat-icon>
             </div>
           </div>
 
-          <div class="status-group">
-            <span class="status-group-label">Zasoby</span>
-            <div class="asset-status">
-              <span class="asset-chip" [class.ok]="group.offer.imageFile" [class.missing]="!group.offer.imageFile">
-                <mat-icon>{{ group.offer.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
-                Zdjęcie oferty
-              </span>
-              <span
-                class="asset-chip"
-                [class.ok]="group.offer.company.imageFile"
-                [class.missing]="!group.offer.company.imageFile"
-              >
-                <mat-icon>{{ group.offer.company.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
-                Zdjęcie armatora
-              </span>
-              <span
-                class="asset-chip"
-                [class.ok]="group.offer.ship.imageFile"
-                [class.missing]="!group.offer.ship.imageFile"
-              >
-                <mat-icon>{{ group.offer.ship.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
-                Zdjęcie statku
-              </span>
-              <span
-                class="asset-chip"
-                [class.ok]="group.termsWithSourceCount > 0"
-                [class.missing]="group.termsWithSourceCount === 0"
-              >
-                <mat-icon>{{ group.termsWithSourceCount > 0 ? 'check_circle' : 'cancel' }}</mat-icon>
-                Link źródłowy ({{ group.termsWithSourceCount }}/{{ group.terms.length }})
-              </span>
+          <div class="offer-status">
+            <div class="status-group">
+              <span class="status-group-label">Łącznie dla trasy</span>
+              <div class="share-stats">
+                <span class="share-stat-total">
+                  <i class="fab fa-chrome"></i>
+                  <span>{{ group.totalShareStats.webClicks }}</span>
+                </span>
+                <span class="share-stat-total">
+                  <i class="fab fa-facebook"></i>
+                  <span>{{ group.totalShareStats.facebookClicks }}</span>
+                </span>
+                <span class="share-stat-total">
+                  <i class="fab fa-instagram"></i>
+                  <span>{{ group.totalShareStats.instagramClicks }}</span>
+                </span>
+                <span class="share-stat-total">
+                  <i class="fab fa-tiktok"></i>
+                  <span>{{ group.totalShareStats.tiktokClicks }}</span>
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <table class="terms-table">
-          <thead>
-            <tr>
-              <th>Data początkowa</th>
-              <th>Data końcowa</th>
-              <th>Cena od</th>
-              <th>PDF</th>
-              <th>Status</th>
-              <th>Statystyki</th>
-              <th>Akcje</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let term of group.terms" class="term-row" [class.inactive-term]="!term.termIsActive">
-              <td class="term-edit-cell" (click)="editOffer(term)">{{ term.startDate | date: 'dd.MM.yyyy' }}</td>
-              <td class="term-edit-cell" (click)="editOffer(term)">{{ term.endDate | date: 'dd.MM.yyyy' }}</td>
-              <td class="term-edit-cell" (click)="editOffer(term)">
-                {{ term.fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}
-              </td>
-              <td class="term-edit-cell" (click)="editOffer(term)">
-                <span class="asset-chip" [class.ok]="term.pdfFile" [class.missing]="!term.pdfFile">
-                  <mat-icon>{{ term.pdfFile ? 'check_circle' : 'cancel' }}</mat-icon>
+            <div class="status-group">
+              <span class="status-group-label">Zasoby</span>
+              <div class="asset-status">
+                <span class="asset-chip" [class.ok]="group.offer.imageFile" [class.missing]="!group.offer.imageFile">
+                  <mat-icon>{{ group.offer.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
+                  Zdjęcie oferty
                 </span>
-              </td>
-              <td class="term-edit-cell" (click)="editOffer(term)">
-                <span class="asset-chip" [class.ok]="term.termIsActive" [class.missing]="!term.termIsActive">
-                  <mat-icon>{{ term.termIsActive ? 'check_circle' : 'cancel' }}</mat-icon>
-                  {{ term.termIsActive ? 'Aktywny' : 'Nieaktywny' }}
-                </span>
-              </td>
-              <td>
-                <div class="term-stats-cell">
-                  <button
-                    type="button"
-                    class="term-share-stat"
-                    (click)="copyToClipboard('web', group.offer.id, term.termId); $event.stopPropagation()"
-                  >
-                    <i class="fab fa-chrome"></i>
-                    <span>{{ term.shareStats?.webClicks || 0 }}</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="term-share-stat"
-                    (click)="copyToClipboard('fb', group.offer.id, term.termId); $event.stopPropagation()"
-                  >
-                    <i class="fab fa-facebook"></i>
-                    <span>{{ term.shareStats?.facebookClicks || 0 }}</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="term-share-stat"
-                    (click)="copyToClipboard('ig', group.offer.id, term.termId); $event.stopPropagation()"
-                  >
-                    <i class="fab fa-instagram"></i>
-                    <span>{{ term.shareStats?.instagramClicks || 0 }}</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="term-share-stat"
-                    (click)="copyToClipboard('tt', group.offer.id, term.termId); $event.stopPropagation()"
-                  >
-                    <i class="fab fa-tiktok"></i>
-                    <span>{{ term.shareStats?.tiktokClicks || 0 }}</span>
-                  </button>
-                </div>
-              </td>
-              <td>
-                <a
-                  class="icon-view-term"
-                  [routerLink]="['/offers/details', group.offer.id]"
-                  [queryParams]="{ termId: term.termId }"
-                  target="_blank"
-                  rel="noopener"
-                  matTooltip="Otwórz ten termin na stronie"
-                  (click)="$event.stopPropagation()"
+                <span
+                  class="asset-chip"
+                  [class.ok]="group.offer.company.imageFile"
+                  [class.missing]="!group.offer.company.imageFile"
                 >
-                  <mat-icon>open_in_new</mat-icon>
-                </a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <mat-icon>{{ group.offer.company.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
+                  Zdjęcie armatora
+                </span>
+                <span
+                  class="asset-chip"
+                  [class.ok]="group.offer.ship.imageFile"
+                  [class.missing]="!group.offer.ship.imageFile"
+                >
+                  <mat-icon>{{ group.offer.ship.imageFile ? 'check_circle' : 'cancel' }}</mat-icon>
+                  Zdjęcie statku
+                </span>
+                <span
+                  class="asset-chip"
+                  [class.ok]="group.termsWithSourceCount > 0"
+                  [class.missing]="group.termsWithSourceCount === 0"
+                >
+                  <mat-icon>{{ group.termsWithSourceCount > 0 ? 'check_circle' : 'cancel' }}</mat-icon>
+                  Link źródłowy ({{ group.termsWithSourceCount }}/{{ group.terms.length }})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <table class="terms-table">
+            <thead>
+              <tr>
+                <th class="term-select-header">
+                  <mat-checkbox
+                    [checked]="group.termsHeaderChecked"
+                    [indeterminate]="group.termsHeaderIndeterminate"
+                    (change)="toggleSelectAllTerms(group.terms)"
+                  ></mat-checkbox>
+                </th>
+                <th>Data początkowa</th>
+                <th>Data końcowa</th>
+                <th>Cena od</th>
+                <th>PDF</th>
+                <th>Status</th>
+                <th>Statystyki</th>
+                <th>Akcje</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let term of group.terms; trackBy: trackByTermId"
+                class="term-row"
+                [class.inactive-term]="!term.termIsActive"
+              >
+                <td class="term-select-cell">
+                  <mat-checkbox [checked]="term.selected" (change)="termSelection.toggle(term.termId)"></mat-checkbox>
+                </td>
+                <td class="term-edit-cell" (click)="editOffer(term)">{{ term.startDate | date: 'dd.MM.yyyy' }}</td>
+                <td class="term-edit-cell" (click)="editOffer(term)">{{ term.endDate | date: 'dd.MM.yyyy' }}</td>
+                <td class="term-edit-cell" (click)="editOffer(term)">
+                  {{ term.fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}
+                </td>
+                <td class="term-edit-cell" (click)="editOffer(term)">
+                  <span class="asset-chip" [class.ok]="term.pdfFile" [class.missing]="!term.pdfFile">
+                    <mat-icon>{{ term.pdfFile ? 'check_circle' : 'cancel' }}</mat-icon>
+                  </span>
+                </td>
+                <td class="term-edit-cell" (click)="editOffer(term)">
+                  <span class="asset-chip" [class.ok]="term.termIsActive" [class.missing]="!term.termIsActive">
+                    <mat-icon>{{ term.termIsActive ? 'check_circle' : 'cancel' }}</mat-icon>
+                    {{ term.termIsActive ? 'Aktywny' : 'Nieaktywny' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="term-stats-cell">
+                    <button
+                      type="button"
+                      class="term-share-stat"
+                      (click)="copyToClipboard('web', group.offer.id, term.termId); $event.stopPropagation()"
+                    >
+                      <i class="fab fa-chrome"></i>
+                      <span>{{ term.shareStats?.webClicks || 0 }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="term-share-stat"
+                      (click)="copyToClipboard('fb', group.offer.id, term.termId); $event.stopPropagation()"
+                    >
+                      <i class="fab fa-facebook"></i>
+                      <span>{{ term.shareStats?.facebookClicks || 0 }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="term-share-stat"
+                      (click)="copyToClipboard('ig', group.offer.id, term.termId); $event.stopPropagation()"
+                    >
+                      <i class="fab fa-instagram"></i>
+                      <span>{{ term.shareStats?.instagramClicks || 0 }}</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="term-share-stat"
+                      (click)="copyToClipboard('tt', group.offer.id, term.termId); $event.stopPropagation()"
+                    >
+                      <i class="fab fa-tiktok"></i>
+                      <span>{{ term.shareStats?.tiktokClicks || 0 }}</span>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <a
+                    class="icon-view-term"
+                    [routerLink]="['/offers/details', group.offer.id]"
+                    [queryParams]="{ termId: term.termId }"
+                    target="_blank"
+                    rel="noopener"
+                    matTooltip="Otwórz ten termin na stronie"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>open_in_new</mat-icon>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </mat-expansion-panel>
     </mat-accordion>
   </ng-container>
