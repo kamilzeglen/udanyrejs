@@ -1,6 +1,13 @@
 @import '../../../scss/variables.scss';
 
 .admin-cabin-types-list {
+  .selection-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 20px 12px;
+  }
+
   .company-group {
     margin-bottom: 30px;
   }

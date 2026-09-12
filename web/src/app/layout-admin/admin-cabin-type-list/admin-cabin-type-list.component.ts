@@ -1,11 +1,28 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterFacade } from '@state/router';
-import { CommonFacade } from '@state/common';
+import { CabinTypesGroup, CommonFacade } from '@state/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
 import { AllDeviceInfo, CabinType } from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { RowSelection } from '@shared/row-selection/row-selection';
+
+interface CabinTypeRow extends CabinType {
+  selected: boolean;
+}
+
+interface CabinTypeGroupViewModel {
+  companyName: string;
+  cabinTypes: CabinTypeRow[];
+  headerChecked: boolean;
+  headerIndeterminate: boolean;
+}
+
+interface CabinTypeListViewModel {
+  groups: CabinTypeGroupViewModel[];
+  selectedCount: number;
+}
 
 @Component({
   selector: 'app-admin-cabin-type-list',
@@ -20,9 +37,15 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public allColumns: string[] = ['id', 'name', 'offersCount', 'actions'];
+  public allColumns: string[] = ['select', 'id', 'name', 'offersCount', 'actions'];
 
   public columnsToDisplay: string[];
+
+  public readonly selection = new RowSelection();
+
+  public viewModel$ = combineLatest([this.cabinTypesGroups$, this.selection.selectedIds$]).pipe(
+    map(([groups, selectedIds]) => this.buildViewModel(groups || [], selectedIds)),
+  );
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -105,5 +128,39 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
         this.commonFacade.deleteCabinType({ id: cabinType.id });
       });
+  }
+
+  public toggleSelectAll(rows: CabinTypeRow[]): void {
+    const ids = rows.map((row) => row.id);
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(ids);
+      return;
+    }
+
+    this.selection.selectMany(ids);
+  }
+
+  private buildViewModel(groups: CabinTypesGroup[], selectedIds: Set<string>): CabinTypeListViewModel {
+    const groupViewModels = groups.map((group) => this.buildGroupViewModel(group, selectedIds));
+
+    return {
+      groups: groupViewModels,
+      selectedCount: selectedIds.size,
+    };
+  }
+
+  private buildGroupViewModel(group: CabinTypesGroup, selectedIds: Set<string>): CabinTypeGroupViewModel {
+    const cabinTypes = group.cabinTypes.map((cabinType) => ({ ...cabinType, selected: selectedIds.has(cabinType.id) }));
+    const allSelected = cabinTypes.length > 0 && cabinTypes.every((row) => row.selected);
+    const someSelected = cabinTypes.some((row) => row.selected);
+
+    return {
+      companyName: group.companyName,
+      cabinTypes,
+      headerChecked: allSelected,
+      headerIndeterminate: someSelected && !allSelected,
+    };
   }
 }

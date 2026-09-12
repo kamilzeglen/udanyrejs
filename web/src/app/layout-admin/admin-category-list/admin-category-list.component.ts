@@ -1,11 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
 import { AllDeviceInfo, Category } from '@interfaces';
 import { CommonFacade } from '@state/common';
 import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { RowSelection } from '@shared/row-selection/row-selection';
+
+interface CategoryRow extends Category {
+  selected: boolean;
+}
+
+interface CategoryListViewModel {
+  rows: CategoryRow[];
+  selectedCount: number;
+  headerChecked: boolean;
+  headerIndeterminate: boolean;
+}
 
 @Component({
   selector: 'app-admin-category-list',
@@ -21,6 +33,7 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
   public loading$ = this.commonFacade.loading$;
 
   public allColumns: string[] = [
+    'select',
     'id',
     'name',
     'url',
@@ -36,6 +49,12 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
   ];
 
   public columnsToDisplay: string[];
+
+  public readonly selection = new RowSelection();
+
+  public viewModel$ = combineLatest([this.categories$, this.selection.selectedIds$]).pipe(
+    map(([categories, selectedIds]) => this.buildViewModel(categories || [], selectedIds)),
+  );
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -98,11 +117,36 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['id', 'name', 'url', 'position', 'createdAt'];
+      return ['select', 'id', 'name', 'url', 'position', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['id', 'name', 'url', 'position'];
+      return ['select', 'id', 'name', 'url', 'position'];
     }
     return [];
+  }
+
+  public toggleSelectAll(rows: CategoryRow[]): void {
+    const ids = rows.map((row) => row.id);
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(ids);
+      return;
+    }
+
+    this.selection.selectMany(ids);
+  }
+
+  private buildViewModel(categories: Category[], selectedIds: Set<string>): CategoryListViewModel {
+    const rows = categories.map((category) => ({ ...category, selected: selectedIds.has(category.id) }));
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+    const someSelected = rows.some((row) => row.selected);
+
+    return {
+      rows,
+      selectedCount: selectedIds.size,
+      headerChecked: allSelected,
+      headerIndeterminate: someSelected && !allSelected,
+    };
   }
 }

@@ -3,12 +3,35 @@
     <button (click)="addCabinType()">Dodaj rodzaj kabiny</button>
   </div>
 
-  <ng-container *ngIf="(loading$ | async) === false">
-    <div class="company-group" *ngFor="let group of cabinTypesGroups$ | async">
+  <ng-container *ngIf="(loading$ | async) === false && (viewModel$ | async) as viewModel">
+    <div class="selection-toolbar" [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'">
+      <span>{{ viewModel.selectedCount }} zaznaczonych</span>
+      <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
+    </div>
+
+    <div class="company-group" *ngFor="let group of viewModel.groups">
       <h2 class="company-group__name">{{ group.companyName }}</h2>
 
       <div class="mat-elevation-z8 custom-table">
         <table mat-table [dataSource]="group.cabinTypes" matSort>
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                [checked]="group.headerChecked"
+                [indeterminate]="group.headerIndeterminate"
+                (change)="toggleSelectAll(group.cabinTypes)"
+                (click)="$event.stopPropagation()"
+              ></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let element">
+              <mat-checkbox
+                [checked]="element.selected"
+                (change)="selection.toggle(element.id)"
+                (click)="$event.stopPropagation()"
+              ></mat-checkbox>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef>Nr</th>
             <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
@@ -47,7 +70,7 @@
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="(cabinTypesGroups$ | async)?.length === 0">
+    <div class="empty-state" *ngIf="viewModel.groups.length === 0">
       Brak dodanych rodzajów kabin. Dodaj pierwszy przyciskiem powyżej.
     </div>
   </ng-container>

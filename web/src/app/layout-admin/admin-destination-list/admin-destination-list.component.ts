@@ -1,11 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
 import { AllDeviceInfo, Destination } from '@interfaces';
 import { CommonFacade } from '@state/common';
 import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { RowSelection } from '@shared/row-selection/row-selection';
+
+interface DestinationRow extends Destination {
+  selected: boolean;
+}
+
+interface DestinationListViewModel {
+  rows: DestinationRow[];
+  selectedCount: number;
+  headerChecked: boolean;
+  headerIndeterminate: boolean;
+}
 
 @Component({
   selector: 'app-admin-destination-list',
@@ -20,9 +32,15 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
   public destinations$ = this.commonFacade.destinations$;
   public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = ['id', 'name', 'offerCount', 'actions', 'updatedAt', 'createdAt'];
+  public allColumns: string[] = ['select', 'id', 'name', 'offerCount', 'actions', 'updatedAt', 'createdAt'];
 
   public columnsToDisplay: string[];
+
+  public readonly selection = new RowSelection();
+
+  public viewModel$ = combineLatest([this.destinations$, this.selection.selectedIds$]).pipe(
+    map(([destinations, selectedIds]) => this.buildViewModel(destinations || [], selectedIds)),
+  );
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -85,11 +103,36 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['id', 'name', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'actions', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['id', 'name', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'actions', 'createdAt'];
     }
     return [];
+  }
+
+  public toggleSelectAll(rows: DestinationRow[]): void {
+    const ids = rows.map((row) => row.id);
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(ids);
+      return;
+    }
+
+    this.selection.selectMany(ids);
+  }
+
+  private buildViewModel(destinations: Destination[], selectedIds: Set<string>): DestinationListViewModel {
+    const rows = destinations.map((destination) => ({ ...destination, selected: selectedIds.has(destination.id) }));
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+    const someSelected = rows.some((row) => row.selected);
+
+    return {
+      rows,
+      selectedCount: selectedIds.size,
+      headerChecked: allSelected,
+      headerIndeterminate: someSelected && !allSelected,
+    };
   }
 }

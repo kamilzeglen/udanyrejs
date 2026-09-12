@@ -1,5 +1,12 @@
 @import '../../../scss/variables.scss';
 
+.selection-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 12px;
+}
+
 .admin-ships-list {
   .company-select {
     width: 300px;

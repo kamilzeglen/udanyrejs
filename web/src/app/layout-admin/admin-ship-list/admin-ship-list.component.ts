@@ -2,11 +2,23 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterFacade } from '@state/router';
 import { CommonFacade } from '@state/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
 import { AllDeviceInfo, Ship } from '@interfaces';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ActivatedRoute } from '@angular/router';
+import { RowSelection } from '@shared/row-selection/row-selection';
+
+interface ShipRow extends Ship {
+  selected: boolean;
+}
+
+interface ShipListViewModel {
+  rows: ShipRow[];
+  selectedCount: number;
+  headerChecked: boolean;
+  headerIndeterminate: boolean;
+}
 
 @Component({
   selector: 'app-admin-ship-list',
@@ -24,9 +36,15 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public allColumns: string[] = ['id', 'name', 'image', 'description', 'actions', 'updatedAt', 'createdAt'];
+  public allColumns: string[] = ['select', 'id', 'name', 'image', 'description', 'actions', 'updatedAt', 'createdAt'];
 
   public columnsToDisplay: string[];
+
+  public readonly selection = new RowSelection();
+
+  public viewModel$ = combineLatest([this.ships$, this.selection.selectedIds$]).pipe(
+    map(([ships, selectedIds]) => this.buildViewModel(ships || [], selectedIds)),
+  );
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -94,6 +112,7 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
   }
 
   public changedCompany(companyId: string) {
+    this.selection.clear();
     this.commonFacade.getShips(companyId);
   }
 
@@ -102,11 +121,36 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['id', 'name', 'image', 'description', 'createdAt', 'expand'];
+      return ['select', 'id', 'name', 'image', 'description', 'createdAt', 'expand'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['id', 'name', 'image', 'createdAt', 'expand'];
+      return ['select', 'id', 'name', 'image', 'createdAt', 'expand'];
     }
     return [];
+  }
+
+  public toggleSelectAll(rows: ShipRow[]): void {
+    const ids = rows.map((row) => row.id);
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(ids);
+      return;
+    }
+
+    this.selection.selectMany(ids);
+  }
+
+  private buildViewModel(ships: Ship[], selectedIds: Set<string>): ShipListViewModel {
+    const rows = ships.map((ship) => ({ ...ship, selected: selectedIds.has(ship.id) }));
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+    const someSelected = rows.some((row) => row.selected);
+
+    return {
+      rows,
+      selectedCount: selectedIds.size,
+      headerChecked: allSelected,
+      headerIndeterminate: someSelected && !allSelected,
+    };
   }
 }
