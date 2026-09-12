@@ -27,11 +27,11 @@ export class OfferListComponent implements OnInit, OnDestroy {
   public pageSize = defaultPagination.limit;
   public pageSizeOptions = [10, 25, 50];
 
-  public defaultSortBy = 'createdAt';
-  public defaultSortDir: SortDirection = 'desc';
+  public defaultSortBy = 'startDate';
+  public defaultSortDir: SortDirection = 'asc';
 
-  public currentSortBy = 'createdAt';
-  public currentSortDir: SortDirection = 'desc';
+  public currentSortBy = 'startDate';
+  public currentSortDir: SortDirection = 'asc';
 
   public currPage$ = this.pagination$.pipe(
     map((pagination) => {
