@@ -7,6 +7,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -14,6 +15,7 @@ import {
 import { Offer } from '@modules/offer/offer.entity';
 import { OfferTermPrice } from '@modules/offer/offer-term-price.entity';
 import { Category } from '@modules/category/category.entity';
+import { ShareStats } from '@modules/share-stats/share-stat.entity';
 
 @Entity()
 @Unique(['offerId', 'startDate', 'endDate'])
@@ -45,6 +47,14 @@ export class OfferTerm {
   @ManyToMany(() => Category, (category) => category.terms, { eager: true })
   @JoinTable({ name: 'offer_term_categories' })
   categories: Category[];
+
+  @OneToOne(() => ShareStats, (shareStats) => shareStats.term, {
+    nullable: true,
+  })
+  @JoinColumn()
+  shareStats: ShareStats;
+  @Column({ type: 'uuid', nullable: true })
+  shareStatsId: string;
 
   @CreateDateColumn()
   createdAt: Date;

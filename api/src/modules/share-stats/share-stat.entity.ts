@@ -1,10 +1,19 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Offer } from '@modules/offer/offer.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 
 @Entity()
 export class ShareStats {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ type: 'uuid' })
+  termId: string;
 
   @Column()
   offerId: string;
@@ -21,6 +30,7 @@ export class ShareStats {
   @Column({ default: 0 })
   tiktokClicks: number;
 
-  @OneToOne(() => Offer, (offer) => offer.shareStats)
-  offer: Offer;
+  @OneToOne(() => OfferTerm, (term) => term.shareStats)
+  @JoinColumn()
+  term: OfferTerm;
 }

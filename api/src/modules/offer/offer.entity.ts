@@ -19,7 +19,6 @@ import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 import { ImageFile } from '@modules/image-file/image-file.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Destination } from '@modules/destination/destination.entity';
-import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { OfferTerm } from '@modules/offer/offer-term.entity';
 
 @Entity()
@@ -93,15 +92,6 @@ export class Offer {
 
   @Column({ type: 'json', nullable: true })
   itinerary: Itinerary[];
-
-  @OneToOne(() => ShareStats, (shareStats) => shareStats.offer, {
-    eager: true,
-    nullable: true,
-  })
-  @JoinColumn()
-  shareStats: ShareStats;
-  @Column({ type: 'uuid', nullable: true })
-  shareStatsId: string;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()
