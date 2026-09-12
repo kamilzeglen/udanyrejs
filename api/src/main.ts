@@ -24,7 +24,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const { APP_PORT, WEB_URL } = config;
 
-  const allowedOrigins = [process.env.WEB_URL || 'http://localhost:4200'];
+  const allowedOrigins = [config.WEB_URL || 'http://localhost:4200'];
 
   const app = await NestFactory.create(AppModule);
 
