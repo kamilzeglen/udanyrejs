@@ -262,6 +262,11 @@ export class ImageFileService {
         responseType: 'arraybuffer',
         maxContentLength: IMAGE_MAX_BYTES,
         maxBodyLength: IMAGE_MAX_BYTES,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+          Referer: 'https://rejsy4you.pl/',
+        },
       });
       const fileBuffer = Buffer.from(response.data, 'binary');
       const extname = path.extname(url).toLowerCase() || '.jpg';

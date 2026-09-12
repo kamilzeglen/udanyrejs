@@ -4,7 +4,6 @@ import { OfferController } from './offer.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Offer } from './offer.entity';
 import { OfferTerm } from './offer-term.entity';
-import { OfferTermPrice } from './offer-term-price.entity';
 import { ScrapedOfferDraft } from './scraped-offer-draft.entity';
 import { OfferSyncService } from './offer-sync.service';
 import { OfferSyncCron } from './offer-sync.cron';
@@ -26,12 +25,7 @@ import { CityModule } from '@modules/city/city.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Offer,
-      OfferTerm,
-      OfferTermPrice,
-      ScrapedOfferDraft,
-    ]),
+    TypeOrmModule.forFeature([Offer, OfferTerm, ScrapedOfferDraft]),
     ImageFileModule,
     PdfFileModule,
     UserModule,

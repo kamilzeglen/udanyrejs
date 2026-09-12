@@ -64,9 +64,9 @@ export class OfferService {
       .leftJoinAndSelect('offer.ship', 'ship')
       .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
-      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('offer.destinations', 'destinations')
       .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.pdfFile', 'pdfFile')
       .leftJoinAndSelect('terms.shareStats', 'shareStats')
       .leftJoinAndSelect('terms.categories', 'categories')
       .leftJoinAndSelect('terms.prices', 'termPrices')
@@ -77,14 +77,17 @@ export class OfferService {
       .getOne();
   }
 
-  async findAllWithURL(): Promise<Offer[]> {
+  async findOffersForSync(): Promise<Offer[]> {
     return await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.terms', 'terms')
       .leftJoinAndSelect('terms.prices', 'prices')
       .leftJoinAndSelect('prices.cabinType', 'cabinType')
-      .where('offer.offerUrl IS NOT NULL')
-      .andWhere('offer.isActive = :isActive', { isActive: true })
+      .leftJoinAndSelect('terms.pdfFile', 'pdfFile')
+      .where('offer.isActive = :isActive', { isActive: true })
+      .andWhere(
+        'EXISTS (SELECT 1 FROM offer_term term WHERE term."offerId" = offer.id AND term."sourceUrl" IS NOT NULL)',
+      )
       .getMany();
   }
 
@@ -162,6 +165,8 @@ export class OfferService {
     if (!showInactive) {
       whereClauses.push('offer.isActive = :active');
       whereParams.active = true;
+      whereClauses.push('term.isActive = :termActive');
+      whereParams.termActive = true;
     }
 
     if (companyIdList && companyIdList.length > 0) {
@@ -271,7 +276,7 @@ export class OfferService {
       .leftJoinAndSelect('offer.ship', 'ship')
       .leftJoinAndSelect('ship.company', 'shipCompany')
       .leftJoinAndSelect('offer.imageFile', 'offerImageFile')
-      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
+      .leftJoinAndSelect('term.pdfFile', 'pdfFile')
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('term.categories', 'category')
@@ -317,6 +322,9 @@ export class OfferService {
     endDate: Date;
     fromPrice: number;
     shareStats: ShareStats;
+    pdfFile: OfferTerm['pdfFile'];
+    sourceUrl: string;
+    termIsActive: boolean;
   } {
     const offerFields: Partial<Offer> & { terms?: OfferTerm[] } = {
       ...term.offer,
@@ -330,6 +338,9 @@ export class OfferService {
       endDate: term.endDate,
       fromPrice,
       shareStats: term.shareStats,
+      pdfFile: term.pdfFile,
+      sourceUrl: term.sourceUrl,
+      termIsActive: term.isActive,
     };
   }
 
@@ -357,7 +368,7 @@ export class OfferService {
 
     await this.assertCabinTypesExist(terms);
 
-    const offer = await this.dataSource.transaction(async (manager) => {
+    const savedOfferId = await this.dataSource.transaction(async (manager) => {
       let newOffer = new Offer();
       Object.assign(newOffer, createUserData, {
         company,
@@ -373,8 +384,14 @@ export class OfferService {
 
       await this.saveOfferTerms(manager, newOffer.id, companyId, terms);
 
-      return manager.save(newOffer);
+      const savedOffer = await manager.save(newOffer);
+      return savedOffer.id;
     });
+
+    // Transakcja wyżej nie ładuje relacji (terms, pdfFile, ...) na zwracaną
+    // encję - front potrzebuje realnych ID nowo utworzonych terminów, żeby
+    // móc od razu podpiąć pod nie PDF, więc odczytujemy ofertę od nowa.
+    const offer = await this.findOneById(savedOfferId);
 
     await this.logService.createLog(
       'Dodano ofertę: ' + offer.name,
@@ -430,32 +447,35 @@ export class OfferService {
         await this.destinationService.findByIds(destinations);
     }
 
-    return this.dataSource.transaction(async (manager) => {
+    const savedOfferId = await this.dataSource.transaction(async (manager) => {
       const savedOffer = await manager.save(offer);
 
       if (terms?.length) {
         await this.saveOfferTerms(manager, savedOffer.id, companyId, terms);
       }
 
-      await this.logService.createLog(
-        'Zaktualizowano ofertę: ' +
-          savedOffer.name +
-          ' (' +
-          savedOffer.id +
-          ')',
-        reqCreatedBy.email,
-      );
-      this.logger.log(`Updated offer ${savedOffer.id} (${savedOffer.name})`);
-
-      return savedOffer;
+      return savedOffer.id;
     });
+
+    // Tak samo jak w createOffer - front potrzebuje realnych ID terminów
+    // (nowo utworzonych albo zaktualizowanych) do podpięcia PDF per termin.
+    const savedOffer = await this.findOneById(savedOfferId);
+
+    await this.logService.createLog(
+      'Zaktualizowano ofertę: ' + savedOffer.name + ' (' + savedOffer.id + ')',
+      reqCreatedBy.email,
+    );
+    this.logger.log(`Updated offer ${savedOffer.id} (${savedOffer.name})`);
+
+    return savedOffer;
   }
 
   async removeOffer(offerID: string, reqCreatedBy: User): Promise<boolean> {
     const offer = await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
-      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
+      .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.pdfFile', 'pdfFile')
       .where('offer.id = :offerID', { offerID })
       .getOne();
 
@@ -486,8 +506,10 @@ export class OfferService {
       await this.imageFileService.removeImageFile(offer.imageFile.path);
     }
 
-    if (offer.pdfFile) {
-      await this.pdfFileService.removePdfFile(offer.pdfFile.path);
+    for (const term of offer.terms ?? []) {
+      if (term.pdfFile) {
+        await this.pdfFileService.removePdfFile(term.pdfFile.path);
+      }
     }
 
     await this.logService.createLog(
@@ -509,6 +531,7 @@ export class OfferService {
     offer.isActive = false;
     offer.updatedBy = user;
     await this.offerRepository.save(offer);
+    await this.setAllTermsActive(offerId, false);
 
     await this.logService.createLog(
       'Dezaktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
@@ -529,6 +552,7 @@ export class OfferService {
     offer.isActive = true;
     offer.updatedBy = user;
     await this.offerRepository.save(offer);
+    await this.setAllTermsActive(offerId, true);
 
     await this.logService.createLog(
       'Aktywowano ofertę: ' + offer.name + ' (' + offer.id + ')',
@@ -536,6 +560,117 @@ export class OfferService {
     );
     this.logger.log(`Activated offer ${offer.id} (${offer.name})`);
     return true;
+  }
+
+  // Ręczna (de)aktywacja oferty w adminie kaskaduje na WSZYSTKIE jej terminy -
+  // to celowo inna reguła niż automatyczny sync, który dezaktywuje tylko
+  // pojedynczy termin, gdy jego własny link przestaje działać.
+  private async setAllTermsActive(
+    offerId: string,
+    isActive: boolean,
+  ): Promise<void> {
+    await this.offerTermRepository
+      .createQueryBuilder()
+      .update(OfferTerm)
+      .set({ isActive })
+      .where('offerId = :offerId', { offerId })
+      .execute();
+  }
+
+  // Woła to OfferSyncService po zsynchronizowaniu terminów - status oferty
+  // jest tu WYLICZANY z jej terminów, nie ustawiany wprost, w przeciwieństwie
+  // do deactivateOffer/activateOffer wyżej (ręczna decyzja admina).
+  async recalculateOfferActiveState(offerId: string): Promise<boolean> {
+    const activeTermCount = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .where('term.offerId = :offerId', { offerId })
+      .andWhere('term.isActive = :isActive', { isActive: true })
+      .getCount();
+
+    const isActive = activeTermCount > 0;
+
+    await this.offerRepository
+      .createQueryBuilder()
+      .update(Offer)
+      .set({ isActive })
+      .where('id = :offerId', { offerId })
+      .execute();
+
+    return isActive;
+  }
+
+  async setTermActive(termId: string, isActive: boolean): Promise<void> {
+    await this.offerTermRepository
+      .createQueryBuilder()
+      .update(OfferTerm)
+      .set({ isActive })
+      .where('id = :termId', { termId })
+      .execute();
+  }
+
+  // Sync wykrył, że strona źródłowa pokazuje inne daty niż mamy zapisane dla
+  // JUŻ istniejącego terminu - w przeciwieństwie do createDiscoveredTerm to
+  // korekta terminu, który już mamy, nie utworzenie nowego.
+  async updateTermDates(
+    termId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<void> {
+    await this.offerTermRepository
+      .createQueryBuilder()
+      .update(OfferTerm)
+      .set({ startDate, endDate })
+      .where('id = :termId', { termId })
+      .execute();
+  }
+
+  async updateTermPrices(
+    termId: string,
+    companyId: string,
+    priceDtos: OfferTermPriceDto[],
+  ): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      await manager.delete(OfferTermPrice, { offerTermId: termId });
+      await this.saveTermPrices(manager, termId, companyId, priceDtos);
+    });
+  }
+
+  // Nowy termin odkryty przy okazji synchronizacji INNEGO terminu tej samej
+  // oferty (siblingi na jego stronie źródłowej) - ma własny sourceUrl i jest
+  // od razu aktywny, tak jak termin znaleziony przy pierwszym scrapowaniu.
+  async createDiscoveredTerm(
+    offer: Offer,
+    termDto: OfferTermDto,
+  ): Promise<OfferTerm> {
+    return this.dataSource.transaction(async (manager) => {
+      const term = manager.create(OfferTerm, {
+        offerId: offer.id,
+        startDate: termDto.startDate,
+        endDate: termDto.endDate,
+        sourceUrl: termDto.sourceUrl,
+        isActive: true,
+      });
+      const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);
+
+      const shareStats = manager.create(ShareStats, {
+        termId: savedTerm.id,
+        offerId: offer.id,
+        webClicks: 0,
+        facebookClicks: 0,
+        instagramClicks: 0,
+        tiktokClicks: 0,
+      });
+      await manager.save(shareStats);
+
+      await this.saveTermPrices(
+        manager,
+        savedTerm.id,
+        offer.companyId,
+        termDto.prices,
+      );
+
+      return savedTerm;
+    });
   }
 
   private async assertCabinTypesExist(terms: OfferTermDto[]): Promise<void> {
@@ -590,6 +725,9 @@ export class OfferService {
       if (dto.sourceUrl !== undefined) {
         existing.sourceUrl = dto.sourceUrl;
       }
+      if (dto.isActive !== undefined) {
+        existing.isActive = dto.isActive;
+      }
       if (categoryEntities !== undefined) {
         existing.categories = categoryEntities;
       }
@@ -609,6 +747,7 @@ export class OfferService {
         startDate: dto.startDate,
         endDate: dto.endDate,
         sourceUrl: dto.sourceUrl,
+        isActive: dto.isActive ?? true,
         categories: categoryEntities,
       });
       const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);

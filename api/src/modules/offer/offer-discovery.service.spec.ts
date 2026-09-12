@@ -33,7 +33,10 @@ describe('OfferDiscoveryService', () => {
   };
   let offerRepository: { createQueryBuilder: jest.Mock };
   let offerTermRepository: { createQueryBuilder: jest.Mock };
-  let scraperClientService: { discoverOffers: jest.Mock; fullScrap: jest.Mock };
+  let scraperClientService: {
+    discoverOffers: jest.Mock;
+    scrapeOffer: jest.Mock;
+  };
   let companyService: { findAll: jest.Mock };
   let shipService: { findShipsByCompany: jest.Mock };
   let cabinTypeService: { findAllByCompany: jest.Mock };
@@ -52,7 +55,10 @@ describe('OfferDiscoveryService', () => {
     offerTermRepository = {
       createQueryBuilder: jest.fn(() => buildQueryBuilderMock([])),
     };
-    scraperClientService = { discoverOffers: jest.fn(), fullScrap: jest.fn() };
+    scraperClientService = {
+      discoverOffers: jest.fn(),
+      scrapeOffer: jest.fn(),
+    };
     companyService = { findAll: jest.fn().mockResolvedValue([]) };
     shipService = { findShipsByCompany: jest.fn().mockResolvedValue([]) };
     cabinTypeService = { findAllByCompany: jest.fn().mockResolvedValue([]) };
@@ -101,7 +107,7 @@ describe('OfferDiscoveryService', () => {
         expect.stringContaining('Nieznany Armator'),
         'admin@udanyrejs.pl',
       );
-      expect(scraperClientService.fullScrap).not.toHaveBeenCalled();
+      expect(scraperClientService.scrapeOffer).not.toHaveBeenCalled();
     });
 
     it('skips urls that already exist as a draft, an offer, or an offer term', async () => {
@@ -117,18 +123,18 @@ describe('OfferDiscoveryService', () => {
           { sourceUrl: 'https://rejsy4you.pl/rejs/1_x_1' },
         ]),
       );
-      scraperClientService.fullScrap.mockResolvedValue({
+      scraperClientService.scrapeOffer.mockResolvedValue({
         name: 'Rejs testowy',
         shipName: 'Unknown Ship',
         companyName: 'Unknown Company',
         imageUrl: '',
-        pdfUrl: '',
         itinerary: [],
         terms: [
           {
             startDate: '2027-01-01',
             endDate: '2027-01-08',
             sourceUrl: 'https://rejsy4you.pl/rejs/2_x_2',
+            pdfUrl: null,
             cabinPrices: [],
           },
         ],
@@ -136,8 +142,8 @@ describe('OfferDiscoveryService', () => {
 
       await service.runDiscovery(['MSC Cruises'], 5, 'admin@udanyrejs.pl');
 
-      expect(scraperClientService.fullScrap).toHaveBeenCalledTimes(1);
-      expect(scraperClientService.fullScrap).toHaveBeenCalledWith(
+      expect(scraperClientService.scrapeOffer).toHaveBeenCalledTimes(1);
+      expect(scraperClientService.scrapeOffer).toHaveBeenCalledWith(
         'https://rejsy4you.pl/rejs/2_x_2',
       );
       expect(logService.createLog).toHaveBeenCalledWith(
@@ -155,12 +161,11 @@ describe('OfferDiscoveryService', () => {
         urls: ['https://rejsy4you.pl/rejs/1_x_1'],
         unmatchedNames: [],
       });
-      scraperClientService.fullScrap.mockResolvedValue({
+      scraperClientService.scrapeOffer.mockResolvedValue({
         name: 'Rejs testowy',
         shipName: 'MSC Meraviglia',
         companyName: 'MSC Cruises',
         imageUrl: 'https://rejsy4you.pl/img.jpg',
-        pdfUrl: 'https://rejsy4you.pl/pdf',
         itinerary: [
           {
             day: 1,
@@ -175,6 +180,7 @@ describe('OfferDiscoveryService', () => {
             startDate: '2027-01-01',
             endDate: '2027-01-08',
             sourceUrl: 'https://rejsy4you.pl/rejs/1_x_1',
+            pdfUrl: 'https://rejsy4you.pl/pdf-1',
             cabinPrices: [{ label: 'wewnętrzna', price: 100 }],
           },
         ],
@@ -199,6 +205,7 @@ describe('OfferDiscoveryService', () => {
           sourceUrl: 'https://rejsy4you.pl/rejs/1_x_1',
           terms: [
             expect.objectContaining({
+              pdfUrl: 'https://rejsy4you.pl/pdf-1',
               cabinPrices: [
                 {
                   label: 'wewnętrzna',
@@ -212,7 +219,7 @@ describe('OfferDiscoveryService', () => {
       );
     });
 
-    it('logs and continues when fullScrap fails for one url', async () => {
+    it('logs and continues when scrapeOffer fails for one url', async () => {
       scraperClientService.discoverOffers.mockResolvedValue({
         urls: [
           'https://rejsy4you.pl/rejs/1_x_1',
@@ -220,20 +227,20 @@ describe('OfferDiscoveryService', () => {
         ],
         unmatchedNames: [],
       });
-      scraperClientService.fullScrap
+      scraperClientService.scrapeOffer
         .mockRejectedValueOnce(new Error('502 Bad Gateway'))
         .mockResolvedValueOnce({
           name: 'Rejs testowy',
           shipName: 'Unknown Ship',
           companyName: 'Unknown Company',
           imageUrl: '',
-          pdfUrl: '',
           itinerary: [],
           terms: [
             {
               startDate: '2027-01-01',
               endDate: '2027-01-08',
               sourceUrl: 'https://rejsy4you.pl/rejs/2_x_2',
+              pdfUrl: null,
               cabinPrices: [],
             },
           ],

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'node:path';
@@ -24,8 +24,8 @@ export class PdfFileService {
   constructor(
     @InjectRepository(PdfFile)
     private pdfFileRepository: Repository<PdfFile>,
-    @InjectRepository(Offer)
-    private offerRepository: Repository<Offer>,
+    @InjectRepository(OfferTerm)
+    private offerTermRepository: Repository<OfferTerm>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
@@ -44,15 +44,24 @@ export class PdfFileService {
     }
 
     if (!file) {
+      this.logger.warn(
+        `createPdfFile(${targetId}): brak pliku (ani upload, ani pobrany URL)`,
+      );
       throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
     if (file.buffer.length > PDF_MAX_BYTES) {
+      this.logger.warn(
+        `createPdfFile(${targetId}): plik za duży - ${file.buffer.length} bajtów (limit ${PDF_MAX_BYTES})`,
+      );
       throw new AppException(API_ERRORS.FILE_TOO_LARGE_PDF);
     }
 
     const extname = detectPdfExtension(file.buffer);
     if (!extname) {
+      this.logger.warn(
+        `createPdfFile(${targetId}): zawartość nie wygląda na PDF - pierwsze bajty: ${file.buffer.subarray(0, 8).toString('hex')}`,
+      );
       throw new AppException(API_ERRORS.UNSUPPORTED_PDF_TYPE);
     }
 
@@ -61,15 +70,15 @@ export class PdfFileService {
 
     writeFileSync(filePath, file.buffer);
 
-    const target = await this.offerRepository
-      .createQueryBuilder('offer')
-      .where('offer.id = :targetId', { targetId })
+    const target = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .where('term.id = :targetId', { targetId })
       .getOne();
     const pdfFileEntity = this.pdfFileRepository.create({
       name: fileName,
       originalName: file.originalname,
       path: filePath,
-      offer: target,
+      term: target,
       url: url || null,
       createdBy: requestUser,
     });
@@ -85,10 +94,10 @@ export class PdfFileService {
     url?: string,
   ): Promise<PdfFile> {
     const uploadDir: string = process.env.OFFERS_PDFS_PATH || './uploads/pdfs';
-    const target = await this.offerRepository
-      .createQueryBuilder('offer')
-      .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
-      .where('offer.id = :targetId', { targetId })
+    const target = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .leftJoinAndSelect('term.pdfFile', 'pdfFile')
+      .where('term.id = :targetId', { targetId })
       .getOne();
 
     if (!existsSync(uploadDir)) {
@@ -96,6 +105,9 @@ export class PdfFileService {
     }
 
     if (!file) {
+      this.logger.warn(
+        `updatePdfFile(${targetId}): brak pliku (ani upload, ani pobrany URL)`,
+      );
       throw new AppException(API_ERRORS.FILE_NOT_PROVIDED);
     }
 
@@ -107,11 +119,17 @@ export class PdfFileService {
     }
 
     if (file.buffer.length > PDF_MAX_BYTES) {
+      this.logger.warn(
+        `updatePdfFile(${targetId}): plik za duży - ${file.buffer.length} bajtów (limit ${PDF_MAX_BYTES})`,
+      );
       throw new AppException(API_ERRORS.FILE_TOO_LARGE_PDF);
     }
 
     const extname = detectPdfExtension(file.buffer);
     if (!extname) {
+      this.logger.warn(
+        `updatePdfFile(${targetId}): zawartość nie wygląda na PDF - pierwsze bajty: ${file.buffer.subarray(0, 8).toString('hex')}`,
+      );
       throw new AppException(API_ERRORS.UNSUPPORTED_PDF_TYPE);
     }
 
@@ -138,7 +156,7 @@ export class PdfFileService {
         name: fileName,
         originalName: file.originalname,
         path: filePath,
-        offer: target,
+        term: target,
         url: url || null,
         createdBy: requestUser,
       });
@@ -176,6 +194,11 @@ export class PdfFileService {
         responseType: 'arraybuffer',
         maxContentLength: PDF_MAX_BYTES,
         maxBodyLength: PDF_MAX_BYTES,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+          Referer: 'https://rejsy4you.pl/',
+        },
       });
       const fileBuffer = Buffer.from(response.data, 'binary');
       const extname = path.extname(url).toLowerCase() || '.pdf';

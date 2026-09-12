@@ -18,7 +18,7 @@ export class OfferSyncCron {
 
   @Cron(process.env.SYNC_CRON_EXPRESSION ?? '0 4 * * *')
   public async runSyncForAllOffers(): Promise<void> {
-    const offers = await this.offerService.findAllWithURL();
+    const offers = await this.offerService.findOffersForSync();
     const delayMs = Number(process.env.SYNC_REQUEST_DELAY_MS ?? 3000);
 
     for (const offer of offers) {

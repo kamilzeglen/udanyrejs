@@ -55,11 +55,18 @@ describe('OfferService', () => {
     cabinTypeService = { findByIds: jest.fn() };
 
     const offerRepositoryMock = {
+      // Domyślnie odpowiada niepustą ofertą - createOffer/updateOffer na
+      // końcu robią dodatkowy findOneById (żeby front dostał realne ID
+      // nowo utworzonych terminów), więc getOne=null tutaj wywaliłby
+      // większość testów na "offer.name" z nulla. Testy, którym zależy na
+      // "nie znaleziono", same nadpisują ten mock lokalnie.
       createQueryBuilder: jest.fn(() => ({
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         leftJoinAndSelect: jest.fn().mockReturnThis(),
-        getOne: jest.fn().mockResolvedValue(null),
+        getOne: jest
+          .fn()
+          .mockResolvedValue({ id: 'generated-id', name: 'Rejs po Karaibach' }),
       })),
     };
     const offerTermRepositoryMock = {
@@ -663,6 +670,180 @@ describe('OfferService', () => {
           endDate: new Date('2027-12-31'),
         }),
       );
+    });
+  });
+
+  describe('deactivateOffer / activateOffer cascade to terms', () => {
+    const existingOffer = { id: 'offer-1', name: 'Rejs testowy' };
+
+    function buildTermsUpdateBuilder() {
+      return {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+
+    beforeEach(() => {
+      const offerRepository = (service as any).offerRepository;
+      offerRepository.createQueryBuilder.mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(existingOffer),
+      });
+      offerRepository.save = jest.fn().mockResolvedValue(existingOffer);
+    });
+
+    it('deactivating the offer also deactivates every one of its terms', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const termsUpdateBuilder = buildTermsUpdateBuilder();
+      offerTermRepository.createQueryBuilder.mockReturnValue(
+        termsUpdateBuilder,
+      );
+
+      await service.deactivateOffer('offer-1', requestUser);
+
+      expect(termsUpdateBuilder.set).toHaveBeenCalledWith({ isActive: false });
+      expect(termsUpdateBuilder.where).toHaveBeenCalledWith(
+        'offerId = :offerId',
+        { offerId: 'offer-1' },
+      );
+    });
+
+    it('activating the offer also activates every one of its terms', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const termsUpdateBuilder = buildTermsUpdateBuilder();
+      offerTermRepository.createQueryBuilder.mockReturnValue(
+        termsUpdateBuilder,
+      );
+
+      await service.activateOffer('offer-1', requestUser);
+
+      expect(termsUpdateBuilder.set).toHaveBeenCalledWith({ isActive: true });
+    });
+  });
+
+  describe('recalculateOfferActiveState', () => {
+    function buildCountBuilder(count: number) {
+      return {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(count),
+      };
+    }
+
+    function buildOfferUpdateBuilder() {
+      return {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+
+    it('marks the offer active when at least one term is still active', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue(
+        buildCountBuilder(2),
+      );
+
+      const offerRepository = (service as any).offerRepository;
+      const updateBuilder = buildOfferUpdateBuilder();
+      offerRepository.createQueryBuilder.mockReturnValue(updateBuilder);
+
+      const result = await service.recalculateOfferActiveState('offer-1');
+
+      expect(result).toBe(true);
+      expect(updateBuilder.set).toHaveBeenCalledWith({ isActive: true });
+    });
+
+    it('marks the offer inactive once none of its terms are active', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue(
+        buildCountBuilder(0),
+      );
+
+      const offerRepository = (service as any).offerRepository;
+      const updateBuilder = buildOfferUpdateBuilder();
+      offerRepository.createQueryBuilder.mockReturnValue(updateBuilder);
+
+      const result = await service.recalculateOfferActiveState('offer-1');
+
+      expect(result).toBe(false);
+      expect(updateBuilder.set).toHaveBeenCalledWith({ isActive: false });
+    });
+  });
+
+  describe('setTermActive', () => {
+    it('flips only the requested term', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const updateBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      };
+      offerTermRepository.createQueryBuilder.mockReturnValue(updateBuilder);
+
+      await service.setTermActive('term-1', false);
+
+      expect(updateBuilder.set).toHaveBeenCalledWith({ isActive: false });
+      expect(updateBuilder.where).toHaveBeenCalledWith('id = :termId', {
+        termId: 'term-1',
+      });
+    });
+  });
+
+  describe('updateTermDates', () => {
+    it('updates only the requested term dates', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const updateBuilder = {
+        update: jest.fn().mockReturnThis(),
+        set: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      };
+      offerTermRepository.createQueryBuilder.mockReturnValue(updateBuilder);
+
+      await service.updateTermDates('term-1', '2027-05-01', '2027-05-08');
+
+      expect(updateBuilder.set).toHaveBeenCalledWith({
+        startDate: '2027-05-01',
+        endDate: '2027-05-08',
+      });
+      expect(updateBuilder.where).toHaveBeenCalledWith('id = :termId', {
+        termId: 'term-1',
+      });
+    });
+  });
+
+  describe('updateTermPrices', () => {
+    it('replaces the term prices inside a transaction', async () => {
+      await service.updateTermPrices('term-1', 'company-1', [
+        { cabinTypeId: 'cabin-1', price: 100000 },
+      ]);
+
+      expect(transactionManager.delete).toHaveBeenCalledWith(OfferTermPrice, {
+        offerTermId: 'term-1',
+      });
+      expect(transactionManager.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('createDiscoveredTerm', () => {
+    it('creates the term, its share stats row and its prices in one transaction', async () => {
+      const offer = { id: 'offer-1', companyId: 'company-1' } as any;
+
+      const created = await service.createDiscoveredTerm(offer, {
+        startDate: '2027-05-01',
+        endDate: '2027-05-08',
+        sourceUrl: 'https://rejsy4you.pl/rejs/2',
+        prices: [{ cabinTypeId: 'cabin-1', price: 100000 }],
+      } as any);
+
+      expect(created).toBeDefined();
+      expect(transactionManager.save).toHaveBeenCalledTimes(3);
     });
   });
 });

@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 import { User } from '@modules/user/user.entity';
 
 @Entity()
@@ -29,8 +29,15 @@ export class PdfFile {
   @Column({ type: 'varchar', length: 1024, nullable: true })
   url: string;
 
-  @OneToOne(() => Offer, (offer) => offer.pdfFile, { nullable: false })
-  offer: Offer;
+  @Column({ type: 'uuid' })
+  termId: string;
+
+  // @JoinColumn() bez nazwy domyślnie mapuje na "termId" - dokładnie tę
+  // kolumnę zadeklarowaną wyżej. To ta strona relacji fizycznie trzyma FK
+  // (ten sam wzorzec co ShareStats.term).
+  @OneToOne(() => OfferTerm, (term) => term.pdfFile, { nullable: false })
+  @JoinColumn()
+  term: OfferTerm;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()

@@ -178,7 +178,7 @@ export class OfferDiscoveryService {
     let scraped;
 
     try {
-      scraped = await this.scraperClientService.fullScrap(url);
+      scraped = await this.scraperClientService.scrapeOffer(url);
     } catch (error) {
       await this.logService.createLog(
         `Discovery: nie udało się zescrapować "${url}": ${(error as Error).message}`,
@@ -210,6 +210,7 @@ export class OfferDiscoveryService {
       startDate: term.startDate,
       endDate: term.endDate,
       sourceUrl: term.sourceUrl,
+      pdfUrl: term.pdfUrl || null,
       cabinPrices: term.cabinPrices.map((cabinPrice) => ({
         label: cabinPrice.label,
         price: cabinPrice.price,
@@ -224,7 +225,6 @@ export class OfferDiscoveryService {
       matchedCompanyId,
       matchedShipId,
       imageUrl: scraped.imageUrl || null,
-      pdfUrl: scraped.pdfUrl || null,
       itinerary: resolvedItinerary,
       terms,
       sourceUrl: url,

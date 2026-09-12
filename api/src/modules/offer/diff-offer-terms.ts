@@ -1,5 +1,6 @@
 import { OfferTerm } from './offer-term.entity';
 import { OfferTermDto } from './dto/offer-term.dto';
+import { isSameDateRange } from '@core/utils/date-range.util';
 
 export interface OfferTermMatch {
   existing: OfferTerm;
@@ -22,7 +23,7 @@ export function diffOfferTerms(
 
   for (const dto of incomingTerms) {
     const matchIndex = remainingExisting.findIndex((term) =>
-      sameDateRange(term, dto),
+      isSameDateRange(term, dto),
     );
 
     if (matchIndex === -1) {
@@ -35,11 +36,4 @@ export function diffOfferTerms(
   }
 
   return { toCreate, toUpdate, toDelete: remainingExisting };
-}
-
-function sameDateRange(term: OfferTerm, dto: OfferTermDto): boolean {
-  return (
-    new Date(term.startDate).getTime() === new Date(dto.startDate).getTime() &&
-    new Date(term.endDate).getTime() === new Date(dto.endDate).getTime()
-  );
 }

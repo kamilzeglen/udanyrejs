@@ -22,7 +22,7 @@ The project is built with NestJS, PostgreSQL, TypeORM, JWT authentication, and f
 - User, role, company, ship, destination, category, and offer modules
 - Offer search and offer activation/deactivation
 - Image upload and update support for offers, ships, and companies
-- PDF upload and update support for offers
+- PDF upload and update support per offer term (sailing date)
 - Static serving for uploaded images
 - Contact email endpoint
 - Database migrations and seed data

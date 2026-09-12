@@ -86,6 +86,11 @@ export const API_ERRORS = {
     HttpStatus.BAD_REQUEST,
     'This offer already has a term with the same dates',
   ),
+  OFFER_SYNC_NO_URL: defineError(
+    'OFFER_SYNC_NO_URL',
+    HttpStatus.BAD_REQUEST,
+    'Offer has no term with a source URL to sync from',
+  ),
   SCRAPE_URL_NOT_ALLOWED: defineError(
     'SCRAPE_URL_NOT_ALLOWED',
     HttpStatus.BAD_REQUEST,

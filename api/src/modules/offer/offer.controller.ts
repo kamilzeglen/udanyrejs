@@ -18,13 +18,13 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { SearchOffersDto } from '@modules/offer/dto/search-offers.dto';
 import {
   ScraperClientService,
-  FullScrapResponse,
+  ScrapeOfferResponse,
 } from '@core/scraper-client/scraper-client.service';
 import { isAllowedScrapeHost } from '@core/scraper-client/allowed-scrape-host.util';
 import { ScrapeOfferDto } from '@modules/offer/dto/scrape-offer.dto';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
-import { OfferSyncService } from './offer-sync.service';
+import { OfferSyncResult, OfferSyncService } from './offer-sync.service';
 import { OfferDiscoveryService } from './offer-discovery.service';
 import { DiscoverOffersDto } from '@modules/offer/dto/discover-offers.dto';
 import { ScrapedOfferDraft } from '@modules/offer/scraped-offer-draft.entity';
@@ -53,7 +53,7 @@ export class OfferController {
   @Post('/scrape')
   async scrapeOffer(
     @Body() scrapeOfferDto: ScrapeOfferDto,
-  ): Promise<FullScrapResponse> {
+  ): Promise<ScrapeOfferResponse> {
     const allowedHosts = (process.env.ALLOWED_SCRAPE_HOSTS ?? '')
       .split(',')
       .map((host) => host.trim());
@@ -63,7 +63,7 @@ export class OfferController {
       throw new AppException(API_ERRORS.SCRAPE_URL_NOT_ALLOWED);
     }
 
-    return this.scraperClientService.fullScrap(scrapeOfferDto.url);
+    return this.scraperClientService.scrapeOffer(scrapeOfferDto.url);
   }
 
   @Throttle({ default: { limit: 2, ttl: 60_000 } })
@@ -180,16 +180,18 @@ export class OfferController {
 
   @UseGuards(AuthGuard)
   @Post('/:offerId/sync')
-  async syncOffer(
-    @Param('offerId') offerId: string,
-  ): Promise<{ synced: boolean }> {
+  async syncOffer(@Param('offerId') offerId: string): Promise<OfferSyncResult> {
     const offer = await this.offerService.findOneById(offerId);
 
     if (!offer) {
       throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerId });
     }
 
-    await this.offerSyncService.syncOffer(offer);
-    return { synced: true };
+    const hasSyncableTerm = offer.terms?.some((term) => term.sourceUrl);
+    if (!hasSyncableTerm) {
+      throw new AppException(API_ERRORS.OFFER_SYNC_NO_URL, { id: offerId });
+    }
+
+    return this.offerSyncService.syncOffer(offer);
   }
 }

@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { isAxiosError } from 'axios';
+
+// Odróżnia potwierdzone "strona nie istnieje" (scraper dostał 404/410
+// bezpośrednio od rejsy4you) od każdego innego niepowodzenia (timeout, nasz
+// scraper padł, błąd sieci) - tylko ten pierwszy przypadek uzasadnia
+// dezaktywację terminu w OfferSyncService, patrz syncOffer().
+export class ScrapedPageNotFoundError extends Error {
+  constructor(public readonly url: string) {
+    super(`Scraped page not found: ${url}`);
+    this.name = 'ScrapedPageNotFoundError';
+  }
+}
 
 export interface ScrapedCabinPrice {
   label: string;
@@ -11,6 +23,7 @@ export interface ScrapedTermResponse {
   startDate: string;
   endDate: string;
   sourceUrl: string;
+  pdfUrl: string | null;
   cabinPrices: ScrapedCabinPrice[];
 }
 
@@ -22,19 +35,31 @@ export interface ScrapedItineraryDay {
   departureTime: string;
 }
 
-export interface FullScrapResponse {
+export interface ScrapeOfferResponse {
   name: string;
   shipName: string;
   companyName: string;
   imageUrl: string;
-  pdfUrl: string;
   itinerary: ScrapedItineraryDay[];
   terms: ScrapedTermResponse[];
+  // Adresy siblingów, dla których scraper potwierdził 404/410 przy okazji
+  // tego samego zapytania - pozwala dezaktywować konkretny termin bez
+  // osobnego zapytania /scrape-offer na jego własny URL (patrz OfferSyncService).
+  notFoundUrls?: string[];
 }
 
-export interface PriceCheckResponse {
-  available: boolean;
+export interface ScrapedSiblingLink {
+  sourceUrl: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ScrapedTermPageResponse {
+  startDate: string;
+  endDate: string;
   cabinPrices: ScrapedCabinPrice[];
+  pdfUrl: string | null;
+  siblingLinks: ScrapedSiblingLink[];
 }
 
 export interface DiscoverOffersResponse {
@@ -49,28 +74,50 @@ export class ScraperClientService {
 
   public constructor(private readonly httpService: HttpService) {}
 
-  public async fullScrap(url: string): Promise<FullScrapResponse> {
-    const response = await firstValueFrom(
-      this.httpService.post<FullScrapResponse>(
-        `${this.baseUrl}/full-scrap`,
-        { url },
-        { headers: { 'X-Internal-Token': this.internalToken } },
-      ),
-    );
+  // Skrapuje CAŁĄ rodzinę terminów oferty (primary + wszyscy siblingi) w
+  // jednym zapytaniu - używane tylko przy pierwszym imporcie (discovery/
+  // ręczne dodanie oferty). Do odświeżenia już znanego terminu albo pobrania
+  // jednego nowo odkrytego służy lekki scrapeTerm() (jedna strona).
+  public async scrapeOffer(url: string): Promise<ScrapeOfferResponse> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<ScrapeOfferResponse>(
+          `${this.baseUrl}/scrape-offer`,
+          { url },
+          { headers: { 'X-Internal-Token': this.internalToken } },
+        ),
+      );
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        throw new ScrapedPageNotFoundError(url);
+      }
+      throw error;
+    }
   }
 
-  public async priceCheck(url: string): Promise<PriceCheckResponse> {
-    const response = await firstValueFrom(
-      this.httpService.post<PriceCheckResponse>(
-        `${this.baseUrl}/price-check`,
-        { url },
-        { headers: { 'X-Internal-Token': this.internalToken } },
-      ),
-    );
+  // Skrapuje TYLKO tę jedną stronę (bez chodzenia po siblingach jak
+  // scrapeOffer) - używane do lekkiego odświeżenia już znanego terminu
+  // (cena/daty/PDF) oraz do pobrania pełnych danych pojedynczego nowo
+  // odkrytego terminu, patrz OfferSyncService.
+  public async scrapeTerm(url: string): Promise<ScrapedTermPageResponse> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post<ScrapedTermPageResponse>(
+          `${this.baseUrl}/scrape-term`,
+          { url },
+          { headers: { 'X-Internal-Token': this.internalToken } },
+        ),
+      );
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        throw new ScrapedPageNotFoundError(url);
+      }
+      throw error;
+    }
   }
 
   public async discoverOffers(

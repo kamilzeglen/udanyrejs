@@ -10,11 +10,11 @@ import { CompanyService } from '@modules/company/company.service';
 
 describe('OfferController.scrapeOffer', () => {
   let controller: OfferController;
-  let scraperClient: { fullScrap: jest.Mock };
+  let scraperClient: { scrapeOffer: jest.Mock };
 
   beforeEach(async () => {
     process.env.ALLOWED_SCRAPE_HOSTS = 'rejsy4you.pl';
-    scraperClient = { fullScrap: jest.fn() };
+    scraperClient = { scrapeOffer: jest.fn() };
 
     const moduleRef = await Test.createTestingModule({
       controllers: [OfferController],
@@ -37,11 +37,11 @@ describe('OfferController.scrapeOffer', () => {
     await expect(
       controller.scrapeOffer({ url: 'https://evil.example.com/x' }),
     ).rejects.toThrow(AppException);
-    expect(scraperClient.fullScrap).not.toHaveBeenCalled();
+    expect(scraperClient.scrapeOffer).not.toHaveBeenCalled();
   });
 
   it('returns the scraper response for an allowed URL', async () => {
-    scraperClient.fullScrap.mockResolvedValue({
+    scraperClient.scrapeOffer.mockResolvedValue({
       name: 'Rejs testowy',
       terms: [],
     });
@@ -51,7 +51,7 @@ describe('OfferController.scrapeOffer', () => {
     });
 
     expect(result).toEqual({ name: 'Rejs testowy', terms: [] });
-    expect(scraperClient.fullScrap).toHaveBeenCalledWith(
+    expect(scraperClient.scrapeOffer).toHaveBeenCalledWith(
       'https://rejsy4you.pl/rejs/1',
     );
   });
@@ -70,7 +70,7 @@ describe('OfferController.syncOffer', () => {
       controllers: [OfferController],
       providers: [
         { provide: OfferService, useValue: offerService },
-        { provide: ScraperClientService, useValue: { fullScrap: jest.fn() } },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
         { provide: OfferSyncService, useValue: offerSyncService },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
@@ -83,20 +83,41 @@ describe('OfferController.syncOffer', () => {
     controller = moduleRef.get(OfferController);
   });
 
-  it('syncs the found offer and returns synced: true', async () => {
-    const offer = { id: 'offer-1' };
+  it('syncs the found offer and returns the sync result', async () => {
+    const offer = {
+      id: 'offer-1',
+      terms: [{ id: 'term-1', sourceUrl: 'https://rejsy4you.pl/rejs/1' }],
+    };
+    const syncResult = {
+      offerDeactivated: false,
+      termsAdded: 1,
+      termsDeactivated: 0,
+      termsSkipped: 0,
+      pdfsUpdated: 2,
+    };
     offerService.findOneById.mockResolvedValue(offer);
+    offerSyncService.syncOffer.mockResolvedValue(syncResult);
 
     const result = await controller.syncOffer('offer-1');
 
     expect(offerSyncService.syncOffer).toHaveBeenCalledWith(offer);
-    expect(result).toEqual({ synced: true });
+    expect(result).toEqual(syncResult);
   });
 
   it('throws when the offer does not exist', async () => {
     offerService.findOneById.mockResolvedValue(null);
 
     await expect(controller.syncOffer('missing')).rejects.toThrow(AppException);
+    expect(offerSyncService.syncOffer).not.toHaveBeenCalled();
+  });
+
+  it('throws instead of syncing an offer that has no term with a source URL', async () => {
+    offerService.findOneById.mockResolvedValue({
+      id: 'offer-1',
+      terms: [{ id: 'term-1', sourceUrl: null }],
+    });
+
+    await expect(controller.syncOffer('offer-1')).rejects.toThrow(AppException);
     expect(offerSyncService.syncOffer).not.toHaveBeenCalled();
   });
 });
@@ -116,7 +137,7 @@ describe('OfferController.discoverOffers', () => {
       controllers: [OfferController],
       providers: [
         { provide: OfferService, useValue: {} },
-        { provide: ScraperClientService, useValue: { fullScrap: jest.fn() } },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: companyService },
@@ -168,7 +189,7 @@ describe('OfferController.listDiscoveryDrafts / getDiscoveryDraft / deleteDiscov
       controllers: [OfferController],
       providers: [
         { provide: OfferService, useValue: {} },
-        { provide: ScraperClientService, useValue: { fullScrap: jest.fn() } },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: { findOneById: jest.fn() } },

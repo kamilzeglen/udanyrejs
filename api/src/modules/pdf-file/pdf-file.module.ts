@@ -3,12 +3,12 @@ import { PdfFileService } from './pdf-file.service';
 import { PdfFileController } from './pdf-file.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 import { AuthModule } from '@modules/auth/auth.module';
 import { User } from '@modules/user/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PdfFile, Offer, User]), AuthModule],
+  imports: [TypeOrmModule.forFeature([PdfFile, OfferTerm, User]), AuthModule],
   controllers: [PdfFileController],
   providers: [PdfFileService],
   exports: [PdfFileService],

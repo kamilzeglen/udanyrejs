@@ -19,6 +19,7 @@ export interface ScrapedOfferDraftTerm {
   startDate: string;
   endDate: string;
   sourceUrl: string;
+  pdfUrl: string | null;
   cabinPrices: ScrapedOfferDraftPriceRow[];
 }
 
@@ -56,9 +57,6 @@ export class ScrapedOfferDraft {
 
   @Column({ type: 'varchar', nullable: true })
   imageUrl: string;
-
-  @Column({ type: 'varchar', nullable: true })
-  pdfUrl: string;
 
   @Column({ type: 'json' })
   itinerary: ScrapedOfferDraftItineraryDay[];

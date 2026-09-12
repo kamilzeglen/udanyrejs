@@ -15,7 +15,6 @@ import {
 import { Company } from '@modules/company/company.entity';
 import { User } from '@modules/user/user.entity';
 import { Itinerary } from '../../interfaces/Itinerary';
-import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 import { ImageFile } from '@modules/image-file/image-file.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Destination } from '@modules/destination/destination.entity';
@@ -71,16 +70,6 @@ export class Offer {
   imageFile: ImageFile;
   @Column({ type: 'uuid', nullable: true })
   imageFileId: string;
-
-  @OneToOne(() => PdfFile, (pdfFile) => pdfFile.offer, {
-    eager: true,
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
-  pdfFile: PdfFile;
-  @Column({ type: 'uuid', nullable: true })
-  pdfFileId: string;
 
   @ManyToMany(() => Destination, (destination) => destination.offers, {
     eager: true,

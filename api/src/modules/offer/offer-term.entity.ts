@@ -16,6 +16,7 @@ import { Offer } from '@modules/offer/offer.entity';
 import { OfferTermPrice } from '@modules/offer/offer-term-price.entity';
 import { Category } from '@modules/category/category.entity';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
+import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 
 @Entity()
 @Unique(['offerId', 'startDate', 'endDate'])
@@ -41,6 +42,9 @@ export class OfferTerm {
   @Column({ type: 'varchar', nullable: true })
   sourceUrl: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @OneToMany(() => OfferTermPrice, (price) => price.offerTerm)
   prices: OfferTermPrice[];
 
@@ -54,6 +58,11 @@ export class OfferTerm {
     nullable: true,
   })
   shareStats: ShareStats;
+
+  // FK żyje po stronie pdf_file.termId (patrz PdfFile.term) - jeden termin,
+  // jeden plik PDF, tak samo jak wcześniej PdfFile był 1:1 z Offer.
+  @OneToOne(() => PdfFile, (pdfFile) => pdfFile.term, { nullable: true })
+  pdfFile: PdfFile;
 
   @CreateDateColumn()
   createdAt: Date;

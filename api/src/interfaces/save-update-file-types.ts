@@ -5,7 +5,7 @@ export enum ImageFileType {
 }
 
 export enum PdfFileType {
-  OFFER = 'offer',
+  TERM = 'term',
   COMPANY = 'company',
   SHIP = 'ship',
 }

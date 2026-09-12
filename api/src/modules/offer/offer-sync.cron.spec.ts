@@ -5,12 +5,12 @@ import { OfferSyncService } from './offer-sync.service';
 
 describe('OfferSyncCron.runSyncForAllOffers', () => {
   let cron: OfferSyncCron;
-  let offerService: { findAllWithURL: jest.Mock };
+  let offerService: { findOffersForSync: jest.Mock };
   let offerSyncService: { syncOffer: jest.Mock };
 
   beforeEach(async () => {
     process.env.SYNC_REQUEST_DELAY_MS = '0';
-    offerService = { findAllWithURL: jest.fn() };
+    offerService = { findOffersForSync: jest.fn() };
     offerSyncService = { syncOffer: jest.fn().mockResolvedValue(undefined) };
 
     const moduleRef = await Test.createTestingModule({
@@ -26,7 +26,7 @@ describe('OfferSyncCron.runSyncForAllOffers', () => {
 
   it('syncs every offer with a URL, one at a time, in order', async () => {
     const callOrder: string[] = [];
-    offerService.findAllWithURL.mockResolvedValue([
+    offerService.findOffersForSync.mockResolvedValue([
       { id: 'offer-1' },
       { id: 'offer-2' },
     ]);
@@ -40,7 +40,7 @@ describe('OfferSyncCron.runSyncForAllOffers', () => {
   });
 
   it('continues with the next offer when one sync throws', async () => {
-    offerService.findAllWithURL.mockResolvedValue([
+    offerService.findOffersForSync.mockResolvedValue([
       { id: 'offer-1' },
       { id: 'offer-2' },
     ]);

@@ -1,6 +1,7 @@
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsDateString,
   IsInt,
   IsOptional,
@@ -40,6 +41,10 @@ export class OfferTermDto {
   @IsString()
   @IsOptional()
   sourceUrl?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 
   @IsUUID('all', { each: true })
   @IsOptional()
