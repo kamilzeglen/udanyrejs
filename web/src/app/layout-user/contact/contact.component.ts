@@ -3,11 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmailFacade } from '@state/email';
 import { ReplaySubject, takeUntil } from 'rxjs';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { OfferFacade } from '@state/offer';
 import { Offer } from '@interfaces';
 import { environment } from '@environment';
-import { Meta, Title } from '@angular/platform-browser';
+import { SeoService } from '@core/seo/seo.service';
 
 @Component({
   selector: 'app-contact',
@@ -43,13 +43,14 @@ export class ContactComponent implements OnInit, OnDestroy {
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly offerFacade: OfferFacade,
-    private readonly titleService: Title,
-    private readonly metaService: Meta,
+    private readonly router: Router,
+    private readonly seoService: SeoService,
   ) {
-    this.titleService.setTitle('UdanyRejs - Kontakt');
-    this.metaService.updateTag({
-      name: 'description',
-      content: 'Masz pytania? Skontaktuj się z nami! Jesteśmy do Twojej dyspozycji, aby pomóc Ci znaleźć idealny rejs.',
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs - Kontakt',
+      description:
+        'Masz pytania? Skontaktuj się z nami! Jesteśmy do Twojej dyspozycji, aby pomóc Ci znaleźć idealny rejs.',
+      path: this.router.url,
     });
   }
 

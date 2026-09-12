@@ -93,3 +93,6 @@ docs/
 # Root tooling deps (husky, lint-staged) - not app dependencies
 /node_modules
 
+# Playwright MCP session artifacts
+.playwright-mcp/
+

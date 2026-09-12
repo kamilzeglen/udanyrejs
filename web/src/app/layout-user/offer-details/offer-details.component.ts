@@ -9,8 +9,9 @@ import { Location } from '@angular/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
 import { RouterFacade } from '@state/router';
 import { PdfFileFacade } from '@state/pdfFile';
-import { Meta, Title } from '@angular/platform-browser';
 import { ShareStatsFacade } from '@state/shareStats';
+import { SeoService } from '@core/seo/seo.service';
+import { computeOfferSeoData } from '@core/utils/compute-offer-seo-data.util';
 
 @Component({
   selector: 'app-offer-details',
@@ -51,14 +52,13 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     private readonly pdfFileFacade: PdfFileFacade,
     private readonly routerFacade: RouterFacade,
     private readonly router: Router,
-    private readonly titleService: Title,
-    private readonly metaService: Meta,
+    private readonly seoService: SeoService,
     private readonly shareStatsFacade: ShareStatsFacade,
   ) {
-    this.titleService.setTitle(`UdanyRejs - Szczegóły oferty`);
-    this.metaService.updateTag({
-      name: 'description',
-      content: `Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`,
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs - Szczegóły oferty',
+      description: 'Sprawdź szczegóły rejsu! Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.',
+      path: this.router.url,
     });
   }
 
@@ -81,12 +81,6 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       this.offer = offer;
       this.loading = false;
 
-      this.titleService.setTitle(`UdanyRejs - ${offer.name} `);
-      this.metaService.updateTag({
-        name: 'description',
-        content: `Sprawdź szczegóły rejsu: ${offer.name}. Wspaniała przygoda czeka! Rezerwuj swój rejs z UdanyRejs.`,
-      });
-
       this.termsViewModel = (offer.terms || [])
         .map((term) => ({
           id: term.id,
@@ -101,6 +95,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         this.selectedTermId = this.getDefaultTermId(this.termsViewModel);
       }
       this.updateSelectedTermSnapshot();
+      this.updateSeo(offer);
 
       if (this.shouldTrackWebVisit && this.selectedTermId) {
         this.shouldTrackWebVisit = false;
@@ -140,6 +135,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.destroy$.next(true);
     this.destroy$.complete();
+    this.seoService.clearStructuredData();
   }
 
   public goBack(): void {
@@ -175,6 +171,23 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     this.selectedTermEndDate = term?.endDate ?? null;
     this.selectedTermPrice = term?.fromPrice ?? null;
     this.recomputeItineraryViewModel();
+  }
+
+  private updateSeo(offer: Offer): void {
+    const seoData = computeOfferSeoData(
+      offer,
+      this.termsViewModel,
+      this.API_URL,
+      environment.WEB_URL + this.router.url,
+    );
+
+    this.seoService.setPageMeta({
+      title: seoData.title,
+      description: seoData.description,
+      path: this.router.url,
+      image: seoData.image,
+    });
+    this.seoService.setStructuredData(seoData.structuredData);
   }
 
   private recomputeItineraryViewModel(): void {

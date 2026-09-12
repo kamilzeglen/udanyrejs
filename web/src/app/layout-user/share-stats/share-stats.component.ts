@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ShareStatsFacade } from '@state/shareStats';
+import { SeoService } from '@core/seo/seo.service';
 
 @Component({
   selector: 'app-share-stats',
@@ -16,7 +17,15 @@ export class ShareStatsComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly shareStatsFacade: ShareStatsFacade,
-  ) {}
+    private readonly seoService: SeoService,
+  ) {
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs',
+      description: 'Przekierowanie do oferty rejsu.',
+      path: this.router.url,
+      noIndex: true,
+    });
+  }
 
   ngOnInit(): void {
     this.platform = this.route.snapshot.paramMap.get('platform')!;

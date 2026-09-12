@@ -4,6 +4,7 @@ import { AuthFacade } from '@state/auth';
 import { ActivatedRoute } from '@angular/router';
 import { filter, ReplaySubject, takeUntil } from 'rxjs';
 import { RouterFacade } from '@state/router';
+import { SeoService } from '@core/seo/seo.service';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly activatedRoute: ActivatedRoute,
     private readonly authFacade: AuthFacade,
     private readonly routerFacade: RouterFacade,
-  ) {}
+    private readonly seoService: SeoService,
+  ) {
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs - Logowanie',
+      description: 'Zaloguj się do panelu UdanyRejs.',
+      path: '/login',
+      noIndex: true,
+    });
+  }
 
   public ngOnInit(): void {
     this.authForm = this.fb.group({

@@ -5,10 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SearchOffersPayload } from '@interfaces';
 import { CommonFacade } from '@state/common';
 import moment from 'moment-timezone';
-import { Meta, Title } from '@angular/platform-browser';
 import { PageEvent } from '@angular/material/paginator';
 import { SortDirection } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
+import { SeoService } from '@core/seo/seo.service';
 
 @Component({
   selector: 'app-offer-list',
@@ -58,16 +58,15 @@ export class OfferListComponent implements OnInit, OnDestroy {
     private readonly offerFacade: OfferFacade,
     private readonly commonFacade: CommonFacade,
     private readonly activatedRoute: ActivatedRoute,
-    private readonly titleService: Title,
-    private readonly metaService: Meta,
+    private readonly seoService: SeoService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
   ) {
-    this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
-    this.metaService.updateTag({
-      name: 'description',
-      content:
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs - Oferty Rejsów',
+      description:
         'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
+      path: this.router.url,
     });
   }
 
@@ -80,21 +79,13 @@ export class OfferListComponent implements OnInit, OnDestroy {
       const category = paramMap.get('category');
       this.filters = { ...this.filters, category: paramMap.get('category') };
 
-      if (category === 'promotions') {
-        this.titleService.setTitle('UdanyRejs - Oferty Rejsów - Promocje');
-        this.metaService.updateTag({
-          name: 'description',
-          content:
-            'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
-        });
-      } else {
-        this.titleService.setTitle('UdanyRejs - Oferty Rejsów');
-        this.metaService.updateTag({
-          name: 'description',
-          content:
-            'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
-        });
-      }
+      const title = category === 'promotions' ? 'UdanyRejs - Oferty Rejsów - Promocje' : 'UdanyRejs - Oferty Rejsów';
+      this.seoService.setPageMeta({
+        title,
+        description:
+          'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
+        path: this.router.url,
+      });
 
       this.commonFacade.getCategories();
       this.getOffers(this.filters);

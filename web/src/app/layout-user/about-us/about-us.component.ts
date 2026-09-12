@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
+import { SeoService } from '@core/seo/seo.service';
 
 @Component({
   selector: 'app-about-us',
@@ -7,14 +7,12 @@ import { Meta, Title } from '@angular/platform-browser';
   styleUrl: './about-us.component.scss',
 })
 export class AboutUsComponent {
-  constructor(
-    private titleService: Title,
-    private metaService: Meta,
-  ) {
-    this.titleService.setTitle('UdanyRejs - O nas');
-    this.metaService.updateTag({
-      name: 'description',
-      content: 'Poznaj naszą firmę i naszą misję. UdanyRejs to lider w organizacji luksusowych rejsów wycieczkowych.',
+  constructor(private readonly seoService: SeoService) {
+    this.seoService.setPageMeta({
+      title: 'UdanyRejs - O nas',
+      description:
+        'Poznaj naszą firmę i naszą misję. UdanyRejs to lider w organizacji luksusowych rejsów wycieczkowych.',
+      path: '/about-us',
     });
   }
 
