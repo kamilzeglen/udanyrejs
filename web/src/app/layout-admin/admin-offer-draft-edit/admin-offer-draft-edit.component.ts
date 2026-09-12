@@ -10,7 +10,7 @@ import { PdfFileFacade } from '@state/pdfFile';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { Category, City, ScrapedOfferDraft } from '@interfaces';
-import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
+import { matchDestinationIdsForCities } from '@core/utils/import-missing-destinations.util';
 import { matchCategoryIdsForRange } from '@core/utils/import-missing-categories.util';
 
 @Component({
@@ -223,19 +223,15 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
       ),
     );
 
-    const currentDestinationIds: string[] = this.draftForm.get('destinations')?.value ?? [];
-    const missingDestinationIds = resolveMissingDestinationIds(cityNames, cities, currentDestinationIds);
+    const matchedDestinationIds = matchDestinationIdsForCities(cityNames, cities);
+    this.draftForm.patchValue({ destinations: matchedDestinationIds });
 
-    if (missingDestinationIds.length === 0) {
-      this.snackService.showInfo('Brak nowych regionów do zaimportowania');
+    if (matchedDestinationIds.length === 0) {
+      this.snackService.showInfo('Brak pasujących regionów dla portów w planie podróży');
       return;
     }
 
-    this.draftForm.patchValue({
-      destinations: [...currentDestinationIds, ...missingDestinationIds],
-    });
-
-    this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
+    this.snackService.showInfo('Zaimportowano ' + matchedDestinationIds.length + ' region(ów)');
   }
 
   public importCategoriesForTerm(termIndex: number): void {

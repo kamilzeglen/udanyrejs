@@ -6,11 +6,7 @@ export interface CityWithDestinations {
   destinations: { id: string }[];
 }
 
-export function resolveMissingDestinationIds(
-  cityNames: string[],
-  cities: CityWithDestinations[],
-  currentDestinationIds: string[],
-): string[] {
+export function matchDestinationIdsForCities(cityNames: string[], cities: CityWithDestinations[]): string[] {
   const matchedDestinationIds = new Set<string>();
 
   cityNames.forEach((cityName) => {
@@ -22,5 +18,5 @@ export function resolveMissingDestinationIds(
     });
   });
 
-  return Array.from(matchedDestinationIds).filter((destinationId) => !currentDestinationIds.includes(destinationId));
+  return Array.from(matchedDestinationIds);
 }

@@ -12,7 +12,7 @@ import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { map, switchMap } from 'rxjs/operators';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
-import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
+import { matchDestinationIdsForCities } from '@core/utils/import-missing-destinations.util';
 import { matchCategoryIdsForRange } from '@core/utils/import-missing-categories.util';
 import { filterCitiesByFragment } from '@core/utils/filter-cities-by-fragment.util';
 
@@ -743,19 +743,15 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       ),
     );
 
-    const currentDestinationIds: string[] = this.offerForm.get('destinations')?.value ?? [];
-    const missingDestinationIds = resolveMissingDestinationIds(cityNames, cities, currentDestinationIds);
+    const matchedDestinationIds = matchDestinationIdsForCities(cityNames, cities);
+    this.offerForm.patchValue({ destinations: matchedDestinationIds });
 
-    if (missingDestinationIds.length === 0) {
-      this.snackService.showInfo('Brak nowych regionów do zaimportowania');
+    if (matchedDestinationIds.length === 0) {
+      this.snackService.showInfo('Brak pasujących regionów dla portów w planie podróży');
       return;
     }
 
-    this.offerForm.patchValue({
-      destinations: [...currentDestinationIds, ...missingDestinationIds],
-    });
-
-    this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
+    this.snackService.showInfo('Zaimportowano ' + matchedDestinationIds.length + ' region(ów)');
   }
 
   public importCategoriesForTerm(termIndex: number): void {

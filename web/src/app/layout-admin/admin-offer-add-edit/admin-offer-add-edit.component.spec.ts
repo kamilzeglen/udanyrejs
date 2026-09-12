@@ -413,3 +413,93 @@ describe('AdminOfferAddEditComponent.categoryImport', () => {
     expect(payload.terms[0].categories).toBeUndefined();
   });
 });
+
+describe('AdminOfferAddEditComponent.importMissingDestinations', () => {
+  let component: AdminOfferAddEditComponent;
+  let fixture: ComponentFixture<AdminOfferAddEditComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ReactiveFormsModule],
+      declarations: [AdminOfferAddEditComponent],
+      providers: [
+        {
+          provide: CommonFacade,
+          useValue: {
+            companies$: of([]),
+            ships$: of([]),
+            destinations$: of([]),
+            cities$: of([{ id: 'city-1', name: 'Barcelona', destinations: [{ id: 'dest-med' }] }]),
+            categories$: of([]),
+            cabinTypes$: of([]),
+            getShipsSuccess$: EMPTY,
+            getCabinTypesSuccess$: EMPTY,
+            getCompanies: (): void => undefined,
+            getCategories: (): void => undefined,
+            getDestinations: (): void => undefined,
+            getCities: (): void => undefined,
+            getShips: (): void => undefined,
+            getCabinTypes: (): void => undefined,
+          },
+        },
+        {
+          provide: OfferFacade,
+          useValue: {
+            getOfferSuccess$: EMPTY,
+            createOfferError$: EMPTY,
+            updateOfferError$: EMPTY,
+            createOfferSuccess$: EMPTY,
+            updateOfferSuccess$: EMPTY,
+            deleteOfferSuccess$: EMPTY,
+            activateOfferSuccess$: EMPTY,
+            deactivateOfferSuccess$: EMPTY,
+            scrapeOfferSuccess$: EMPTY,
+            scrapeOfferError$: EMPTY,
+            scraping$: of(false),
+            scrapeOffer: (): void => undefined,
+          },
+        },
+        { provide: RouterFacade, useValue: { changeRoute: (): void => undefined } },
+        {
+          provide: SnackbarService,
+          useValue: { showError: (): void => undefined, showInfo: (): void => undefined },
+        },
+        { provide: ActivatedRoute, useValue: { paramMap: EMPTY } },
+        { provide: ConfirmationModalService, useValue: {} },
+        {
+          provide: ImageFileFacade,
+          useValue: {
+            createImageFileSuccess$: EMPTY,
+            createImageFileError$: EMPTY,
+            updateImageFileSuccess$: EMPTY,
+            updateImageFileError$: EMPTY,
+          },
+        },
+        {
+          provide: PdfFileFacade,
+          useValue: {
+            createPdfFileSuccess$: EMPTY,
+            createPdfFileError$: EMPTY,
+            updatePdfFileSuccess$: EMPTY,
+            updatePdfFileError$: EMPTY,
+          },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AdminOfferAddEditComponent);
+    component = fixture.componentInstance;
+    component.ngOnInit();
+  });
+
+  it('overwrites a previously hand-picked region that no longer matches any itinerary city', () => {
+    component.offerForm.patchValue({ destinations: ['dest-unrelated'] });
+    component.addItineraryDay(1);
+    component.itineraryArray.at(0).patchValue({ city: 'Barcelona' });
+
+    component.importMissingDestinations();
+
+    expect(component.offerForm.get('destinations')?.value).toEqual(['dest-med']);
+  });
+});
