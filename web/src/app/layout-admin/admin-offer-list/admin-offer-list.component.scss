@@ -111,27 +111,19 @@
     gap: 8px;
   }
 
-  .share-stat {
+  .share-stat-total {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border: 1px solid rgba($grey, 0.3);
     border-radius: 20px;
-    background: #fff;
+    background: rgba($grey, 0.08);
     color: $neutral;
-    font: inherit;
     font-weight: 500;
-    cursor: pointer;
 
     i {
       width: 14px;
       font-size: 14px;
-    }
-
-    &:hover {
-      border-color: $primary-color;
-      color: $primary-color;
     }
   }
 
@@ -186,11 +178,43 @@
     }
 
     .term-row {
-      cursor: pointer;
+      .term-edit-cell {
+        cursor: pointer;
+      }
 
       &:hover {
         background-color: rgba($grey, 0.05);
       }
+    }
+  }
+
+  .term-stats-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .term-share-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid rgba($grey, 0.3);
+    border-radius: 14px;
+    background: #fff;
+    color: $neutral;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+
+    i {
+      width: 12px;
+      font-size: 12px;
+    }
+
+    &:hover {
+      border-color: $primary-color;
+      color: $primary-color;
     }
   }
 }

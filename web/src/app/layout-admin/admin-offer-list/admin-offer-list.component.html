@@ -20,7 +20,14 @@
         <mat-panel-title>{{ group.offer.name }}</mat-panel-title>
         <mat-panel-description>
           {{ group.offer.company.name }} / {{ group.offer.ship.name }} — {{ group.terms.length }}
-          {{ group.terms.length === 1 ? 'termin' : 'terminów' }}
+          {{ group.terms.length === 1 ? 'termin' : 'terminów' }} — Łącznie:
+          {{
+            group.totalShareStats.webClicks +
+              group.totalShareStats.facebookClicks +
+              group.totalShareStats.instagramClicks +
+              group.totalShareStats.tiktokClicks
+          }}
+          kliknięć
         </mat-panel-description>
       </mat-expansion-panel-header>
 
@@ -42,24 +49,24 @@
 
       <div class="offer-status">
         <div class="status-group">
-          <span class="status-group-label">Udostępnienia tej oferty</span>
+          <span class="status-group-label">Łącznie dla trasy</span>
           <div class="share-stats">
-            <button type="button" class="share-stat" (click)="copyToClipboard('web', group.offer.id)">
+            <span class="share-stat-total">
               <i class="fab fa-chrome"></i>
-              <span>{{ group.offer.shareStats?.webClicks || 0 }}</span>
-            </button>
-            <button type="button" class="share-stat" (click)="copyToClipboard('fb', group.offer.id)">
+              <span>{{ group.totalShareStats.webClicks }}</span>
+            </span>
+            <span class="share-stat-total">
               <i class="fab fa-facebook"></i>
-              <span>{{ group.offer.shareStats?.facebookClicks || 0 }}</span>
-            </button>
-            <button type="button" class="share-stat" (click)="copyToClipboard('ig', group.offer.id)">
+              <span>{{ group.totalShareStats.facebookClicks }}</span>
+            </span>
+            <span class="share-stat-total">
               <i class="fab fa-instagram"></i>
-              <span>{{ group.offer.shareStats?.instagramClicks || 0 }}</span>
-            </button>
-            <button type="button" class="share-stat" (click)="copyToClipboard('tt', group.offer.id)">
+              <span>{{ group.totalShareStats.instagramClicks }}</span>
+            </span>
+            <span class="share-stat-total">
               <i class="fab fa-tiktok"></i>
-              <span>{{ group.offer.shareStats?.tiktokClicks || 0 }}</span>
-            </button>
+              <span>{{ group.totalShareStats.tiktokClicks }}</span>
+            </span>
           </div>
         </div>
 
@@ -100,13 +107,52 @@
             <th>Data początkowa</th>
             <th>Data końcowa</th>
             <th>Cena od</th>
+            <th>Statystyki</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let term of group.terms" class="term-row" (click)="editOffer(term)">
-            <td>{{ term.startDate | date: 'dd.MM.yyyy' }}</td>
-            <td>{{ term.endDate | date: 'dd.MM.yyyy' }}</td>
-            <td>{{ term.fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}</td>
+          <tr *ngFor="let term of group.terms" class="term-row">
+            <td class="term-edit-cell" (click)="editOffer(term)">{{ term.startDate | date: 'dd.MM.yyyy' }}</td>
+            <td class="term-edit-cell" (click)="editOffer(term)">{{ term.endDate | date: 'dd.MM.yyyy' }}</td>
+            <td class="term-edit-cell" (click)="editOffer(term)">
+              {{ term.fromPrice / 100 | currency: '&#8364;' : 'symbol' : '0.0' }}
+            </td>
+            <td>
+              <div class="term-stats-cell">
+                <button
+                  type="button"
+                  class="term-share-stat"
+                  (click)="copyToClipboard('web', group.offer.id, term.termId); $event.stopPropagation()"
+                >
+                  <i class="fab fa-chrome"></i>
+                  <span>{{ term.shareStats?.webClicks || 0 }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="term-share-stat"
+                  (click)="copyToClipboard('fb', group.offer.id, term.termId); $event.stopPropagation()"
+                >
+                  <i class="fab fa-facebook"></i>
+                  <span>{{ term.shareStats?.facebookClicks || 0 }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="term-share-stat"
+                  (click)="copyToClipboard('ig', group.offer.id, term.termId); $event.stopPropagation()"
+                >
+                  <i class="fab fa-instagram"></i>
+                  <span>{{ term.shareStats?.instagramClicks || 0 }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="term-share-stat"
+                  (click)="copyToClipboard('tt', group.offer.id, term.termId); $event.stopPropagation()"
+                >
+                  <i class="fab fa-tiktok"></i>
+                  <span>{{ term.shareStats?.tiktokClicks || 0 }}</span>
+                </button>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>

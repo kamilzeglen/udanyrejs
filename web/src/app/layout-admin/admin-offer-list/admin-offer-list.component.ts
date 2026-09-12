@@ -151,8 +151,8 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.routerFacade.changeRoute({ linkParams });
   }
 
-  public copyToClipboard(type: string, id: string) {
-    const url = `${window.location.origin}/share/${type}/${id}`;
+  public copyToClipboard(type: string, offerId: string, termId: string) {
+    const url = `${window.location.origin}/share/${type}/${offerId}/${termId}`;
     navigator.clipboard
       .writeText(url)
       .then(() => {
