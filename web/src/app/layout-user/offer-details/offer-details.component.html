@@ -41,7 +41,7 @@
         <ng-template #askPrice><strong class="price-on-request">Zapytaj o cenę</strong></ng-template>
       </div>
       <button type="button" class="action-button" (click)="redirectToContact(offer.id)">Zapytaj o rejs</button>
-      <button type="button" class="pdf-button" (click)="downloadPdfFile(offer.id)">
+      <button type="button" class="pdf-button" *ngIf="offer.pdfFile?.name" (click)="downloadPdfFile(offer.id)">
         <mat-icon>file_download</mat-icon>Pobierz ofertę PDF
       </button>
     </aside>
@@ -96,11 +96,6 @@
       <div class="description-text" [innerHTML]="offer.company.description"></div>
     </section>
 
-    <section class="description-section" *ngIf="offer.ship?.description">
-      <h2 *ngIf="offer.ship?.name">{{ offer.ship.name }}</h2>
-      <div class="description-text" [innerHTML]="offer.ship.description"></div>
-    </section>
-
     <div class="image-container-ship" *ngIf="offer.ship?.imageFile?.name">
       <img
         crossorigin="anonymous"
@@ -109,6 +104,11 @@
         class="ship-image"
       />
     </div>
+
+    <section class="description-section" *ngIf="offer.ship?.description">
+      <h2 *ngIf="offer.ship?.name">{{ offer.ship.name }}</h2>
+      <div class="description-text" [innerHTML]="offer.ship.description"></div>
+    </section>
 
     <section class="ship">
       <div class="ship-details-title">
