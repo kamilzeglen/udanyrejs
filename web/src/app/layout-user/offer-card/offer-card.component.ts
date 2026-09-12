@@ -1,6 +1,7 @@
 import { Component, input, OnChanges } from '@angular/core';
 import { OfferSearchResult } from '@interfaces';
 import { environment } from '@environment';
+import { computeOfferDurationDays } from '@core/utils/compute-offer-duration.util';
 
 @Component({
   selector: 'app-offer-card',
@@ -25,5 +26,6 @@ export class OfferCardComponent implements OnChanges {
     const offerDate = new Date(this.offer()?.createdAt);
 
     this.isNew = offerDate >= threeDaysAgo;
+    this.durationDays = computeOfferDurationDays(this.offer()?.startDate, this.offer()?.endDate);
   }
 }
