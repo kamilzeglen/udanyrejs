@@ -206,11 +206,15 @@ export class OfferService {
       );
     }
 
+    // limit()/offset(), nie skip()/take() - TypeORM po cichu pomija skip()/take()
+    // (zero błędu, zero ostrzeżenia) w zapytaniach z joinami do relacji "many"
+    // (tu: term.categories, offer.destinations), przez co paginacja przestawała
+    // działać i zwracane były wszystkie wiersze naraz.
     const idQuery = idQueryBuilder
       .where(whereSql, whereParams)
       .distinct(true)
-      .skip(offset)
-      .take(limit)
+      .limit(limit)
+      .offset(offset)
       .orderBy(
         `"${orderColumnAlias}"`,
         orderDir.toUpperCase() as any,

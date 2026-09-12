@@ -466,6 +466,8 @@ describe('OfferService', () => {
         distinct: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn().mockResolvedValue([]),
         getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
@@ -524,6 +526,30 @@ describe('OfferService', () => {
         expect.objectContaining({ termId: 'term-2', fromPrice: 300000 }),
       );
       expect(result.pagination.all).toBe(2);
+    });
+
+    it('paginates with limit/offset, not skip/take (TypeORM silently drops skip/take once a query has many-relation joins)', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const idQuery = buildTermQueryBuilder({
+        getRawMany: jest.fn().mockResolvedValue([]),
+      });
+      const countQuery = buildTermQueryBuilder({
+        getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
+      });
+      offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery);
+
+      await service.searchOffers({
+        ...baseSearchDto,
+        offset: 20,
+        limit: 10,
+      } as any);
+
+      expect(idQuery.limit).toHaveBeenCalledWith(10);
+      expect(idQuery.offset).toHaveBeenCalledWith(20);
+      expect(idQuery.skip).not.toHaveBeenCalled();
+      expect(idQuery.take).not.toHaveBeenCalled();
     });
 
     it('returns an empty page without querying for hydration when no term matches', async () => {
