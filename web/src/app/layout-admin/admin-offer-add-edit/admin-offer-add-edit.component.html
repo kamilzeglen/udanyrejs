@@ -115,6 +115,14 @@
     <!-- Sekcja Terminy rejsu -->
     <section class="section terms-section">
       <h2>Terminy rejsu</h2>
+      <button
+        type="button"
+        class="import-button"
+        [disabled]="termsArray.controls.length === 0"
+        (click)="importCategoriesForAllTerms()"
+      >
+        Zaimportuj kategorie dla wszystkich terminów
+      </button>
       <div formArrayName="terms">
         <mat-expansion-panel
           *ngFor="let term of termsArray.controls; let termIndex = index"
@@ -218,9 +226,9 @@
             <button
               type="button"
               class="import-button"
-              (click)="importMissingCategories(termIndex); $event.stopPropagation()"
+              (click)="importCategoriesForTerm(termIndex); $event.stopPropagation()"
             >
-              Zaimportuj brakujące dane — Kategorie
+              Zaimportuj kategorie automatycznie
             </button>
           </div>
         </mat-expansion-panel>

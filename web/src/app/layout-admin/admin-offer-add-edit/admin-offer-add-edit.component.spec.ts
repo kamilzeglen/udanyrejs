@@ -266,7 +266,7 @@ describe('AdminOfferAddEditComponent.submitForm', () => {
   });
 });
 
-describe('AdminOfferAddEditComponent.importMissingCategories', () => {
+describe('AdminOfferAddEditComponent.categoryImport', () => {
   let component: AdminOfferAddEditComponent;
   let fixture: ComponentFixture<AdminOfferAddEditComponent>;
   let offerFacadeMock: { createOffer: jasmine.Spy };
@@ -355,16 +355,44 @@ describe('AdminOfferAddEditComponent.importMissingCategories', () => {
     expect(component.termsArray.at(0).get('categories')?.value).toBeFalsy();
   });
 
-  it('patches only the targeted term with categories matching its own date range', () => {
+  it('overwrites only the targeted term with categories matching its own date range', () => {
     component.addTerm();
     component.addTerm();
     component.termsArray.at(0).patchValue({ startDate: '2026-12-10', endDate: '2026-12-20' });
     component.termsArray.at(1).patchValue({ startDate: '2026-06-01', endDate: '2026-06-08' });
 
-    component.importMissingCategories(0);
+    component.importCategoriesForTerm(0);
 
     expect(component.termsArray.at(0).get('categories')?.value).toEqual(['cat-zima']);
     expect(component.termsArray.at(1).get('categories')?.value).toBeFalsy();
+  });
+
+  it('overwrites a previously hand-picked category when it no longer matches the term range', () => {
+    component.addTerm();
+    component.termsArray.at(0).patchValue({
+      startDate: '2026-06-01',
+      endDate: '2026-06-08',
+      categories: ['cat-zima'],
+    });
+
+    component.importCategoriesForTerm(0);
+
+    expect(component.termsArray.at(0).get('categories')?.value).toEqual([]);
+  });
+
+  it('imports categories for every term that has filled-in dates in one action', () => {
+    component.addTerm();
+    component.addTerm();
+    component.addTerm();
+    component.termsArray.at(0).patchValue({ startDate: '2026-12-10', endDate: '2026-12-20' });
+    component.termsArray.at(1).patchValue({ startDate: '2026-06-01', endDate: '2026-06-08' });
+    component.termsArray.at(2).patchValue({ startDate: '', endDate: '' });
+
+    component.importCategoriesForAllTerms();
+
+    expect(component.termsArray.at(0).get('categories')?.value).toEqual(['cat-zima']);
+    expect(component.termsArray.at(1).get('categories')?.value).toEqual([]);
+    expect(component.termsArray.at(2).get('categories')?.value).toBeFalsy();
   });
 
   it('strips an untouched (empty-string) categories control from the payload instead of sending it as-is', () => {

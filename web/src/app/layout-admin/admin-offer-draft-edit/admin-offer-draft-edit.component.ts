@@ -11,7 +11,7 @@ import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { Category, City, ScrapedOfferDraft } from '@interfaces';
 import { resolveMissingDestinationIds } from '@core/utils/import-missing-destinations.util';
-import { resolveMissingCategoryIds } from '@core/utils/import-missing-categories.util';
+import { matchCategoryIdsForRange } from '@core/utils/import-missing-categories.util';
 
 @Component({
   selector: 'app-admin-offer-draft-edit',
@@ -238,7 +238,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
   }
 
-  public importMissingCategories(termIndex: number): void {
+  public importCategoriesForTerm(termIndex: number): void {
     let categories: Category[] = [];
     this.categories$.pipe(take(1)).subscribe((value) => {
       categories = value ?? [];
@@ -253,18 +253,43 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const currentCategoryIds: string[] = termGroup.get('categories')?.value ?? [];
-    const missingCategoryIds = resolveMissingCategoryIds({ startDate, endDate }, categories, currentCategoryIds);
+    const matchedCategoryIds = matchCategoryIdsForRange({ startDate, endDate }, categories);
+    termGroup.patchValue({ categories: matchedCategoryIds });
 
-    if (missingCategoryIds.length === 0) {
-      this.snackService.showInfo('Brak nowych kategorii do zaimportowania');
+    if (matchedCategoryIds.length === 0) {
+      this.snackService.showInfo('Brak pasujących kategorii dla tego terminu');
       return;
     }
 
-    termGroup.patchValue({
-      categories: [...currentCategoryIds, ...missingCategoryIds],
+    this.snackService.showInfo('Zaimportowano ' + matchedCategoryIds.length + ' kategori(e/i)');
+  }
+
+  public importCategoriesForAllTerms(): void {
+    let categories: Category[] = [];
+    this.categories$.pipe(take(1)).subscribe((value) => {
+      categories = value ?? [];
     });
 
-    this.snackService.showInfo('Zaimportowano ' + missingCategoryIds.length + ' kategori(e/i)');
+    let updatedTermsCount = 0;
+
+    this.termsArray.controls.forEach((termGroup) => {
+      const startDate = termGroup.get('startDate')?.value as string;
+      const endDate = termGroup.get('endDate')?.value as string;
+
+      if (!startDate || !endDate) {
+        return;
+      }
+
+      const matchedCategoryIds = matchCategoryIdsForRange({ startDate, endDate }, categories);
+      termGroup.patchValue({ categories: matchedCategoryIds });
+      updatedTermsCount++;
+    });
+
+    if (updatedTermsCount === 0) {
+      this.snackService.showInfo('Brak terminów z uzupełnionymi datami do zaimportowania');
+      return;
+    }
+
+    this.snackService.showInfo('Zaimportowano kategorie dla ' + updatedTermsCount + ' termin(ów)');
   }
 }

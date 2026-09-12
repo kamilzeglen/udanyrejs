@@ -9,15 +9,11 @@ export interface CategoryWithDateRange {
   endDate: Date | string | null;
 }
 
-export function resolveMissingCategoryIds(
-  termRange: DateRange,
-  categories: CategoryWithDateRange[],
-  currentCategoryIds: string[],
-): string[] {
+export function matchCategoryIdsForRange(termRange: DateRange, categories: CategoryWithDateRange[]): string[] {
   const termStart = new Date(termRange.startDate).getTime();
   const termEnd = new Date(termRange.endDate).getTime();
 
-  const matchedCategoryIds = categories
+  return categories
     .filter((category) => !!category.startDate && !!category.endDate)
     .filter((category) => {
       const categoryStart = new Date(category.startDate).getTime();
@@ -25,6 +21,4 @@ export function resolveMissingCategoryIds(
       return termStart <= categoryEnd && termEnd >= categoryStart;
     })
     .map((category) => category.id);
-
-  return matchedCategoryIds.filter((categoryId) => !currentCategoryIds.includes(categoryId));
 }
