@@ -55,6 +55,7 @@ export class OfferService {
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('offer.ship', 'ship')
+      .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
       .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('offer.destinations', 'destinations')
