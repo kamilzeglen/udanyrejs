@@ -17,7 +17,7 @@ const routes: Routes = [
   { path: 'contact', component: ContactComponent },
   { path: 'contact/:offerId', component: ContactComponent },
   { path: 'about-us', component: AboutUsComponent },
-  { path: 'share/:platform/:offerId', component: ShareStatsComponent },
+  { path: 'share/:platform/:offerId/:termId', component: ShareStatsComponent },
   { path: 'rules', component: RulesComponent },
 ];
 

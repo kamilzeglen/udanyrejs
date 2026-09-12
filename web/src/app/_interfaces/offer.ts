@@ -4,7 +4,6 @@ import { ImageFile, PdfFile } from './file';
 import { Ship } from './ship';
 import { Destination } from './destination';
 import { User } from './user';
-import { ShareStats } from './shareStats';
 import { OfferTerm } from './offer-term';
 
 export interface Offer {
@@ -25,8 +24,6 @@ export interface Offer {
   pdfFileId: string;
   destinations: Destination[];
   itinerary: Itinerary[];
-  shareStats: ShareStats;
-  sharedStatId: string;
   createdBy: User;
   createdById: string;
   updatedBy: User;

@@ -10,6 +10,7 @@ import { ShareStatsFacade } from '@state/shareStats';
 export class ShareStatsComponent implements OnInit {
   platform: string;
   offerId: string;
+  termId: string;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -18,18 +19,17 @@ export class ShareStatsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Pobranie parametrów z URL
     this.platform = this.route.snapshot.paramMap.get('platform')!;
     this.offerId = this.route.snapshot.paramMap.get('offerId')!;
+    this.termId = this.route.snapshot.paramMap.get('termId')!;
 
-    this.shareStatsFacade.updateShareStats({ platform: this.platform, offerId: this.offerId });
+    this.shareStatsFacade.updateShareStats({ platform: this.platform, offerId: this.offerId, termId: this.termId });
 
     this.redirectToOfferPage();
   }
 
-  // Przekierowanie na stronę oferty
   redirectToOfferPage(): void {
-    const offerUrl = `/offers/details/${this.offerId}`;
+    const offerUrl = `/offers/details/${this.offerId}?termId=${this.termId}`;
     window.location.replace(offerUrl);
   }
 }

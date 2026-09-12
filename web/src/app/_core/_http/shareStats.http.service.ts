@@ -12,8 +12,8 @@ export class ShareStatsHttpService {
 
   constructor(private http: HttpClient) {}
 
-  public shareStats(payload: { platform: string; offerId: string }): Observable<User> {
-    const url = `${this.API_URL}/share/` + payload.platform + '/' + payload.offerId;
+  public shareStats(payload: { platform: string; offerId: string; termId: string }): Observable<User> {
+    const url = `${this.API_URL}/share/${payload.platform}/${payload.offerId}/${payload.termId}`;
     return this.http.get<User>(url, { withCredentials: true });
   }
 }

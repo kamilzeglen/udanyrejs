@@ -14,7 +14,7 @@ export class ShareStatsFacade {
     private actions: Actions,
   ) {}
 
-  public updateShareStats(payload: { platform: string; offerId: string }): void {
+  public updateShareStats(payload: { platform: string; offerId: string; termId: string }): void {
     this.store.dispatch(shareStatsActions.updateShareStats({ payload }));
   }
 }

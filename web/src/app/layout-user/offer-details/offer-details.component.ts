@@ -35,6 +35,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   }[] = [];
 
   private loadedOfferId: string;
+  private shouldTrackWebVisit = false;
 
   public selectedTermId: string;
   public selectedTermStartDate: string;
@@ -100,6 +101,15 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         this.selectedTermId = this.getDefaultTermId(this.termsViewModel);
       }
       this.updateSelectedTermSnapshot();
+
+      if (this.shouldTrackWebVisit && this.selectedTermId) {
+        this.shouldTrackWebVisit = false;
+        this.shareStatsFacade.updateShareStats({
+          platform: 'web',
+          offerId: offer.id,
+          termId: this.selectedTermId,
+        });
+      }
     });
 
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
@@ -119,7 +129,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe((previousUrl) => {
           if (previousUrl?.includes('/offers')) {
-            this.shareStatsFacade.updateShareStats({ platform: 'web', offerId: offerId });
+            this.shouldTrackWebVisit = true;
           }
         });
 

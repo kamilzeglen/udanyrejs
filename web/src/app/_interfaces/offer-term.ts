@@ -1,6 +1,7 @@
 import { CabinType } from './cabin-type';
 import { Category } from './category';
 import { Offer } from './offer';
+import { ShareStats } from './shareStats';
 
 export interface OfferTermPrice {
   id: string;
@@ -17,6 +18,7 @@ export interface OfferTerm {
   endDate: string;
   prices: OfferTermPrice[];
   categories: Category[];
+  shareStats: ShareStats;
 }
 
 // Wynik listy/wyszukiwarki - jeden wiersz = jeden termin danej oferty.
@@ -25,4 +27,5 @@ export type OfferSearchResult = Omit<Offer, 'terms'> & {
   startDate: string;
   endDate: string;
   fromPrice: number;
+  shareStats: ShareStats;
 };
