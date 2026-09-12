@@ -30,6 +30,8 @@ export class ShareStats {
   @Column({ default: 0 })
   tiktokClicks: number;
 
+  // @JoinColumn() bez nazwy domyślnie mapuje na "termId" - dokładnie tę
+  // kolumnę zadeklarowaną wyżej. To ta strona relacji fizycznie trzyma FK.
   @OneToOne(() => OfferTerm, (term) => term.shareStats)
   @JoinColumn()
   term: OfferTerm;

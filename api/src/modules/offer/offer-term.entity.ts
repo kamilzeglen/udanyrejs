@@ -48,13 +48,12 @@ export class OfferTerm {
   @JoinTable({ name: 'offer_term_categories' })
   categories: Category[];
 
+  // FK żyje po stronie share_stats.termId (patrz ShareStats.term), nie tutaj -
+  // to czysto odwrotna strona relacji, bez własnej kolumny.
   @OneToOne(() => ShareStats, (shareStats) => shareStats.term, {
     nullable: true,
   })
-  @JoinColumn()
   shareStats: ShareStats;
-  @Column({ type: 'uuid', nullable: true })
-  shareStatsId: string;
 
   @CreateDateColumn()
   createdAt: Date;
