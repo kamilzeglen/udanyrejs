@@ -1,6 +1,8 @@
 <div class="error-container">
   <div class="error-icon">⚠️</div>
   <h1>Błąd połączenia</h1>
-  <p>Nie udało się nawiązać połączenia z serwerem. Sprawdź swoje połączenie internetowe i spróbuj ponownie.</p>
-  <button (click)="reloadPage()">Odśwież stronę</button>
+  <p>Nie udało się nawiązać połączenia z serwerem. Próbujemy połączyć ponownie automatycznie co kilka sekund.</p>
+  <button (click)="retryNow()" [disabled]="checking$ | async">
+    {{ (checking$ | async) ? 'Sprawdzanie…' : 'Sprawdź teraz' }}
+  </button>
 </div>
