@@ -19,7 +19,6 @@ import { PdfFile } from '@modules/pdf-file/pdf-file.entity';
 import { ImageFile } from '@modules/image-file/image-file.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Destination } from '@modules/destination/destination.entity';
-import { Category } from '@modules/category/category.entity';
 import { ShareStats } from '@modules/share-stats/share-stat.entity';
 import { OfferTerm } from '@modules/offer/offer-term.entity';
 
@@ -91,12 +90,6 @@ export class Offer {
     name: 'offer_destinations',
   })
   destinations: Destination[];
-
-  @ManyToMany(() => Category, (category) => category.offers, { eager: true })
-  @JoinTable({
-    name: 'offer_categories',
-  })
-  categories: Category[];
 
   @Column({ type: 'json', nullable: true })
   itinerary: Itinerary[];

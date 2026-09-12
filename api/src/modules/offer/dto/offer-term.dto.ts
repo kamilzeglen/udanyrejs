@@ -41,6 +41,10 @@ export class OfferTermDto {
   @IsOptional()
   sourceUrl?: string;
 
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  categories?: string[];
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

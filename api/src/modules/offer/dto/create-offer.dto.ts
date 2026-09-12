@@ -34,10 +34,6 @@ export class CreateOfferDto {
   @IsOptional()
   destinations?: string[];
 
-  @IsUUID('all', { each: true })
-  @IsOptional()
-  categories?: string[];
-
   @IsUUID()
   shipId: string;
 

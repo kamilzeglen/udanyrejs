@@ -58,9 +58,9 @@ export class OfferService {
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
       .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('offer.destinations', 'destinations')
-      .leftJoinAndSelect('offer.categories', 'categories')
       .leftJoinAndSelect('offer.shareStats', 'shareStats')
       .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.categories', 'categories')
       .leftJoinAndSelect('terms.prices', 'termPrices')
       .leftJoinAndSelect('termPrices.cabinType', 'cabinType')
       .leftJoinAndSelect('offer.createdBy', 'createdBy')
@@ -100,7 +100,8 @@ export class OfferService {
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
-      .leftJoinAndSelect('offer.categories', 'categories')
+      .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.categories', 'categories')
       .leftJoinAndSelect('offer.imageFile', 'imageFile');
 
     if (category) {
@@ -188,7 +189,7 @@ export class OfferService {
     let idQueryBuilder = this.offerTermRepository
       .createQueryBuilder('term')
       .innerJoin('term.offer', 'offer')
-      .leftJoin('offer.categories', 'category')
+      .leftJoin('term.categories', 'category')
       .leftJoin('offer.destinations', 'destination')
       .select('term.id', 'termId')
       .addSelect((subQuery) => {
@@ -231,7 +232,7 @@ export class OfferService {
     const countRow = await this.offerTermRepository
       .createQueryBuilder('term')
       .innerJoin('term.offer', 'offer')
-      .leftJoin('offer.categories', 'category')
+      .leftJoin('term.categories', 'category')
       .leftJoin('offer.destinations', 'destination')
       .select('COUNT(DISTINCT term.id)', 'count')
       .where(whereSql, whereParams)
@@ -261,7 +262,7 @@ export class OfferService {
       .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('company.imageFile', 'companyImageFile')
       .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
-      .leftJoinAndSelect('offer.categories', 'category')
+      .leftJoinAndSelect('term.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
       .leftJoinAndSelect('offer.shareStats', 'shareStats')
       .where('term.id IN (:...termIds)', { termIds: orderedTermIds })
@@ -322,14 +323,8 @@ export class OfferService {
     createOfferDto: CreateOfferDto,
     reqCreatedBy: User,
   ): Promise<Offer> {
-    const {
-      companyId,
-      shipId,
-      destinations,
-      categories,
-      terms,
-      ...createUserData
-    } = createOfferDto;
+    const { companyId, shipId, destinations, terms, ...createUserData } =
+      createOfferDto;
 
     const requestUser = await this.userService.findOneByEmail(
       reqCreatedBy.email,
@@ -337,9 +332,6 @@ export class OfferService {
     const company = await this.companyService.findOneById(companyId);
     const ship = await this.shipService.findOneById(shipId);
 
-    const categoryEntities = categories?.length
-      ? await this.categoryService.findByIds(categories)
-      : [];
     const destinationEntities = destinations?.length
       ? await this.destinationService.findByIds(destinations)
       : [];
@@ -370,9 +362,6 @@ export class OfferService {
 
       newOffer.shareStatsId = savedShareStats.id;
 
-      if (categoryEntities.length) {
-        newOffer.categories = categoryEntities;
-      }
       if (destinationEntities.length) {
         newOffer.destinations = destinationEntities;
       }
@@ -395,14 +384,8 @@ export class OfferService {
     updateOfferDto: UpdateOfferDto,
     reqCreatedBy: User,
   ): Promise<Offer> {
-    const {
-      companyId,
-      shipId,
-      destinations,
-      categories,
-      terms,
-      ...updateOfferData
-    } = updateOfferDto;
+    const { companyId, shipId, destinations, terms, ...updateOfferData } =
+      updateOfferDto;
 
     const offer = await this.offerRepository
       .createQueryBuilder('offer')
@@ -437,10 +420,6 @@ export class OfferService {
       ship,
     });
 
-    if (categories && categories.length > 0) {
-      offer.categories = await this.categoryService.findByIds(categories);
-    }
-
     if (destinations && destinations.length > 0) {
       offer.destinations =
         await this.destinationService.findByIds(destinations);
@@ -471,7 +450,6 @@ export class OfferService {
   async removeOffer(offerID: string, reqCreatedBy: User): Promise<boolean> {
     const offer = await this.offerRepository
       .createQueryBuilder('offer')
-      .leftJoinAndSelect('offer.categories', 'categories')
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
       .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .where('offer.id = :offerID', { offerID })
@@ -486,13 +464,6 @@ export class OfferService {
         .createQueryBuilder()
         .delete()
         .from('offer_destinations')
-        .where('offerId = :offerID', { offerID })
-        .execute();
-
-      await manager
-        .createQueryBuilder()
-        .delete()
-        .from('offer_categories')
         .where('offerId = :offerID', { offerID })
         .execute();
 
@@ -590,11 +561,16 @@ export class OfferService {
     terms: OfferTermDto[],
   ): Promise<void> {
     for (const termDto of terms) {
+      const categoryEntities = termDto.categories?.length
+        ? await this.categoryService.findByIds(termDto.categories)
+        : undefined;
+
       const term = manager.create(OfferTerm, {
         offerId,
         startDate: termDto.startDate,
         endDate: termDto.endDate,
         sourceUrl: termDto.sourceUrl,
+        categories: categoryEntities,
       });
       const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);
 

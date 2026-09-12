@@ -151,6 +151,39 @@ describe('OfferService', () => {
     expect(transactionManager.save).toHaveBeenCalledTimes(7);
   });
 
+  it('assigns categories to their own term, not to the whole offer', async () => {
+    cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
+    const categoryServiceMock = (service as any).categoryService;
+    categoryServiceMock.findByIds.mockResolvedValue([{ id: 'cat-zima' }]);
+
+    const dto = {
+      name: 'Rejs testowy',
+      companyId: 'company-1',
+      shipId: 'ship-1',
+      terms: [
+        {
+          startDate: '2027-01-10',
+          endDate: '2027-01-17',
+          categories: ['cat-zima'],
+          prices: [{ cabinTypeId: 'cabin-1', price: 100000 }],
+        },
+        {
+          startDate: '2027-06-10',
+          endDate: '2027-06-17',
+          prices: [{ cabinTypeId: 'cabin-1', price: 150000 }],
+        },
+      ],
+    };
+
+    await service.createOffer(dto as any, requestUser);
+
+    const savedTermCalls = transactionManager.create.mock.calls.filter(
+      (call) => call[1]?.startDate,
+    );
+    expect(savedTermCalls[0][1].categories).toEqual([{ id: 'cat-zima' }]);
+    expect(savedTermCalls[1][1].categories).toBeUndefined();
+  });
+
   it('rejects an offer referencing a cabin type that does not exist', async () => {
     cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
 
