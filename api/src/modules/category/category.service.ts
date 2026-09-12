@@ -20,11 +20,18 @@ export class CategoryService {
   ) {}
 
   async findAll(): Promise<Category[]> {
-    return await this.categoryRepository
+    const { entities, raw } = await this.categoryRepository
       .createQueryBuilder('category')
-      .loadRelationCountAndMap('category.offerCount', 'category.offers')
+      .leftJoin('category.terms', 'term')
+      .addSelect('COUNT(DISTINCT term.offerId)', 'offerCount')
+      .groupBy('category.id')
       .orderBy('category.position', 'ASC')
-      .getMany();
+      .getRawAndEntities();
+
+    return entities.map((category, index) => ({
+      ...category,
+      offerCount: Number(raw[index].offerCount),
+    }));
   }
 
   async findOneByID(id: string): Promise<Category> {

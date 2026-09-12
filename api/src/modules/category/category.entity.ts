@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Offer } from '@modules/offer/offer.entity';
+import { OfferTerm } from '@modules/offer/offer-term.entity';
 import { User } from '@modules/user/user.entity';
 
 @Entity()
@@ -38,8 +38,12 @@ export class Category {
   @Column({ default: true })
   isVisible: boolean;
 
-  @ManyToMany(() => Offer, (offer) => offer.categories, { cascade: true })
-  offers: Offer[];
+  @ManyToMany(() => OfferTerm, (term) => term.categories, { cascade: true })
+  terms: OfferTerm[];
+
+  // Nie jest kolumną - liczone przez CategoryService.findAll() na podstawie
+  // COUNT(DISTINCT term.offerId), więc opcjonalne i tylko dla odczytu.
+  offerCount?: number;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()

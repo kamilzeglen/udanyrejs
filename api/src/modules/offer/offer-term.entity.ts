@@ -3,6 +3,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,6 +13,7 @@ import {
 } from 'typeorm';
 import { Offer } from '@modules/offer/offer.entity';
 import { OfferTermPrice } from '@modules/offer/offer-term-price.entity';
+import { Category } from '@modules/category/category.entity';
 
 @Entity()
 @Unique(['offerId', 'startDate', 'endDate'])
@@ -38,6 +41,10 @@ export class OfferTerm {
 
   @OneToMany(() => OfferTermPrice, (price) => price.offerTerm)
   prices: OfferTermPrice[];
+
+  @ManyToMany(() => Category, (category) => category.terms, { eager: true })
+  @JoinTable({ name: 'offer_term_categories' })
+  categories: Category[];
 
   @CreateDateColumn()
   createdAt: Date;
