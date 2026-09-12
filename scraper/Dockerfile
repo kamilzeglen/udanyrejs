@@ -6,7 +6,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
 
-FROM mcr.microsoft.com/playwright:v1.49.1-jammy AS runtime
+FROM mcr.microsoft.com/playwright:v1.63.0-jammy AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
