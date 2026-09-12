@@ -14,6 +14,7 @@ Cruise offer platform — a public catalogue of cruises with search, filtering, 
 |-------|-------------|
 | Frontend | Angular 18, TypeScript, NgRx (Store/Effects/Router-Store), RxJS, Angular Material, NG-ZORRO, ng-select, SCSS |
 | Backend | NestJS 10, TypeScript, PostgreSQL, TypeORM (migrations + seeds), JWT + Passport, class-validator, Terminus, Throttler |
+| Scraper | Express, Playwright (headless Chromium), internal-token auth, rejsy4you.pl offer/listing extraction |
 | Files & Mail | Multer uploads (images, PDFs), static serving, Nodemailer via `@nestjs-modules/mailer` |
 | Tooling | Docker, Docker Compose, Nginx, ESLint + Prettier |
 
@@ -21,11 +22,13 @@ Cruise offer platform — a public catalogue of cruises with search, filtering, 
 
 - **Public offer catalogue** — offer list, category filtering, detail pages with images, ship and company data, and PDF attachments.
 - **Contact flow** — general contact form plus offer-specific requests sent over SMTP from mail templates.
-- **Share tracking** — `/share/:platform/:offerId` route records share statistics per platform before redirecting.
+- **Share tracking** — `/share/:platform/:offerId/:termId` route records share statistics per platform and per term before redirecting to that term's offer page; the admin offer list groups terms by route and shows both a per-term breakdown and a route-level total.
 - **Admin panel** — protected CRUD for offers, companies, ships, categories and destinations, plus an application log view.
 - **Asset management** — image and PDF upload/update per offer, ship and company; files stored on disk and served through API static routes.
 - **Cookie-based auth** — JWT issued by the API in an HTTP-only cookie, guarded admin routes on the frontend, role-based users on the backend.
 - **Offer lifecycle** — manual activation/deactivation and `DAYS_BEFORE_INACTIVE` handling for stale offers.
+- **Offer scraping (rejsy4you.pl)** — a dedicated Playwright-based scraper service. Admins can import a single offer by URL, or bulk-**discover** offers for chosen shipowners (count + allowlist), which land in a review queue (`ScrapedOfferDraft`) for the admin to complete and confirm before they become real offers.
+- **Price sync** — a scheduled job re-checks each active offer's source URL and updates cabin prices, deactivating offers whose page has disappeared.
 
 ## Architecture
 
@@ -35,15 +38,21 @@ Cruise offer platform — a public catalogue of cruises with search, filtering, 
 │ Angular SPA│ HTTP │ NestJS API │      │ (external) │
 └────────────┘      └─────┬──────┘      └────────────┘
                           │
-                    ┌─────▼──────┐
-                    │ file store │  (images, PDFs)
-                    └────────────┘
+              ┌───────────┴───────────┐
+              │                       │
+        ┌─────▼──────┐         ┌──────▼──────┐
+        │ file store │         │   scraper   │
+        └────────────┘         └──────┬──────┘
+         (images, PDFs)                │
+                                        ▼
+                                  rejsy4you.pl
 ```
 
 - **web** — Angular SPA built and served by Nginx, deep links routed through `index.html`.
-- **api** — auth, persistence, offer normalization, uploads and mail.
+- **api** — auth, persistence, offer normalization, uploads, mail and scraper orchestration.
+- **scraper** — internal-only Express service (authenticated with a shared token), drives headless Chromium against rejsy4you.pl to scrape single offers and discover offer listings per shipowner.
 - **PostgreSQL** — external database, not part of the compose stack.
-- Containers publish no host ports; they join the `nginx-proxy-manager_default` network and are exposed by the reverse proxy.
+- Containers publish no host ports; they join the `nginx-proxy-manager_default` network and are exposed by the reverse proxy. `scraper` is reachable only from `api`, over the internal `udanyrejs_default` network.
 
 ## Installation
 
@@ -90,15 +99,38 @@ OFFERS_IMAGES_PATH=./files/OFFERS_IMAGES
 SHIPS_IMAGES_PATH=./files/SHIPS_IMAGES
 COMPANIES_IMAGES_PATH=./files/COMPANIES_IMAGES
 OFFERS_PDFS_PATH=./files/OFFERS_PDFS
+
+# --- Scraper ---
+SCRAPER_URL=http://localhost:5010
+SCRAPER_INTERNAL_TOKEN=change-me-to-a-long-random-secret
+ALLOWED_SCRAPE_HOSTS=rejsy4you.pl
 ```
 
-For Docker deployments point the file paths at the mounted container directories:
+For Docker deployments point the file paths at the mounted container directories, and `SCRAPER_URL` at the compose service name:
 
 ```bash
 OFFERS_IMAGES_PATH=/api/files/OFFERS_IMAGES
 SHIPS_IMAGES_PATH=/api/files/SHIPS_IMAGES
 COMPANIES_IMAGES_PATH=/api/files/COMPANIES_IMAGES
 OFFERS_PDFS_PATH=/api/files/OFFERS_PDFS
+SCRAPER_URL=http://udanyrejs-scraper:5010
+```
+
+**`scraper/.env`**
+
+```bash
+PORT=5010
+INTERNAL_TOKEN=change-me-to-a-long-random-secret # must match api's SCRAPER_INTERNAL_TOKEN
+ALLOWED_SCRAPE_HOSTS=rejsy4you.pl
+MAX_TERMS_PER_SCRAP=100
+MIN_DELAY_MS=2000
+MAX_DELAY_MS=5000
+MAX_DISCOVERY_PAGES_PER_HOST=20
+
+# Optional: use a locally installed Chrome instead of downloading Playwright's
+# bundled Chromium (useful on dev machines without network access to the
+# Playwright CDN). Leave unset in the Docker image, which bundles Chromium.
+PLAYWRIGHT_CHANNEL=
 ```
 
 **`web/src/environments/environment.ts`** — the frontend uses build-time environment files, not `.env`:
@@ -126,11 +158,13 @@ Services are reachable through the reverse proxy on the shared `nginx-proxy-mana
 ```bash
 cd api && npm install && npm run migration:run && npm run start:dev
 cd web && npm install && npm start
+cd scraper && npm install && npm run start:dev
 ```
 
 - App: http://localhost:4200
 - API: http://localhost:5006
 - Health: http://localhost:5006/health
+- Scraper: http://localhost:5010 (internal-only, not meant to be reached directly from the browser)
 
 If npm reports peer dependency conflicts, use `npm install --legacy-peer-deps`.
 
@@ -147,9 +181,10 @@ Migrations create the schema and seed initial data (roles, users, companies, shi
 ## Project Structure
 
 ```text
-api/     NestJS backend — modules, migrations, mail templates
-web/     Angular frontend — public pages, admin panel, NgRx state, Nginx config
-files/   Uploaded images and PDFs mounted into the backend container
+api/      NestJS backend — modules, migrations, mail templates
+web/      Angular frontend — public pages, admin panel, NgRx state, Nginx config
+scraper/  Express + Playwright service — offer scraping and discovery for rejsy4you.pl
+files/    Uploaded images and PDFs mounted into the backend container
 ```
 
 Per-application details live in [api/readme.md](api/readme.md) and [web/README.md](web/README.md).
