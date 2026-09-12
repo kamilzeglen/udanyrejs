@@ -6,8 +6,8 @@ RELEASE_TAG=${3:?Release tag required}
 REGISTRY_USER=${4:?Registry user required}
 export RELEASE_DIR
 
-declare -A SERVICE_FOR=([api]=udanyrejs-backend [web]=udanyrejs-frontend)
-declare -A ENV_KEY_FOR=([api]=API_IMAGE [web]=WEB_IMAGE)
+declare -A SERVICE_FOR=([api]=udanyrejs-backend [web]=udanyrejs-frontend [scraper]=udanyrejs-scraper)
+declare -A ENV_KEY_FOR=([api]=API_IMAGE [web]=WEB_IMAGE [scraper]=SCRAPER_IMAGE)
 
 mkdir -p .deploy
 exec 9>.deploy/lock
@@ -19,7 +19,7 @@ trap 'rm -rf -- "$DOCKER_CONFIG"' EXIT
 docker login ghcr.io --username "$REGISTRY_USER" --password-stdin
 bash "$RELEASE_DIR/scripts/preflight.sh"
 
-for app in api web; do
+for app in api web scraper; do
   printf '%s=%s-%s:%s\n' "${ENV_KEY_FOR[$app]}" "$IMAGE_PREFIX" "$app" "$RELEASE_TAG"
 done > "$RELEASE_DIR/images.env"
 
@@ -27,7 +27,7 @@ compose=(docker compose --project-directory "$PWD" --env-file "$RELEASE_DIR/imag
 "${compose[@]}" config --quiet
 "${compose[@]}" pull --policy always
 
-for app in api web; do
+for app in api web scraper; do
   digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE_PREFIX-$app:$RELEASE_TAG")
   if [[ "$digest" != *@sha256:* ]]; then
     echo "Missing image digest for $app" >&2
@@ -37,7 +37,7 @@ for app in api web; do
 done > "$RELEASE_DIR/images.env.tmp"
 mv "$RELEASE_DIR/images.env.tmp" "$RELEASE_DIR/images.env"
 
-for app in api web; do
+for app in api web scraper; do
   service=${SERVICE_FOR[$app]}
   container=$("${compose[@]}" ps --all -q "$service")
   if [[ -z "$container" ]]; then

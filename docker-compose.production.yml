@@ -27,6 +27,17 @@ services:
             - postgres_default
             - udanyrejs_default
 
+    udanyrejs-scraper:
+        image: ${SCRAPER_IMAGE}
+        container_name: udanyrejs-scraper
+        env_file:
+            - scraper/.env
+        restart: always
+        labels:
+            - pl.udanyrejs.application=true
+        networks:
+            - udanyrejs_default
+
 networks:
     nginx-proxy-manager_default:
         external: true

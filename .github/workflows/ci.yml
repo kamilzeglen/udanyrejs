@@ -90,6 +90,39 @@ jobs:
         if: github.event_name == 'pull_request' || inputs.build
         run: npm --prefix web run build
 
+  scraper:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: scraper/package-lock.json
+
+      - name: Install dependencies
+        run: npm --prefix scraper ci
+
+      - name: Check formatting
+        run: npm --prefix scraper run format:check
+
+      - name: Lint
+        run: npm --prefix scraper run lint:check
+
+      - name: Install Playwright browser
+        run: npx --prefix scraper playwright install --with-deps chromium
+
+      - name: Test
+        run: npm --prefix scraper test
+
+      - name: Build
+        if: github.event_name == 'pull_request' || inputs.build
+        run: npm --prefix scraper run build
+
   audit:
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -107,4 +140,5 @@ jobs:
         run: |
           npm --prefix api audit --audit-level=high || true
           npm --prefix web audit --audit-level=high || true
+          npm --prefix scraper audit --audit-level=high || true
         shell: bash
