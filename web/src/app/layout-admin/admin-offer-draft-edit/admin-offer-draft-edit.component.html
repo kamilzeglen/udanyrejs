@@ -14,6 +14,16 @@
         <input id="name" formControlName="name" type="text" />
       </div>
 
+      <a
+        class="term-card__source-link"
+        *ngIf="draftForm.get('offerUrl')?.value"
+        [href]="draftForm.get('offerUrl')?.value"
+        target="_blank"
+        rel="noopener"
+      >
+        Zobacz ofertę źródłową (link główny) ↗
+      </a>
+
       <div class="form-group" *ngIf="companies$ | async as companies">
         <label for="companyId">Armator</label>
         <mat-select formControlName="companyId" id="companyId" placeholder="Armator">

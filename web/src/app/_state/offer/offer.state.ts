@@ -5,6 +5,7 @@ export type OfferState = Readonly<{
   offers: OfferSearchResult[];
   loading: boolean;
   scraping: boolean;
+  syncingOfferId: string;
   pagination: Pagination;
   errorMessage: string;
 }>;
@@ -20,6 +21,7 @@ export const initialState: OfferState = {
   offers: null,
   loading: false,
   scraping: false,
+  syncingOfferId: null,
   pagination: { ...(defaultPagination as Pagination) },
   errorMessage: null,
 };

@@ -125,6 +125,22 @@ export class OfferEffects {
     ),
   );
 
+  syncOffer$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.syncOffer),
+      switchMap(({ payload }) => {
+        return this.http.syncOffer(payload).pipe(
+          map((result) => {
+            return offerActions.syncOfferSuccess({ id: payload.id, result });
+          }),
+          catchError((errorMessage) => {
+            return of(offerActions.syncOfferError({ id: payload.id, errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   scrapeOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.scrapeOffer),

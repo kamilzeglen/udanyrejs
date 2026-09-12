@@ -1,13 +1,25 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { OfferFacade } from '@state/offer';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
-import { map, ReplaySubject, take, takeUntil } from 'rxjs';
-import { OfferSearchResult, SearchOffersPayload } from '@interfaces';
+import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
+import { OfferSearchResult, OfferSyncResult, SearchOffersPayload } from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
 import { SortDirection } from '@angular/material/sort';
 import { Pagination } from '../../_interfaces/http';
-import { groupOffersByOfferId } from './group-offers-by-offer';
+import { GroupedOffer, groupOffersByOfferId } from './group-offers-by-offer';
+import { RowSelection } from '@shared/row-selection/row-selection';
+
+interface GroupedOfferRow extends GroupedOffer {
+  selected: boolean;
+}
+
+interface OfferListViewModel {
+  groups: GroupedOfferRow[];
+  selectedCount: number;
+  headerChecked: boolean;
+  headerIndeterminate: boolean;
+}
 
 @Component({
   selector: 'app-admin-offer-list',
@@ -36,8 +48,15 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
   public loading$ = this.offerFacade.loading$;
   public pagination$ = this.offerFacade.pagination$;
+  public syncingOfferId$ = this.offerFacade.syncingOfferId$;
 
   public groupedOffers$ = this.offerFacade.offers$.pipe(map((offers) => (offers ? groupOffersByOfferId(offers) : [])));
+
+  public readonly selection = new RowSelection();
+
+  public viewModel$ = combineLatest([this.groupedOffers$, this.selection.selectedIds$]).pipe(
+    map(([groups, selectedIds]) => this.buildViewModel(groups, selectedIds)),
+  );
 
   constructor(
     private readonly offerFacade: OfferFacade,
@@ -50,6 +69,15 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto ofertę');
       this.getOffers();
+    });
+
+    this.offerFacade.syncOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ result }) => {
+      this.snackService.showInfo(this.buildSyncResultMessage(result));
+      this.getOffers();
+    });
+
+    this.offerFacade.syncOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się zsynchronizować oferty');
     });
 
     this.getOffers();
@@ -121,9 +149,21 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
       });
   }
 
-  public detailsOffer(offer: OfferSearchResult): void {
-    const linkParams = ['/offers/details/' + offer.id];
-    this.routerFacade.changeRoute({ linkParams });
+  public syncOffer(offer: OfferSearchResult): void {
+    this.offerFacade.syncOffer({ id: offer.id });
+  }
+
+  private buildSyncResultMessage(result: OfferSyncResult): string {
+    const base =
+      `${result.termsAdded} nowy(ch) termin(ów), ${result.termsDeactivated} dezaktywowany(ch) termin(ów), ` +
+      `${result.termsSkipped} pominięty(ch) z powodu błędu połączenia, ` +
+      `${result.pdfsUpdated} zaktualizowany(ch) PDF.`;
+
+    if (result.offerDeactivated) {
+      return 'Zsynchronizowano ofertę i dezaktywowano ją (brak aktywnych terminów) - ' + base;
+    }
+
+    return 'Zsynchronizowano ofertę: ' + base;
   }
 
   public editOffer(offer: OfferSearchResult): void {
@@ -149,6 +189,31 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public editCompany(companyId: string): void {
     const linkParams = ['/admin/companies/edit/' + companyId];
     this.routerFacade.changeRoute({ linkParams });
+  }
+
+  public toggleSelectAll(groups: GroupedOfferRow[]): void {
+    const ids = groups.map((group) => group.offer.id);
+    const allSelected = groups.length > 0 && groups.every((group) => group.selected);
+
+    if (allSelected) {
+      this.selection.deselectMany(ids);
+      return;
+    }
+
+    this.selection.selectMany(ids);
+  }
+
+  private buildViewModel(groups: GroupedOffer[], selectedIds: Set<string>): OfferListViewModel {
+    const rows = groups.map((group) => ({ ...group, selected: selectedIds.has(group.offer.id) }));
+    const allSelected = rows.length > 0 && rows.every((row) => row.selected);
+    const someSelected = rows.some((row) => row.selected);
+
+    return {
+      groups: rows,
+      selectedCount: selectedIds.size,
+      headerChecked: allSelected,
+      headerIndeterminate: someSelected && !allSelected,
+    };
   }
 
   public copyToClipboard(type: string, offerId: string, termId: string) {

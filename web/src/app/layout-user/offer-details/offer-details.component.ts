@@ -42,7 +42,14 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   public selectedTermStartDate: string;
   public selectedTermEndDate: string;
   public selectedTermPrice: number;
-  public termsViewModel: { id: string; startDate: string; endDate: string; fromPrice: number }[];
+  public selectedTermPdfFileName: string;
+  public termsViewModel: {
+    id: string;
+    startDate: string;
+    endDate: string;
+    fromPrice: number;
+    pdfFileName: string;
+  }[];
 
   constructor(
     private readonly activatedRoute: ActivatedRoute,
@@ -87,6 +94,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
           startDate: term.startDate,
           endDate: term.endDate,
           fromPrice: term.prices?.length ? Math.min(...term.prices.map((price) => price.price)) : null,
+          pdfFileName: term.pdfFile?.name ?? null,
         }))
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
@@ -170,6 +178,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     this.selectedTermStartDate = term?.startDate ?? null;
     this.selectedTermEndDate = term?.endDate ?? null;
     this.selectedTermPrice = term?.fromPrice ?? null;
+    this.selectedTermPdfFileName = term?.pdfFileName ?? null;
     this.recomputeItineraryViewModel();
   }
 

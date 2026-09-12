@@ -24,6 +24,19 @@ const reducer = createReducer(
     offers: [],
   })),
 
+  on(offerActions.syncOffer, (state, { payload }) => ({
+    ...state,
+    syncingOfferId: payload.id,
+  })),
+  on(offerActions.syncOfferSuccess, (state) => ({
+    ...state,
+    syncingOfferId: null,
+  })),
+  on(offerActions.syncOfferError, (state) => ({
+    ...state,
+    syncingOfferId: null,
+  })),
+
   on(offerActions.scrapeOffer, (state) => ({
     ...state,
     scraping: true,

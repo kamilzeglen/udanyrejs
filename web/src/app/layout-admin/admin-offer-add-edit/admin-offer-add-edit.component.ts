@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { combineLatest, filter, merge, Observable, of, ReplaySubject, startWith, take, takeUntil } from 'rxjs';
+import { combineLatest, filter, from, merge, Observable, of, ReplaySubject, startWith, take, takeUntil } from 'rxjs';
 import { CommonFacade } from '@state/common';
 import { OfferFacade } from 'src/app/_state/offer';
 import { RouterFacade } from '@state/router';
@@ -10,11 +10,12 @@ import { Category, City, Offer, OfferScrapper } from '@interfaces';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
-import { map, switchMap } from 'rxjs/operators';
+import { concatMap, map, switchMap, toArray } from 'rxjs/operators';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
 import { matchDestinationIdsForCities } from '@core/utils/import-missing-destinations.util';
 import { matchCategoryIdsForRange } from '@core/utils/import-missing-categories.util';
 import { filterCitiesByFragment } from '@core/utils/filter-cities-by-fragment.util';
+import { isSameCalendarDate } from '@core/utils/date-range.util';
 
 @Component({
   selector: 'app-admin-panel-add-edit',
@@ -48,9 +49,13 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
   public imageUrl: string;
   public scrappedImageFile: boolean;
 
-  public pdfFile: File;
-  public pdfUrl: string;
-  public scrappedPdfFile: boolean;
+  // PDF jest teraz per termin - indeksy w tych tablicach odpowiadają
+  // indeksom w termsArray i muszą być trzymane w zgodzie z nim (patrz
+  // addTerm/removeTerm/patchValues/applyScrapedTerms).
+  public pdfFilesByTermIndex: File[] = [];
+  public pdfUrlsByTermIndex: string[] = [];
+  public scrappedPdfByTermIndex: boolean[] = [];
+  public existingPdfFileNameByTermIndex: string[] = [];
 
   public scraping$ = this.offerFacade.scraping$;
 
@@ -145,11 +150,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
             observables.push(merge(createImageSuccess$, createImageError$));
           }
 
-          if (this.pdfFile || this.pdfUrl) {
-            this.createPdfFile(offer.id);
-            const createPdfSuccess$ = this.pdfFileFacade.createPdfFileSuccess$.pipe(map(() => true));
-            const createPdfError$ = this.pdfFileFacade.createPdfFileError$.pipe(map(() => false));
-            observables.push(merge(createPdfSuccess$, createPdfError$));
+          if (this.hasPendingPdfForAnyTerm()) {
+            observables.push(this.createPdfFilesForTerms$(offer));
           }
 
           if (observables.length === 0) {
@@ -183,11 +185,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
             observables.push(merge(updateImageSuccess$, updateImageError$));
           }
 
-          if (this.pdfFile || this.pdfUrl) {
-            this.updatePdfFile(offer.id);
-            const updatePdfSuccess$ = this.pdfFileFacade.updatePdfFileSuccess$.pipe(map(() => true));
-            const updatePdfError$ = this.pdfFileFacade.updatePdfFileError$.pipe(map(() => false));
-            observables.push(merge(updatePdfSuccess$, updatePdfError$));
+          if (this.hasPendingPdfForAnyTerm()) {
+            observables.push(this.updatePdfFilesForTerms$(offer));
           }
 
           if (observables.length === 0) {
@@ -264,6 +263,8 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     const termGroup = this.fb.group({
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
+      sourceUrl: [''],
+      isActive: [true],
       categories: [''],
       prices: this.fb.array([]),
     });
@@ -277,6 +278,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public removeTerm(termIndex: number): void {
     this.termsArray.removeAt(termIndex);
+    this.pdfFilesByTermIndex.splice(termIndex, 1);
+    this.pdfUrlsByTermIndex.splice(termIndex, 1);
+    this.scrappedPdfByTermIndex.splice(termIndex, 1);
+    this.existingPdfFileNameByTermIndex.splice(termIndex, 1);
   }
 
   public addTermPrice(termIndex: number): void {
@@ -377,12 +382,12 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onPDFFileChange(event: Event): void {
+  public onPDFFileChange(event: Event, termIndex: number): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
 
     if (file) {
-      this.pdfFile = file;
+      this.pdfFilesByTermIndex[termIndex] = file;
     }
   }
 
@@ -459,24 +464,75 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  public createPdfFile(offerId: string): void {
-    if (this.pdfUrl) {
+  public hasPendingPdfForAnyTerm(): boolean {
+    return this.termsArray.controls.some(
+      (_, termIndex) => !!this.pdfFilesByTermIndex[termIndex] || !!this.pdfUrlsByTermIndex[termIndex],
+    );
+  }
+
+  public createPdfFileForTerm(termId: string, file: File, url: string): void {
+    if (url) {
       this.pdfFileFacade.createPdfFile({
-        pdfFileType: 'offer',
-        targetId: offerId,
-        pdfUrl: this.pdfUrl,
+        pdfFileType: 'term',
+        targetId: termId,
+        pdfUrl: url,
       });
     }
-    if (this.pdfFile) {
+    if (file) {
       const formData = new FormData();
-      formData.append('pdfFile', this.pdfFile);
+      formData.append('pdfFile', file);
 
       this.pdfFileFacade.createPdfFile({
-        pdfFileType: 'offer',
-        targetId: offerId,
+        pdfFileType: 'term',
+        targetId: termId,
         file: formData,
       });
     }
+  }
+
+  // Terminy formularza dopasowujemy do świeżo zapisanych terminów po dacie
+  // (tak samo jak robi to backend w diffOfferTerms) - kolejność zwrócona
+  // przez API nie jest gwarantowana.
+  private findMatchingTermId(offer: Offer, termIndex: number): string | null {
+    const termGroup = this.termsArray.at(termIndex);
+    const startDate = termGroup.get('startDate')?.value;
+    const endDate = termGroup.get('endDate')?.value;
+
+    const matchedTerm = offer.terms?.find(
+      (term) => isSameCalendarDate(term.startDate, startDate) && isSameCalendarDate(term.endDate, endDate),
+    );
+
+    return matchedTerm?.id ?? null;
+  }
+
+  // Wysyłka jeden po drugim (concatMap), nie równolegle - createPdfFileSuccess$/
+  // Error$ to jeden globalny strumień akcji, więc przy N równoległych żądaniach
+  // nie dałoby się poprawnie skojarzyć, który sukces/błąd należy do którego
+  // terminu. take(1) na każdym kroku gwarantuje poprawne skojarzenie.
+  private createPdfFilesForTerms$(offer: Offer): Observable<boolean> {
+    const pendingTermIndexes = this.termsArray.controls
+      .map((_, termIndex) => termIndex)
+      .filter((termIndex) => this.pdfFilesByTermIndex[termIndex] || this.pdfUrlsByTermIndex[termIndex]);
+
+    return from(pendingTermIndexes).pipe(
+      concatMap((termIndex) => {
+        const termId = this.findMatchingTermId(offer, termIndex);
+        if (!termId) {
+          return of(false);
+        }
+
+        const result$ = merge(
+          this.pdfFileFacade.createPdfFileSuccess$.pipe(map(() => true)),
+          this.pdfFileFacade.createPdfFileError$.pipe(map(() => false)),
+        ).pipe(take(1));
+
+        this.createPdfFileForTerm(termId, this.pdfFilesByTermIndex[termIndex], this.pdfUrlsByTermIndex[termIndex]);
+
+        return result$;
+      }),
+      toArray(),
+      map((results) => results.every((result) => result)),
+    );
   }
 
   public updateImageFile(offerId: string): void {
@@ -499,24 +555,50 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
     }
   }
 
-  public updatePdfFile(offerId: string): void {
-    if (this.pdfUrl) {
+  public updatePdfFileForTerm(termId: string, file: File, url: string): void {
+    if (url) {
       this.pdfFileFacade.updatePdfFile({
-        pdfFileType: 'offer',
-        targetId: offerId,
-        pdfUrl: this.pdfUrl,
+        pdfFileType: 'term',
+        targetId: termId,
+        pdfUrl: url,
       });
     }
-    if (this.pdfFile) {
+    if (file) {
       const formData = new FormData();
-      formData.append('pdfFile', this.pdfFile);
+      formData.append('pdfFile', file);
 
       this.pdfFileFacade.updatePdfFile({
-        pdfFileType: 'offer',
-        targetId: offerId,
+        pdfFileType: 'term',
+        targetId: termId,
         file: formData,
       });
     }
+  }
+
+  private updatePdfFilesForTerms$(offer: Offer): Observable<boolean> {
+    const pendingTermIndexes = this.termsArray.controls
+      .map((_, termIndex) => termIndex)
+      .filter((termIndex) => this.pdfFilesByTermIndex[termIndex] || this.pdfUrlsByTermIndex[termIndex]);
+
+    return from(pendingTermIndexes).pipe(
+      concatMap((termIndex) => {
+        const termId = this.findMatchingTermId(offer, termIndex);
+        if (!termId) {
+          return of(false);
+        }
+
+        const result$ = merge(
+          this.pdfFileFacade.updatePdfFileSuccess$.pipe(map(() => true)),
+          this.pdfFileFacade.updatePdfFileError$.pipe(map(() => false)),
+        ).pipe(take(1));
+
+        this.updatePdfFileForTerm(termId, this.pdfFilesByTermIndex[termIndex], this.pdfUrlsByTermIndex[termIndex]);
+
+        return result$;
+      }),
+      toArray(),
+      map((results) => results.every((result) => result)),
+    );
   }
 
   public deleteOffer(): void {
@@ -581,11 +663,14 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     if (data?.terms) {
       this.termsArray.clear();
+      this.existingPdfFileNameByTermIndex = [];
 
-      data.terms.forEach((term) => {
+      data.terms.forEach((term, termIndex) => {
         const termGroup = this.fb.group({
           startDate: [term.startDate],
           endDate: [term.endDate],
+          sourceUrl: [term.sourceUrl ?? ''],
+          isActive: [term.isActive ?? true],
           categories: [term.categories?.map((category) => category.id) ?? []],
           prices: this.fb.array(
             (term.prices || []).map((priceRow) =>
@@ -597,6 +682,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
           ),
         });
         this.termsArray.push(termGroup);
+        this.existingPdfFileNameByTermIndex[termIndex] = term.pdfFile?.originalName ?? null;
       });
 
       if (this.termsArray.length) {
@@ -675,11 +761,6 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
       this.imageUrl = scrapedOffer.imageUrl;
       this.scrappedImageFile = true;
     }
-
-    if (scrapedOffer.pdfUrl) {
-      this.pdfUrl = scrapedOffer.pdfUrl;
-      this.scrappedPdfFile = true;
-    }
   }
 
   private matchCompany(companyName: string): string {
@@ -692,12 +773,15 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   private applyScrapedTerms(scrapedOffer: OfferScrapper, cabinTypes: { id: string; name: string }[]): void {
     this.termsArray.clear();
+    this.pdfUrlsByTermIndex = [];
+    this.scrappedPdfByTermIndex = [];
 
-    scrapedOffer.terms.forEach((term) => {
+    scrapedOffer.terms.forEach((term, termIndex) => {
       const termGroup = this.fb.group({
         startDate: [term.startDate],
         endDate: [term.endDate],
         sourceUrl: [term.sourceUrl],
+        isActive: [true],
         categories: [[]],
         prices: this.fb.array(
           term.cabinPrices.map((cabinPrice) => {
@@ -711,6 +795,11 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
         ),
       });
       this.termsArray.push(termGroup);
+
+      if (term.pdfUrl) {
+        this.pdfUrlsByTermIndex[termIndex] = term.pdfUrl;
+        this.scrappedPdfByTermIndex[termIndex] = true;
+      }
     });
   }
 

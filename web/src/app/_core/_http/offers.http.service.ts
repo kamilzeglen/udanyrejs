@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Offer, OfferScrapper, OfferSearchResult, SearchOffersPayload } from '@interfaces';
+import { Offer, OfferScrapper, OfferSearchResult, OfferSyncResult, SearchOffersPayload } from '@interfaces';
 import { environment } from '@environment';
 import { PaginatedResponse } from '../../_interfaces/http';
 
@@ -53,8 +53,8 @@ export class OffersHttpService {
     return this.http.post<OfferScrapper>(url, { url: payload.url });
   }
 
-  public syncOffer(payload: { id: string }): Observable<{ synced: boolean }> {
+  public syncOffer(payload: { id: string }): Observable<OfferSyncResult> {
     const url = `${this.API_URL}/offers/` + payload.id + '/sync';
-    return this.http.post<{ synced: boolean }>(url, {});
+    return this.http.post<OfferSyncResult>(url, {});
   }
 }

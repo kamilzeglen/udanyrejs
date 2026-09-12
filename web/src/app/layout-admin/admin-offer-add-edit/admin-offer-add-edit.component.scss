@@ -229,6 +229,15 @@
     }
   }
 
+  .term-card__active-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
   .term-card__remove {
     padding: 6px 14px;
     font-size: 13px;

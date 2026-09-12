@@ -5,6 +5,7 @@ function buildTerm(
   offerId: string,
   termId: string,
   shareStats?: Partial<OfferSearchResult['shareStats']>,
+  sourceUrl: string = null,
 ): OfferSearchResult {
   return {
     id: offerId,
@@ -13,6 +14,7 @@ function buildTerm(
     startDate: '2026-01-01',
     endDate: '2026-01-10',
     fromPrice: 1000,
+    sourceUrl,
     shareStats: {
       id: `stats-${termId}`,
       offerId,
@@ -71,5 +73,17 @@ describe('groupOffersByOfferId', () => {
       instagramClicks: 4,
       tiktokClicks: 2,
     });
+  });
+
+  it('counts only the terms that have their own source URL', () => {
+    const rows = [
+      buildTerm('offer-1', 'term-1', undefined, 'https://rejsy4you.pl/rejs/1'),
+      buildTerm('offer-1', 'term-2', undefined, null),
+      buildTerm('offer-1', 'term-3', undefined, 'https://rejsy4you.pl/rejs/3'),
+    ];
+
+    const groups = groupOffersByOfferId(rows);
+
+    expect(groups[0].termsWithSourceCount).toBe(2);
   });
 });

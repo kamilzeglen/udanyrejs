@@ -1,6 +1,6 @@
 import { Itinerary } from './itinerary';
 import { Company } from './company';
-import { ImageFile, PdfFile } from './file';
+import { ImageFile } from './file';
 import { Ship } from './ship';
 import { Destination } from './destination';
 import { User } from './user';
@@ -20,8 +20,6 @@ export interface Offer {
   terms: OfferTerm[];
   imageFile: ImageFile;
   imageFileId: string;
-  pdfFile: PdfFile;
-  pdfFileId: string;
   destinations: Destination[];
   itinerary: Itinerary[];
   createdBy: User;
@@ -33,6 +31,14 @@ export interface Offer {
   deletedAt: Date;
 }
 
+export interface OfferSyncResult {
+  offerDeactivated: boolean;
+  termsAdded: number;
+  termsDeactivated: number;
+  termsSkipped: number;
+  pdfsUpdated: number;
+}
+
 export interface OfferScrapperCabinPrice {
   label: string;
   price: number;
@@ -42,6 +48,7 @@ export interface OfferScrapperTerm {
   startDate: string;
   endDate: string;
   sourceUrl: string;
+  pdfUrl: string | null;
   cabinPrices: OfferScrapperCabinPrice[];
 }
 
@@ -58,7 +65,6 @@ export interface OfferScrapper {
   shipName: string;
   companyName: string;
   imageUrl: string;
-  pdfUrl: string;
   itinerary: OfferScrapperItineraryDay[];
   terms: OfferScrapperTerm[];
 }

@@ -41,7 +41,12 @@
         <ng-template #askPrice><strong class="price-on-request">Zapytaj o cenę</strong></ng-template>
       </div>
       <button type="button" class="action-button" (click)="redirectToContact(offer.id)">Zapytaj o rejs</button>
-      <button type="button" class="pdf-button" *ngIf="offer.pdfFile?.name" (click)="downloadPdfFile(offer.id)">
+      <button
+        type="button"
+        class="pdf-button"
+        *ngIf="selectedTermPdfFileName"
+        (click)="downloadPdfFile(selectedTermId)"
+      >
         <mat-icon>file_download</mat-icon>Pobierz ofertę PDF
       </button>
     </aside>

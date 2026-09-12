@@ -1,6 +1,19 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import {
+  combineLatest,
+  concatMap,
+  from,
+  map,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  switchMap,
+  take,
+  takeUntil,
+  toArray,
+} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { CommonFacade } from '@state/common';
 import { DiscoverFacade } from '@state/discover';
@@ -9,9 +22,10 @@ import { ImageFileFacade } from '@state/imageFile';
 import { PdfFileFacade } from '@state/pdfFile';
 import { RouterFacade } from '@state/router';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { Category, City, ScrapedOfferDraft } from '@interfaces';
+import { Category, City, Offer, ScrapedOfferDraft } from '@interfaces';
 import { matchDestinationIdsForCities } from '@core/utils/import-missing-destinations.util';
 import { matchCategoryIdsForRange } from '@core/utils/import-missing-categories.util';
+import { isSameCalendarDate } from '@core/utils/date-range.util';
 
 @Component({
   selector: 'app-admin-offer-draft-edit',
@@ -36,7 +50,9 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
   public termsArray: FormArray;
 
   public imageUrl: string;
-  public pdfUrl: string;
+  // PDF jest per termin - draft.terms niesie własny pdfUrl na termin, ten
+  // indeks musi zostać w zgodzie z indeksem w termsArray (patrz applyDraft).
+  public pdfUrlsByTermIndex: (string | null)[] = [];
 
   constructor(
     private readonly fb: FormBuilder,
@@ -53,6 +69,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.draftForm = this.fb.group({
       name: ['', Validators.required],
+      offerUrl: [''],
       companyId: ['', Validators.required],
       destinations: [''],
       shipId: ['', Validators.required],
@@ -67,19 +84,46 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
       this.applyDraft(draft);
     });
 
-    this.offerFacade.createOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ offer }) => {
-      if (this.imageUrl) {
-        this.imageFileFacade.createImageFile({ imageFileType: 'offer', targetId: offer.id, imageUrl: this.imageUrl });
-      }
+    this.offerFacade.createOfferSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({ offer }) => {
+          const observables: Observable<boolean>[] = [];
 
-      if (this.pdfUrl) {
-        this.pdfFileFacade.createPdfFile({ pdfFileType: 'offer', targetId: offer.id, pdfUrl: this.pdfUrl });
-      }
+          if (this.imageUrl) {
+            this.imageFileFacade.createImageFile({
+              imageFileType: 'offer',
+              targetId: offer.id,
+              imageUrl: this.imageUrl,
+            });
+            const createImageSuccess$ = this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true));
+            const createImageError$ = this.imageFileFacade.createImageFileError$.pipe(map(() => false));
+            observables.push(merge(createImageSuccess$, createImageError$).pipe(take(1)));
+          }
 
-      this.snackService.showInfo('Oferta zaimportowana');
-      this.discoverFacade.deleteDraft({ id: this.draftId });
-      this.router.changeRoute({ linkParams: ['/admin/offers'] });
-    });
+          if (this.hasPendingPdfForAnyTerm()) {
+            observables.push(this.createPdfFilesForTerms$(offer));
+          }
+
+          if (observables.length === 0) {
+            return of(true);
+          }
+
+          return combineLatest(observables).pipe(map((results) => results.every((result) => result)));
+        }),
+      )
+      .subscribe((allFilesSaved) => {
+        if (allFilesSaved) {
+          this.snackService.showInfo('Oferta zaimportowana');
+        } else {
+          this.snackService.showError(
+            'Oferta zaimportowana, ale nie udało się pobrać zdjęcia lub PDF-a dla części terminów ze strony źródłowej',
+          );
+        }
+
+        this.discoverFacade.deleteDraft({ id: this.draftId });
+        this.router.changeRoute({ linkParams: ['/admin/offers'] });
+      });
 
     this.offerFacade.createOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się zaimportować oferty');
@@ -119,12 +163,12 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
 
     this.draftForm.patchValue({
       name: draft.name,
+      offerUrl: draft.sourceUrl || '',
       companyId: draft.matchedCompanyId || '',
       shipId: draft.matchedShipId || '',
     });
 
     this.imageUrl = draft.imageUrl || '';
-    this.pdfUrl = draft.pdfUrl || '';
 
     this.itineraryArray.clear();
     draft.itinerary.forEach((day) => {
@@ -140,7 +184,8 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     });
 
     this.termsArray.clear();
-    draft.terms.forEach((term) => {
+    this.pdfUrlsByTermIndex = [];
+    draft.terms.forEach((term, termIndex) => {
       this.termsArray.push(
         this.fb.group({
           startDate: [term.startDate],
@@ -158,6 +203,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
           ),
         }),
       );
+      this.pdfUrlsByTermIndex[termIndex] = term.pdfUrl || null;
     });
   }
 
@@ -207,6 +253,59 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
 
   public goBack(): void {
     this.router.changeRoute({ linkParams: ['/admin/offers/discover/drafts'] });
+  }
+
+  public hasPendingPdfForAnyTerm(): boolean {
+    return this.pdfUrlsByTermIndex.some((pdfUrl) => !!pdfUrl);
+  }
+
+  // Wysyłka jeden po drugim (concatMap), nie równolegle - createPdfFileSuccess$/
+  // Error$ to jeden globalny strumień akcji dzielony przez switchMap w efekcie,
+  // więc N równoległych żądań anulowałoby wszystkie poza ostatnim (tak samo
+  // rozwiązane w admin-offer-add-edit.component.ts).
+  private createPdfFilesForTerms$(offer: Offer): Observable<boolean> {
+    const pendingTermIndexes = this.termsArray.controls
+      .map((_, termIndex) => termIndex)
+      .filter((termIndex) => this.pdfUrlsByTermIndex[termIndex]);
+
+    return from(pendingTermIndexes).pipe(
+      concatMap((termIndex) => {
+        const termId = this.findMatchingTermId(offer, termIndex);
+        if (!termId) {
+          return of(false);
+        }
+
+        const result$ = merge(
+          this.pdfFileFacade.createPdfFileSuccess$.pipe(map(() => true)),
+          this.pdfFileFacade.createPdfFileError$.pipe(map(() => false)),
+        ).pipe(take(1));
+
+        this.pdfFileFacade.createPdfFile({
+          pdfFileType: 'term',
+          targetId: termId,
+          pdfUrl: this.pdfUrlsByTermIndex[termIndex],
+        });
+
+        return result$;
+      }),
+      toArray(),
+      map((results) => results.every((result) => result)),
+    );
+  }
+
+  // Terminy formularza dopasowujemy do świeżo zapisanych terminów po dacie
+  // (tak samo jak backend w diffOfferTerms) - kolejność zwrócona przez API
+  // nie jest gwarantowana, a admin mógł poprawić daty przed importem.
+  private findMatchingTermId(offer: Offer, termIndex: number): string | null {
+    const termGroup = this.termsArray.at(termIndex);
+    const startDate = termGroup.get('startDate')?.value;
+    const endDate = termGroup.get('endDate')?.value;
+
+    const matchedTerm = offer.terms?.find(
+      (term) => isSameCalendarDate(term.startDate, startDate) && isSameCalendarDate(term.endDate, endDate),
+    );
+
+    return matchedTerm?.id ?? null;
   }
 
   public importMissingDestinations(): void {

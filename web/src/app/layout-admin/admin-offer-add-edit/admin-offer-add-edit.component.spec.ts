@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 import { AdminOfferAddEditComponent } from './admin-offer-add-edit.component';
 import { CommonFacade } from '@state/common';
 import { OfferFacade } from 'src/app/_state/offer';
@@ -97,13 +97,13 @@ describe('AdminOfferAddEditComponent.applyScrapedData', () => {
       shipName: 'Norwegian Epic',
       companyName: 'Norwegian Cruise Line',
       imageUrl: 'https://rejsy4you.pl/img.jpg',
-      pdfUrl: 'https://rejsy4you.pl/pdf',
       itinerary: [{ day: 1, date: '2027-01-01', city: 'Gdynia', arrivalTime: '', departureTime: '10:00' }],
       terms: [
         {
           startDate: '2027-01-01',
           endDate: '2027-01-08',
           sourceUrl: 'https://rejsy4you.pl/rejs/1',
+          pdfUrl: 'https://rejsy4you.pl/pdf',
           cabinPrices: [{ label: 'wewnętrzna', price: 100 }],
         },
       ],
@@ -114,8 +114,8 @@ describe('AdminOfferAddEditComponent.applyScrapedData', () => {
     expect(component.scrappedData).toBe(true);
     expect(component.imageUrl).toBe('https://rejsy4you.pl/img.jpg');
     expect(component.scrappedImageFile).toBe(true);
-    expect(component.pdfUrl).toBe('https://rejsy4you.pl/pdf');
-    expect(component.scrappedPdfFile).toBe(true);
+    expect(component.pdfUrlsByTermIndex[0]).toBe('https://rejsy4you.pl/pdf');
+    expect(component.scrappedPdfByTermIndex[0]).toBe(true);
     expect(component.itineraryArray.length).toBe(1);
     expect(component.termsArray.length).toBe(1);
 
@@ -129,13 +129,13 @@ describe('AdminOfferAddEditComponent.applyScrapedData', () => {
       shipName: 'Unknown Ship',
       companyName: 'Norwegian Cruise Line',
       imageUrl: '',
-      pdfUrl: '',
       itinerary: [],
       terms: [
         {
           startDate: '2027-01-01',
           endDate: '2027-01-08',
           sourceUrl: 'https://rejsy4you.pl/rejs/1',
+          pdfUrl: null,
           cabinPrices: [{ label: 'kabina bez odpowiednika', price: 50 }],
         },
       ],
@@ -145,6 +145,130 @@ describe('AdminOfferAddEditComponent.applyScrapedData', () => {
     const priceGroup = pricesArray.at(0);
     expect(priceGroup.get('cabinTypeId')?.value).toBe('');
     expect(priceGroup.get('cabinTypeName')?.value).toBe('kabina bez odpowiednika');
+  });
+});
+
+describe('AdminOfferAddEditComponent PDF import on create success', () => {
+  let component: AdminOfferAddEditComponent;
+  let fixture: ComponentFixture<AdminOfferAddEditComponent>;
+  let createOfferSuccess$: Subject<{ offer: any }>;
+  let createPdfFile: jasmine.Spy;
+
+  beforeEach(async () => {
+    createOfferSuccess$ = new Subject();
+    createPdfFile = jasmine.createSpy('createPdfFile');
+
+    await TestBed.configureTestingModule({
+      imports: [ReactiveFormsModule],
+      declarations: [AdminOfferAddEditComponent],
+      providers: [
+        {
+          provide: CommonFacade,
+          useValue: {
+            companies$: of([{ id: 'company-1', name: 'Norwegian Cruise Line' }]),
+            ships$: of([]),
+            destinations$: of([]),
+            cities$: of([]),
+            categories$: of([]),
+            cabinTypes$: of([]),
+            getShipsSuccess$: of({ ships: [] }),
+            getCabinTypesSuccess$: of({ cabinTypes: [] }),
+            getCompanies: (): void => undefined,
+            getCategories: (): void => undefined,
+            getDestinations: (): void => undefined,
+            getCities: (): void => undefined,
+            getShips: (): void => undefined,
+            getCabinTypes: (): void => undefined,
+          },
+        },
+        {
+          provide: OfferFacade,
+          useValue: {
+            getOfferSuccess$: EMPTY,
+            createOfferError$: EMPTY,
+            updateOfferError$: EMPTY,
+            createOfferSuccess$,
+            updateOfferSuccess$: EMPTY,
+            deleteOfferSuccess$: EMPTY,
+            activateOfferSuccess$: EMPTY,
+            deactivateOfferSuccess$: EMPTY,
+            scrapeOfferSuccess$: EMPTY,
+            scrapeOfferError$: EMPTY,
+            scraping$: of(false),
+            scrapeOffer: (): void => undefined,
+          },
+        },
+        { provide: RouterFacade, useValue: { changeRoute: (): void => undefined } },
+        {
+          provide: SnackbarService,
+          useValue: { showError: (): void => undefined, showInfo: (): void => undefined },
+        },
+        { provide: ActivatedRoute, useValue: { paramMap: EMPTY } },
+        { provide: ConfirmationModalService, useValue: {} },
+        {
+          provide: ImageFileFacade,
+          useValue: {
+            createImageFileSuccess$: EMPTY,
+            createImageFileError$: EMPTY,
+            updateImageFileSuccess$: EMPTY,
+            updateImageFileError$: EMPTY,
+          },
+        },
+        {
+          provide: PdfFileFacade,
+          useValue: {
+            createPdfFileSuccess$: EMPTY,
+            createPdfFileError$: EMPTY,
+            updatePdfFileSuccess$: EMPTY,
+            updatePdfFileError$: EMPTY,
+            createPdfFile,
+          },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AdminOfferAddEditComponent);
+    component = fixture.componentInstance;
+    component.ngOnInit();
+  });
+
+  it('matches a term to the offer returned by the API even when its date comes back as a UTC-shifted ISO datetime', () => {
+    component.applyScrapedData({
+      name: 'Rejs testowy',
+      shipName: 'Norwegian Epic',
+      companyName: 'Norwegian Cruise Line',
+      imageUrl: '',
+      itinerary: [],
+      terms: [
+        {
+          startDate: '2027-01-01',
+          endDate: '2027-01-08',
+          sourceUrl: 'https://rejsy4you.pl/rejs/1',
+          pdfUrl: 'https://rejsy4you.pl/pdf-1',
+          cabinPrices: [],
+        },
+      ],
+    });
+
+    // Tak realnie wygląda term.startDate zwrócone przez API: lokalna północ
+    // z Postgresa zserializowana jako ISO string w UTC, przesunięta o strefę
+    // serwera - inna dokładna chwila niż goły string '2027-01-01' ze
+    // scrapowanego formularza, ale ten sam dzień kalendarzowy.
+    const offer = {
+      id: 'offer-1',
+      terms: [
+        { id: 'term-1', startDate: new Date(2027, 0, 1).toISOString(), endDate: new Date(2027, 0, 8).toISOString() },
+      ],
+    };
+
+    createOfferSuccess$.next({ offer });
+
+    expect(createPdfFile).toHaveBeenCalledWith({
+      pdfFileType: 'term',
+      targetId: 'term-1',
+      pdfUrl: 'https://rejsy4you.pl/pdf-1',
+    });
   });
 });
 
@@ -237,13 +361,13 @@ describe('AdminOfferAddEditComponent.submitForm', () => {
       shipName: 'Norwegian Epic',
       companyName: 'Norwegian Cruise Line',
       imageUrl: '',
-      pdfUrl: '',
       itinerary: [],
       terms: [
         {
           startDate: '2027-01-01',
           endDate: '2027-01-08',
           sourceUrl: 'https://rejsy4you.pl/rejs/1',
+          pdfUrl: null,
           cabinPrices: [
             { label: 'wewnętrzna', price: 100 },
             { label: 'kabina bez odpowiednika', price: 50 },

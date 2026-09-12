@@ -27,6 +27,9 @@ export class OfferFacade {
   public scraping$ = this.store.select(offerSelectors.selectScraping);
   public scrapeOfferSuccess$ = this.actions.pipe(ofType(offerActions.scrapeOfferSuccess));
   public scrapeOfferError$ = this.actions.pipe(ofType(offerActions.scrapeOfferError));
+  public syncingOfferId$ = this.store.select(offerSelectors.selectSyncingOfferId);
+  public syncOfferSuccess$ = this.actions.pipe(ofType(offerActions.syncOfferSuccess));
+  public syncOfferError$ = this.actions.pipe(ofType(offerActions.syncOfferError));
 
   constructor(
     private store: Store<AppState>,
@@ -63,5 +66,9 @@ export class OfferFacade {
 
   public scrapeOffer(payload: { url: string }): void {
     this.store.dispatch(offerActions.scrapeOffer({ payload }));
+  }
+
+  public syncOffer(payload: { id: string }): void {
+    this.store.dispatch(offerActions.syncOffer({ payload }));
   }
 }

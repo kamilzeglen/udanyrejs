@@ -93,23 +93,6 @@
           <b>Aktualny plik</b>: {{ editingOffer.imageFile.originalName }} <mat-icon>check_circle</mat-icon>
         </div>
       </div>
-
-      <div class="form-group">
-        <label for="pdfUpload">Załaduj PDF:</label>
-        <input
-          id="pdfUpload"
-          type="file"
-          accept=".pdf"
-          (change)="onPDFFileChange($event)"
-          [disabled]="scrappedPdfFile"
-        />
-        <div class="current-file" *ngIf="scrappedPdfFile">
-          <b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon>
-        </div>
-        <div class="current-file" *ngIf="editingOffer?.pdfFile?.originalName">
-          <b>Aktualny plik</b>: {{ editingOffer.pdfFile.originalName }} <mat-icon>check_circle</mat-icon>
-        </div>
-      </div>
     </section>
 
     <!-- Sekcja Terminy rejsu -->
@@ -138,9 +121,23 @@
           </mat-expansion-panel-header>
 
           <div class="term-card__header">
+            <label class="term-card__active-toggle">
+              <input type="checkbox" formControlName="isActive" />
+              Termin aktywny
+            </label>
             <button type="button" class="term-card__remove" (click)="removeTerm(termIndex); $event.stopPropagation()">
               Usuń termin
             </button>
+          </div>
+
+          <div class="form-group">
+            <label [attr.for]="'termSourceUrl' + termIndex">Link źródłowy (rejsy4you) terminu:</label>
+            <input
+              [id]="'termSourceUrl' + termIndex"
+              type="text"
+              formControlName="sourceUrl"
+              placeholder="https://rejsy4you.pl/..."
+            />
           </div>
 
           <div class="term-card__dates">
@@ -174,6 +171,23 @@
                 <mat-datepicker-toggle matSuffix [for]="termEndDatePicker"></mat-datepicker-toggle>
                 <mat-datepicker #termEndDatePicker></mat-datepicker>
               </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label [attr.for]="'termPdfUpload' + termIndex">Załaduj PDF terminu:</label>
+            <input
+              [id]="'termPdfUpload' + termIndex"
+              type="file"
+              accept=".pdf"
+              (change)="onPDFFileChange($event, termIndex)"
+              [disabled]="scrappedPdfByTermIndex[termIndex]"
+            />
+            <div class="current-file" *ngIf="scrappedPdfByTermIndex[termIndex]">
+              <b>Plik zaimportowany</b><mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="current-file" *ngIf="existingPdfFileNameByTermIndex[termIndex]">
+              <b>Aktualny plik</b>: {{ existingPdfFileNameByTermIndex[termIndex] }} <mat-icon>check_circle</mat-icon>
             </div>
           </div>
 
@@ -311,11 +325,7 @@
       mat-raised-button
       color="primary"
       type="submit"
-      [disabled]="
-        offerForm.invalid ||
-        (!imageFile && !imageUrl && !editingOffer?.imageFile?.name) ||
-        (!pdfFile && !pdfUrl && !editingOffer?.pdfFile?.name)
-      "
+      [disabled]="offerForm.invalid || (!imageFile && !imageUrl && !editingOffer?.imageFile?.name)"
     >
       {{ mode === 'ADD' ? 'Dodaj ofertę' : 'Zaktualizuj ofertę' }}
     </button>

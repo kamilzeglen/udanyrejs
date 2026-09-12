@@ -8,6 +8,7 @@ export interface ScrapedOfferDraftTerm {
   startDate: string;
   endDate: string;
   sourceUrl: string;
+  pdfUrl: string | null;
   cabinPrices: ScrapedOfferDraftCabinPrice[];
 }
 
@@ -27,7 +28,6 @@ export interface ScrapedOfferDraft {
   matchedCompanyId: string;
   matchedShipId: string;
   imageUrl: string;
-  pdfUrl: string;
   itinerary: ScrapedOfferDraftItineraryDay[];
   terms: ScrapedOfferDraftTerm[];
   sourceUrl: string;

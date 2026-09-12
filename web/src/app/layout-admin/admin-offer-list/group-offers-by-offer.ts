@@ -11,6 +11,10 @@ export interface GroupedOffer {
   offer: OfferSearchResult;
   terms: OfferSearchResult[];
   totalShareStats: ShareStatsTotal;
+  // Liczba terminów tej oferty z własnym linkiem źródłowym - offer.offerUrl
+  // służy już tylko do pierwszego zaimportowania, każdy termin synchronizuje
+  // się dalej niezależnie przez własny sourceUrl (patrz admin-offer-list.html).
+  termsWithSourceCount: number;
 }
 
 export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[] {
@@ -23,6 +27,7 @@ export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[
     if (existingGroup) {
       existingGroup.terms.push(term);
       addToTotal(existingGroup.totalShareStats, term.shareStats);
+      existingGroup.termsWithSourceCount += term.sourceUrl ? 1 : 0;
       continue;
     }
 
@@ -30,6 +35,7 @@ export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[
       offer: term,
       terms: [term],
       totalShareStats: { webClicks: 0, facebookClicks: 0, instagramClicks: 0, tiktokClicks: 0 },
+      termsWithSourceCount: term.sourceUrl ? 1 : 0,
     };
     addToTotal(newGroup.totalShareStats, term.shareStats);
     groupByOfferId.set(term.id, newGroup);

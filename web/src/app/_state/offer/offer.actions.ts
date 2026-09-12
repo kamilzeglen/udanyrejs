@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Offer, OfferScrapper, OfferSearchResult, SearchOffersPayload } from '@interfaces';
+import { Offer, OfferScrapper, OfferSearchResult, OfferSyncResult, SearchOffersPayload } from '@interfaces';
 import { PaginatedResponse } from '../../_interfaces/http';
 
 export const getOffers = createAction('[Offer] Get Offers', props<{ payload: Partial<SearchOffersPayload> }>());
@@ -37,6 +37,13 @@ export const deactivateOfferError = createAction('[Offer] Deactivate Offer Error
 export const activateOffer = createAction('[Offer] Activate Offer', props<{ payload: { id: string } }>());
 export const activateOfferSuccess = createAction('[Offer] Activate Offer Success');
 export const activateOfferError = createAction('[Offer] Activate Offer Error', props<{ errorMessage: string }>());
+
+export const syncOffer = createAction('[Offer] Sync Offer', props<{ payload: { id: string } }>());
+export const syncOfferSuccess = createAction(
+  '[Offer] Sync Offer Success',
+  props<{ id: string; result: OfferSyncResult }>(),
+);
+export const syncOfferError = createAction('[Offer] Sync Offer Error', props<{ id: string; errorMessage: string }>());
 
 export const scrapeOffer = createAction('[Offer] Scrape Offer', props<{ payload: { url: string } }>());
 export const scrapeOfferSuccess = createAction(

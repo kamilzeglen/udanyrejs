@@ -28,12 +28,23 @@
   }
 }
 
+.selection-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 20px 16px;
+}
+
 .offer-groups {
   display: block;
   margin: 0 20px;
 
   mat-expansion-panel {
     margin-bottom: 8px;
+  }
+
+  .offer-select-checkbox {
+    margin-right: 12px;
   }
 
   .inactive-group {
@@ -50,8 +61,10 @@
     cursor: pointer;
   }
 
-  .icon-details {
+  .icon-view-term {
+    display: inline-flex;
     color: grey;
+    text-decoration: none;
     cursor: pointer;
   }
 
@@ -63,6 +76,25 @@
   .icon-delete {
     color: $negative;
     cursor: pointer;
+  }
+
+  .icon-sync {
+    color: $primary-color;
+    cursor: pointer;
+
+    &.syncing {
+      animation: icon-sync-spin 1s linear infinite;
+      pointer-events: none;
+    }
+  }
+
+  @keyframes icon-sync-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .offer-meta {
@@ -184,6 +216,10 @@
 
       &:hover {
         background-color: rgba($grey, 0.05);
+      }
+
+      &.inactive-term {
+        background-color: rgba($negative, 0.05);
       }
     }
   }
