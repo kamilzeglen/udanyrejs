@@ -1,4 +1,3 @@
-import { Offer } from './offer';
 import { User } from './user';
 
 export interface Category {
@@ -10,7 +9,7 @@ export interface Category {
   endDate: Date;
   isActive: boolean;
   isVisible: boolean;
-  offers: Offer[];
+  offerCount?: number;
   createdBy: User;
   createdById: string;
   updatedBy: User;

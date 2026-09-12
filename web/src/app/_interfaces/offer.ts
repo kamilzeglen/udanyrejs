@@ -2,7 +2,6 @@ import { Itinerary } from './itinerary';
 import { Company } from './company';
 import { ImageFile, PdfFile } from './file';
 import { Ship } from './ship';
-import { Category } from './category';
 import { Destination } from './destination';
 import { User } from './user';
 import { ShareStats } from './shareStats';
@@ -25,7 +24,6 @@ export interface Offer {
   pdfFile: PdfFile;
   pdfFileId: string;
   destinations: Destination[];
-  categories: Category[];
   itinerary: Itinerary[];
   shareStats: ShareStats;
   sharedStatId: string;
