@@ -44,23 +44,6 @@
           Zaimportuj brakujące dane — Regiony
         </button>
       </div>
-
-      <div class="form-group" *ngIf="categories$ | async as categories">
-        <label for="categories">Kategorie</label>
-        <mat-select formControlName="categories" id="categories" placeholder="Kategorie" multiple>
-          <mat-option *ngFor="let category of categories" [value]="category.id">
-            {{ category.name }}
-          </mat-option>
-        </mat-select>
-        <button
-          type="button"
-          class="import-button"
-          [disabled]="termsArray.controls.length === 0"
-          (click)="importMissingCategories()"
-        >
-          Zaimportuj brakujące dane — Kategorie
-        </button>
-      </div>
     </section>
 
     <section class="section terms-section">
@@ -106,6 +89,27 @@
 
               <input formControlName="price" type="number" step="0.01" placeholder="Cena (Euro)" />
             </div>
+          </div>
+
+          <div class="form-group term-categories" *ngIf="categories$ | async as categories">
+            <label [attr.for]="'termCategories' + termIndex">Kategorie</label>
+            <mat-select
+              [id]="'termCategories' + termIndex"
+              formControlName="categories"
+              placeholder="Kategorie"
+              multiple
+            >
+              <mat-option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+            <button
+              type="button"
+              class="import-button"
+              (click)="importMissingCategories(termIndex); $event.stopPropagation()"
+            >
+              Zaimportuj brakujące dane — Kategorie
+            </button>
           </div>
         </mat-expansion-panel>
       </div>

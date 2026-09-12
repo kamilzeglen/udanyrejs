@@ -55,7 +55,6 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
       name: ['', Validators.required],
       companyId: ['', Validators.required],
       destinations: [''],
-      categories: [''],
       shipId: ['', Validators.required],
       terms: this.fb.array([]),
       itinerary: this.fb.array([]),
@@ -147,6 +146,7 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
           startDate: [term.startDate],
           endDate: [term.endDate],
           sourceUrl: [term.sourceUrl],
+          categories: [[]],
           prices: this.fb.array(
             term.cabinPrices.map((cabinPrice) =>
               this.fb.group({
@@ -176,22 +176,30 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     // Formularz operuje na cenie w euro, backend przechowuje ją w groszach -
     // ta sama konwersja co w admin-offer-add-edit.component.ts.
     if (payload.terms) {
-      payload.terms = payload.terms.map((term: any) => ({
-        ...term,
-        prices: (term.prices || []).map((priceRow: any) => {
-          const price = { ...priceRow, price: Math.round(Number(priceRow.price) * 100) };
+      payload.terms = payload.terms.map((term: any) => {
+        const mappedTerm = {
+          ...term,
+          prices: (term.prices || []).map((priceRow: any) => {
+            const price = { ...priceRow, price: Math.round(Number(priceRow.price) * 100) };
 
-          if (!price.cabinTypeId) {
-            delete price.cabinTypeId;
-          }
+            if (!price.cabinTypeId) {
+              delete price.cabinTypeId;
+            }
 
-          if (!price.cabinTypeName) {
-            delete price.cabinTypeName;
-          }
+            if (!price.cabinTypeName) {
+              delete price.cabinTypeName;
+            }
 
-          return price;
-        }),
-      }));
+            return price;
+          }),
+        };
+
+        if (!mappedTerm.categories?.length) {
+          delete mappedTerm.categories;
+        }
+
+        return mappedTerm;
+      });
     }
 
     this.offerFacade.createOffer({ formData: payload });
@@ -230,28 +238,30 @@ export class AdminOfferDraftEditComponent implements OnInit, OnDestroy {
     this.snackService.showInfo('Zaimportowano ' + missingDestinationIds.length + ' region(ów)');
   }
 
-  public importMissingCategories(): void {
+  public importMissingCategories(termIndex: number): void {
     let categories: Category[] = [];
     this.categories$.pipe(take(1)).subscribe((value) => {
       categories = value ?? [];
     });
 
-    const termRanges = this.termsArray.controls
-      .map((termGroup) => ({
-        startDate: termGroup.get('startDate')?.value as string,
-        endDate: termGroup.get('endDate')?.value as string,
-      }))
-      .filter((term) => !!term.startDate && !!term.endDate);
+    const termGroup = this.termsArray.at(termIndex);
+    const startDate = termGroup.get('startDate')?.value as string;
+    const endDate = termGroup.get('endDate')?.value as string;
 
-    const currentCategoryIds: string[] = this.draftForm.get('categories')?.value ?? [];
-    const missingCategoryIds = resolveMissingCategoryIds(termRanges, categories, currentCategoryIds);
+    if (!startDate || !endDate) {
+      this.snackService.showInfo('Uzupełnij daty terminu przed importem kategorii');
+      return;
+    }
+
+    const currentCategoryIds: string[] = termGroup.get('categories')?.value ?? [];
+    const missingCategoryIds = resolveMissingCategoryIds({ startDate, endDate }, categories, currentCategoryIds);
 
     if (missingCategoryIds.length === 0) {
       this.snackService.showInfo('Brak nowych kategorii do zaimportowania');
       return;
     }
 
-    this.draftForm.patchValue({
+    termGroup.patchValue({
       categories: [...currentCategoryIds, ...missingCategoryIds],
     });
 
