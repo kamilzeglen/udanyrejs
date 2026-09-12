@@ -5,4 +5,5 @@
 module.exports = {
   'api/**/*.ts': ['npm --prefix api run format:check', 'npm --prefix api run lint:check'],
   'web/**/*.{ts,html,scss}': () => ['npm --prefix web run format:check', 'npm --prefix web run lint:check'],
+  'scraper/**/*.ts': ['npm --prefix scraper run format:check', 'npm --prefix scraper run lint:check'],
 };
