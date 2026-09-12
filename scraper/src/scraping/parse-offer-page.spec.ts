@@ -1,12 +1,12 @@
 import {
   mapCabinGroupRows,
-  mapRawToFullScrap,
-  mapRawToPriceCheck,
+  mapRawToScrapedOffer,
+  mapRawToScrapedTerm,
   parseDdMmYyyy,
   parseEuroPrice,
   slugToTitleCase,
 } from './parse-offer-page';
-import { RawOfferPage, RawPriceCheckPage } from './raw-types';
+import { RawOfferPage } from './raw-types';
 
 describe('parseDdMmYyyy', () => {
   it('converts dd.mm.yyyy to yyyy-mm-dd', () => {
@@ -57,7 +57,7 @@ describe('mapCabinGroupRows', () => {
   });
 });
 
-describe('mapRawToFullScrap', () => {
+describe('mapRawToScrapedOffer', () => {
   const raw: RawOfferPage = {
     titleText: 'Rejs Hiszpania, Francja, Włochy',
     shipNameText: 'Norwegian Epic',
@@ -103,7 +103,7 @@ describe('mapRawToFullScrap', () => {
   };
 
   it('maps the primary term from the itinerary dates and cabin rows', () => {
-    const result = mapRawToFullScrap(
+    const result = mapRawToScrapedOffer(
       raw,
       'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
       100,
@@ -114,9 +114,6 @@ describe('mapRawToFullScrap', () => {
     expect(result.companyName).toBe('Norwegian Cruise Line');
     expect(result.imageUrl).toBe(
       'https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg',
-    );
-    expect(result.pdfUrl).toBe(
-      'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
     );
     expect(result.itinerary).toEqual([
       {
@@ -139,6 +136,8 @@ describe('mapRawToFullScrap', () => {
       endDate: '2026-10-05',
       sourceUrl:
         'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
+      pdfUrl:
+        'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
       cabinPrices: [
         { label: 'wewnętrzna', price: 614.43 },
         { label: 'zewnętrzna z balkonem', price: 1619.5 },
@@ -147,7 +146,7 @@ describe('mapRawToFullScrap', () => {
   });
 
   it('lists same-route other terms but excludes different-route ones', () => {
-    const result = mapRawToFullScrap(
+    const result = mapRawToScrapedOffer(
       raw,
       'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
       100,
@@ -159,11 +158,12 @@ describe('mapRawToFullScrap', () => {
     );
     expect(result.terms[1].startDate).toBe('2026-10-18');
     expect(result.terms[1].endDate).toBe('2026-10-25');
+    expect(result.terms[1].pdfUrl).toBeNull();
     expect(result.terms[1].cabinPrices).toEqual([]);
   });
 
   it('caps the number of other terms at maxTerms', () => {
-    const result = mapRawToFullScrap(
+    const result = mapRawToScrapedOffer(
       raw,
       'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
       1,
@@ -172,23 +172,68 @@ describe('mapRawToFullScrap', () => {
   });
 });
 
-describe('mapRawToPriceCheck', () => {
-  it('maps a found page to available with its cabin prices', () => {
-    const raw: RawPriceCheckPage = {
-      pageFound: true,
-      cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €620' }],
-    };
-    expect(mapRawToPriceCheck(raw)).toEqual({
-      available: true,
-      cabinPrices: [{ label: 'wewnętrzna', price: 620 }],
-    });
+describe('mapRawToScrapedTerm', () => {
+  const raw: RawOfferPage = {
+    titleText: 'Rejs Hiszpania, Francja, Włochy',
+    shipNameText: 'Norwegian Epic',
+    companyHrefSlug: 'norwegian-cruise-line',
+    ogImageContent: '',
+    pdfHref:
+      'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
+    itineraryRows: [
+      {
+        dayText: '1',
+        dateText: '04.10.2026',
+        cityText: 'Barcelona',
+        arrivalText: '',
+        departureText: '17:00',
+      },
+      {
+        dayText: '2',
+        dateText: '05.10.2026',
+        cityText: 'Marsylia',
+        arrivalText: '07:00',
+        departureText: '17:00',
+      },
+    ],
+    cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €620' }],
+    otherTermLinks: [
+      {
+        href: 'https://rejsy4you.pl/rejs/93098_hiszpania-francja-wlochy_208992',
+        startDateText: '2026-10-18',
+        endDateText: '2026-10-25',
+        isDifferentRoute: false,
+      },
+      {
+        href: 'https://rejsy4you.pl/rejs/93124_hiszpania-malta-tunezja_209018',
+        startDateText: '2027-05-02',
+        endDateText: '2027-05-09',
+        isDifferentRoute: true,
+      },
+    ],
+  };
+
+  it('derives its own dates from the itinerary and its own cabin prices/PDF', () => {
+    const result = mapRawToScrapedTerm(raw);
+
+    expect(result.startDate).toBe('2026-10-04');
+    expect(result.endDate).toBe('2026-10-05');
+    expect(result.cabinPrices).toEqual([{ label: 'wewnętrzna', price: 620 }]);
+    expect(result.pdfUrl).toBe(
+      'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
+    );
   });
 
-  it('maps a missing page to unavailable with no prices', () => {
-    const raw: RawPriceCheckPage = { pageFound: false, cabinGroupRows: [] };
-    expect(mapRawToPriceCheck(raw)).toEqual({
-      available: false,
-      cabinPrices: [],
-    });
+  it('lists same-route sibling links but excludes different-route ones', () => {
+    const result = mapRawToScrapedTerm(raw);
+
+    expect(result.siblingLinks).toEqual([
+      {
+        sourceUrl:
+          'https://rejsy4you.pl/rejs/93098_hiszpania-francja-wlochy_208992',
+        startDate: '2026-10-18',
+        endDate: '2026-10-25',
+      },
+    ]);
   });
 });

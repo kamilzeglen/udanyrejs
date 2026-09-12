@@ -1,10 +1,10 @@
 import {
   CabinPrice,
-  FullScrapResult,
+  ScrapedOfferResult,
   ItineraryDay,
-  PriceCheckResult,
+  ScrapedTermPageResult,
 } from '../types';
-import { RawCabinGroupRow, RawOfferPage, RawPriceCheckPage } from './raw-types';
+import { RawCabinGroupRow, RawOfferPage } from './raw-types';
 
 export function parseDdMmYyyy(text: string): string {
   const [day, month, year] = text.split('.');
@@ -64,11 +64,11 @@ function derivePrimaryTermDates(itinerary: ItineraryDay[]): {
   return { startDate: firstDay.date, endDate: lastDay.date };
 }
 
-export function mapRawToFullScrap(
+export function mapRawToScrapedOffer(
   raw: RawOfferPage,
   sourceUrl: string,
   maxTerms: number,
-): FullScrapResult {
+): ScrapedOfferResult {
   const itinerary = mapItineraryRows(raw.itineraryRows);
   const primaryTermDates = derivePrimaryTermDates(itinerary);
 
@@ -79,6 +79,9 @@ export function mapRawToFullScrap(
       startDate: link.startDateText,
       endDate: link.endDateText,
       sourceUrl: link.href,
+      // Uzupełniane osobno - dopiero po odwiedzeniu własnej strony tego
+      // terminu (patrz scrape-offer.route.ts), tak samo jak cabinPrices.
+      pdfUrl: null as string | null,
       cabinPrices: [] as CabinPrice[],
     }));
 
@@ -87,13 +90,13 @@ export function mapRawToFullScrap(
     shipName: raw.shipNameText.trim(),
     companyName: slugToTitleCase(raw.companyHrefSlug),
     imageUrl: raw.ogImageContent,
-    pdfUrl: raw.pdfHref,
     itinerary,
     terms: [
       {
         startDate: primaryTermDates.startDate,
         endDate: primaryTermDates.endDate,
         sourceUrl,
+        pdfUrl: raw.pdfHref || null,
         cabinPrices: mapCabinGroupRows(raw.cabinGroupRows),
       },
       ...otherTerms,
@@ -101,13 +104,22 @@ export function mapRawToFullScrap(
   };
 }
 
-export function mapRawToPriceCheck(raw: RawPriceCheckPage): PriceCheckResult {
-  if (!raw.pageFound) {
-    return { available: false, cabinPrices: [] };
-  }
+export function mapRawToScrapedTerm(raw: RawOfferPage): ScrapedTermPageResult {
+  const { startDate, endDate } = derivePrimaryTermDates(
+    mapItineraryRows(raw.itineraryRows),
+  );
 
   return {
-    available: true,
+    startDate,
+    endDate,
     cabinPrices: mapCabinGroupRows(raw.cabinGroupRows),
+    pdfUrl: raw.pdfHref || null,
+    siblingLinks: raw.otherTermLinks
+      .filter((link) => !link.isDifferentRoute)
+      .map((link) => ({
+        sourceUrl: link.href,
+        startDate: link.startDateText,
+        endDate: link.endDateText,
+      })),
   };
 }

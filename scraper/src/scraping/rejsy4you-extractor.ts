@@ -1,5 +1,5 @@
 import { Page } from 'playwright';
-import { RawOfferPage, RawPriceCheckPage, RawListingPage } from './raw-types';
+import { RawOfferPage, RawListingPage } from './raw-types';
 
 export async function dismissCookieBanner(page: Page): Promise<void> {
   const acceptButton = page.locator('#c-p-bn');
@@ -93,26 +93,6 @@ export async function extractRawOfferPage(page: Page): Promise<RawOfferPage> {
       otherTermLinks,
     };
   });
-}
-
-export async function extractRawPriceCheckPage(
-  page: Page,
-): Promise<RawPriceCheckPage> {
-  const cabinGroupRows = await page.evaluate(() => {
-    return Array.from(
-      document.querySelectorAll('table[aria-describedby="legend"] tr.group'),
-    ).map((row) => {
-      const cells = row.querySelectorAll('td');
-      return {
-        labelText: cells[0]?.textContent?.trim() ?? '',
-        minPriceText:
-          cells[1]?.querySelector('.group-min-price')?.textContent?.trim() ??
-          '',
-      };
-    });
-  });
-
-  return { pageFound: true, cabinGroupRows };
 }
 
 export async function extractRawListingPage(

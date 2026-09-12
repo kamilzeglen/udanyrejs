@@ -4,7 +4,6 @@ import * as path from 'path';
 import {
   dismissCookieBanner,
   extractRawOfferPage,
-  extractRawPriceCheckPage,
   extractRawListingPage,
 } from './rejsy4you-extractor';
 
@@ -81,12 +80,6 @@ describe('rejsy4you-extractor', () => {
     );
     expect(sameRoute[0].startDateText).toBe('2026-10-18');
     expect(sameRoute[0].endDateText).toBe('2026-10-25');
-  });
-
-  it('extracts only the cabin prices for a price-check page', async () => {
-    const raw = await extractRawPriceCheckPage(page);
-    expect(raw.pageFound).toBe(true);
-    expect(raw.cabinGroupRows).toHaveLength(3);
   });
 
   describe('extractRawListingPage', () => {
