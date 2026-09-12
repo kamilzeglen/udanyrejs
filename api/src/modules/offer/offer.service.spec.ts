@@ -16,6 +16,8 @@ import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { User } from '@modules/user/user.entity';
 import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
+import { OfferTermPrice } from './offer-term-price.entity';
+import { In } from 'typeorm';
 
 describe('OfferService', () => {
   let service: OfferService;
@@ -24,6 +26,7 @@ describe('OfferService', () => {
     save: jest.Mock;
     create: jest.Mock;
     delete: jest.Mock;
+    find: jest.Mock;
     createQueryBuilder: jest.Mock;
   };
   let dataSource: { transaction: jest.Mock };
@@ -39,6 +42,7 @@ describe('OfferService', () => {
       ),
       create: jest.fn((_entityClass, data) => data),
       delete: jest.fn().mockResolvedValue(undefined),
+      find: jest.fn().mockResolvedValue([]),
       createQueryBuilder: jest.fn(() => ({
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
@@ -147,8 +151,8 @@ describe('OfferService', () => {
 
     expect(offer).toBeDefined();
     expect(dataSource.transaction).toHaveBeenCalledTimes(1);
-    // 1 offer + 1 shareStats + 2 terms + 3 price rows (2 w pierwszym terminie, 1 w drugim) = 7 zapisów.
-    expect(transactionManager.save).toHaveBeenCalledTimes(7);
+    // 1 offer + 2 terms + 2 shareStats (jeden per termin) + 3 price rows (2 w pierwszym terminie, 1 w drugim) = 8 zapisów.
+    expect(transactionManager.save).toHaveBeenCalledTimes(8);
   });
 
   it('assigns categories to their own term, not to the whole offer', async () => {
@@ -218,11 +222,6 @@ describe('OfferService', () => {
         Array.isArray(entity) ? entity : { id: 'generated-id', ...entity },
       ),
     ); // save Offer - ok
-    transactionManager.save.mockImplementationOnce((entity) =>
-      Promise.resolve(
-        Array.isArray(entity) ? entity : { id: 'generated-id', ...entity },
-      ),
-    ); // save ShareStats - ok
     transactionManager.save.mockImplementationOnce(() => {
       const duplicateError: any = new Error(
         'duplicate key value violates unique constraint',
@@ -335,7 +334,7 @@ describe('OfferService', () => {
       });
     });
 
-    it('replaces all existing terms when new terms are provided', async () => {
+    it('creates a brand new term when the offer currently has none', async () => {
       cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
 
       await service.updateOffer(
@@ -354,12 +353,80 @@ describe('OfferService', () => {
         requestUser,
       );
 
-      expect(transactionManager.delete).toHaveBeenCalledWith(
-        expect.anything(),
-        { offerId: 'offer-1' },
+      expect(transactionManager.delete).not.toHaveBeenCalled();
+      // 1 zapisana oferta + 1 termin + 1 shareStats + 1 cena = 4.
+      expect(transactionManager.save).toHaveBeenCalledTimes(4);
+    });
+
+    it('keeps the existing term (and its id) when its dates are unchanged, and only replaces its prices', async () => {
+      const existingTerm = {
+        id: 'term-1',
+        offerId: 'offer-1',
+        startDate: new Date('2027-05-01'),
+        endDate: new Date('2027-05-08'),
+        sourceUrl: null,
+        categories: [],
+      };
+      transactionManager.find.mockResolvedValue([existingTerm]);
+      cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
+
+      await service.updateOffer(
+        'offer-1',
+        {
+          companyId: 'company-1',
+          shipId: 'ship-1',
+          terms: [
+            {
+              startDate: '2027-05-01',
+              endDate: '2027-05-08',
+              prices: [{ cabinTypeId: 'cabin-1', price: 250000 }],
+            },
+          ],
+        } as any,
+        requestUser,
       );
-      // 1 zapis oferty + 1 termin + 1 cena = 3.
+
+      expect(transactionManager.delete).toHaveBeenCalledWith(OfferTermPrice, {
+        offerTermId: 'term-1',
+      });
+      expect(transactionManager.delete).not.toHaveBeenCalledWith(
+        OfferTerm,
+        expect.anything(),
+      );
+      expect(transactionManager.save).toHaveBeenCalledWith(existingTerm);
+      // 1 zapisana oferta + 1 zapisany istniejący termin + 1 cena = 3. Brak nowego ShareStats.
       expect(transactionManager.save).toHaveBeenCalledTimes(3);
+    });
+
+    it('deletes a term that is no longer in the submitted list', async () => {
+      const existingTerm = {
+        id: 'term-1',
+        offerId: 'offer-1',
+        startDate: new Date('2027-05-01'),
+        endDate: new Date('2027-05-08'),
+      };
+      transactionManager.find.mockResolvedValue([existingTerm]);
+      cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
+
+      await service.updateOffer(
+        'offer-1',
+        {
+          companyId: 'company-1',
+          shipId: 'ship-1',
+          terms: [
+            {
+              startDate: '2027-09-01',
+              endDate: '2027-09-08',
+              prices: [{ cabinTypeId: 'cabin-1', price: 250000 }],
+            },
+          ],
+        } as any,
+        requestUser,
+      );
+
+      expect(transactionManager.delete).toHaveBeenCalledWith(OfferTerm, {
+        id: In(['term-1']),
+      });
     });
 
     it('does not touch terms when the update omits them', async () => {

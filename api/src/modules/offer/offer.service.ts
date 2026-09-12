@@ -1,9 +1,16 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, ObjectLiteral, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  In,
+  ObjectLiteral,
+  Repository,
+} from 'typeorm';
 import { Offer } from './offer.entity';
 import { OfferTerm } from './offer-term.entity';
 import { OfferTermPrice } from './offer-term-price.entity';
+import { diffOfferTerms } from './diff-offer-terms';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { OfferTermDto } from './dto/offer-term.dto';
 import { ImageFileService } from '@modules/image-file/image-file.service';
@@ -59,8 +66,8 @@ export class OfferService {
       .leftJoinAndSelect('offer.imageFile', 'imageFile')
       .leftJoinAndSelect('offer.pdfFile', 'pdfFile')
       .leftJoinAndSelect('offer.destinations', 'destinations')
-      .leftJoinAndSelect('offer.shareStats', 'shareStats')
       .leftJoinAndSelect('offer.terms', 'terms')
+      .leftJoinAndSelect('terms.shareStats', 'shareStats')
       .leftJoinAndSelect('terms.categories', 'categories')
       .leftJoinAndSelect('terms.prices', 'termPrices')
       .leftJoinAndSelect('termPrices.cabinType', 'cabinType')
@@ -269,7 +276,7 @@ export class OfferService {
       .leftJoinAndSelect('ship.imageFile', 'shipImageFile')
       .leftJoinAndSelect('term.categories', 'category')
       .leftJoinAndSelect('offer.destinations', 'destination')
-      .leftJoinAndSelect('offer.shareStats', 'shareStats')
+      .leftJoinAndSelect('term.shareStats', 'shareStats')
       .where('term.id IN (:...termIds)', { termIds: orderedTermIds })
       .getMany();
 
@@ -309,6 +316,7 @@ export class OfferService {
     startDate: Date;
     endDate: Date;
     fromPrice: number;
+    shareStats: ShareStats;
   } {
     const offerFields: Partial<Offer> & { terms?: OfferTerm[] } = {
       ...term.offer,
@@ -321,6 +329,7 @@ export class OfferService {
       startDate: term.startDate,
       endDate: term.endDate,
       fromPrice,
+      shareStats: term.shareStats,
     };
   }
 
@@ -357,15 +366,6 @@ export class OfferService {
       });
 
       newOffer = await manager.save(newOffer);
-
-      const shareStats = new ShareStats();
-      shareStats.offerId = newOffer.id;
-      shareStats.facebookClicks = 0;
-      shareStats.instagramClicks = 0;
-      shareStats.tiktokClicks = 0;
-      const savedShareStats = await manager.save(shareStats);
-
-      newOffer.shareStatsId = savedShareStats.id;
 
       if (destinationEntities.length) {
         newOffer.destinations = destinationEntities;
@@ -434,7 +434,6 @@ export class OfferService {
       const savedOffer = await manager.save(offer);
 
       if (terms?.length) {
-        await manager.delete(OfferTerm, { offerId: savedOffer.id });
         await this.saveOfferTerms(manager, savedOffer.id, companyId, terms);
       }
 
@@ -565,37 +564,91 @@ export class OfferService {
     companyId: string,
     terms: OfferTermDto[],
   ): Promise<void> {
-    for (const termDto of terms) {
-      const categoryEntities = termDto.categories?.length
-        ? await this.categoryService.findByIds(termDto.categories)
+    const existingTerms = await manager.find(OfferTerm, {
+      where: { offerId },
+    });
+    const { toCreate, toUpdate, toDelete } = diffOfferTerms(
+      existingTerms,
+      terms,
+    );
+
+    if (toDelete.length) {
+      await manager.delete(OfferTerm, {
+        id: In(toDelete.map((term) => term.id)),
+      });
+    }
+
+    for (const { existing, dto } of toUpdate) {
+      const categoryEntities = dto.categories?.length
+        ? await this.categoryService.findByIds(dto.categories)
+        : undefined;
+
+      // dto.sourceUrl/categories są opcjonalne - brak wartości w tym
+      // konkretnym zapisie nie może oznaczać "wyczyść", bo existing już ma
+      // je załadowane (categories jest eager) i nadpisanie ich undefined
+      // skasowałoby dane, których formularz nawet nie próbował zmieniać.
+      if (dto.sourceUrl !== undefined) {
+        existing.sourceUrl = dto.sourceUrl;
+      }
+      if (categoryEntities !== undefined) {
+        existing.categories = categoryEntities;
+      }
+      await manager.save(existing);
+
+      await manager.delete(OfferTermPrice, { offerTermId: existing.id });
+      await this.saveTermPrices(manager, existing.id, companyId, dto.prices);
+    }
+
+    for (const dto of toCreate) {
+      const categoryEntities = dto.categories?.length
+        ? await this.categoryService.findByIds(dto.categories)
         : undefined;
 
       const term = manager.create(OfferTerm, {
         offerId,
-        startDate: termDto.startDate,
-        endDate: termDto.endDate,
-        sourceUrl: termDto.sourceUrl,
+        startDate: dto.startDate,
+        endDate: dto.endDate,
+        sourceUrl: dto.sourceUrl,
         categories: categoryEntities,
       });
       const savedTerm = await this.saveTermOrThrowOnDuplicate(manager, term);
 
-      const prices = [];
-      for (const priceDto of termDto.prices) {
-        const cabinTypeId = await this.resolveCabinTypeId(
-          manager,
-          companyId,
-          priceDto,
-        );
-        prices.push(
-          manager.create(OfferTermPrice, {
-            offerTermId: savedTerm.id,
-            cabinTypeId,
-            price: priceDto.price,
-          }),
-        );
-      }
-      await manager.save(prices);
+      const shareStats = manager.create(ShareStats, {
+        termId: savedTerm.id,
+        offerId,
+        webClicks: 0,
+        facebookClicks: 0,
+        instagramClicks: 0,
+        tiktokClicks: 0,
+      });
+      await manager.save(shareStats);
+
+      await this.saveTermPrices(manager, savedTerm.id, companyId, dto.prices);
     }
+  }
+
+  private async saveTermPrices(
+    manager: EntityManager,
+    offerTermId: string,
+    companyId: string,
+    priceDtos: OfferTermPriceDto[],
+  ): Promise<void> {
+    const prices = [];
+    for (const priceDto of priceDtos) {
+      const cabinTypeId = await this.resolveCabinTypeId(
+        manager,
+        companyId,
+        priceDto,
+      );
+      prices.push(
+        manager.create(OfferTermPrice, {
+          offerTermId,
+          cabinTypeId,
+          price: priceDto.price,
+        }),
+      );
+    }
+    await manager.save(prices);
   }
 
   private async resolveCabinTypeId(
