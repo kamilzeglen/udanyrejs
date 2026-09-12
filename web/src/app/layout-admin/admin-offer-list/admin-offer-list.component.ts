@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { OfferFacade } from '@state/offer';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
-import { AllDeviceInfo, Offer, SearchOffersPayload } from '@interfaces';
+import { map, ReplaySubject, take, takeUntil } from 'rxjs';
+import { OfferSearchResult, SearchOffersPayload } from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
-import { DeviceInfoService } from '@shared/device-info/device-info.service';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { SortDirection } from '@angular/material/sort';
 import { Pagination } from '../../_interfaces/http';
+import { groupOffersByOfferId } from './group-offers-by-offer';
 
 @Component({
   selector: 'app-admin-offer-list',
@@ -17,7 +17,8 @@ import { Pagination } from '../../_interfaces/http';
 export class AdminOfferListComponent implements OnInit, OnDestroy {
   private readonly destroy$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-  public pageSize = 100;
+  // Admin list has no paginator UI - this must stay above the total term count so every offer's terms load in one request.
+  public pageSize = 5000;
 
   public defaultSortBy = 'createdAt';
   public defaultSortDir: SortDirection = 'desc';
@@ -25,45 +26,27 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public currentSortBy = 'createdAt';
   public currentSortDir: SortDirection = 'desc';
 
-  public deviceInfo: AllDeviceInfo;
+  public sortableFields: { value: string; label: string }[] = [
+    { value: 'name', label: 'Nazwa' },
+    { value: 'company.name', label: 'Firma' },
+    { value: 'ship.name', label: 'Statek' },
+    { value: 'updatedAt', label: 'Data aktualizacji' },
+    { value: 'createdAt', label: 'Data utworzenia' },
+  ];
 
-  public offers$ = this.offerFacade.offers$;
   public loading$ = this.offerFacade.loading$;
   public pagination$ = this.offerFacade.pagination$;
 
-  public columnsToDisplay: string[];
-  public allColumns: string[] = [
-    'id',
-    'name',
-    'price',
-    'company.name',
-    'ship.name',
-    'startDate',
-    'endDate',
-    'actions',
-    'stats',
-    'photos-or-pdf',
-    'updatedAt',
-    'createdAt',
-  ];
+  public groupedOffers$ = this.offerFacade.offers$.pipe(map((offers) => (offers ? groupOffersByOfferId(offers) : [])));
 
   constructor(
     private readonly offerFacade: OfferFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
     private readonly routerFacade: RouterFacade,
-    private readonly deviceInfoService: DeviceInfoService,
   ) {}
 
   public ngOnInit() {
-    this.deviceInfo = this.deviceInfoService.getInfo();
-
-    this.deviceInfoService.infoEmitter.pipe(takeUntil(this.destroy$)).subscribe((info) => {
-      this.deviceInfo = info;
-    });
-
-    this.columnsToDisplay = this.getColumnsToDisplay();
-
     this.offerFacade.deleteOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto ofertę');
       this.getOffers();
@@ -77,17 +60,23 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public sortData(sort: Sort): void {
+  public changeSortBy(orderBy: string): void {
+    this.applySort(orderBy, this.currentSortDir);
+  }
+
+  public toggleSortDirection(): void {
+    this.applySort(this.currentSortBy, this.currentSortDir === 'asc' ? 'desc' : 'asc');
+  }
+
+  private applySort(orderBy: string, orderDir: SortDirection): void {
     this.pagination$.pipe(take(1)).subscribe((pagination) => {
       const { all: _all, count: _count, ...rest } = pagination;
-      this.currentSortBy = sort.active as Pagination['orderBy'];
-      this.currentSortDir = sort.direction as Pagination['orderDir'];
       this.getOffers({
         ...rest,
         offset: 0,
         limit: this.pageSize,
-        orderBy: this.currentSortBy,
-        orderDir: this.currentSortDir,
+        orderBy: orderBy as Pagination['orderBy'],
+        orderDir: orderDir as Pagination['orderDir'],
       });
     });
   }
@@ -116,7 +105,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     });
   }
 
-  public deleteOffer(offer: Offer): void {
+  public deleteOffer(offer: OfferSearchResult): void {
     this.confirmationModalService
       .open({
         message: 'Jesteś pewny że chcesz usunąć ofertę: ' + offer.name + '?',
@@ -132,12 +121,12 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
       });
   }
 
-  public detailsOffer(offer: Offer): void {
+  public detailsOffer(offer: OfferSearchResult): void {
     const linkParams = ['/offers/details/' + offer.id];
     this.routerFacade.changeRoute({ linkParams });
   }
 
-  public editOffer(offer: Offer): void {
+  public editOffer(offer: OfferSearchResult): void {
     const linkParams = ['/admin/offers/edit/' + offer.id];
     this.routerFacade.changeRoute({ linkParams });
   }
@@ -160,19 +149,6 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public editCompany(companyId: string): void {
     const linkParams = ['/admin/companies/edit/' + companyId];
     this.routerFacade.changeRoute({ linkParams });
-  }
-
-  public getColumnsToDisplay(): string[] {
-    if (this.deviceInfo.deviceTypeDetected === 'DESKTOP') {
-      return this.allColumns;
-    }
-    if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['name', 'price', 'ship', 'startDate', 'endDate'];
-    }
-    if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['name', 'startDate', 'endDate'];
-    }
-    return [];
   }
 
   public copyToClipboard(type: string, id: string) {
