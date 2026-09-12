@@ -33,11 +33,15 @@ describe('POST /discover-offers', () => {
       goto: jest.fn().mockResolvedValue(undefined),
       waitForSelector: jest.fn().mockResolvedValue(undefined),
     };
-    queue = { enqueue: jest.fn((task) => task(fakePage as never)) } as unknown as BrowserQueue;
+    queue = {
+      enqueue: jest.fn((task) => task(fakePage as never)),
+    } as unknown as BrowserQueue;
   });
 
   it('rejects an invalid body', async () => {
-    const response = await request(buildApp(queue)).post('/discover-offers').send({ count: 'not-a-number' });
+    const response = await request(buildApp(queue))
+      .post('/discover-offers')
+      .send({ count: 'not-a-number' });
 
     expect(response.status).toBe(400);
     expect(queue.enqueue).not.toHaveBeenCalled();
@@ -56,8 +60,15 @@ describe('POST /discover-offers', () => {
 
   it('collects offer urls across pages until count is reached', async () => {
     (extractor.extractRawListingPage as jest.Mock)
-      .mockResolvedValueOnce({ offerHrefs: ['https://rejsy4you.pl/rejs/1_x_1', 'https://rejsy4you.pl/rejs/2_x_2'] })
-      .mockResolvedValueOnce({ offerHrefs: ['https://rejsy4you.pl/rejs/3_x_3'] });
+      .mockResolvedValueOnce({
+        offerHrefs: [
+          'https://rejsy4you.pl/rejs/1_x_1',
+          'https://rejsy4you.pl/rejs/2_x_2',
+        ],
+      })
+      .mockResolvedValueOnce({
+        offerHrefs: ['https://rejsy4you.pl/rejs/3_x_3'],
+      });
 
     const response = await request(buildApp(queue))
       .post('/discover-offers')
@@ -75,7 +86,9 @@ describe('POST /discover-offers', () => {
 
   it('stops paging a shipowner once its listing page returns no offers', async () => {
     (extractor.extractRawListingPage as jest.Mock)
-      .mockResolvedValueOnce({ offerHrefs: ['https://rejsy4you.pl/rejs/1_x_1'] })
+      .mockResolvedValueOnce({
+        offerHrefs: ['https://rejsy4you.pl/rejs/1_x_1'],
+      })
       .mockResolvedValueOnce({ offerHrefs: [] });
 
     const response = await request(buildApp(queue))

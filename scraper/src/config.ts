@@ -30,7 +30,11 @@ export function loadConfig(): ScraperConfig {
     maxTermsPerScrap: Number(process.env.MAX_TERMS_PER_SCRAP ?? 100),
     minDelayMs: Number(process.env.MIN_DELAY_MS ?? 2000),
     maxDelayMs: Number(process.env.MAX_DELAY_MS ?? 5000),
-    maxDiscoveryPagesPerHost: Number(process.env.MAX_DISCOVERY_PAGES_PER_HOST ?? 20),
-    listingRenderTimeoutMs: Number(process.env.LISTING_RENDER_TIMEOUT_MS ?? 8000),
+    maxDiscoveryPagesPerHost: Number(
+      process.env.MAX_DISCOVERY_PAGES_PER_HOST ?? 20,
+    ),
+    listingRenderTimeoutMs: Number(
+      process.env.LISTING_RENDER_TIMEOUT_MS ?? 8000,
+    ),
   };
 }

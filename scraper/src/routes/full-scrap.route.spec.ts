@@ -30,7 +30,9 @@ describe('POST /full-scrap', () => {
 
   beforeEach(() => {
     const fakePage = { goto: jest.fn().mockResolvedValue(undefined) };
-    queue = { enqueue: jest.fn((task) => task(fakePage as never)) } as unknown as BrowserQueue;
+    queue = {
+      enqueue: jest.fn((task) => task(fakePage as never)),
+    } as unknown as BrowserQueue;
     (extractor.dismissCookieBanner as jest.Mock).mockResolvedValue(undefined);
   });
 
@@ -51,7 +53,13 @@ describe('POST /full-scrap', () => {
       ogImageContent: 'https://rejsy4you.pl/img.jpg',
       pdfHref: 'https://rejsy4you.pl/pdf',
       itineraryRows: [
-        { dayText: '1', dateText: '01.01.2027', cityText: 'Gdynia', arrivalText: '', departureText: '10:00' },
+        {
+          dayText: '1',
+          dateText: '01.01.2027',
+          cityText: 'Gdynia',
+          arrivalText: '',
+          departureText: '10:00',
+        },
       ],
       cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €100' }],
       otherTermLinks: [
@@ -75,8 +83,12 @@ describe('POST /full-scrap', () => {
     expect(response.status).toBe(200);
     expect(response.body.name).toBe('Rejs testowy');
     expect(response.body.terms).toHaveLength(2);
-    expect(response.body.terms[1].sourceUrl).toBe('https://rejsy4you.pl/rejs/2_x_2');
-    expect(response.body.terms[1].cabinPrices).toEqual([{ label: 'wewnętrzna', price: 120 }]);
+    expect(response.body.terms[1].sourceUrl).toBe(
+      'https://rejsy4you.pl/rejs/2_x_2',
+    );
+    expect(response.body.terms[1].cabinPrices).toEqual([
+      { label: 'wewnętrzna', price: 120 },
+    ]);
     expect(queue.enqueue).toHaveBeenCalledTimes(2);
   });
 });

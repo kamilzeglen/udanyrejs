@@ -19,31 +19,41 @@ export class BrowserQueue {
 
   public constructor(private readonly config: ScraperConfig) {}
 
-  public enqueue<T>(task: (page: Page) => Promise<T>, label = 'task'): Promise<T> {
-    const run = this.tail.catch(() => undefined).then(async () => {
-      const startedAt = Date.now();
-      console.log(`[scraper] ${label}: starting`);
+  public enqueue<T>(
+    task: (page: Page) => Promise<T>,
+    label = 'task',
+  ): Promise<T> {
+    const run = this.tail
+      .catch(() => undefined)
+      .then(async () => {
+        const startedAt = Date.now();
+        console.log(`[scraper] ${label}: starting`);
 
-      const browser = await this.getBrowser();
-      const page = await browser.newPage();
+        const browser = await this.getBrowser();
+        const page = await browser.newPage();
 
-      try {
-        const result = await task(page);
-        const elapsedMs = Date.now() - startedAt;
-        console.log(`[scraper] ${label}: done (${elapsedMs}ms)`);
+        try {
+          const result = await task(page);
+          const elapsedMs = Date.now() - startedAt;
+          console.log(`[scraper] ${label}: done (${elapsedMs}ms)`);
 
-        const delayMs = randomDelayMs(this.config.minDelayMs, this.config.maxDelayMs);
-        console.log(`[scraper] waiting ${delayMs}ms before the next request`);
-        await wait(delayMs);
+          const delayMs = randomDelayMs(
+            this.config.minDelayMs,
+            this.config.maxDelayMs,
+          );
+          console.log(`[scraper] waiting ${delayMs}ms before the next request`);
+          await wait(delayMs);
 
-        return result;
-      } catch (error) {
-        console.error(`[scraper] ${label}: failed - ${(error as Error).message}`);
-        throw error;
-      } finally {
-        await page.close();
-      }
-    });
+          return result;
+        } catch (error) {
+          console.error(
+            `[scraper] ${label}: failed - ${(error as Error).message}`,
+          );
+          throw error;
+        } finally {
+          await page.close();
+        }
+      });
 
     this.tail = run;
     return run;
@@ -63,7 +73,10 @@ export class BrowserQueue {
     if (!this.browserPromise) {
       console.log('[scraper] launching headless Chromium');
       const channel = process.env.PLAYWRIGHT_CHANNEL;
-      this.browserPromise = chromium.launch({ headless: true, channel: channel || undefined });
+      this.browserPromise = chromium.launch({
+        headless: true,
+        channel: channel || undefined,
+      });
     }
 
     return this.browserPromise;

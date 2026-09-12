@@ -48,14 +48,19 @@ export function findShipownerId(
     return null;
   }
 
-  const exactMatch = shipowners.find((shipowner) => shipowner.name.trim().toLowerCase() === normalizedQuery);
+  const exactMatch = shipowners.find(
+    (shipowner) => shipowner.name.trim().toLowerCase() === normalizedQuery,
+  );
   if (exactMatch) {
     return exactMatch.id;
   }
 
   const substringMatches = shipowners.filter((shipowner) => {
     const normalizedName = shipowner.name.trim().toLowerCase();
-    return normalizedQuery.includes(normalizedName) || normalizedName.includes(normalizedQuery);
+    return (
+      normalizedQuery.includes(normalizedName) ||
+      normalizedName.includes(normalizedQuery)
+    );
   });
 
   if (substringMatches.length === 1) {

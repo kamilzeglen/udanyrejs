@@ -1,4 +1,9 @@
-import { CabinPrice, FullScrapResult, ItineraryDay, PriceCheckResult } from '../types';
+import {
+  CabinPrice,
+  FullScrapResult,
+  ItineraryDay,
+  PriceCheckResult,
+} from '../types';
 import { RawCabinGroupRow, RawOfferPage, RawPriceCheckPage } from './raw-types';
 
 export function parseDdMmYyyy(text: string): string {
@@ -49,14 +54,21 @@ function mapItineraryRows(rows: RawOfferPage['itineraryRows']): ItineraryDay[] {
   }));
 }
 
-function derivePrimaryTermDates(itinerary: ItineraryDay[]): { startDate: string; endDate: string } {
+function derivePrimaryTermDates(itinerary: ItineraryDay[]): {
+  startDate: string;
+  endDate: string;
+} {
   const firstDay = itinerary[0];
   const lastDay = itinerary[itinerary.length - 1];
 
   return { startDate: firstDay.date, endDate: lastDay.date };
 }
 
-export function mapRawToFullScrap(raw: RawOfferPage, sourceUrl: string, maxTerms: number): FullScrapResult {
+export function mapRawToFullScrap(
+  raw: RawOfferPage,
+  sourceUrl: string,
+  maxTerms: number,
+): FullScrapResult {
   const itinerary = mapItineraryRows(raw.itineraryRows);
   const primaryTermDates = derivePrimaryTermDates(itinerary);
 
@@ -94,5 +106,8 @@ export function mapRawToPriceCheck(raw: RawPriceCheckPage): PriceCheckResult {
     return { available: false, cabinPrices: [] };
   }
 
-  return { available: true, cabinPrices: mapCabinGroupRows(raw.cabinGroupRows) };
+  return {
+    available: true,
+    cabinPrices: mapCabinGroupRows(raw.cabinGroupRows),
+  };
 }

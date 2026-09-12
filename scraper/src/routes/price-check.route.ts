@@ -5,18 +5,27 @@ import { isAllowedScrapeUrl } from '../scraping/allowlist';
 import { extractRawPriceCheckPage } from '../scraping/rejsy4you-extractor';
 import { mapRawToPriceCheck } from '../scraping/parse-offer-page';
 
-export function createPriceCheckRoute(config: ScraperConfig, queue: BrowserQueue): Router {
+export function createPriceCheckRoute(
+  config: ScraperConfig,
+  queue: BrowserQueue,
+): Router {
   const router = Router();
 
   router.post('/price-check', async (req, res) => {
     const url = req.body?.url;
-    const urlIsAllowed = typeof url === 'string' && isAllowedScrapeUrl(url, config.allowedScrapeHosts);
+    const urlIsAllowed =
+      typeof url === 'string' &&
+      isAllowedScrapeUrl(url, config.allowedScrapeHosts);
 
     console.log(`[scraper] POST /price-check: ${url}`);
 
     if (!urlIsAllowed) {
-      console.warn(`[scraper] rejected /price-check: URL not on the allowlist - ${url}`);
-      res.status(400).json({ message: 'URL is missing or not on the allowlist' });
+      console.warn(
+        `[scraper] rejected /price-check: URL not on the allowlist - ${url}`,
+      );
+      res
+        .status(400)
+        .json({ message: 'URL is missing or not on the allowlist' });
       return;
     }
 
@@ -32,7 +41,9 @@ export function createPriceCheckRoute(config: ScraperConfig, queue: BrowserQueue
       );
       res.status(200).json(result);
     } catch (error) {
-      console.warn(`[scraper] /price-check treating as unavailable for ${url}: ${(error as Error).message}`);
+      console.warn(
+        `[scraper] /price-check treating as unavailable for ${url}: ${(error as Error).message}`,
+      );
       res.status(200).json({ available: false, cabinPrices: [] });
     }
   });

@@ -1,7 +1,12 @@
 import { chromium, Browser, Page } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
-import { dismissCookieBanner, extractRawOfferPage, extractRawPriceCheckPage, extractRawListingPage } from './rejsy4you-extractor';
+import {
+  dismissCookieBanner,
+  extractRawOfferPage,
+  extractRawPriceCheckPage,
+  extractRawListingPage,
+} from './rejsy4you-extractor';
 
 const fixtureHtml = fs.readFileSync(
   path.join(__dirname, '__fixtures__', 'rejsy4you-offer-page.html'),
@@ -46,8 +51,12 @@ describe('rejsy4you-extractor', () => {
     expect(raw.titleText).toBe('Rejs Hiszpania, Francja, Włochy');
     expect(raw.shipNameText).toBe('Norwegian Epic');
     expect(raw.companyHrefSlug).toBe('norwegian-cruise-line');
-    expect(raw.ogImageContent).toBe('https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg');
-    expect(raw.pdfHref).toContain('/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990');
+    expect(raw.ogImageContent).toBe(
+      'https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg',
+    );
+    expect(raw.pdfHref).toContain(
+      '/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
+    );
 
     expect(raw.itineraryRows).toHaveLength(4);
     expect(raw.itineraryRows[0]).toEqual({
@@ -63,9 +72,13 @@ describe('rejsy4you-extractor', () => {
     expect(raw.cabinGroupRows[0].minPriceText).toContain('614.43');
 
     expect(raw.otherTermLinks).toHaveLength(3);
-    const sameRoute = raw.otherTermLinks.filter((link) => !link.isDifferentRoute);
+    const sameRoute = raw.otherTermLinks.filter(
+      (link) => !link.isDifferentRoute,
+    );
     expect(sameRoute).toHaveLength(1);
-    expect(sameRoute[0].href).toContain('93098_hiszpania-francja-wlochy_208992');
+    expect(sameRoute[0].href).toContain(
+      '93098_hiszpania-francja-wlochy_208992',
+    );
     expect(sameRoute[0].startDateText).toBe('2026-10-18');
     expect(sameRoute[0].endDateText).toBe('2026-10-25');
   });
@@ -87,12 +100,18 @@ describe('rejsy4you-extractor', () => {
       const raw = await extractRawListingPage(page);
 
       expect(raw.offerHrefs).toHaveLength(2);
-      expect(raw.offerHrefs[0]).toContain('117581_wlochy-francja-hiszpania_233877');
-      expect(raw.offerHrefs[1]).toContain('109206_hiszpania-wlochy-francja_225102');
+      expect(raw.offerHrefs[0]).toContain(
+        '117581_wlochy-francja-hiszpania_233877',
+      );
+      expect(raw.offerHrefs[1]).toContain(
+        '109206_hiszpania-wlochy-francja_225102',
+      );
     });
 
     it('returns an empty list when the page has no offer cards', async () => {
-      await page.setContent('<html><body></body></html>', { waitUntil: 'load' });
+      await page.setContent('<html><body></body></html>', {
+        waitUntil: 'load',
+      });
 
       const raw = await extractRawListingPage(page);
 

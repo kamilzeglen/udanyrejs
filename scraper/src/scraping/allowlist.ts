@@ -1,4 +1,7 @@
-export function isAllowedScrapeUrl(url: string, allowedHosts: string[]): boolean {
+export function isAllowedScrapeUrl(
+  url: string,
+  allowedHosts: string[],
+): boolean {
   let parsed: URL;
 
   try {
@@ -7,7 +10,8 @@ export function isAllowedScrapeUrl(url: string, allowedHosts: string[]): boolean
     return false;
   }
 
-  const protocolIsHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  const protocolIsHttp =
+    parsed.protocol === 'http:' || parsed.protocol === 'https:';
   if (!protocolIsHttp) {
     return false;
   }

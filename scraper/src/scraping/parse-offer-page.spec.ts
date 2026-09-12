@@ -30,7 +30,9 @@ describe('parseEuroPrice', () => {
 
 describe('slugToTitleCase', () => {
   it('turns a hyphenated slug into a title-cased name', () => {
-    expect(slugToTitleCase('norwegian-cruise-line')).toBe('Norwegian Cruise Line');
+    expect(slugToTitleCase('norwegian-cruise-line')).toBe(
+      'Norwegian Cruise Line',
+    );
   });
 });
 
@@ -48,7 +50,9 @@ describe('mapCabinGroupRows', () => {
   });
 
   it('skips a group whose price is unavailable', () => {
-    const result = mapCabinGroupRows([{ labelText: '▸ wewnętrzna', minPriceText: '–' }]);
+    const result = mapCabinGroupRows([
+      { labelText: '▸ wewnętrzna', minPriceText: '–' },
+    ]);
     expect(result).toEqual([]);
   });
 });
@@ -58,11 +62,25 @@ describe('mapRawToFullScrap', () => {
     titleText: 'Rejs Hiszpania, Francja, Włochy',
     shipNameText: 'Norwegian Epic',
     companyHrefSlug: 'norwegian-cruise-line',
-    ogImageContent: 'https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg',
-    pdfHref: 'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
+    ogImageContent:
+      'https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg',
+    pdfHref:
+      'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
     itineraryRows: [
-      { dayText: '1', dateText: '04.10.2026', cityText: 'Barcelona', arrivalText: '', departureText: '17:00' },
-      { dayText: '2', dateText: '05.10.2026', cityText: 'Marsylia', arrivalText: '07:00', departureText: '17:00' },
+      {
+        dayText: '1',
+        dateText: '04.10.2026',
+        cityText: 'Barcelona',
+        arrivalText: '',
+        departureText: '17:00',
+      },
+      {
+        dayText: '2',
+        dateText: '05.10.2026',
+        cityText: 'Marsylia',
+        arrivalText: '07:00',
+        departureText: '17:00',
+      },
     ],
     cabinGroupRows: [
       { labelText: '▸ wewnętrzna', minPriceText: 'od €614.43' },
@@ -85,21 +103,42 @@ describe('mapRawToFullScrap', () => {
   };
 
   it('maps the primary term from the itinerary dates and cabin rows', () => {
-    const result = mapRawToFullScrap(raw, 'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990', 100);
+    const result = mapRawToFullScrap(
+      raw,
+      'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
+      100,
+    );
 
     expect(result.name).toBe('Rejs Hiszpania, Francja, Włochy');
     expect(result.shipName).toBe('Norwegian Epic');
     expect(result.companyName).toBe('Norwegian Cruise Line');
-    expect(result.imageUrl).toBe('https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg');
-    expect(result.pdfUrl).toBe('https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990');
+    expect(result.imageUrl).toBe(
+      'https://rejsy4you.pl/public/upload/2021/10/20/holland_rzym_wlochy_6.jpg',
+    );
+    expect(result.pdfUrl).toBe(
+      'https://rejsy4you.pl/api/Itineraries/offerPdf?itineraryId=93096&scheduleId=208990',
+    );
     expect(result.itinerary).toEqual([
-      { day: 1, date: '2026-10-04', city: 'Barcelona', arrivalTime: '', departureTime: '17:00' },
-      { day: 2, date: '2026-10-05', city: 'Marsylia', arrivalTime: '07:00', departureTime: '17:00' },
+      {
+        day: 1,
+        date: '2026-10-04',
+        city: 'Barcelona',
+        arrivalTime: '',
+        departureTime: '17:00',
+      },
+      {
+        day: 2,
+        date: '2026-10-05',
+        city: 'Marsylia',
+        arrivalTime: '07:00',
+        departureTime: '17:00',
+      },
     ]);
     expect(result.terms[0]).toEqual({
       startDate: '2026-10-04',
       endDate: '2026-10-05',
-      sourceUrl: 'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
+      sourceUrl:
+        'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
       cabinPrices: [
         { label: 'wewnętrzna', price: 614.43 },
         { label: 'zewnętrzna z balkonem', price: 1619.5 },
@@ -108,17 +147,27 @@ describe('mapRawToFullScrap', () => {
   });
 
   it('lists same-route other terms but excludes different-route ones', () => {
-    const result = mapRawToFullScrap(raw, 'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990', 100);
+    const result = mapRawToFullScrap(
+      raw,
+      'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
+      100,
+    );
 
     expect(result.terms).toHaveLength(2);
-    expect(result.terms[1].sourceUrl).toBe('https://rejsy4you.pl/rejs/93098_hiszpania-francja-wlochy_208992');
+    expect(result.terms[1].sourceUrl).toBe(
+      'https://rejsy4you.pl/rejs/93098_hiszpania-francja-wlochy_208992',
+    );
     expect(result.terms[1].startDate).toBe('2026-10-18');
     expect(result.terms[1].endDate).toBe('2026-10-25');
     expect(result.terms[1].cabinPrices).toEqual([]);
   });
 
   it('caps the number of other terms at maxTerms', () => {
-    const result = mapRawToFullScrap(raw, 'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990', 1);
+    const result = mapRawToFullScrap(
+      raw,
+      'https://rejsy4you.pl/rejs/93096_hiszpania-francja-wlochy_208990',
+      1,
+    );
     expect(result.terms).toHaveLength(1);
   });
 });
@@ -129,11 +178,17 @@ describe('mapRawToPriceCheck', () => {
       pageFound: true,
       cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €620' }],
     };
-    expect(mapRawToPriceCheck(raw)).toEqual({ available: true, cabinPrices: [{ label: 'wewnętrzna', price: 620 }] });
+    expect(mapRawToPriceCheck(raw)).toEqual({
+      available: true,
+      cabinPrices: [{ label: 'wewnętrzna', price: 620 }],
+    });
   });
 
   it('maps a missing page to unavailable with no prices', () => {
     const raw: RawPriceCheckPage = { pageFound: false, cabinGroupRows: [] };
-    expect(mapRawToPriceCheck(raw)).toEqual({ available: false, cabinPrices: [] });
+    expect(mapRawToPriceCheck(raw)).toEqual({
+      available: false,
+      cabinPrices: [],
+    });
   });
 });

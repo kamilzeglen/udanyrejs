@@ -30,11 +30,15 @@ describe('POST /price-check', () => {
 
   beforeEach(() => {
     const fakePage = { goto: jest.fn().mockResolvedValue(undefined) };
-    queue = { enqueue: jest.fn((task) => task(fakePage as never)) } as unknown as BrowserQueue;
+    queue = {
+      enqueue: jest.fn((task) => task(fakePage as never)),
+    } as unknown as BrowserQueue;
   });
 
   it('rejects a URL outside the allowlist', async () => {
-    const response = await request(buildApp(queue)).post('/price-check').send({ url: 'https://evil.example.com/x' });
+    const response = await request(buildApp(queue))
+      .post('/price-check')
+      .send({ url: 'https://evil.example.com/x' });
     expect(response.status).toBe(400);
   });
 
@@ -49,7 +53,10 @@ describe('POST /price-check', () => {
       .send({ url: 'https://rejsy4you.pl/rejs/1_x_1' });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ available: true, cabinPrices: [{ label: 'wewnętrzna', price: 120 }] });
+    expect(response.body).toEqual({
+      available: true,
+      cabinPrices: [{ label: 'wewnętrzna', price: 120 }],
+    });
   });
 
   it('returns unavailable when the page navigation fails', async () => {

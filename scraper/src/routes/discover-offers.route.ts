@@ -7,22 +7,33 @@ import { findShipownerId } from '../scraping/rejsy4you-shipowners';
 
 const LISTING_BASE_URL = 'https://rejsy4you.pl/rejsy';
 
-export function createDiscoverOffersRoute(config: ScraperConfig, queue: BrowserQueue): Router {
+export function createDiscoverOffersRoute(
+  config: ScraperConfig,
+  queue: BrowserQueue,
+): Router {
   const router = Router();
 
   router.post('/discover-offers', async (req, res) => {
     const shipownerNames = req.body?.shipownerNames;
     const count = req.body?.count;
 
-    const namesAreValid = Array.isArray(shipownerNames) && shipownerNames.every((name) => typeof name === 'string');
-    const countIsValid = typeof count === 'number' && Number.isInteger(count) && count > 0;
+    const namesAreValid =
+      Array.isArray(shipownerNames) &&
+      shipownerNames.every((name) => typeof name === 'string');
+    const countIsValid =
+      typeof count === 'number' && Number.isInteger(count) && count > 0;
 
     if (!namesAreValid || !countIsValid) {
-      res.status(400).json({ message: 'shipownerNames (string[]) and count (positive integer) are required' });
+      res.status(400).json({
+        message:
+          'shipownerNames (string[]) and count (positive integer) are required',
+      });
       return;
     }
 
-    console.log(`[scraper] POST /discover-offers: count=${count}, shipownerNames=${shipownerNames.join(', ')}`);
+    console.log(
+      `[scraper] POST /discover-offers: count=${count}, shipownerNames=${shipownerNames.join(', ')}`,
+    );
 
     const matched: { name: string; id: number }[] = [];
     const unmatchedNames: string[] = [];
@@ -38,7 +49,9 @@ export function createDiscoverOffersRoute(config: ScraperConfig, queue: BrowserQ
 
     const collectedUrls = new Set<string>();
     const exhausted = new Set<number>();
-    const pageByShipownerId = new Map<number, number>(matched.map((m) => [m.id, 1]));
+    const pageByShipownerId = new Map<number, number>(
+      matched.map((m) => [m.id, 1]),
+    );
 
     while (collectedUrls.size < count && exhausted.size < matched.length) {
       for (const { id } of matched) {
@@ -67,7 +80,9 @@ export function createDiscoverOffersRoute(config: ScraperConfig, queue: BrowserQ
         const raw = await queue.enqueue(async (page) => {
           await page.goto(listingUrl, { waitUntil: 'domcontentloaded' });
           await page
-            .waitForSelector('cruiselist-item a.cruise-item__title', { timeout: config.listingRenderTimeoutMs })
+            .waitForSelector('cruiselist-item a.cruise-item__title', {
+              timeout: config.listingRenderTimeoutMs,
+            })
             .catch(() => undefined);
           return extractRawListingPage(page);
         }, `discover-offers page ${currentPage} (shipowner ${id})`);
