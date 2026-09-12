@@ -1,22 +1,46 @@
-<nav class="submenu" aria-label="Kategorie rejsów">
-  <a
-    routerLink="/offers/recommended"
-    class="nav-link mobile-link"
-    routerLinkActive="active"
-    ariaCurrentWhenActive="page"
-    >Polecamy</a
+<div class="submenu-wrapper">
+  <button
+    type="button"
+    class="menu-toggle"
+    [class.open]="isMenuVisible"
+    [attr.aria-expanded]="isMenuVisible"
+    aria-controls="cruise-submenu"
+    (click)="toggleMenu()"
   >
-  <ng-container *ngFor="let item of subMenuItems">
+    <span class="menu-toggle-icon"><mat-icon>directions_boat</mat-icon></span>
+    <span class="menu-toggle-text">Nawigacja</span>
+    <mat-icon class="menu-toggle-chevron">expand_more</mat-icon>
+  </button>
+  <nav id="cruise-submenu" class="submenu" [class.visible]="isMenuVisible" aria-label="Nawigacja">
+    <span class="submenu-group-label">Kategorie rejsów</span>
     <a
-      *ngIf="item.isVisible"
-      [routerLink]="item.url | lowercase"
-      class="nav-link"
+      routerLink="/offers/recommended"
+      class="nav-link mobile-link"
       routerLinkActive="active"
       ariaCurrentWhenActive="page"
-      >{{ item.name }}</a
+      (click)="closeMenu()"
+      >Polecamy</a
     >
-  </ng-container>
-  <a routerLink="/about-us" class="nav-link mobile-link" routerLinkActive="active" ariaCurrentWhenActive="page"
-    >O nas</a
-  >
-</nav>
+    <ng-container *ngFor="let item of subMenuItems">
+      <a
+        *ngIf="item.isVisible"
+        [routerLink]="item.url | lowercase"
+        class="nav-link"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu()"
+        >{{ item.name }}</a
+      >
+    </ng-container>
+    <span class="submenu-divider" role="separator"></span>
+    <span class="submenu-group-label">Więcej</span>
+    <a
+      routerLink="/about-us"
+      class="nav-link mobile-link"
+      routerLinkActive="active"
+      ariaCurrentWhenActive="page"
+      (click)="closeMenu()"
+      >O nas</a
+    >
+  </nav>
+</div>

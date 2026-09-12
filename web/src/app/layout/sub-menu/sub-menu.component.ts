@@ -18,6 +18,8 @@ export class SubMenuComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
+  public isMenuVisible = false;
+
   constructor(
     private readonly subMenuService: SubMenuService,
     private readonly commonFacade: CommonFacade,
@@ -47,6 +49,14 @@ export class SubMenuComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  public toggleMenu(): void {
+    this.isMenuVisible = !this.isMenuVisible;
+  }
+
+  public closeMenu(): void {
+    this.isMenuVisible = false;
   }
 
   public ngOnDestroy() {
