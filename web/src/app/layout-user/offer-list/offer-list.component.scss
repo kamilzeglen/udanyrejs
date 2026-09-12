@@ -60,6 +60,9 @@ mat-paginator {
   margin-top: 24px;
   background: transparent;
   color: $cruise-muted;
+  ::ng-deep .mat-mdc-paginator-container {
+    justify-content: center;
+  }
 }
 .no-offers {
   padding: 64px 24px;
