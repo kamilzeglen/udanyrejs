@@ -1,7 +1,11 @@
 import { OfferSearchResult } from '@interfaces';
 import { groupOffersByOfferId } from './group-offers-by-offer';
 
-function buildTerm(offerId: string, termId: string): OfferSearchResult {
+function buildTerm(
+  offerId: string,
+  termId: string,
+  shareStats?: Partial<OfferSearchResult['shareStats']>,
+): OfferSearchResult {
   return {
     id: offerId,
     termId,
@@ -9,6 +13,16 @@ function buildTerm(offerId: string, termId: string): OfferSearchResult {
     startDate: '2026-01-01',
     endDate: '2026-01-10',
     fromPrice: 1000,
+    shareStats: {
+      id: `stats-${termId}`,
+      offerId,
+      termId,
+      webClicks: 0,
+      facebookClicks: 0,
+      instagramClicks: 0,
+      tiktokClicks: 0,
+      ...shareStats,
+    },
   } as OfferSearchResult;
 }
 
@@ -41,5 +55,21 @@ describe('groupOffersByOfferId', () => {
 
   it('returns an empty array for an empty input', () => {
     expect(groupOffersByOfferId([])).toEqual([]);
+  });
+
+  it('sums each term shareStats field into totalShareStats', () => {
+    const rows = [
+      buildTerm('offer-1', 'term-1', { webClicks: 3, facebookClicks: 1, instagramClicks: 0, tiktokClicks: 2 }),
+      buildTerm('offer-1', 'term-2', { webClicks: 5, facebookClicks: 0, instagramClicks: 4, tiktokClicks: 0 }),
+    ];
+
+    const groups = groupOffersByOfferId(rows);
+
+    expect(groups[0].totalShareStats).toEqual({
+      webClicks: 8,
+      facebookClicks: 1,
+      instagramClicks: 4,
+      tiktokClicks: 2,
+    });
   });
 });
