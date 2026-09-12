@@ -59,29 +59,6 @@
         </button>
       </div>
 
-      <div class="form-group" *ngIf="categories$ | async as categories">
-        <label for="categories">Kategorie:</label>
-        <mat-select
-          formControlName="categories"
-          id="categories"
-          placeholder="Kategorie"
-          [disabled]="!categories$"
-          multiple
-        >
-          <mat-option *ngFor="let category of categories" [value]="category.id">
-            {{ category.name }}
-          </mat-option>
-        </mat-select>
-        <button
-          type="button"
-          class="import-button"
-          [disabled]="termsArray.controls.length === 0"
-          (click)="importMissingCategories()"
-        >
-          Zaimportuj brakujące dane — Kategorie
-        </button>
-      </div>
-
       <div class="form-group">
         <label for="companyId">Firma:</label>
         <mat-select formControlName="companyId" id="companyId" placeholder="Firma" [disabled]="!companies$">
@@ -223,6 +200,27 @@
 
             <button type="button" class="term-prices__add" (click)="addTermPrice(termIndex)">
               Dodaj cenę dla kabiny
+            </button>
+          </div>
+
+          <div class="form-group term-categories" *ngIf="categories$ | async as categories">
+            <label [attr.for]="'termCategories' + termIndex">Kategorie</label>
+            <mat-select
+              [id]="'termCategories' + termIndex"
+              formControlName="categories"
+              placeholder="Kategorie"
+              multiple
+            >
+              <mat-option *ngFor="let category of categories" [value]="category.id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+            <button
+              type="button"
+              class="import-button"
+              (click)="importMissingCategories(termIndex); $event.stopPropagation()"
+            >
+              Zaimportuj brakujące dane — Kategorie
             </button>
           </div>
         </mat-expansion-panel>

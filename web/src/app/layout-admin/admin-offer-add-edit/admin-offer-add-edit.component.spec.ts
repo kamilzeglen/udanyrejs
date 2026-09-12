@@ -265,3 +265,123 @@ describe('AdminOfferAddEditComponent.submitForm', () => {
     expect(prices[1].cabinTypeName).toBe('kabina bez odpowiednika');
   });
 });
+
+describe('AdminOfferAddEditComponent.importMissingCategories', () => {
+  let component: AdminOfferAddEditComponent;
+  let fixture: ComponentFixture<AdminOfferAddEditComponent>;
+  let offerFacadeMock: { createOffer: jasmine.Spy };
+
+  beforeEach(async () => {
+    offerFacadeMock = { createOffer: jasmine.createSpy('createOffer') };
+
+    await TestBed.configureTestingModule({
+      imports: [ReactiveFormsModule],
+      declarations: [AdminOfferAddEditComponent],
+      providers: [
+        {
+          provide: CommonFacade,
+          useValue: {
+            companies$: of([]),
+            ships$: of([]),
+            destinations$: of([]),
+            cities$: of([]),
+            categories$: of([{ id: 'cat-zima', name: 'Zima', startDate: '2026-12-01', endDate: '2027-02-28' }]),
+            cabinTypes$: of([]),
+            getShipsSuccess$: EMPTY,
+            getCabinTypesSuccess$: EMPTY,
+            getCompanies: (): void => undefined,
+            getCategories: (): void => undefined,
+            getDestinations: (): void => undefined,
+            getCities: (): void => undefined,
+            getShips: (): void => undefined,
+            getCabinTypes: (): void => undefined,
+          },
+        },
+        {
+          provide: OfferFacade,
+          useValue: {
+            getOfferSuccess$: EMPTY,
+            createOfferError$: EMPTY,
+            updateOfferError$: EMPTY,
+            createOfferSuccess$: EMPTY,
+            updateOfferSuccess$: EMPTY,
+            deleteOfferSuccess$: EMPTY,
+            activateOfferSuccess$: EMPTY,
+            deactivateOfferSuccess$: EMPTY,
+            scrapeOfferSuccess$: EMPTY,
+            scrapeOfferError$: EMPTY,
+            scraping$: of(false),
+            scrapeOffer: (): void => undefined,
+            createOffer: offerFacadeMock.createOffer,
+          },
+        },
+        { provide: RouterFacade, useValue: { changeRoute: (): void => undefined } },
+        {
+          provide: SnackbarService,
+          useValue: { showError: (): void => undefined, showInfo: (): void => undefined },
+        },
+        { provide: ActivatedRoute, useValue: { paramMap: EMPTY } },
+        { provide: ConfirmationModalService, useValue: {} },
+        {
+          provide: ImageFileFacade,
+          useValue: {
+            createImageFileSuccess$: EMPTY,
+            createImageFileError$: EMPTY,
+            updateImageFileSuccess$: EMPTY,
+            updateImageFileError$: EMPTY,
+          },
+        },
+        {
+          provide: PdfFileFacade,
+          useValue: {
+            createPdfFileSuccess$: EMPTY,
+            createPdfFileError$: EMPTY,
+            updatePdfFileSuccess$: EMPTY,
+            updatePdfFileError$: EMPTY,
+          },
+        },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AdminOfferAddEditComponent);
+    component = fixture.componentInstance;
+    component.ngOnInit();
+  });
+
+  it('initializes an empty categories control for each new term', () => {
+    component.addTerm();
+
+    expect(component.termsArray.at(0).get('categories')?.value).toBeFalsy();
+  });
+
+  it('patches only the targeted term with categories matching its own date range', () => {
+    component.addTerm();
+    component.addTerm();
+    component.termsArray.at(0).patchValue({ startDate: '2026-12-10', endDate: '2026-12-20' });
+    component.termsArray.at(1).patchValue({ startDate: '2026-06-01', endDate: '2026-06-08' });
+
+    component.importMissingCategories(0);
+
+    expect(component.termsArray.at(0).get('categories')?.value).toEqual(['cat-zima']);
+    expect(component.termsArray.at(1).get('categories')?.value).toBeFalsy();
+  });
+
+  it('strips an untouched (empty-string) categories control from the payload instead of sending it as-is', () => {
+    component.addTerm();
+    component.termsArray.at(0).patchValue({
+      startDate: '2026-12-10',
+      endDate: '2026-12-20',
+    });
+    component.addTermPrice(0);
+    const pricesArray = component.termsArray.at(0).get('prices') as import('@angular/forms').FormArray;
+    pricesArray.at(0).patchValue({ cabinTypeId: 'cabin-1', price: 100 });
+
+    component.offerForm.patchValue({ name: 'Rejs testowy', companyId: 'company-1', shipId: 'ship-1' });
+
+    component.submitForm();
+
+    const payload = offerFacadeMock.createOffer.calls.mostRecent().args[0].formData;
+    expect(payload.terms[0].categories).toBeUndefined();
+  });
+});
