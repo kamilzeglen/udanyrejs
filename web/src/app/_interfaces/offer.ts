@@ -9,7 +9,6 @@ import { OfferTerm } from './offer-term';
 export interface Offer {
   id: string;
   name: string;
-  isActive: boolean;
   offerUrl: string;
   syncData: string;
   isRecommended: boolean;
@@ -31,10 +30,29 @@ export interface Offer {
   deletedAt: Date;
 }
 
+export interface OfferBulkSyncResult {
+  syncedIds: string[];
+  failedIds: string[];
+  termsAdded: number;
+  termsDeactivated: number;
+  termsReactivated: number;
+  termsSkipped: number;
+  pdfsUpdated: number;
+}
+
+export interface OfferTermsBulkSyncResult {
+  syncedIds: string[];
+  failedIds: string[];
+  reactivatedIds: string[];
+  deactivatedIds: string[];
+  pdfsUpdated: number;
+}
+
 export interface OfferSyncResult {
   offerDeactivated: boolean;
   termsAdded: number;
   termsDeactivated: number;
+  termsReactivated: number;
   termsSkipped: number;
   pdfsUpdated: number;
 }

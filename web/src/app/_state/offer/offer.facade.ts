@@ -20,6 +20,9 @@ export class OfferFacade {
   public updateOfferError$ = this.actions.pipe(ofType(offerActions.updateOfferError));
   public deleteOfferSuccess$ = this.actions.pipe(ofType(offerActions.deleteOfferSuccess));
   public deleteOfferError$ = this.actions.pipe(ofType(offerActions.deactivateOfferError));
+  public bulkDeleting$ = this.store.select(offerSelectors.selectBulkDeleting);
+  public deleteOffersSuccess$ = this.actions.pipe(ofType(offerActions.deleteOffersSuccess));
+  public deleteOffersError$ = this.actions.pipe(ofType(offerActions.deleteOffersError));
   public activateOfferSuccess$ = this.actions.pipe(ofType(offerActions.activateOfferSuccess));
   public activateOfferError$ = this.actions.pipe(ofType(offerActions.activateOfferError));
   public deactivateOfferSuccess$ = this.actions.pipe(ofType(offerActions.deactivateOfferSuccess));
@@ -30,6 +33,12 @@ export class OfferFacade {
   public syncingOfferId$ = this.store.select(offerSelectors.selectSyncingOfferId);
   public syncOfferSuccess$ = this.actions.pipe(ofType(offerActions.syncOfferSuccess));
   public syncOfferError$ = this.actions.pipe(ofType(offerActions.syncOfferError));
+  public bulkSyncing$ = this.store.select(offerSelectors.selectBulkSyncing);
+  public syncOffersSuccess$ = this.actions.pipe(ofType(offerActions.syncOffersSuccess));
+  public syncOffersError$ = this.actions.pipe(ofType(offerActions.syncOffersError));
+  public bulkSyncingTerms$ = this.store.select(offerSelectors.selectBulkSyncingTerms);
+  public syncTermsSuccess$ = this.actions.pipe(ofType(offerActions.syncTermsSuccess));
+  public syncTermsError$ = this.actions.pipe(ofType(offerActions.syncTermsError));
 
   constructor(
     private store: Store<AppState>,
@@ -56,6 +65,10 @@ export class OfferFacade {
     this.store.dispatch(offerActions.deleteOffer({ payload }));
   }
 
+  public deleteOffers(payload: { ids: string[] }): void {
+    this.store.dispatch(offerActions.deleteOffers({ payload }));
+  }
+
   public deactivateOffer(payload: { id: string }): void {
     this.store.dispatch(offerActions.deactivateOffer({ payload }));
   }
@@ -70,5 +83,13 @@ export class OfferFacade {
 
   public syncOffer(payload: { id: string }): void {
     this.store.dispatch(offerActions.syncOffer({ payload }));
+  }
+
+  public syncOffers(payload: { ids: string[] }): void {
+    this.store.dispatch(offerActions.syncOffers({ payload }));
+  }
+
+  public syncTerms(payload: { termIds: string[] }): void {
+    this.store.dispatch(offerActions.syncTerms({ payload }));
   }
 }

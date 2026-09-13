@@ -26,8 +26,8 @@ export interface OfferTerm {
 }
 
 // Wynik listy/wyszukiwarki - jeden wiersz = jeden termin danej oferty.
-// isActive odziedziczone z Offer to status CAŁEJ oferty - termIsActive to
-// status TEGO KONKRETNEGO terminu, mogą się różnić (patrz admin-offer-list).
+// Oferta nie ma własnej flagi aktywności - termIsActive to status TEGO
+// KONKRETNEGO terminu (patrz admin-offer-list, group-offers-by-offer).
 export type OfferSearchResult = Omit<Offer, 'terms'> & {
   termId: string;
   startDate: string;

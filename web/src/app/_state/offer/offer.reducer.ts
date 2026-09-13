@@ -37,6 +37,51 @@ const reducer = createReducer(
     syncingOfferId: null,
   })),
 
+  on(offerActions.deleteOffers, (state) => ({
+    ...state,
+    bulkDeleting: true,
+    errorMessage: null,
+  })),
+  on(offerActions.deleteOffersSuccess, (state) => ({
+    ...state,
+    bulkDeleting: false,
+  })),
+  on(offerActions.deleteOffersError, (state, { errorMessage }) => ({
+    ...state,
+    bulkDeleting: false,
+    errorMessage,
+  })),
+
+  on(offerActions.syncOffers, (state) => ({
+    ...state,
+    bulkSyncing: true,
+    errorMessage: null,
+  })),
+  on(offerActions.syncOffersSuccess, (state) => ({
+    ...state,
+    bulkSyncing: false,
+  })),
+  on(offerActions.syncOffersError, (state, { errorMessage }) => ({
+    ...state,
+    bulkSyncing: false,
+    errorMessage,
+  })),
+
+  on(offerActions.syncTerms, (state) => ({
+    ...state,
+    bulkSyncingTerms: true,
+    errorMessage: null,
+  })),
+  on(offerActions.syncTermsSuccess, (state) => ({
+    ...state,
+    bulkSyncingTerms: false,
+  })),
+  on(offerActions.syncTermsError, (state, { errorMessage }) => ({
+    ...state,
+    bulkSyncingTerms: false,
+    errorMessage,
+  })),
+
   on(offerActions.scrapeOffer, (state) => ({
     ...state,
     scraping: true,

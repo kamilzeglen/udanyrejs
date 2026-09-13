@@ -93,6 +93,22 @@ export class OfferEffects {
     ),
   );
 
+  deleteOffers$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.deleteOffers),
+      switchMap(({ payload }) => {
+        return this.http.deleteOffers(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return offerActions.deleteOffersSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(offerActions.deleteOffersError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   deactivateOffer$ = createEffect(() =>
     this.actions$.pipe(
       ofType(offerActions.deactivateOffer),
@@ -135,6 +151,38 @@ export class OfferEffects {
           }),
           catchError((errorMessage) => {
             return of(offerActions.syncOfferError({ id: payload.id, errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  syncOffers$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.syncOffers),
+      switchMap(({ payload }) => {
+        return this.http.syncOffers(payload).pipe(
+          map((result) => {
+            return offerActions.syncOffersSuccess({ result });
+          }),
+          catchError((errorMessage) => {
+            return of(offerActions.syncOffersError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  syncTerms$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(offerActions.syncTerms),
+      switchMap(({ payload }) => {
+        return this.http.syncTerms(payload).pipe(
+          map((result) => {
+            return offerActions.syncTermsSuccess({ result });
+          }),
+          catchError((errorMessage) => {
+            return of(offerActions.syncTermsError({ errorMessage }));
           }),
         );
       }),

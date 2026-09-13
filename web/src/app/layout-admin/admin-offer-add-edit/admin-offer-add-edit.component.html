@@ -301,7 +301,7 @@
     </section>
 
     <button
-      *ngIf="mode === 'EDIT' && editingOffer?.isActive"
+      *ngIf="mode === 'EDIT' && editingOfferHasActiveTerm"
       (click)="deactivateOffer()"
       mat-raised-button
       class="deactivateOffer"
@@ -310,7 +310,7 @@
     </button>
 
     <button
-      *ngIf="mode === 'EDIT' && !editingOffer?.isActive"
+      *ngIf="mode === 'EDIT' && !editingOfferHasActiveTerm"
       (click)="activateOffer()"
       mat-raised-button
       class="activateOffer"

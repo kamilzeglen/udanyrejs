@@ -2,7 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { OfferFacade } from '@state/offer';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { combineLatest, map, ReplaySubject, take, takeUntil } from 'rxjs';
-import { OfferSearchResult, OfferSyncResult, SearchOffersPayload } from '@interfaces';
+import {
+  OfferBulkSyncResult,
+  OfferSearchResult,
+  OfferSyncResult,
+  OfferTermsBulkSyncResult,
+  SearchOffersPayload,
+} from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
 import { SortDirection } from '@angular/material/sort';
@@ -57,6 +63,9 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public loading$ = this.offerFacade.loading$;
   public pagination$ = this.offerFacade.pagination$;
   public syncingOfferId$ = this.offerFacade.syncingOfferId$;
+  public bulkDeleting$ = this.offerFacade.bulkDeleting$;
+  public bulkSyncing$ = this.offerFacade.bulkSyncing$;
+  public bulkSyncingTerms$ = this.offerFacade.bulkSyncingTerms$;
 
   public groupedOffers$ = this.offerFacade.offers$.pipe(map((offers) => (offers ? groupOffersByOfferId(offers) : [])));
 
@@ -89,6 +98,36 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
     this.offerFacade.syncOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się zsynchronizować oferty');
+    });
+
+    this.offerFacade.deleteOffersSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ deletedIds, failedIds }) => {
+      this.snackService.showInfo(this.buildBulkDeleteResultMessage(deletedIds, failedIds));
+      this.clearSelection();
+      this.getOffers();
+    });
+
+    this.offerFacade.deleteOffersError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych ofert');
+    });
+
+    this.offerFacade.syncOffersSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ result }) => {
+      this.snackService.showInfo(this.buildBulkSyncResultMessage(result));
+      this.clearSelection();
+      this.getOffers();
+    });
+
+    this.offerFacade.syncOffersError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się zsynchronizować zaznaczonych ofert');
+    });
+
+    this.offerFacade.syncTermsSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ result }) => {
+      this.snackService.showInfo(this.buildBulkTermsSyncResultMessage(result));
+      this.termSelection.clear();
+      this.getOffers();
+    });
+
+    this.offerFacade.syncTermsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się zsynchronizować zaznaczonych terminów');
     });
 
     this.getOffers();
@@ -164,9 +203,42 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.offerFacade.syncOffer({ id: offer.id });
   }
 
+  public deleteSelectedOffers(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'ą ofertę' : 'e oferty'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.offerFacade.deleteOffers({ ids });
+        });
+    });
+  }
+
+  public syncSelectedOffers(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.offerFacade.syncOffers({ ids: Array.from(selectedIds) });
+    });
+  }
+
+  public syncSelectedTerms(): void {
+    this.termSelection.selectedIds$.pipe(take(1)).subscribe((selectedTermIds) => {
+      this.offerFacade.syncTerms({ termIds: Array.from(selectedTermIds) });
+    });
+  }
+
   private buildSyncResultMessage(result: OfferSyncResult): string {
     const base =
-      `${result.termsAdded} nowy(ch) termin(ów), ${result.termsDeactivated} dezaktywowany(ch) termin(ów), ` +
+      `${result.termsAdded} nowy(ch) termin(ów), ${result.termsReactivated} przywrócony(ch) termin(ów), ` +
+      `${result.termsDeactivated} dezaktywowany(ch) termin(ów), ` +
       `${result.termsSkipped} pominięty(ch) z powodu błędu połączenia, ` +
       `${result.pdfsUpdated} zaktualizowany(ch) PDF.`;
 
@@ -175,6 +247,45 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     }
 
     return 'Zsynchronizowano ofertę: ' + base;
+  }
+
+  private buildBulkDeleteResultMessage(deletedIds: string[], failedIds: string[]): string {
+    if (failedIds.length === 0) {
+      return `Usunięto ${deletedIds.length} ofert(y).`;
+    }
+
+    return `Usunięto ${deletedIds.length} ofert(y), ${failedIds.length} nie udało się usunąć.`;
+  }
+
+  private buildBulkSyncResultMessage(result: OfferBulkSyncResult): string {
+    const base =
+      `Zsynchronizowano ${result.syncedIds.length} ofert(y): ` +
+      `${result.termsAdded} nowy(ch) termin(ów), ${result.termsReactivated} przywrócony(ch) termin(ów), ` +
+      `${result.termsDeactivated} dezaktywowany(ch) termin(ów), ` +
+      `${result.termsSkipped} pominięty(ch) z powodu błędu połączenia, ` +
+      `${result.pdfsUpdated} zaktualizowany(ch) PDF.`;
+
+    if (result.failedIds.length === 0) {
+      return base;
+    }
+
+    return base + ` ${result.failedIds.length} ofert(y) pominięto (brak linku źródłowego lub nie znaleziono).`;
+  }
+
+  private buildBulkTermsSyncResultMessage(result: OfferTermsBulkSyncResult): string {
+    const base =
+      `Zsynchronizowano ${result.syncedIds.length} termin(ów): ` +
+      `${result.reactivatedIds.length} przywrócony(ch), ${result.deactivatedIds.length} dezaktywowany(ch)`;
+
+    if (result.failedIds.length === 0) {
+      return base + `, ${result.pdfsUpdated} zaktualizowany(ch) PDF.`;
+    }
+
+    return (
+      base +
+      `, ${result.pdfsUpdated} zaktualizowany(ch) PDF. ` +
+      `${result.failedIds.length} termin(ów) pominięto (brak linku źródłowego, błąd połączenia lub nie znaleziono).`
+    );
   }
 
   public editOffer(offer: OfferSearchResult): void {

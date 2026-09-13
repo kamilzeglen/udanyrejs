@@ -31,6 +31,34 @@
         >
           Odznacz wszystko
         </button>
+        <button
+          type="button"
+          class="bulk-sync"
+          *ngIf="viewModel.selectedCount > 0"
+          [disabled]="bulkSyncing$ | async"
+          (click)="syncSelectedOffers()"
+        >
+          Synchronizuj zaznaczone ({{ viewModel.selectedCount }})
+        </button>
+        <button
+          type="button"
+          class="bulk-delete"
+          *ngIf="viewModel.selectedCount > 0"
+          [disabled]="bulkDeleting$ | async"
+          (click)="deleteSelectedOffers()"
+        >
+          Usuń zaznaczone ({{ viewModel.selectedCount }})
+        </button>
+        <button
+          type="button"
+          class="bulk-sync-terms"
+          *ngIf="viewModel.selectedTermCount > 0"
+          [disabled]="bulkSyncingTerms$ | async"
+          matTooltip="Odświeża tylko zaznaczone terminy, bez odkrywania nowych terminów oferty"
+          (click)="syncSelectedTerms()"
+        >
+          Synchronizuj zaznaczone terminy ({{ viewModel.selectedTermCount }})
+        </button>
       </div>
 
       <div class="sort-controls">
@@ -47,7 +75,7 @@
     <mat-accordion class="offer-groups" multi="true">
       <mat-expansion-panel
         *ngFor="let group of viewModel.groups; trackBy: trackByOfferId"
-        [class.inactive-group]="!group.offer.isActive"
+        [class.inactive-group]="!group.hasActiveTerm"
       >
         <mat-expansion-panel-header>
           <mat-panel-title>
@@ -246,6 +274,17 @@
                     (click)="$event.stopPropagation()"
                   >
                     <mat-icon>open_in_new</mat-icon>
+                  </a>
+                  <a
+                    *ngIf="term.sourceUrl"
+                    class="icon-view-term"
+                    [href]="term.sourceUrl"
+                    target="_blank"
+                    rel="noopener"
+                    matTooltip="Otwórz stronę źródłową (rejsy4you)"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>language</mat-icon>
                   </a>
                 </td>
               </tr>

@@ -1,5 +1,13 @@
 import { createAction, props } from '@ngrx/store';
-import { Offer, OfferScrapper, OfferSearchResult, OfferSyncResult, SearchOffersPayload } from '@interfaces';
+import {
+  Offer,
+  OfferBulkSyncResult,
+  OfferScrapper,
+  OfferSearchResult,
+  OfferSyncResult,
+  OfferTermsBulkSyncResult,
+  SearchOffersPayload,
+} from '@interfaces';
 import { PaginatedResponse } from '../../_interfaces/http';
 
 export const getOffers = createAction('[Offer] Get Offers', props<{ payload: Partial<SearchOffersPayload> }>());
@@ -30,6 +38,13 @@ export const deleteOffer = createAction('[Offer] Delete Offer', props<{ payload:
 export const deleteOfferSuccess = createAction('[Offer] Delete Offer Success');
 export const deleteOfferError = createAction('[Offer] Delete Offer Error', props<{ errorMessage: string }>());
 
+export const deleteOffers = createAction('[Offer] Delete Offers', props<{ payload: { ids: string[] } }>());
+export const deleteOffersSuccess = createAction(
+  '[Offer] Delete Offers Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const deleteOffersError = createAction('[Offer] Delete Offers Error', props<{ errorMessage: string }>());
+
 export const deactivateOffer = createAction('[Offer] Deactivate Offer', props<{ payload: { id: string } }>());
 export const deactivateOfferSuccess = createAction('[Offer] Deactivate Offer Success');
 export const deactivateOfferError = createAction('[Offer] Deactivate Offer Error', props<{ errorMessage: string }>());
@@ -44,6 +59,17 @@ export const syncOfferSuccess = createAction(
   props<{ id: string; result: OfferSyncResult }>(),
 );
 export const syncOfferError = createAction('[Offer] Sync Offer Error', props<{ id: string; errorMessage: string }>());
+
+export const syncOffers = createAction('[Offer] Sync Offers', props<{ payload: { ids: string[] } }>());
+export const syncOffersSuccess = createAction('[Offer] Sync Offers Success', props<{ result: OfferBulkSyncResult }>());
+export const syncOffersError = createAction('[Offer] Sync Offers Error', props<{ errorMessage: string }>());
+
+export const syncTerms = createAction('[Offer] Sync Terms', props<{ payload: { termIds: string[] } }>());
+export const syncTermsSuccess = createAction(
+  '[Offer] Sync Terms Success',
+  props<{ result: OfferTermsBulkSyncResult }>(),
+);
+export const syncTermsError = createAction('[Offer] Sync Terms Error', props<{ errorMessage: string }>());
 
 export const scrapeOffer = createAction('[Offer] Scrape Offer', props<{ payload: { url: string } }>());
 export const scrapeOfferSuccess = createAction(

@@ -15,6 +15,10 @@ export interface GroupedOffer {
   // służy już tylko do pierwszego zaimportowania, każdy termin synchronizuje
   // się dalej niezależnie przez własny sourceUrl (patrz admin-offer-list.html).
   termsWithSourceCount: number;
+  // Oferta nie ma własnej flagi aktywności w bazie - liczymy ją tu z jej
+  // terminów (ma choć jeden aktywny), żeby uniknąć jej wywoływania w
+  // template'ach (patrz admin-offer-list.html - klasa "inactive-group").
+  hasActiveTerm: boolean;
 }
 
 export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[] {
@@ -28,6 +32,7 @@ export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[
       existingGroup.terms.push(term);
       addToTotal(existingGroup.totalShareStats, term.shareStats);
       existingGroup.termsWithSourceCount += term.sourceUrl ? 1 : 0;
+      existingGroup.hasActiveTerm = existingGroup.hasActiveTerm || term.termIsActive;
       continue;
     }
 
@@ -36,6 +41,7 @@ export function groupOffersByOfferId(offers: OfferSearchResult[]): GroupedOffer[
       terms: [term],
       totalShareStats: { webClicks: 0, facebookClicks: 0, instagramClicks: 0, tiktokClicks: 0 },
       termsWithSourceCount: term.sourceUrl ? 1 : 0,
+      hasActiveTerm: term.termIsActive,
     };
     addToTotal(newGroup.totalShareStats, term.shareStats);
     groupByOfferId.set(term.id, newGroup);

@@ -6,6 +6,7 @@ function buildTerm(
   termId: string,
   shareStats?: Partial<OfferSearchResult['shareStats']>,
   sourceUrl: string = null,
+  termIsActive: boolean = true,
 ): OfferSearchResult {
   return {
     id: offerId,
@@ -15,6 +16,7 @@ function buildTerm(
     endDate: '2026-01-10',
     fromPrice: 1000,
     sourceUrl,
+    termIsActive,
     shareStats: {
       id: `stats-${termId}`,
       offerId,
@@ -85,5 +87,27 @@ describe('groupOffersByOfferId', () => {
     const groups = groupOffersByOfferId(rows);
 
     expect(groups[0].termsWithSourceCount).toBe(2);
+  });
+
+  it('marks the group as having an active term when at least one of its terms is active', () => {
+    const rows = [
+      buildTerm('offer-1', 'term-1', undefined, null, false),
+      buildTerm('offer-1', 'term-2', undefined, null, true),
+    ];
+
+    const groups = groupOffersByOfferId(rows);
+
+    expect(groups[0].hasActiveTerm).toBe(true);
+  });
+
+  it('marks the group as inactive once every one of its terms is inactive', () => {
+    const rows = [
+      buildTerm('offer-1', 'term-1', undefined, null, false),
+      buildTerm('offer-1', 'term-2', undefined, null, false),
+    ];
+
+    const groups = groupOffersByOfferId(rows);
+
+    expect(groups[0].hasActiveTerm).toBe(false);
   });
 });

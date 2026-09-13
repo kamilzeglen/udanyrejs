@@ -27,6 +27,10 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
   public mode: 'EDIT' | 'ADD' = 'ADD';
   public editingOffer: Offer;
+  // Oferta nie ma własnej flagi aktywności w bazie - liczymy ją tutaj z jej
+  // terminów, raz, gdy oferta się załaduje (nie w template - patrz reguła
+  // projektu o unikaniu wywołań funkcji w bindingach).
+  public editingOfferHasActiveTerm: boolean;
 
   public isInitializing: boolean = false;
 
@@ -95,6 +99,7 @@ export class AdminOfferAddEditComponent implements OnInit, OnDestroy {
 
     this.offerFacade.getOfferSuccess$.pipe(take(1)).subscribe(({ offer }) => {
       this.editingOffer = offer;
+      this.editingOfferHasActiveTerm = (offer?.terms ?? []).some((term) => term.isActive);
 
       if (!this.editingOffer) {
         this.snackService.showError('Nie znaleziono oferty');

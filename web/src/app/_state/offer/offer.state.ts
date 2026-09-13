@@ -6,6 +6,9 @@ export type OfferState = Readonly<{
   loading: boolean;
   scraping: boolean;
   syncingOfferId: string;
+  bulkDeleting: boolean;
+  bulkSyncing: boolean;
+  bulkSyncingTerms: boolean;
   pagination: Pagination;
   errorMessage: string;
 }>;
@@ -22,6 +25,9 @@ export const initialState: OfferState = {
   loading: false,
   scraping: false,
   syncingOfferId: null,
+  bulkDeleting: false,
+  bulkSyncing: false,
+  bulkSyncingTerms: false,
   pagination: { ...(defaultPagination as Pagination) },
   errorMessage: null,
 };
