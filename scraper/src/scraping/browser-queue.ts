@@ -36,14 +36,6 @@ export class BrowserQueue {
           const result = await task(page);
           const elapsedMs = Date.now() - startedAt;
           console.log(`[scraper] ${label}: done (${elapsedMs}ms)`);
-
-          const delayMs = randomDelayMs(
-            this.config.minDelayMs,
-            this.config.maxDelayMs,
-          );
-          console.log(`[scraper] waiting ${delayMs}ms before the next request`);
-          await wait(delayMs);
-
           return result;
         } catch (error) {
           console.error(
@@ -52,6 +44,17 @@ export class BrowserQueue {
           throw error;
         } finally {
           await page.close();
+
+          // Ten delay musi zajść RÓWNIEŻ po błędzie, nie tylko po sukcesie -
+          // inaczej seria niepowodzeń (np. blokada anti-bot po stronie
+          // rejsy4you) przelatuje przez kolejkę bez żadnego throttlingu,
+          // co potęguje problem zamiast go łagodzić.
+          const delayMs = randomDelayMs(
+            this.config.minDelayMs,
+            this.config.maxDelayMs,
+          );
+          console.log(`[scraper] waiting ${delayMs}ms before the next request`);
+          await wait(delayMs);
         }
       });
 

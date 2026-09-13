@@ -52,4 +52,32 @@ describe('BrowserQueue', () => {
     await expect(failingTask).rejects.toThrow('boom');
     await expect(nextTask).resolves.toBe('still works');
   });
+
+  it('waits the configured delay after a failing task too, not just after a successful one', async () => {
+    const delayedConfig: ScraperConfig = {
+      ...config,
+      minDelayMs: 600,
+      maxDelayMs: 600,
+    };
+    queue = new BrowserQueue(delayedConfig);
+
+    // Uruchamia przeglądarkę PRZED pomiarem, żeby czas jej startu (rzędu
+    // sekund) nie zagłuszył mierzonego opóźnienia (600ms).
+    await queue.enqueue(async () => 'warmup');
+
+    const beforeFailingTask = Date.now();
+    const failingTask = queue.enqueue(async () => {
+      throw new Error('boom');
+    });
+    let nextTaskStartedAt = 0;
+    const nextTask = queue.enqueue(async () => {
+      nextTaskStartedAt = Date.now();
+      return 'done';
+    });
+
+    await expect(failingTask).rejects.toThrow('boom');
+    await nextTask;
+
+    expect(nextTaskStartedAt - beforeFailingTask).toBeGreaterThanOrEqual(450);
+  });
 });
