@@ -492,6 +492,37 @@ describe('OfferService', () => {
     });
   });
 
+  describe('findTermsByIds', () => {
+    it('joins the parent offer, prices and PDF for the requested term ids', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([{ id: 'term-1' }]),
+      };
+      offerTermRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      const result = await service.findTermsByIds(['term-1', 'term-2']);
+
+      expect(queryBuilder.where).toHaveBeenCalledWith(
+        'term.id IN (:...termIds)',
+        {
+          termIds: ['term-1', 'term-2'],
+        },
+      );
+      expect(result).toEqual([{ id: 'term-1' }]);
+    });
+
+    it('returns an empty array without querying when given no ids', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+
+      const result = await service.findTermsByIds([]);
+
+      expect(result).toEqual([]);
+      expect(offerTermRepository.createQueryBuilder).not.toHaveBeenCalled();
+    });
+  });
+
   describe('findActiveOffers', () => {
     it('filters by term start date instead of the removed offer.startDate column', async () => {
       const offerRepository = (service as any).offerRepository;
@@ -692,7 +723,6 @@ describe('OfferService', () => {
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         getOne: jest.fn().mockResolvedValue(existingOffer),
       });
-      offerRepository.save = jest.fn().mockResolvedValue(existingOffer);
     });
 
     it('deactivating the offer also deactivates every one of its terms', async () => {
@@ -724,7 +754,7 @@ describe('OfferService', () => {
     });
   });
 
-  describe('recalculateOfferActiveState', () => {
+  describe('offerHasActiveTerm', () => {
     function buildCountBuilder(count: number) {
       return {
         where: jest.fn().mockReturnThis(),
@@ -733,45 +763,26 @@ describe('OfferService', () => {
       };
     }
 
-    function buildOfferUpdateBuilder() {
-      return {
-        update: jest.fn().mockReturnThis(),
-        set: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        execute: jest.fn().mockResolvedValue(undefined),
-      };
-    }
-
-    it('marks the offer active when at least one term is still active', async () => {
+    it('returns true when at least one term is still active', async () => {
       const offerTermRepository = (service as any).offerTermRepository;
       offerTermRepository.createQueryBuilder.mockReturnValue(
         buildCountBuilder(2),
       );
 
-      const offerRepository = (service as any).offerRepository;
-      const updateBuilder = buildOfferUpdateBuilder();
-      offerRepository.createQueryBuilder.mockReturnValue(updateBuilder);
-
-      const result = await service.recalculateOfferActiveState('offer-1');
+      const result = await service.offerHasActiveTerm('offer-1');
 
       expect(result).toBe(true);
-      expect(updateBuilder.set).toHaveBeenCalledWith({ isActive: true });
     });
 
-    it('marks the offer inactive once none of its terms are active', async () => {
+    it('returns false once none of its terms are active', async () => {
       const offerTermRepository = (service as any).offerTermRepository;
       offerTermRepository.createQueryBuilder.mockReturnValue(
         buildCountBuilder(0),
       );
 
-      const offerRepository = (service as any).offerRepository;
-      const updateBuilder = buildOfferUpdateBuilder();
-      offerRepository.createQueryBuilder.mockReturnValue(updateBuilder);
-
-      const result = await service.recalculateOfferActiveState('offer-1');
+      const result = await service.offerHasActiveTerm('offer-1');
 
       expect(result).toBe(false);
-      expect(updateBuilder.set).toHaveBeenCalledWith({ isActive: false });
     });
   });
 
@@ -828,6 +839,72 @@ describe('OfferService', () => {
         offerTermId: 'term-1',
       });
       expect(transactionManager.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removeOffers', () => {
+    beforeEach(() => {
+      const offerRepository = (service as any).offerRepository;
+      offerRepository.createQueryBuilder.mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({
+          id: 'offer-1',
+          name: 'Rejs testowy',
+          terms: [],
+        }),
+      });
+      transactionManager.createQueryBuilder.mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      });
+    });
+
+    it('removes every offer and reports all of them as deleted', async () => {
+      const result = await service.removeOffers(
+        ['offer-1', 'offer-2'],
+        requestUser,
+      );
+
+      expect(dataSource.transaction).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        deletedIds: ['offer-1', 'offer-2'],
+        failedIds: [],
+      });
+    });
+
+    it('keeps removing the rest of the batch when one offer is not found', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const queryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest
+          .fn()
+          .mockResolvedValueOnce({
+            id: 'offer-1',
+            name: 'Rejs testowy',
+            terms: [],
+          })
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({
+            id: 'offer-3',
+            name: 'Rejs testowy 2',
+            terms: [],
+          }),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      const result = await service.removeOffers(
+        ['offer-1', 'offer-missing', 'offer-3'],
+        requestUser,
+      );
+
+      expect(result).toEqual({
+        deletedIds: ['offer-1', 'offer-3'],
+        failedIds: ['offer-missing'],
+      });
     });
   });
 

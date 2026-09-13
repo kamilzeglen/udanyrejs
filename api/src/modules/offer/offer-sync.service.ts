@@ -7,6 +7,7 @@ import {
   ScraperClientService,
 } from '@core/scraper-client/scraper-client.service';
 import { Offer } from './offer.entity';
+import { OfferTerm } from './offer-term.entity';
 import { OfferTermPrice } from './offer-term-price.entity';
 import { LogService } from '@modules/log/log.service';
 import { OfferService } from './offer.service';
@@ -29,8 +30,33 @@ export interface OfferSyncResult {
   offerDeactivated: boolean;
   termsAdded: number;
   termsDeactivated: number;
+  termsReactivated: number;
   termsSkipped: number;
   pdfsUpdated: number;
+}
+
+export interface OfferBulkSyncResult {
+  syncedIds: string[];
+  failedIds: string[];
+  termsAdded: number;
+  termsDeactivated: number;
+  termsReactivated: number;
+  termsSkipped: number;
+  pdfsUpdated: number;
+}
+
+export interface OfferTermsBulkSyncResult {
+  syncedIds: string[];
+  failedIds: string[];
+  reactivatedIds: string[];
+  deactivatedIds: string[];
+  pdfsUpdated: number;
+}
+
+interface TermSyncOutcome {
+  status: 'deactivated' | 'skipped' | 'synced';
+  reactivated: boolean;
+  pdfUpdated: boolean;
 }
 
 @Injectable()
@@ -61,71 +87,48 @@ export class OfferSyncService {
       offer.companyId,
     );
     const knownTerms = [...offer.terms];
-    const termsToSync = offer.terms.filter(
-      (term) => term.sourceUrl && term.isActive,
-    );
+    // Świadomie NIE filtrujemy po term.isActive - termin błędnie
+    // dezaktywowany (np. przez chwilową blokadę/rate-limit strony
+    // źródłowej) ma szansę sam się "naprawić" przy kolejnym syncu, jeśli
+    // jego strona faktycznie znów odpowiada poprawnie.
+    const termsToSync = offer.terms.filter((term) => term.sourceUrl);
 
     let termsAdded = 0;
     let termsDeactivated = 0;
+    let termsReactivated = 0;
     let termsSkipped = 0;
     let pdfsUpdated = 0;
 
     const discoveredLinks = new Map<string, ScrapedSiblingLink>();
 
-    // Faza 1: odśwież KAŻDY znany aktywny termin - lekki scrapeTerm (jedna
-    // strona), update tylko przy realnej różnicy.
+    // Faza 1: odśwież KAŻDY znany termin z linkiem źródłowym (aktywny albo
+    // nie) - lekki scrapeTerm (jedna strona), update tylko przy realnej
+    // różnicy.
     for (const term of termsToSync) {
-      let scraped: ScrapedTermPageResponse;
-      try {
-        scraped = await this.scraperClientService.scrapeTerm(term.sourceUrl);
-      } catch (error) {
-        if (error instanceof ScrapedPageNotFoundError) {
-          await this.offerService.setTermActive(term.id, false);
-          this.logger.warn(
-            `Termin "${term.id}" oferty "${offer.id}" dezaktywowany - strona źródłowa potwierdziła 404/410 (oferta zdjęta ze strony).`,
-          );
-          termsDeactivated++;
-          continue;
-        }
+      const outcome = await this.syncKnownTerm(
+        term,
+        offer.companyId,
+        cabinTypes,
+        offer.id,
+        discoveredLinks,
+      );
 
-        // Niepowodzenie komunikacji ze scraperem (timeout, scraper padł,
-        // błąd sieci) NIE oznacza że strona źródłowa faktycznie zniknęła -
-        // dezaktywacja tylko na tej podstawie byłaby fałszywym alarmem
-        // niszczącym żywe terminy. Próbujemy ponownie przy kolejnym syncu.
-        this.logger.warn(
-          `Termin "${term.id}" oferty "${offer.id}" pominięty w tej synchronizacji - strona źródłowa nie odpowiedziała: ${(error as Error).message}`,
-        );
+      if (outcome.status === 'deactivated') {
+        termsDeactivated++;
+        continue;
+      }
+
+      if (outcome.status === 'skipped') {
         termsSkipped++;
         continue;
       }
 
-      if (!isSameDateRange(term, scraped)) {
-        await this.offerService.updateTermDates(
-          term.id,
-          scraped.startDate,
-          scraped.endDate,
-        );
+      if (outcome.reactivated) {
+        termsReactivated++;
       }
 
-      const priceDtos = this.buildPriceDtos(scraped.cabinPrices, cabinTypes);
-      if (!this.pricesUnchanged(term.prices ?? [], priceDtos)) {
-        await this.offerService.updateTermPrices(
-          term.id,
-          offer.companyId,
-          priceDtos,
-        );
-      }
-
-      if (
-        scraped.pdfUrl &&
-        term.pdfFile?.url !== scraped.pdfUrl &&
-        (await this.tryUpdateTermPdf(term.id, scraped.pdfUrl))
-      ) {
+      if (outcome.pdfUpdated) {
         pdfsUpdated++;
-      }
-
-      for (const sibling of scraped.siblingLinks) {
-        discoveredLinks.set(sibling.sourceUrl, sibling);
       }
     }
 
@@ -173,18 +176,15 @@ export class OfferSyncService {
       }
     }
 
-    const offerActive = await this.offerService.recalculateOfferActiveState(
-      offer.id,
-    );
+    const offerActive = await this.offerService.offerHasActiveTerm(offer.id);
 
     await this.logService.createLog(
       `Zsynchronizowano ofertę "${offer.name}" (${offer.id}): ` +
-        `${termsAdded} nowy(ch) termin(ów), ${termsDeactivated} dezaktywowany(ch) termin(ów), ` +
+        `${termsAdded} nowy(ch) termin(ów), ${termsReactivated} przywrócony(ch) termin(ów), ` +
+        `${termsDeactivated} dezaktywowany(ch) termin(ów), ` +
         `${termsSkipped} pominięty(ch) z powodu błędu połączenia, ` +
         `${pdfsUpdated} zaktualizowany(ch) PDF` +
-        (offerActive
-          ? '.'
-          : ', oferta dezaktywowana - brak aktywnych terminów.'),
+        (offerActive ? '.' : ', oferta bez aktywnych terminów.'),
       'SYSTEM',
     );
 
@@ -192,9 +192,198 @@ export class OfferSyncService {
       offerDeactivated: !offerActive,
       termsAdded,
       termsDeactivated,
+      termsReactivated,
       termsSkipped,
       pdfsUpdated,
     };
+  }
+
+  // Wspólna logika odświeżenia JEDNEGO już znanego terminu - używana zarówno
+  // przez pełny syncOffer() (Faza 1, po kolei dla całej oferty), jak i przez
+  // syncTerms() (tylko dla wybranych, pojedynczych terminów). discoveredLinks
+  // jest opcjonalny - syncTerms() nie robi Fazy 2 (odkrywanie nowych
+  // terminów), bo to z definicji dotyczy całej rodziny terminów oferty.
+  private async syncKnownTerm(
+    term: OfferTerm,
+    companyId: string,
+    cabinTypes: CabinType[],
+    offerId: string,
+    discoveredLinks?: Map<string, ScrapedSiblingLink>,
+  ): Promise<TermSyncOutcome> {
+    let scraped: ScrapedTermPageResponse;
+    try {
+      scraped = await this.scraperClientService.scrapeTerm(term.sourceUrl);
+    } catch (error) {
+      if (error instanceof ScrapedPageNotFoundError) {
+        await this.offerService.setTermActive(term.id, false);
+        this.logger.warn(
+          `Termin "${term.id}" oferty "${offerId}" dezaktywowany - strona źródłowa potwierdziła 404/410 (oferta zdjęta ze strony).`,
+        );
+        return { status: 'deactivated', reactivated: false, pdfUpdated: false };
+      }
+
+      // Niepowodzenie komunikacji ze scraperem (timeout, scraper padł, błąd
+      // sieci) NIE oznacza że strona źródłowa faktycznie zniknęła -
+      // dezaktywacja tylko na tej podstawie byłaby fałszywym alarmem
+      // niszczącym żywe terminy. Próbujemy ponownie przy kolejnym syncu.
+      this.logger.warn(
+        `Termin "${term.id}" oferty "${offerId}" pominięty w tej synchronizacji - strona źródłowa nie odpowiedziała: ${(error as Error).message}`,
+      );
+      return { status: 'skipped', reactivated: false, pdfUpdated: false };
+    }
+
+    let reactivated = false;
+    if (!term.isActive) {
+      await this.offerService.setTermActive(term.id, true);
+      reactivated = true;
+      this.logger.log(
+        `Termin "${term.id}" oferty "${offerId}" przywrócony - strona źródłowa znów odpowiada poprawnie.`,
+      );
+    }
+
+    if (!isSameDateRange(term, scraped)) {
+      await this.offerService.updateTermDates(
+        term.id,
+        scraped.startDate,
+        scraped.endDate,
+      );
+    }
+
+    const priceDtos = this.buildPriceDtos(scraped.cabinPrices, cabinTypes);
+    if (!this.pricesUnchanged(term.prices ?? [], priceDtos)) {
+      await this.offerService.updateTermPrices(term.id, companyId, priceDtos);
+    }
+
+    let pdfUpdated = false;
+    if (
+      scraped.pdfUrl &&
+      term.pdfFile?.url !== scraped.pdfUrl &&
+      (await this.tryUpdateTermPdf(term.id, scraped.pdfUrl))
+    ) {
+      pdfUpdated = true;
+    }
+
+    if (discoveredLinks) {
+      for (const sibling of scraped.siblingLinks) {
+        discoveredLinks.set(sibling.sourceUrl, sibling);
+      }
+    }
+
+    return { status: 'synced', reactivated, pdfUpdated };
+  }
+
+  // Sync na poziomie POJEDYNCZYCH zaznaczonych terminów - w odróżnieniu od
+  // syncOffer()/syncOffers() (cała oferta) odświeża WYŁĄCZNIE wskazane
+  // terminy, nawet jeśli reszta terminów tej samej oferty nie została
+  // zaznaczona. Bez Fazy 2 (odkrywanie nowych terminów) - to z definicji
+  // dotyczy całej rodziny terminów, nie pojedynczego wyboru.
+  public async syncTerms(termIds: string[]): Promise<OfferTermsBulkSyncResult> {
+    const result: OfferTermsBulkSyncResult = {
+      syncedIds: [],
+      failedIds: [],
+      reactivatedIds: [],
+      deactivatedIds: [],
+      pdfsUpdated: 0,
+    };
+
+    const terms = await this.offerService.findTermsByIds(termIds);
+    const termById = new Map(terms.map((term) => [term.id, term]));
+    const cabinTypesByCompany = new Map<string, CabinType[]>();
+
+    for (const termId of termIds) {
+      const term = termById.get(termId);
+
+      if (!term || !term.sourceUrl) {
+        result.failedIds.push(termId);
+        continue;
+      }
+
+      let cabinTypes = cabinTypesByCompany.get(term.offer.companyId);
+      if (!cabinTypes) {
+        cabinTypes = await this.cabinTypeService.findAllByCompany(
+          term.offer.companyId,
+        );
+        cabinTypesByCompany.set(term.offer.companyId, cabinTypes);
+      }
+
+      const outcome = await this.syncKnownTerm(
+        term,
+        term.offer.companyId,
+        cabinTypes,
+        term.offerId,
+      );
+
+      if (outcome.status === 'deactivated') {
+        result.deactivatedIds.push(termId);
+        continue;
+      }
+
+      if (outcome.status === 'skipped') {
+        result.failedIds.push(termId);
+        continue;
+      }
+
+      result.syncedIds.push(termId);
+      if (outcome.reactivated) {
+        result.reactivatedIds.push(termId);
+      }
+      if (outcome.pdfUpdated) {
+        result.pdfsUpdated++;
+      }
+    }
+
+    await this.logService.createLog(
+      `Zsynchronizowano ${result.syncedIds.length} zaznaczony(ch) termin(ów) ` +
+        `(spośród ${termIds.length}): ${result.reactivatedIds.length} przywrócony(ch), ` +
+        `${result.deactivatedIds.length} dezaktywowany(ch), ${result.failedIds.length} pominięty(ch), ` +
+        `${result.pdfsUpdated} zaktualizowany(ch) PDF.`,
+      'SYSTEM',
+    );
+
+    return result;
+  }
+
+  // Wersja masowa uproszczona względem OfferSyncCron: wywołuje ten sam
+  // syncOffer() dla każdej podanej oferty po kolei, ale BEZ opóźnienia
+  // między ofertami (SYNC_REQUEST_DELAY_MS w cronie) - akceptowalne dla
+  // ręcznego triggera na garstce zaznaczonych ofert, nie dla całej bazy.
+  public async syncOffers(offerIds: string[]): Promise<OfferBulkSyncResult> {
+    const result: OfferBulkSyncResult = {
+      syncedIds: [],
+      failedIds: [],
+      termsAdded: 0,
+      termsDeactivated: 0,
+      termsReactivated: 0,
+      termsSkipped: 0,
+      pdfsUpdated: 0,
+    };
+
+    for (const offerId of offerIds) {
+      const offer = await this.offerService.findOneById(offerId);
+      const hasSyncableTerm = offer?.terms?.some((term) => term.sourceUrl);
+
+      if (!offer || !hasSyncableTerm) {
+        result.failedIds.push(offerId);
+        continue;
+      }
+
+      try {
+        const offerResult = await this.syncOffer(offer);
+        result.syncedIds.push(offerId);
+        result.termsAdded += offerResult.termsAdded;
+        result.termsDeactivated += offerResult.termsDeactivated;
+        result.termsReactivated += offerResult.termsReactivated;
+        result.termsSkipped += offerResult.termsSkipped;
+        result.pdfsUpdated += offerResult.pdfsUpdated;
+      } catch (error) {
+        this.logger.warn(
+          `Bulk sync: failed to sync offer ${offerId}: ${error.message}`,
+        );
+        result.failedIds.push(offerId);
+      }
+    }
+
+    return result;
   }
 
   private pricesUnchanged(

@@ -84,8 +84,12 @@ export class OfferService {
       .leftJoinAndSelect('terms.prices', 'prices')
       .leftJoinAndSelect('prices.cabinType', 'cabinType')
       .leftJoinAndSelect('terms.pdfFile', 'pdfFile')
-      .where('offer.isActive = :isActive', { isActive: true })
-      .andWhere(
+      .where(
+        // Świadomie NIE wymagamy term.isActive tutaj - oferta, której
+        // wszystkie terminy padły ofiarą fałszywej dezaktywacji (np. bug w
+        // scraperze), ma nadal być kandydatem do syncu, żeby mogła się sama
+        // "naprawić" (patrz OfferSyncService.syncOffer - Faza 1 już nie
+        // filtruje po isActive).
         'EXISTS (SELECT 1 FROM offer_term term WHERE term."offerId" = offer.id AND term."sourceUrl" IS NOT NULL)',
       )
       .getMany();
@@ -94,7 +98,9 @@ export class OfferService {
   async findActiveOffers(opts?: { lessThan: Date }): Promise<Offer[]> {
     const queryBuilder = this.offerRepository
       .createQueryBuilder('offer')
-      .where('offer.isActive = :isActive', { isActive: true });
+      .where(
+        'EXISTS (SELECT 1 FROM offer_term term WHERE term."offerId" = offer.id AND term."isActive" = true)',
+      );
 
     if (opts?.lessThan) {
       queryBuilder.andWhere(
@@ -163,8 +169,6 @@ export class OfferService {
     }
 
     if (!showInactive) {
-      whereClauses.push('offer.isActive = :active');
-      whereParams.active = true;
       whereClauses.push('term.isActive = :termActive');
       whereParams.termActive = true;
     }
@@ -520,17 +524,35 @@ export class OfferService {
     return true;
   }
 
+  async removeOffers(
+    offerIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const offerId of offerIds) {
+      try {
+        await this.removeOffer(offerId, reqCreatedBy);
+        deletedIds.push(offerId);
+      } catch (error) {
+        this.logger.warn(
+          `Bulk delete: failed to remove offer ${offerId}: ${error.message}`,
+        );
+        failedIds.push(offerId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
   async deactivateOffer(offerId: string, reqCreatedBy: User): Promise<boolean> {
     const offer = await this.findOneById(offerId);
-    const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
       throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerId });
     }
 
-    offer.isActive = false;
-    offer.updatedBy = user;
-    await this.offerRepository.save(offer);
     await this.setAllTermsActive(offerId, false);
 
     await this.logService.createLog(
@@ -543,15 +565,11 @@ export class OfferService {
 
   async activateOffer(offerId: string, reqCreatedBy: User): Promise<boolean> {
     const offer = await this.findOneById(offerId);
-    const user = await this.userService.findOneByEmail(reqCreatedBy.email);
 
     if (!offer) {
       throw new AppException(API_ERRORS.OFFER_NOT_FOUND, { id: offerId });
     }
 
-    offer.isActive = true;
-    offer.updatedBy = user;
-    await this.offerRepository.save(offer);
     await this.setAllTermsActive(offerId, true);
 
     await this.logService.createLog(
@@ -577,26 +595,36 @@ export class OfferService {
       .execute();
   }
 
-  // Woła to OfferSyncService po zsynchronizowaniu terminów - status oferty
-  // jest tu WYLICZANY z jej terminów, nie ustawiany wprost, w przeciwieństwie
-  // do deactivateOffer/activateOffer wyżej (ręczna decyzja admina).
-  async recalculateOfferActiveState(offerId: string): Promise<boolean> {
+  // Oferta nie przechowuje własnej flagi aktywności - jest ona zawsze
+  // WYLICZANA z jej terminów (ma choć jeden aktywny), nigdy nie zapisywana
+  // osobno, żeby nie mogła się rozjechać ze stanem terminów (patrz incydent:
+  // bug w scraperze błędnie dezaktywował terminy, co przez zapisywaną
+  // flagę na ofercie chowało całe, wciąż żywe oferty ze strony).
+  async offerHasActiveTerm(offerId: string): Promise<boolean> {
     const activeTermCount = await this.offerTermRepository
       .createQueryBuilder('term')
       .where('term.offerId = :offerId', { offerId })
       .andWhere('term.isActive = :isActive', { isActive: true })
       .getCount();
 
-    const isActive = activeTermCount > 0;
+    return activeTermCount > 0;
+  }
 
-    await this.offerRepository
-      .createQueryBuilder()
-      .update(Offer)
-      .set({ isActive })
-      .where('id = :offerId', { offerId })
-      .execute();
+  // Ładuje konkretne terminy razem z ich ofertą (companyId potrzebny do
+  // dopasowania cen kabin) i cenami/PDF - używane przez syncTerms() do
+  // odświeżenia tylko wybranych, pojedynczych terminów.
+  async findTermsByIds(termIds: string[]): Promise<OfferTerm[]> {
+    if (termIds.length === 0) {
+      return [];
+    }
 
-    return isActive;
+    return await this.offerTermRepository
+      .createQueryBuilder('term')
+      .leftJoinAndSelect('term.offer', 'offer')
+      .leftJoinAndSelect('term.prices', 'prices')
+      .leftJoinAndSelect('term.pdfFile', 'pdfFile')
+      .where('term.id IN (:...termIds)', { termIds })
+      .getMany();
   }
 
   async setTermActive(termId: string, isActive: boolean): Promise<void> {

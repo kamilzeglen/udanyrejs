@@ -122,6 +122,141 @@ describe('OfferController.syncOffer', () => {
   });
 });
 
+describe('OfferController.removeOffers', () => {
+  let controller: OfferController;
+  let offerService: { removeOffers: jest.Mock };
+
+  beforeEach(async () => {
+    offerService = { removeOffers: jest.fn() };
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [OfferController],
+      providers: [
+        { provide: OfferService, useValue: offerService },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
+        { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
+        { provide: OfferDiscoveryService, useValue: {} },
+        { provide: CompanyService, useValue: {} },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    controller = moduleRef.get(OfferController);
+  });
+
+  it('delegates the id list and the requesting user to the service', async () => {
+    offerService.removeOffers.mockResolvedValue({
+      deletedIds: ['offer-1', 'offer-2'],
+      failedIds: [],
+    });
+
+    const result = await controller.removeOffers(
+      { ids: ['offer-1', 'offer-2'] },
+      { user: { email: 'admin@udanyrejs.pl' } },
+    );
+
+    expect(offerService.removeOffers).toHaveBeenCalledWith(
+      ['offer-1', 'offer-2'],
+      { email: 'admin@udanyrejs.pl' },
+    );
+    expect(result).toEqual({
+      deletedIds: ['offer-1', 'offer-2'],
+      failedIds: [],
+    });
+  });
+});
+
+describe('OfferController.syncOffers (bulk)', () => {
+  let controller: OfferController;
+  let offerSyncService: { syncOffers: jest.Mock };
+
+  beforeEach(async () => {
+    offerSyncService = { syncOffers: jest.fn() };
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [OfferController],
+      providers: [
+        { provide: OfferService, useValue: {} },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
+        { provide: OfferSyncService, useValue: offerSyncService },
+        { provide: OfferDiscoveryService, useValue: {} },
+        { provide: CompanyService, useValue: {} },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    controller = moduleRef.get(OfferController);
+  });
+
+  it('delegates the id list to the sync service and returns its summary', async () => {
+    const bulkResult = {
+      syncedIds: ['offer-1'],
+      failedIds: ['offer-2'],
+      termsAdded: 1,
+      termsDeactivated: 0,
+      termsReactivated: 0,
+      termsSkipped: 0,
+      pdfsUpdated: 0,
+    };
+    offerSyncService.syncOffers.mockResolvedValue(bulkResult);
+
+    const result = await controller.syncOffers({
+      ids: ['offer-1', 'offer-2'],
+    });
+
+    expect(offerSyncService.syncOffers).toHaveBeenCalledWith([
+      'offer-1',
+      'offer-2',
+    ]);
+    expect(result).toEqual(bulkResult);
+  });
+});
+
+describe('OfferController.syncTerms (bulk, term-level)', () => {
+  let controller: OfferController;
+  let offerSyncService: { syncTerms: jest.Mock };
+
+  beforeEach(async () => {
+    offerSyncService = { syncTerms: jest.fn() };
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [OfferController],
+      providers: [
+        { provide: OfferService, useValue: {} },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
+        { provide: OfferSyncService, useValue: offerSyncService },
+        { provide: OfferDiscoveryService, useValue: {} },
+        { provide: CompanyService, useValue: {} },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    controller = moduleRef.get(OfferController);
+  });
+
+  it('delegates the term id list to the sync service and returns its summary', async () => {
+    const bulkResult = {
+      syncedIds: ['term-1'],
+      failedIds: [],
+      reactivatedIds: ['term-1'],
+      deactivatedIds: [],
+      pdfsUpdated: 0,
+    };
+    offerSyncService.syncTerms.mockResolvedValue(bulkResult);
+
+    const result = await controller.syncTerms({ termIds: ['term-1'] });
+
+    expect(offerSyncService.syncTerms).toHaveBeenCalledWith(['term-1']);
+    expect(result).toEqual(bulkResult);
+  });
+});
+
 describe('OfferController.discoverOffers', () => {
   let controller: OfferController;
   let offerDiscoveryService: { runDiscovery: jest.Mock };

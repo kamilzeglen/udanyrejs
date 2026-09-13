@@ -24,9 +24,16 @@ import { isAllowedScrapeHost } from '@core/scraper-client/allowed-scrape-host.ut
 import { ScrapeOfferDto } from '@modules/offer/dto/scrape-offer.dto';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
-import { OfferSyncResult, OfferSyncService } from './offer-sync.service';
+import {
+  OfferBulkSyncResult,
+  OfferSyncResult,
+  OfferSyncService,
+  OfferTermsBulkSyncResult,
+} from './offer-sync.service';
 import { OfferDiscoveryService } from './offer-discovery.service';
 import { DiscoverOffersDto } from '@modules/offer/dto/discover-offers.dto';
+import { BulkOfferIdsDto } from '@modules/offer/dto/bulk-offer-ids.dto';
+import { BulkTermIdsDto } from '@modules/offer/dto/bulk-term-ids.dto';
 import { ScrapedOfferDraft } from '@modules/offer/scraped-offer-draft.entity';
 import { CompanyService } from '@modules/company/company.service';
 import { Company } from '@modules/company/company.entity';
@@ -161,6 +168,15 @@ export class OfferController {
   }
 
   @UseGuards(AuthGuard)
+  @Post('/bulk-delete')
+  async removeOffers(
+    @Body() bulkOfferIdsDto: BulkOfferIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    return await this.offerService.removeOffers(bulkOfferIdsDto.ids, req.user);
+  }
+
+  @UseGuards(AuthGuard)
   @Get('/:offerId/deactivate')
   async deactivateOffer(
     @Param('offerId') offerId: string,
@@ -193,5 +209,21 @@ export class OfferController {
     }
 
     return this.offerSyncService.syncOffer(offer);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-sync')
+  async syncOffers(
+    @Body() bulkOfferIdsDto: BulkOfferIdsDto,
+  ): Promise<OfferBulkSyncResult> {
+    return this.offerSyncService.syncOffers(bulkOfferIdsDto.ids);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/terms/bulk-sync')
+  async syncTerms(
+    @Body() bulkTermIdsDto: BulkTermIdsDto,
+  ): Promise<OfferTermsBulkSyncResult> {
+    return this.offerSyncService.syncTerms(bulkTermIdsDto.termIds);
   }
 }

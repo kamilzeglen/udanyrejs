@@ -19,7 +19,8 @@ describe('OfferSyncService.syncOffer', () => {
     updateTermDates: jest.Mock;
     updateTermPrices: jest.Mock;
     createDiscoveredTerm: jest.Mock;
-    recalculateOfferActiveState: jest.Mock;
+    offerHasActiveTerm: jest.Mock;
+    findTermsByIds: jest.Mock;
   };
   let cabinTypeService: { findAllByCompany: jest.Mock };
   let pdfFileService: {
@@ -38,7 +39,8 @@ describe('OfferSyncService.syncOffer', () => {
       updateTermDates: jest.fn().mockResolvedValue(undefined),
       updateTermPrices: jest.fn().mockResolvedValue(undefined),
       createDiscoveredTerm: jest.fn(),
-      recalculateOfferActiveState: jest.fn().mockResolvedValue(true),
+      offerHasActiveTerm: jest.fn().mockResolvedValue(true),
+      findTermsByIds: jest.fn().mockResolvedValue([]),
     };
     cabinTypeService = { findAllByCompany: jest.fn().mockResolvedValue([]) };
     pdfFileService = {
@@ -315,9 +317,10 @@ describe('OfferSyncService.syncOffer', () => {
 
     expect(offerService.createDiscoveredTerm).not.toHaveBeenCalled();
     expect(result.termsAdded).toBe(0);
-    // term-2 jest nieaktywny i pominięty w fazie 1 (termsToSync filtruje
-    // isActive) - odkrycie go jako sibling w fazie 2 nie ma go przywracać.
-    expect(offerService.setTermActive).not.toHaveBeenCalledWith('term-2', true);
+    // term-2 zostaje przywrócony przez WŁASNY scrape w Fazie 1 (ma sourceUrl,
+    // sprawdzany teraz niezależnie od isActive) - samo odkrycie go jako
+    // sibling w Fazie 2 nadal nie tworzy go ponownie ani nie przywraca.
+    expect(offerService.setTermActive).toHaveBeenCalledWith('term-2', true);
   });
 
   it('deactivates a term whose page confirms 404/410', async () => {
@@ -340,21 +343,44 @@ describe('OfferSyncService.syncOffer', () => {
     expect(result.termsSkipped).toBe(1);
   });
 
-  it('does not scrape or touch a term that is already inactive', async () => {
+  it('still scrapes an already-inactive term that has a source URL (self-healing)', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
     await service.syncOffer(
       buildOffer({ terms: [buildTerm({ isActive: false })] }),
     );
 
-    expect(scraperClient.scrapeTerm).not.toHaveBeenCalled();
+    expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
+      'https://rejsy4you.pl/rejs/1',
+    );
   });
 
-  it('skips terms without a source URL and terms already inactive, without calling the scraper', async () => {
+  it('reactivates an inactive term once its page scrapes successfully again', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+    const result = await service.syncOffer(
+      buildOffer({ terms: [buildTerm({ isActive: false })] }),
+    );
+
+    expect(offerService.setTermActive).toHaveBeenCalledWith('term-1', true);
+    expect(result.termsReactivated).toBe(1);
+  });
+
+  it('does not report a reactivation for a term that was already active', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+    const result = await service.syncOffer(
+      buildOffer({ terms: [buildTerm({ isActive: true })] }),
+    );
+
+    expect(offerService.setTermActive).not.toHaveBeenCalled();
+    expect(result.termsReactivated).toBe(0);
+  });
+
+  it('skips only terms without a source URL, without calling the scraper for them', async () => {
     const result = await service.syncOffer(
       buildOffer({
-        terms: [
-          buildTerm({ id: 'term-no-url', sourceUrl: null }),
-          buildTerm({ id: 'term-inactive', isActive: false }),
-        ],
+        terms: [buildTerm({ id: 'term-no-url', sourceUrl: null })],
       }),
     );
 
@@ -363,6 +389,7 @@ describe('OfferSyncService.syncOffer', () => {
       offerDeactivated: false,
       termsAdded: 0,
       termsDeactivated: 0,
+      termsReactivated: 0,
       termsSkipped: 0,
       pdfsUpdated: 0,
     });
@@ -438,10 +465,180 @@ describe('OfferSyncService.syncOffer', () => {
     scraperClient.scrapeTerm.mockRejectedValue(
       new ScrapedPageNotFoundError('https://rejsy4you.pl/rejs/1'),
     );
-    offerService.recalculateOfferActiveState.mockResolvedValue(false);
+    offerService.offerHasActiveTerm.mockResolvedValue(false);
 
     const result = await service.syncOffer(buildOffer());
 
     expect(result.offerDeactivated).toBe(true);
+  });
+
+  describe('syncOffers (bulk)', () => {
+    let findOneById: jest.Mock;
+
+    beforeEach(() => {
+      findOneById = jest.fn();
+      (service as any).offerService.findOneById = findOneById;
+    });
+
+    it('syncs every offer that has a syncable term and sums up the results', async () => {
+      findOneById.mockImplementation((offerId: string) =>
+        Promise.resolve(
+          buildOffer({
+            id: offerId,
+            terms: [buildTerm({ id: `${offerId}-term` })],
+          }),
+        ),
+      );
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+      offerService.offerHasActiveTerm.mockResolvedValue(true);
+
+      const result = await service.syncOffers(['offer-1', 'offer-2']);
+
+      expect(result.syncedIds).toEqual(['offer-1', 'offer-2']);
+      expect(result.failedIds).toEqual([]);
+      expect(scraperClient.scrapeTerm).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips an offer that does not exist without failing the rest of the batch', async () => {
+      findOneById.mockImplementation((offerId: string) =>
+        Promise.resolve(
+          offerId === 'offer-missing'
+            ? null
+            : buildOffer({
+                id: offerId,
+                terms: [buildTerm({ id: `${offerId}-term` })],
+              }),
+        ),
+      );
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+      offerService.offerHasActiveTerm.mockResolvedValue(true);
+
+      const result = await service.syncOffers(['offer-1', 'offer-missing']);
+
+      expect(result.syncedIds).toEqual(['offer-1']);
+      expect(result.failedIds).toEqual(['offer-missing']);
+    });
+
+    it('skips an offer with no syncable term (no term has a sourceUrl)', async () => {
+      findOneById.mockResolvedValue(
+        buildOffer({ terms: [buildTerm({ sourceUrl: null })] }),
+      );
+
+      const result = await service.syncOffers(['offer-1']);
+
+      expect(result.syncedIds).toEqual([]);
+      expect(result.failedIds).toEqual(['offer-1']);
+      expect(scraperClient.scrapeTerm).not.toHaveBeenCalled();
+    });
+
+    it('does not run offers with a delay between them (unlike the throttled cron loop)', async () => {
+      findOneById.mockImplementation((offerId: string) =>
+        Promise.resolve(
+          buildOffer({
+            id: offerId,
+            terms: [buildTerm({ id: `${offerId}-term` })],
+          }),
+        ),
+      );
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+      offerService.offerHasActiveTerm.mockResolvedValue(true);
+
+      const start = Date.now();
+      await service.syncOffers(['offer-1', 'offer-2', 'offer-3']);
+      const elapsed = Date.now() - start;
+
+      expect(elapsed).toBeLessThan(200);
+    });
+  });
+
+  describe('syncTerms (only the selected terms, not the whole offer)', () => {
+    function buildTermWithOffer(overrides: Record<string, unknown> = {}) {
+      return {
+        ...buildTerm(overrides),
+        offerId: 'offer-1',
+        offer: { id: 'offer-1', companyId: 'company-1' },
+      } as unknown as OfferTerm & { offer: { companyId: string } };
+    }
+
+    it('syncs only the requested terms, ignoring sibling terms of the same offer that were not selected', async () => {
+      const term1 = buildTermWithOffer({ id: 'term-1' });
+      offerService.findTermsByIds.mockResolvedValue([term1]);
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+      const result = await service.syncTerms(['term-1']);
+
+      expect(offerService.findTermsByIds).toHaveBeenCalledWith(['term-1']);
+      expect(scraperClient.scrapeTerm).toHaveBeenCalledTimes(1);
+      expect(result.syncedIds).toEqual(['term-1']);
+    });
+
+    it('does not run Phase 2 discovery - a sibling link found on a synced term is not created', async () => {
+      const term1 = buildTermWithOffer({
+        id: 'term-1',
+        sourceUrl: 'https://rejsy4you.pl/rejs/1',
+      });
+      offerService.findTermsByIds.mockResolvedValue([term1]);
+      scraperClient.scrapeTerm.mockResolvedValue(
+        scrapedTerm({
+          siblingLinks: [
+            {
+              sourceUrl: 'https://rejsy4you.pl/rejs/2',
+              startDate: '2099-02-01',
+              endDate: '2099-02-08',
+            },
+          ],
+        }),
+      );
+
+      await service.syncTerms(['term-1']);
+
+      expect(offerService.createDiscoveredTerm).not.toHaveBeenCalled();
+      expect(scraperClient.scrapeTerm).toHaveBeenCalledTimes(1);
+    });
+
+    it('reactivates a selected term that was inactive once its page scrapes successfully', async () => {
+      const term1 = buildTermWithOffer({ id: 'term-1', isActive: false });
+      offerService.findTermsByIds.mockResolvedValue([term1]);
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+      const result = await service.syncTerms(['term-1']);
+
+      expect(offerService.setTermActive).toHaveBeenCalledWith('term-1', true);
+      expect(result.reactivatedIds).toEqual(['term-1']);
+    });
+
+    it('deactivates a selected term whose page confirms 404/410', async () => {
+      const term1 = buildTermWithOffer({ id: 'term-1' });
+      offerService.findTermsByIds.mockResolvedValue([term1]);
+      scraperClient.scrapeTerm.mockRejectedValue(
+        new ScrapedPageNotFoundError('https://rejsy4you.pl/rejs/1'),
+      );
+
+      const result = await service.syncTerms(['term-1']);
+
+      expect(offerService.setTermActive).toHaveBeenCalledWith('term-1', false);
+      expect(result.deactivatedIds).toEqual(['term-1']);
+    });
+
+    it('reports a term as failed when it does not exist or has no source URL', async () => {
+      const term2 = buildTermWithOffer({ id: 'term-2', sourceUrl: null });
+      offerService.findTermsByIds.mockResolvedValue([term2]);
+
+      const result = await service.syncTerms(['term-1-missing', 'term-2']);
+
+      expect(result.failedIds).toEqual(['term-1-missing', 'term-2']);
+      expect(scraperClient.scrapeTerm).not.toHaveBeenCalled();
+    });
+
+    it('reuses cabin types looked up per company instead of refetching for every term', async () => {
+      const term1 = buildTermWithOffer({ id: 'term-1' });
+      const term2 = buildTermWithOffer({ id: 'term-2' });
+      offerService.findTermsByIds.mockResolvedValue([term1, term2]);
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+      await service.syncTerms(['term-1', 'term-2']);
+
+      expect(cabinTypeService.findAllByCompany).toHaveBeenCalledTimes(1);
+    });
   });
 });

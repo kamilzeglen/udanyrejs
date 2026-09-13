@@ -28,9 +28,6 @@ export class Offer {
   @Column()
   name: string;
 
-  @Column({ default: true })
-  isActive: boolean;
-
   @Column({ nullable: true })
   offerUrl: string;
 
