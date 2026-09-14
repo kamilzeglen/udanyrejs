@@ -7,6 +7,7 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { clearBackendError, setBackendErrorForKey } from '@core/utils/form-backend-error.util';
 
 @Component({
   selector: 'app-admin-category-add-edit',
@@ -75,11 +76,13 @@ export class AdminCategoryAddEditComponent implements OnInit, OnDestroy {
       this.router.changeRoute({ linkParams: ['/admin/categories'] });
     });
 
-    this.commonFacade.createCategoryError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.createCategoryError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.categoryForm.controls.name, errorMessage, 'CATEGORY_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas dodawania kategorii');
     });
 
-    this.commonFacade.updateCategoryError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.updateCategoryError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.categoryForm.controls.name, errorMessage, 'CATEGORY_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas aktualizowania kategorii');
     });
 
@@ -100,6 +103,8 @@ export class AdminCategoryAddEditComponent implements OnInit, OnDestroy {
   }
 
   public submitForm(): void {
+    clearBackendError(this.categoryForm.controls.name);
+
     if (this.categoryForm.invalid) {
       return;
     }

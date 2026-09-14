@@ -15,6 +15,36 @@ function defineError(
 }
 
 export const API_ERRORS = {
+  IMPORT_FILE_INVALID: defineError(
+    'IMPORT_FILE_INVALID',
+    HttpStatus.BAD_REQUEST,
+    'The uploaded file is not a valid CSV or ZIP, or is empty',
+  ),
+  IMPORT_FILE_TOO_LARGE: defineError(
+    'IMPORT_FILE_TOO_LARGE',
+    HttpStatus.BAD_REQUEST,
+    'The uploaded file is too large',
+  ),
+  IMPORT_REFERENCE_AMBIGUOUS: defineError(
+    'IMPORT_REFERENCE_AMBIGUOUS',
+    HttpStatus.BAD_REQUEST,
+    'The reference matches more than one record',
+  ),
+  CATEGORY_NAME_DUPLICATE: defineError(
+    'CATEGORY_NAME_DUPLICATE',
+    HttpStatus.BAD_REQUEST,
+    'A category with this name already exists',
+  ),
+  DESTINATION_NAME_DUPLICATE: defineError(
+    'DESTINATION_NAME_DUPLICATE',
+    HttpStatus.BAD_REQUEST,
+    'A destination with this name already exists',
+  ),
+  SHIP_NAME_DUPLICATE: defineError(
+    'SHIP_NAME_DUPLICATE',
+    HttpStatus.BAD_REQUEST,
+    'A ship with this name already exists for this company',
+  ),
   UNAUTHORIZED: defineError(
     'UNAUTHORIZED',
     HttpStatus.UNAUTHORIZED,

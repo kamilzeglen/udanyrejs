@@ -7,6 +7,7 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+import { clearBackendError, setBackendErrorForKey } from '@core/utils/form-backend-error.util';
 
 @Component({
   selector: 'app-admin-destination-add-edit',
@@ -69,11 +70,13 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
       this.router.changeRoute({ linkParams: ['/admin/destinations'] });
     });
 
-    this.commonFacade.createDestinationError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.createDestinationError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.destinationForm.controls.name, errorMessage, 'DESTINATION_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas dodawania regionu');
     });
 
-    this.commonFacade.updateDestinationError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.updateDestinationError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.destinationForm.controls.name, errorMessage, 'DESTINATION_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas aktualizowania regionu');
     });
 
@@ -94,6 +97,8 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
   }
 
   public submitForm(): void {
+    clearBackendError(this.destinationForm.controls.name);
+
     if (this.destinationForm.invalid) {
       return;
     }

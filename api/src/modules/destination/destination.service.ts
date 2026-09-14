@@ -33,6 +33,20 @@ export class DestinationService {
       .getOne();
   }
 
+  async findOneByName(name: string): Promise<Destination | null> {
+    const destinations = await this.destinationRepository
+      .createQueryBuilder('destination')
+      .where('LOWER(destination.name) = LOWER(:name)', { name })
+      .take(2)
+      .getMany();
+
+    if (destinations.length > 1) {
+      throw new AppException(API_ERRORS.IMPORT_REFERENCE_AMBIGUOUS, { name });
+    }
+
+    return destinations[0] ?? null;
+  }
+
   async findByIds(ids: string[]): Promise<Destination[]> {
     return await this.destinationRepository
       .createQueryBuilder('destination')
@@ -55,7 +69,7 @@ export class DestinationService {
       reqCreatedBy.email,
     );
 
-    return await this.destinationRepository.save(destination);
+    return await this.saveOrThrowOnDuplicateName(destination);
   }
 
   async updateDestination(
@@ -88,7 +102,7 @@ export class DestinationService {
       reqCreatedBy.email,
     );
 
-    return this.destinationRepository.save(destination);
+    return this.saveOrThrowOnDuplicateName(destination);
   }
 
   async removeDestination(
@@ -195,5 +209,21 @@ export class DestinationService {
     );
 
     return { updatedIds: existingIds, failedIds };
+  }
+
+  private async saveOrThrowOnDuplicateName(
+    destination: Destination,
+  ): Promise<Destination> {
+    try {
+      return await this.destinationRepository.save(destination);
+    } catch (error) {
+      if ((error as { code?: string })?.code === '23505') {
+        throw new AppException(API_ERRORS.DESTINATION_NAME_DUPLICATE, {
+          name: destination.name,
+        });
+      }
+
+      throw error;
+    }
   }
 }

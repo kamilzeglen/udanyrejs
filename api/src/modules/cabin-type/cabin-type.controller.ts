@@ -6,9 +6,24 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import {
+  csvUploadOptions,
+  parseExportIds,
+  requireImportFile,
+} from '@core/import-export/import-upload.util';
+import {
+  ImportConfirmResult,
+  ImportPreviewResult,
+} from '@core/import-export/import-row-result.interface';
 import {
   CabinTypeService,
   CabinTypeWithOffersCount,
@@ -18,10 +33,14 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { CreateCabinTypeDto } from './dto/create-cabin-type.dto';
 import { UpdateCabinTypeDto } from './dto/update-cabin-type.dto';
 import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
+import { CabinTypeImportExportService } from './cabin-type-import-export.service';
 
 @Controller('cabin-type')
 export class CabinTypeController {
-  constructor(private readonly cabinTypeService: CabinTypeService) {}
+  constructor(
+    private readonly cabinTypeService: CabinTypeService,
+    private readonly cabinTypeImportExportService: CabinTypeImportExportService,
+  ) {}
 
   @Get('/details/:cabinTypeId')
   async getOneCabinType(
@@ -35,11 +54,51 @@ export class CabinTypeController {
     return await this.cabinTypeService.findAll();
   }
 
+  @UseGuards(AuthGuard)
+  @Get('/export')
+  async exportCabinTypes(
+    @Query('ids') ids: string | undefined,
+    @Res() response: Response,
+  ): Promise<void> {
+    const csv = await this.cabinTypeImportExportService.exportToCsv(
+      parseExportIds(ids),
+    );
+
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="cabin-types.csv"',
+    );
+    response.send(csv);
+  }
+
   @Get('/:companyId')
   async getCabinTypesByCompany(
     @Param('companyId') companyId: string,
   ): Promise<CabinType[]> {
     return await this.cabinTypeService.findAllByCompany(companyId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/preview')
+  @UseInterceptors(FileInterceptor('file', csvUploadOptions))
+  async previewImportCabinTypes(
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<ImportPreviewResult> {
+    return this.cabinTypeImportExportService.preview(requireImportFile(file));
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/confirm')
+  @UseInterceptors(FileInterceptor('file', csvUploadOptions))
+  async confirmImportCabinTypes(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() request: { user: any },
+  ): Promise<ImportConfirmResult> {
+    return this.cabinTypeImportExportService.confirm(
+      requireImportFile(file),
+      request.user,
+    );
   }
 
   @UseGuards(AuthGuard)

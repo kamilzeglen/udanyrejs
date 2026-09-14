@@ -6,19 +6,38 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import {
+  csvUploadOptions,
+  parseExportIds,
+  requireImportFile,
+} from '@core/import-export/import-upload.util';
+import {
+  ImportConfirmResult,
+  ImportPreviewResult,
+} from '@core/import-export/import-row-result.interface';
 import { CityService } from './city.service';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { City } from '@modules/city/city.entity';
 import { CreateCityDto } from '@modules/city/dto/create-city.dto';
 import { UpdateCityDto } from '@modules/city/dto/update-city.dto';
 import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
+import { CityImportExportService } from './city-import-export.service';
 
 @Controller('city')
 export class CityController {
-  constructor(private readonly cityService: CityService) {}
+  constructor(
+    private readonly cityService: CityService,
+    private readonly cityImportExportService: CityImportExportService,
+  ) {}
 
   @Get('/')
   async getAllCities(): Promise<City[]> {
@@ -28,6 +47,46 @@ export class CityController {
   @Get('/details/:cityId')
   async getOneCity(@Param('cityId') cityId: string): Promise<City> {
     return await this.cityService.findOneByID(cityId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/export')
+  async exportCities(
+    @Query('ids') ids: string | undefined,
+    @Res() response: Response,
+  ): Promise<void> {
+    const csv = await this.cityImportExportService.exportToCsv(
+      parseExportIds(ids),
+    );
+
+    response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="cities.csv"',
+    );
+    response.send(csv);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/preview')
+  @UseInterceptors(FileInterceptor('file', csvUploadOptions))
+  async previewImportCities(
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<ImportPreviewResult> {
+    return this.cityImportExportService.preview(requireImportFile(file));
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/confirm')
+  @UseInterceptors(FileInterceptor('file', csvUploadOptions))
+  async confirmImportCities(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() request: { user: any },
+  ): Promise<ImportConfirmResult> {
+    return this.cityImportExportService.confirm(
+      requireImportFile(file),
+      request.user,
+    );
   }
 
   @UseGuards(AuthGuard)

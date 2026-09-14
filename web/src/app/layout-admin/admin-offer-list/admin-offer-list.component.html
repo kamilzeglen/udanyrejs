@@ -2,6 +2,8 @@
   <div class="add-button">
     <button (click)="addOffer()">Dodaj oferte</button>
     <button (click)="openDiscoverTrigger()">Automatyczne szukanie ofert</button>
+    <button (click)="openImport()">Importuj</button>
+    <button (click)="exportAllOffers()">Eksportuj wszystko</button>
   </div>
 
   <ng-container *ngIf="(loading$ | async) === false && (viewModel$ | async) as viewModel">
@@ -48,6 +50,9 @@
           (click)="deleteSelectedOffers()"
         >
           Usuń zaznaczone ({{ viewModel.selectedCount }})
+        </button>
+        <button type="button" class="bulk-export" *ngIf="viewModel.selectedCount > 0" (click)="exportSelectedOffers()">
+          Eksportuj zaznaczone ({{ viewModel.selectedCount }})
         </button>
         <button
           type="button"

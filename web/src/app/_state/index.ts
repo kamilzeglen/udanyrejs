@@ -9,6 +9,7 @@ import { PdfFileEffects, PdfFileFacade, pdfFileReducer, PdfFileState } from '@st
 import { EmailEffects, EmailFacade, emailReducer, EmailState } from '@state/email';
 import { ShareStatsEffects, ShareStatsFacade } from '@state/shareStats';
 import { SettingsEffects, SettingsFacade, settingsReducer, SettingsState } from '@state/settings';
+import { ImportExportEffects, ImportExportFacade, importExportReducer, ImportExportState } from '@state/importExport';
 
 export const reducers = {
   users: usersReducer,
@@ -20,6 +21,7 @@ export const reducers = {
   pdfFile: pdfFileReducer,
   email: emailReducer,
   settings: settingsReducer,
+  importExport: importExportReducer,
 };
 
 export const effects = [
@@ -34,6 +36,7 @@ export const effects = [
   EmailEffects,
   ShareStatsEffects,
   SettingsEffects,
+  ImportExportEffects,
 ];
 
 export const facades = [
@@ -48,6 +51,7 @@ export const facades = [
   EmailFacade,
   ShareStatsFacade,
   SettingsFacade,
+  ImportExportFacade,
 ];
 
 export interface AppState {
@@ -61,4 +65,5 @@ export interface AppState {
   pdfFile: PdfFileState;
   email: EmailState;
   settings: SettingsState;
+  importExport: ImportExportState;
 }

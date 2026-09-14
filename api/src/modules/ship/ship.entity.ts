@@ -9,6 +9,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import { Company } from '@modules/company/company.entity';
 import { Offer } from '@modules/offer/offer.entity';
@@ -16,6 +17,7 @@ import { ImageFile } from '@modules/image-file/image-file.entity';
 import { User } from '@modules/user/user.entity';
 
 @Entity()
+@Unique('UQ_ship_companyId_name', ['companyId', 'name'])
 export class Ship {
   @PrimaryGeneratedColumn('uuid')
   id: string;

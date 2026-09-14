@@ -13,6 +13,13 @@ import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class CompanyService {
+  public async findOneByKey(key: string): Promise<Company | null> {
+    return this.companyRepository
+      .createQueryBuilder('company')
+      .where('company.key = :key', { key })
+      .getOne();
+  }
+
   constructor(
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,

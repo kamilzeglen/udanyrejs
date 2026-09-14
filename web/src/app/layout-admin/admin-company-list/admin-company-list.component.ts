@@ -7,6 +7,10 @@ import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 interface CompanyRow extends Company {
   selected: boolean;
@@ -60,6 +64,8 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit() {
@@ -110,6 +116,24 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.bulkDeactivateCompaniesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się dezaktywować zaznaczonych firm');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'company') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'company') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować firm');
     });
 
     this.commonFacade.getCompanies();
@@ -176,6 +200,36 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
 
           this.commonFacade.bulkDeleteCompanies({ ids });
         });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'company',
+          entityLabelSingular: 'firma',
+          entityLabelPlural: 'firmy',
+          acceptExtension: '.zip',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.commonFacade.getCompanies();
+        }
+      });
+  }
+
+  public exportAllCompanies(): void {
+    this.importExportFacade.exportEntities({ entityType: 'company' });
+  }
+
+  public exportSelectedCompanies(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'company', ids: Array.from(selectedIds) });
     });
   }
 

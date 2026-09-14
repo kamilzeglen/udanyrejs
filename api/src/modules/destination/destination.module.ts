@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Destination } from '@modules/destination/destination.entity';
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { DestinationImportExportService } from './destination-import-export.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Destination]), UserModule, AuthModule],
   controllers: [DestinationController],
-  providers: [DestinationService],
-  exports: [DestinationService],
+  providers: [DestinationService, DestinationImportExportService],
+  exports: [DestinationService, DestinationImportExportService],
 })
 export class DestinationModule {}

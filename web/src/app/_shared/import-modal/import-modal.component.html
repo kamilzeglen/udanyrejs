@@ -1,0 +1,58 @@
+<mat-dialog-content>
+  <div class="close-wrapper">
+    <button mat-icon-button type="button" aria-label="Zamknij import" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <h2>Import — {{ data.entityLabelPlural }}</h2>
+
+  <div class="file-picker" *ngIf="state === 'idle'">
+    <label for="import-file">Wybierz plik {{ data.acceptExtension }}</label>
+    <input id="import-file" type="file" [accept]="data.acceptExtension" (change)="onFileSelected($event)" />
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <button mat-raised-button type="button" color="primary" [disabled]="selectedFile === null" (click)="preview()">
+      Podgląd
+    </button>
+  </div>
+
+  <div class="status-message" *ngIf="state === 'previewing'">
+    <p>Wczytywanie podglądu...</p>
+  </div>
+
+  <div class="preview-result" *ngIf="state === 'ready' && previewResult">
+    <p>Do utworzenia: {{ previewResult.toCreate }}</p>
+    <p>Do aktualizacji: {{ previewResult.toUpdate }}</p>
+    <p>Błędów: {{ previewResult.errors }}</p>
+
+    <ul class="row-errors" *ngIf="previewRows.length > 0">
+      <li *ngFor="let row of previewRows">{{ row.label }}: {{ row.errorMessage }}</li>
+    </ul>
+
+    <p class="error-message" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <button mat-raised-button type="button" color="primary" [disabled]="canConfirm === false" (click)="confirm()">
+      Potwierdź
+    </button>
+  </div>
+
+  <div class="status-message" *ngIf="state === 'confirming'">
+    <p>Zapisywanie...</p>
+  </div>
+
+  <div class="confirm-result" *ngIf="state === 'done' && confirmResult">
+    <p>Utworzono: {{ confirmResult.created.length }}</p>
+    <p>Zaktualizowano: {{ confirmResult.updated.length }}</p>
+    <p>Nie udało się: {{ confirmResult.failed.length }}</p>
+    <ul class="row-errors" *ngIf="confirmResult.failed.length > 0">
+      <li *ngFor="let failure of confirmResult.failed">{{ failure.rowRef }}: {{ failure.error }}</li>
+    </ul>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <div class="action-buttons">
+    <button mat-raised-button type="button" class="cancel-button" (click)="close()">
+      {{ state === 'done' ? 'Zamknij i odśwież' : 'Anuluj' }}
+    </button>
+  </div>
+</mat-dialog-actions>

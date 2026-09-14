@@ -7,6 +7,10 @@ import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 interface DestinationRow extends Destination {
   selected: boolean;
@@ -48,6 +52,8 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit() {
@@ -98,6 +104,24 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.bulkDeactivateDestinationsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się dezaktywować zaznaczonych kierunków');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'destination') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'destination') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować kierunków');
     });
 
     this.commonFacade.getDestinations();
@@ -176,6 +200,36 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
 
           this.commonFacade.bulkDeleteDestinations({ ids });
         });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'destination',
+          entityLabelSingular: 'kierunek',
+          entityLabelPlural: 'kierunki',
+          acceptExtension: '.csv',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.commonFacade.getDestinations();
+        }
+      });
+  }
+
+  public exportAllDestinations(): void {
+    this.importExportFacade.exportEntities({ entityType: 'destination' });
+  }
+
+  public exportSelectedDestinations(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'destination', ids: Array.from(selectedIds) });
     });
   }
 

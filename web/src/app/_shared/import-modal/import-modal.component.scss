@@ -1,0 +1,31 @@
+.close-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.file-picker,
+.preview-result,
+.confirm-result,
+.status-message {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.row-errors {
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+
+.error-message {
+  color: #c62828;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 16px 16px;
+}

@@ -13,6 +13,36 @@ import { API_ERRORS } from '@core/errors/api-errors';
 
 @Injectable()
 export class ShipService {
+  public async findOneByNameAndCompany(
+    name: string,
+    companyId: string,
+  ): Promise<Ship | null> {
+    const ships = await this.shipRepository
+      .createQueryBuilder('ship')
+      .where('LOWER(ship.name) = LOWER(:name)', { name })
+      .andWhere('ship.companyId = :companyId', { companyId })
+      .take(2)
+      .getMany();
+    if (ships.length > 1) {
+      throw new AppException(API_ERRORS.IMPORT_REFERENCE_AMBIGUOUS, { name });
+    }
+    return ships[0] ?? null;
+  }
+
+  private async saveOrThrowOnDuplicateName(ship: Ship): Promise<Ship> {
+    try {
+      return await this.shipRepository.save(ship);
+    } catch (error) {
+      if (error?.code === '23505') {
+        throw new AppException(API_ERRORS.SHIP_NAME_DUPLICATE, {
+          name: ship.name,
+          companyId: ship.companyId,
+        });
+      }
+      throw error;
+    }
+  }
+
   constructor(
     @InjectRepository(Ship)
     private readonly shipRepository: Repository<Ship>,
@@ -59,9 +89,7 @@ export class ShipService {
       reqCreatedBy.email,
     );
 
-    const savedShip = await this.shipRepository.save(ship);
-
-    return this.shipRepository.save(savedShip);
+    return this.saveOrThrowOnDuplicateName(ship);
   }
 
   async updateShip(
@@ -90,7 +118,7 @@ export class ShipService {
       reqCreatedBy.email,
     );
 
-    return this.shipRepository.save(ship);
+    return this.saveOrThrowOnDuplicateName(ship);
   }
 
   async removeShip(shipId: string, reqCreatedBy: User): Promise<boolean> {

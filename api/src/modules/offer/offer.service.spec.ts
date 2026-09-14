@@ -341,6 +341,63 @@ describe('OfferService', () => {
       });
     });
 
+    it('clears destinations when an empty list is submitted', async () => {
+      const offerWithDestination = {
+        ...existingOffer,
+        destinations: [{ id: 'destination-1' }],
+      };
+      const offerRepository = (service as any).offerRepository;
+      offerRepository.createQueryBuilder.mockReturnValue({
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(offerWithDestination),
+      });
+
+      await service.updateOffer(
+        'offer-1',
+        {
+          companyId: 'company-1',
+          shipId: 'ship-1',
+          destinations: [],
+        } as any,
+        requestUser,
+      );
+
+      expect(offerWithDestination.destinations).toEqual([]);
+    });
+
+    it('clears categories when an empty list is submitted for a term', async () => {
+      const existingTerm = {
+        id: 'term-1',
+        offerId: 'offer-1',
+        startDate: new Date('2027-05-01'),
+        endDate: new Date('2027-05-08'),
+        categories: [{ id: 'category-1' }],
+      };
+      transactionManager.find.mockResolvedValue([existingTerm]);
+      cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
+
+      await service.updateOffer(
+        'offer-1',
+        {
+          companyId: 'company-1',
+          shipId: 'ship-1',
+          terms: [
+            {
+              startDate: '2027-05-01',
+              endDate: '2027-05-08',
+              categories: [],
+              prices: [{ cabinTypeId: 'cabin-1', price: 250000 }],
+            },
+          ],
+        } as any,
+        requestUser,
+      );
+
+      expect(existingTerm.categories).toEqual([]);
+    });
+
     it('creates a brand new term when the offer currently has none', async () => {
       cabinTypeService.findByIds.mockResolvedValue([{ id: 'cabin-1' }]);
 

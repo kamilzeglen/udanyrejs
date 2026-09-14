@@ -77,7 +77,7 @@ export class CategoryService {
       reqCreatedBy.email,
     );
 
-    return await this.categoryRepository.save(category);
+    return await this.saveOrThrowOnDuplicateName(category);
   }
 
   async updateCategory(
@@ -106,7 +106,7 @@ export class CategoryService {
       reqCreatedBy.email,
     );
 
-    return this.categoryRepository.save(category);
+    return this.saveOrThrowOnDuplicateName(category);
   }
 
   async removeCategory(
@@ -209,5 +209,21 @@ export class CategoryService {
     );
 
     return { updatedIds: existingIds, failedIds };
+  }
+
+  private async saveOrThrowOnDuplicateName(
+    category: Category,
+  ): Promise<Category> {
+    try {
+      return await this.categoryRepository.save(category);
+    } catch (error) {
+      if ((error as { code?: string })?.code === '23505') {
+        throw new AppException(API_ERRORS.CATEGORY_NAME_DUPLICATE, {
+          name: category.name,
+        });
+      }
+
+      throw error;
+    }
   }
 }

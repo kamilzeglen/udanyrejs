@@ -20,6 +20,10 @@ export class CommonHttpService {
 
   constructor(private http: HttpClient) {}
 
+  public clearDictionaryCache(): void {
+    this.dictionaryCache.clear();
+  }
+
   // =========
   // Companies
   // =========
@@ -339,6 +343,6 @@ export class CommonHttpService {
   }
 
   private invalidateDictionaries<T>(request$: Observable<T>): Observable<T> {
-    return request$.pipe(tap(() => this.dictionaryCache.clear()));
+    return request$.pipe(tap(() => this.clearDictionaryCache()));
   }
 }

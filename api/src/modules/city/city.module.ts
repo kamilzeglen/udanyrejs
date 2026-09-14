@@ -6,6 +6,7 @@ import { City } from '@modules/city/city.entity';
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { DestinationModule } from '@modules/destination/destination.module';
+import { CityImportExportService } from './city-import-export.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { DestinationModule } from '@modules/destination/destination.module';
     DestinationModule,
   ],
   controllers: [CityController],
-  providers: [CityService],
-  exports: [CityService],
+  providers: [CityService, CityImportExportService],
+  exports: [CityService, CityImportExportService],
 })
 export class CityModule {}

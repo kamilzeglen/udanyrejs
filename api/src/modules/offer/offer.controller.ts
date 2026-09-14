@@ -7,10 +7,16 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
+import { Response } from 'express';
 import { OfferService } from './offer.service';
 import { CreateOfferDto } from '@modules/offer/dto/create-offer.dto';
 import { Offer } from '@modules/offer/offer.entity';
@@ -38,6 +44,17 @@ import { BulkTermIdsDto } from '@modules/offer/dto/bulk-term-ids.dto';
 import { ScrapedOfferDraft } from '@modules/offer/scraped-offer-draft.entity';
 import { CompanyService } from '@modules/company/company.service';
 import { Company } from '@modules/company/company.entity';
+import { User } from '@modules/user/user.entity';
+import {
+  parseExportIds,
+  requireImportFile,
+  zipUploadOptions,
+} from '@core/import-export/import-upload.util';
+import {
+  ImportConfirmResult,
+  ImportPreviewResult,
+} from '@core/import-export/import-row-result.interface';
+import { OfferImportExportService } from './offer-import-export.service';
 
 @Controller('offers')
 export class OfferController {
@@ -50,6 +67,7 @@ export class OfferController {
     private readonly offerDiscoveryService: OfferDiscoveryService,
     private readonly companyService: CompanyService,
     private readonly offerSyncCron: OfferSyncCron,
+    private readonly offerImportExportService: OfferImportExportService,
   ) {}
 
   @Post('/search')
@@ -104,6 +122,45 @@ export class OfferController {
   @Get('/discover/drafts')
   async listDiscoveryDrafts(): Promise<ScrapedOfferDraft[]> {
     return this.offerDiscoveryService.listPendingDrafts();
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('/export')
+  async exportOffers(
+    @Query('ids') ids: string | undefined,
+    @Res() response: Response,
+  ): Promise<void> {
+    const zipBuffer = await this.offerImportExportService.exportToZip(
+      parseExportIds(ids),
+    );
+    response.setHeader('Content-Type', 'application/zip');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="offers.zip"',
+    );
+    response.send(zipBuffer);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/preview')
+  @UseInterceptors(FileInterceptor('file', zipUploadOptions))
+  async previewImportOffers(
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<ImportPreviewResult> {
+    return this.offerImportExportService.preview(requireImportFile(file));
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/confirm')
+  @UseInterceptors(FileInterceptor('file', zipUploadOptions))
+  async confirmImportOffers(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() request: { user: User },
+  ): Promise<ImportConfirmResult> {
+    return this.offerImportExportService.confirm(
+      requireImportFile(file),
+      request.user,
+    );
   }
 
   @UseGuards(AuthGuard)

@@ -1,6 +1,8 @@
 <div class="admin-ships-list">
   <div class="add-button">
     <button (click)="addShip()">Dodaj statek</button>
+    <button (click)="openImport()">Importuj</button>
+    <button (click)="exportAllShips()">Eksportuj wszystko</button>
   </div>
 
   <div class="company-select">
@@ -21,6 +23,7 @@
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
       <button type="button" (click)="bulkActivateSelectedShips()">Aktywuj zaznaczone</button>
       <button type="button" (click)="bulkDeactivateSelectedShips()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="exportSelectedShips()">Eksportuj zaznaczone</button>
       <button type="button" (click)="bulkDeleteSelectedShips()">Usuń trwale zaznaczone</button>
     </div>
 

@@ -1,3 +1,17 @@
+import { Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import { ShipImportExportService } from './ship-import-export.service';
+import {
+  zipUploadOptions,
+  requireImportFile,
+  parseExportIds,
+} from '@core/import-export/import-upload.util';
+import {
+  ImportConfirmResult,
+  ImportPreviewResult,
+} from '@core/import-export/import-row-result.interface';
+import { User } from '@modules/user/user.entity';
 import {
   Body,
   Controller,
@@ -18,7 +32,49 @@ import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
 
 @Controller('ship')
 export class ShipController {
-  constructor(private readonly shipService: ShipService) {}
+  @UseGuards(AuthGuard)
+  @Get('/export')
+  public async exportShip(
+    @Query('ids') ids: string | undefined,
+    @Res() response: Response,
+  ): Promise<void> {
+    const buffer = await this.importExportService.exportToZip(
+      parseExportIds(ids),
+    );
+    response.setHeader('Content-Type', 'application/zip');
+    response.setHeader(
+      'Content-Disposition',
+      'attachment; filename="ships.zip"',
+    );
+    response.send(buffer);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/preview')
+  @UseInterceptors(FileInterceptor('file', zipUploadOptions))
+  public previewImport(
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ): Promise<ImportPreviewResult> {
+    return this.importExportService.preview(requireImportFile(file));
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/import/confirm')
+  @UseInterceptors(FileInterceptor('file', zipUploadOptions))
+  public confirmImport(
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Req() request: { user: User },
+  ): Promise<ImportConfirmResult> {
+    return this.importExportService.confirm(
+      requireImportFile(file),
+      request.user,
+    );
+  }
+
+  constructor(
+    private readonly shipService: ShipService,
+    private readonly importExportService: ShipImportExportService,
+  ) {}
 
   @Get('/details/id/:shipId')
   async getOneOfferById(@Param('shipId') shipId: string): Promise<Ship> {

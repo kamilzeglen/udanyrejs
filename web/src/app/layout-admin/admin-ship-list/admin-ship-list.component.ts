@@ -8,6 +8,10 @@ import { ConfirmationModalService } from '@shared/confirmation-modal/confirmatio
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ActivatedRoute } from '@angular/router';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 interface ShipRow extends Ship {
   selected: boolean;
@@ -63,6 +67,8 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
     private readonly activatedRoute: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit() {
@@ -111,6 +117,24 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.bulkDeactivateShipsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się dezaktywować zaznaczonych statków');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'ship') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'ship') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować statków');
     });
 
     this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
@@ -177,6 +201,36 @@ export class AdminShipListComponent implements OnInit, OnDestroy {
 
           this.commonFacade.bulkDeleteShips({ ids });
         });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'ship',
+          entityLabelSingular: 'statek',
+          entityLabelPlural: 'statki',
+          acceptExtension: '.zip',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.changedCompany(this.selectedCompany);
+        }
+      });
+  }
+
+  public exportAllShips(): void {
+    this.importExportFacade.exportEntities({ entityType: 'ship' });
+  }
+
+  public exportSelectedShips(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'ship', ids: Array.from(selectedIds) });
     });
   }
 

@@ -9,6 +9,7 @@ import { combineLatest, filter, merge, of, ReplaySubject, take, takeUntil } from
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { map, switchMap } from 'rxjs/operators';
 import { ImageFileFacade } from '@state/imageFile';
+import { clearBackendError, setBackendErrorForKey } from '@core/utils/form-backend-error.util';
 
 @Component({
   selector: 'app-admin-ship-add-edit',
@@ -86,11 +87,13 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.commonFacade.createShipError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.createShipError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.shipForm.controls.name, errorMessage, 'SHIP_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas dodawania statku');
     });
 
-    this.commonFacade.updateShipError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+    this.commonFacade.updateShipError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
+      setBackendErrorForKey(this.shipForm.controls.name, errorMessage, 'SHIP_NAME_DUPLICATE');
       this.snackService.showError('Wystąpił błąd podczas aktualizowania statku');
     });
 
@@ -168,6 +171,8 @@ export class AdminShipAddEditComponent implements OnInit, OnDestroy {
   }
 
   public submitForm(): void {
+    clearBackendError(this.shipForm.controls.name);
+
     if (this.shipForm.invalid) {
       return;
     }

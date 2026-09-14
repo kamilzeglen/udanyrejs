@@ -24,10 +24,19 @@ import { HttpModule } from '@nestjs/axios';
 import { ScraperClientModule } from '@core/scraper-client/scraper-client.module';
 import { CityModule } from '@modules/city/city.module';
 import { SettingsModule } from '@modules/settings/settings.module';
+import { OfferImportExportService } from './offer-import-export.service';
+import { Destination } from '@modules/destination/destination.entity';
+import { Category } from '@modules/category/category.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Offer, OfferTerm, ScrapedOfferDraft]),
+    TypeOrmModule.forFeature([
+      Offer,
+      OfferTerm,
+      ScrapedOfferDraft,
+      Destination,
+      Category,
+    ]),
     ImageFileModule,
     PdfFileModule,
     UserModule,
@@ -51,6 +60,7 @@ import { SettingsModule } from '@modules/settings/settings.module';
     OfferTermCleanupCron,
     OfferDiscoveryService,
     ItineraryCityResolverService,
+    OfferImportExportService,
   ],
   exports: [OfferService],
 })

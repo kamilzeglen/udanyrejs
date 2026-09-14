@@ -1,6 +1,8 @@
 <div class="admin-companies-list">
   <div class="add-button">
     <button (click)="addCompany()">Dodaj firme</button>
+    <button (click)="openImport()">Importuj</button>
+    <button (click)="exportAllCompanies()">Eksportuj wszystko</button>
   </div>
 
   <div class="mat-elevation-z8 custom-table" *ngIf="(loading$ | async) === false && (viewModel$ | async) as viewModel">
@@ -9,6 +11,7 @@
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
       <button type="button" (click)="bulkActivateSelectedCompanies()">Aktywuj zaznaczone</button>
       <button type="button" (click)="bulkDeactivateSelectedCompanies()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="exportSelectedCompanies()">Eksportuj zaznaczone</button>
       <button type="button" (click)="bulkDeleteSelectedCompanies()">Usuń trwale zaznaczone</button>
     </div>
 

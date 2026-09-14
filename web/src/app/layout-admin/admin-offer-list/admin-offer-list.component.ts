@@ -15,6 +15,10 @@ import { SortDirection } from '@angular/material/sort';
 import { Pagination } from '../../_interfaces/http';
 import { GroupedOffer, groupOffersByOfferId } from './group-offers-by-offer';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 interface TermRow extends OfferSearchResult {
   selected: boolean;
@@ -83,6 +87,8 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
     private readonly routerFacade: RouterFacade,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit() {
@@ -128,6 +134,24 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
 
     this.offerFacade.syncTermsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się zsynchronizować zaznaczonych terminów');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'offer') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'offer') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować ofert');
     });
 
     this.getOffers();
@@ -226,6 +250,36 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public syncSelectedOffers(): void {
     this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
       this.offerFacade.syncOffers({ ids: Array.from(selectedIds) });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'offer',
+          entityLabelSingular: 'oferta',
+          entityLabelPlural: 'oferty',
+          acceptExtension: '.zip',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.getOffers();
+        }
+      });
+  }
+
+  public exportAllOffers(): void {
+    this.importExportFacade.exportEntities({ entityType: 'offer' });
+  }
+
+  public exportSelectedOffers(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'offer', ids: Array.from(selectedIds) });
     });
   }
 

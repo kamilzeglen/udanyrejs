@@ -1,5 +1,28 @@
 export const IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const PDF_MAX_BYTES = 20 * 1024 * 1024;
+export const CSV_MAX_BYTES = 10 * 1024 * 1024;
+export const ZIP_MAX_BYTES = 50 * 1024 * 1024;
+export const ALLOWED_CSV_MIME_TYPES = [
+  'text/csv',
+  'application/vnd.ms-excel',
+  'text/plain',
+  'application/octet-stream',
+];
+export const ALLOWED_ZIP_MIME_TYPES = [
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/octet-stream',
+];
+
+export function detectZipExtension(buffer: Buffer): string | null {
+  return buffer.length > 3 &&
+    buffer[0] === 0x50 &&
+    buffer[1] === 0x4b &&
+    buffer[2] === 0x03 &&
+    buffer[3] === 0x04
+    ? '.zip'
+    : null;
+}
 
 export const ALLOWED_IMAGE_MIME_TYPES = [
   'image/jpeg',

@@ -11,6 +11,14 @@ export class CreateShipDto {
   yearBuilt: number;
 
   @IsNumber()
+  @IsOptional()
+  renovation?: number;
+
+  @IsNumber()
+  @IsOptional()
+  speed?: number;
+
+  @IsNumber()
   length: number;
 
   @IsNumber()

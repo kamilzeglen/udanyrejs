@@ -8,6 +8,10 @@ import { RouterFacade } from '@state/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 export interface CityRow extends City {
   destinationNames: string;
@@ -71,6 +75,8 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly confirmationModalService: ConfirmationModalService,
     private readonly snackService: SnackbarService,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit(): void {
@@ -119,6 +125,24 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.bulkDeactivateCitiesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się dezaktywować zaznaczonych miast');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'city') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'city') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować miast');
     });
 
     this.commonFacade.getCities();
@@ -195,6 +219,36 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
 
           this.commonFacade.bulkDeleteCities({ ids });
         });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'city',
+          entityLabelSingular: 'miasto',
+          entityLabelPlural: 'miasta',
+          acceptExtension: '.csv',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.commonFacade.getCities();
+        }
+      });
+  }
+
+  public exportAllCities(): void {
+    this.importExportFacade.exportEntities({ entityType: 'city' });
+  }
+
+  public exportSelectedCities(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'city', ids: Array.from(selectedIds) });
     });
   }
 

@@ -7,6 +7,10 @@ import { AllDeviceInfo, CabinType } from '@interfaces';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { RowSelection } from '@shared/row-selection/row-selection';
+import { MatDialog } from '@angular/material/dialog';
+import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { ImportExportFacade } from '@state/importExport';
+import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
 
 interface CabinTypeRow extends CabinType {
   selected: boolean;
@@ -53,6 +57,8 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
     private readonly routerFacade: RouterFacade,
     private readonly snackService: SnackbarService,
     private readonly confirmationModalService: ConfirmationModalService,
+    private readonly dialog: MatDialog,
+    private readonly importExportFacade: ImportExportFacade,
   ) {}
 
   public ngOnInit() {
@@ -119,6 +125,24 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
     this.commonFacade.bulkDeactivateCabinTypesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showError('Nie udało się dezaktywować zaznaczonych rodzajów kabin');
+    });
+
+    this.importExportFacade.exportEntitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ entityType, blob, filename }) => {
+        if (entityType !== 'cabinType') {
+          return;
+        }
+
+        triggerFileDownload(blob, filename);
+      });
+
+    this.importExportFacade.exportEntitiesError$.pipe(takeUntil(this.destroy$)).subscribe(({ entityType }) => {
+      if (entityType !== 'cabinType') {
+        return;
+      }
+
+      this.snackService.showError('Nie udało się wyeksportować rodzajów kabin');
     });
 
     this.commonFacade.getAllCabinTypes();
@@ -195,6 +219,36 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
           this.commonFacade.bulkDeleteCabinTypes({ ids });
         });
+    });
+  }
+
+  public openImport(): void {
+    this.dialog
+      .open(ImportModalComponent, {
+        width: '600px',
+        data: {
+          entityType: 'cabinType',
+          entityLabelSingular: 'rodzaj kabiny',
+          entityLabelPlural: 'rodzaje kabin',
+          acceptExtension: '.csv',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((refreshed) => {
+        if (refreshed) {
+          this.commonFacade.getAllCabinTypes();
+        }
+      });
+  }
+
+  public exportAllCabinTypes(): void {
+    this.importExportFacade.exportEntities({ entityType: 'cabinType' });
+  }
+
+  public exportSelectedCabinTypes(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      this.importExportFacade.exportEntities({ entityType: 'cabinType', ids: Array.from(selectedIds) });
     });
   }
 

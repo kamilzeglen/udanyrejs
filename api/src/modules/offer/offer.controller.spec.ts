@@ -8,6 +8,9 @@ import { OfferSyncService } from './offer-sync.service';
 import { OfferSyncCron } from './offer-sync.cron';
 import { OfferDiscoveryService } from './offer-discovery.service';
 import { CompanyService } from '@modules/company/company.service';
+import { OfferImportExportService } from './offer-import-export.service';
+
+const OFFER_ID = '55555555-5555-4555-8555-555555555555';
 
 describe('OfferController.scrapeOffer', () => {
   let controller: OfferController;
@@ -26,6 +29,7 @@ describe('OfferController.scrapeOffer', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -77,6 +81,7 @@ describe('OfferController.syncOffer', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -141,6 +146,7 @@ describe('OfferController.removeOffers', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -188,6 +194,7 @@ describe('OfferController.syncOffers (bulk)', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -237,6 +244,7 @@ describe('OfferController.syncTerms (bulk, term-level)', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -283,6 +291,7 @@ describe('OfferController.discoverOffers', () => {
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: companyService },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -328,6 +337,7 @@ describe('OfferController.syncNow', () => {
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
         { provide: OfferSyncCron, useValue: offerSyncCron },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -375,6 +385,7 @@ describe('OfferController.listDiscoveryDrafts / getDiscoveryDraft / deleteDiscov
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: { findOneById: jest.fn() } },
         { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
+        { provide: OfferImportExportService, useValue: {} },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -410,6 +421,77 @@ describe('OfferController.listDiscoveryDrafts / getDiscoveryDraft / deleteDiscov
     expect(offerDiscoveryService.deleteDraft).toHaveBeenCalledWith(
       'draft-1',
       'admin@udanyrejs.pl',
+    );
+  });
+});
+
+describe('OfferController import and export', () => {
+  function createController() {
+    const importExportService = {
+      exportToZip: jest.fn(),
+      preview: jest.fn(),
+      confirm: jest.fn(),
+    };
+    const controller = new OfferController(
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      importExportService as any,
+    );
+
+    return { controller, importExportService };
+  }
+
+  it('parses export ids and sends a ZIP response', async () => {
+    const context = createController();
+    const archive = Buffer.from('zip');
+    const response = {
+      setHeader: jest.fn(),
+      send: jest.fn(),
+    };
+    context.importExportService.exportToZip.mockResolvedValue(archive);
+
+    await context.controller.exportOffers(
+      `${OFFER_ID},${OFFER_ID}`,
+      response as any,
+    );
+
+    expect(context.importExportService.exportToZip).toHaveBeenCalledWith([
+      OFFER_ID,
+    ]);
+    expect(response.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/zip',
+    );
+    expect(response.send).toHaveBeenCalledWith(archive);
+  });
+
+  it('rejects preview without a non-empty uploaded file', async () => {
+    const context = createController();
+
+    await expect(
+      context.controller.previewImportOffers(undefined),
+    ).rejects.toThrow(AppException);
+    expect(context.importExportService.preview).not.toHaveBeenCalled();
+  });
+
+  it('passes a confirmed archive and current user to the service', async () => {
+    const context = createController();
+    const buffer = Buffer.from('zip');
+    const file = { buffer } as Express.Multer.File;
+    const user = { email: 'admin@udanyrejs.pl' };
+    const expected = { created: ['offer-0'], updated: [], failed: [] };
+    context.importExportService.confirm.mockResolvedValue(expected);
+
+    await expect(
+      context.controller.confirmImportOffers(file, { user } as any),
+    ).resolves.toEqual(expected);
+    expect(context.importExportService.confirm).toHaveBeenCalledWith(
+      buffer,
+      user,
     );
   });
 });

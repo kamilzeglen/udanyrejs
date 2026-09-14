@@ -1,6 +1,8 @@
 <div class="admin-cabin-types-list">
   <div class="add-button">
     <button (click)="addCabinType()">Dodaj rodzaj kabiny</button>
+    <button (click)="openImport()">Importuj</button>
+    <button (click)="exportAllCabinTypes()">Eksportuj wszystko</button>
   </div>
 
   <ng-container *ngIf="(loading$ | async) === false && (viewModel$ | async) as viewModel">
@@ -9,6 +11,7 @@
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
       <button type="button" (click)="bulkActivateSelectedCabinTypes()">Aktywuj zaznaczone</button>
       <button type="button" (click)="bulkDeactivateSelectedCabinTypes()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="exportSelectedCabinTypes()">Eksportuj zaznaczone</button>
       <button type="button" (click)="bulkDeleteSelectedCabinTypes()">Usuń trwale zaznaczone</button>
     </div>
 

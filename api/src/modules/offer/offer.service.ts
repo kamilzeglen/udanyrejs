@@ -20,6 +20,7 @@ import { ShipService } from '@modules/ship/ship.service';
 import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
 import { DestinationService } from '@modules/destination/destination.service';
 import { CategoryService } from '@modules/category/category.service';
+import { Category } from '@modules/category/category.entity';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
 import { CabinType } from '@modules/cabin-type/cabin-type.entity';
 import { OfferTermPriceDto } from '@modules/offer/dto/offer-term.dto';
@@ -460,9 +461,11 @@ export class OfferService {
       ship,
     });
 
-    if (destinations && destinations.length > 0) {
+    if (destinations !== undefined) {
       offer.destinations =
-        await this.destinationService.findByIds(destinations);
+        destinations.length > 0
+          ? await this.destinationService.findByIds(destinations)
+          : [];
     }
 
     const savedOfferId = await this.dataSource.transaction(async (manager) => {
@@ -831,9 +834,14 @@ export class OfferService {
     }
 
     for (const { existing, dto } of toUpdate) {
-      const categoryEntities = dto.categories?.length
-        ? await this.categoryService.findByIds(dto.categories)
-        : undefined;
+      let categoryEntities: Category[] | undefined;
+
+      if (dto.categories !== undefined) {
+        categoryEntities =
+          dto.categories.length > 0
+            ? await this.categoryService.findByIds(dto.categories)
+            : [];
+      }
 
       // dto.sourceUrl/categories są opcjonalne - brak wartości w tym
       // konkretnym zapisie nie może oznaczać "wyczyść", bo existing już ma
