@@ -22,7 +22,7 @@ export class OfferEffects {
             return offerActions.getOffersSuccess({ offers: offers });
           }),
           catchError((errorMessage) => {
-            return of(offerActions.getOfferError({ errorMessage }));
+            return of(offerActions.getOffersError({ errorMessage }));
           }),
         );
       }),

@@ -10,6 +10,8 @@ import { AboutUsComponent } from './about-us/about-us.component';
 import { OfferFiltersComponent } from './offer-filters/offer-filters.component';
 import { RulesComponent } from './rules/rules.component';
 import { ShareStatsComponent } from './share-stats/share-stats.component';
+import { OfferImageComponent } from './offer-image/offer-image.component';
+import { OfferSkeletonComponent } from './offer-skeleton/offer-skeleton.component';
 
 const components = [
   OfferListComponent,
@@ -25,6 +27,6 @@ const components = [
 
 @NgModule({
   declarations: [...components],
-  imports: [SharedModule, LayoutUserRoutingModule],
+  imports: [SharedModule, LayoutUserRoutingModule, OfferImageComponent, OfferSkeletonComponent],
 })
 export class LayoutUserModule {}

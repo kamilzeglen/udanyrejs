@@ -1,0 +1,24 @@
+<div class="skeleton-heading" *ngIf="variant === 'details'">
+  <span class="skeleton-line short"></span>
+  <span class="skeleton-line heading"></span>
+  <span class="skeleton-line medium"></span>
+</div>
+<div class="skeleton-card" [class.details]="variant === 'details'">
+  <div class="skeleton-image"></div>
+  <div class="skeleton-content">
+    <div class="skeleton-company"><span class="skeleton-line short"></span></div>
+    <span class="skeleton-line title"></span>
+    <span class="skeleton-line medium"></span>
+    <div class="skeleton-facts">
+      <span class="skeleton-line"></span>
+      <span class="skeleton-line medium"></span>
+    </div>
+    <div class="skeleton-bottom">
+      <div class="skeleton-price">
+        <span class="skeleton-line short"></span>
+        <span class="skeleton-line price"></span>
+      </div>
+      <span class="skeleton-button"></span>
+    </div>
+  </div>
+</div>

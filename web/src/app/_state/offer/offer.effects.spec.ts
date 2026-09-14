@@ -4,6 +4,26 @@ import { Observable, of, throwError } from 'rxjs';
 import { OfferEffects } from './offer.effects';
 import { OffersHttpService } from '@core/_http/offers.http.service';
 import * as offerActions from './offer.actions';
+import { offerReducer } from './offer.reducer';
+import { initialState } from './offer.state';
+
+describe('OfferEffects list loading', () => {
+  it('ends loading when fetching the list fails', (done) => {
+    const actions$ = of(offerActions.getOffers({ payload: {} }));
+    const http = jasmine.createSpyObj('OffersHttpService', ['getOffers']);
+    http.getOffers.and.returnValue(throwError(() => 'network error'));
+    TestBed.configureTestingModule({
+      providers: [OfferEffects, provideMockActions(() => actions$), { provide: OffersHttpService, useValue: http }],
+    });
+
+    TestBed.inject(OfferEffects).getOffers$.subscribe((action) => {
+      const state = offerReducer({ ...initialState, loading: true }, action);
+      expect(state.loading).toBeFalse();
+      expect(state.errorMessage).toBe('network error');
+      done();
+    });
+  });
+});
 
 describe('OfferEffects.scrapeOffer$', () => {
   let actions$: Observable<unknown>;

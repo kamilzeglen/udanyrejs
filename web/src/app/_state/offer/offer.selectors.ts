@@ -5,6 +5,7 @@ export const selectOffersState = createFeatureSelector<OfferState>('offer');
 
 export const selectOffers = createSelector(selectOffersState, (state) => state.offers);
 export const selectLoading = createSelector(selectOffersState, (state) => state.loading);
+export const selectLoadError = createSelector(selectOffersState, (state) => Boolean(state.errorMessage));
 export const selectScraping = createSelector(selectOffersState, (state) => state.scraping);
 export const selectSyncingOfferId = createSelector(selectOffersState, (state) => state.syncingOfferId);
 export const selectBulkDeleting = createSelector(selectOffersState, (state) => state.bulkDeleting);

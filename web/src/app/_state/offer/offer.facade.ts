@@ -10,10 +10,12 @@ import { Offer, SearchOffersPayload } from '@interfaces';
 export class OfferFacade {
   public offers$ = this.store.select(offerSelectors.selectOffers);
   public loading$ = this.store.select(offerSelectors.selectLoading);
+  public loadError$ = this.store.select(offerSelectors.selectLoadError);
   public pagination$ = this.store.select(offerSelectors.selectPagination);
 
   public getOffersSuccess$ = this.actions.pipe(ofType(offerActions.getOffersSuccess));
   public getOfferSuccess$ = this.actions.pipe(ofType(offerActions.getOfferSuccess));
+  public getOfferError$ = this.actions.pipe(ofType(offerActions.getOfferError));
   public createOfferSuccess$ = this.actions.pipe(ofType(offerActions.createOfferSuccess));
   public createOfferError$ = this.actions.pipe(ofType(offerActions.createOfferError));
   public updateOfferSuccess$ = this.actions.pipe(ofType(offerActions.updateOfferSuccess));

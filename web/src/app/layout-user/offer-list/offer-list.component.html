@@ -13,7 +13,13 @@
       <app-offer-filters [filters]="filters" (filterChanged)="onFiltersChanged($event)"></app-offer-filters>
     </aside>
     <div class="offers" *ngIf="offers$ | async as offers" [attr.aria-busy]="loading$ | async">
-      <div class="offer-items" *ngIf="offers.length > 0; else noOffers">
+      <ng-container *ngIf="loading$ | async">
+        <span class="loading-status" role="status">Ładowanie ofert rejsów…</span>
+        <div class="offer-items">
+          <app-offer-skeleton *ngFor="let item of skeletonItems"></app-offer-skeleton>
+        </div>
+      </ng-container>
+      <div class="offer-items" *ngIf="offers.length > 0 && (loading$ | async) === false; else noOffers">
         <app-offer-card
           *ngFor="let offer of offers; index as offerIndex"
           [index]="offerIndex"
@@ -32,12 +38,19 @@
       ></mat-paginator>
       <ng-template #noOffers>
         <div class="no-offers" *ngIf="(loading$ | async) === false" role="status">
-          <mat-icon>travel_explore</mat-icon>
-          <h2>Nie znaleźliśmy pasującego rejsu</h2>
-          <p>Zmień termin lub kierunek w filtrach, aby zobaczyć inne oferty.</p>
+          <ng-container *ngIf="loadError$ | async; else emptyResults">
+            <mat-icon>cloud_off</mat-icon>
+            <h2>Nie udało się pobrać ofert</h2>
+            <p>Sprawdź połączenie i spróbuj ponownie.</p>
+            <button type="button" class="retry-button" (click)="getOffers(filters)">Spróbuj ponownie</button>
+          </ng-container>
+          <ng-template #emptyResults>
+            <mat-icon>travel_explore</mat-icon>
+            <h2>Nie znaleźliśmy pasującego rejsu</h2>
+            <p>Zmień termin lub kierunek w filtrach, aby zobaczyć inne oferty.</p>
+          </ng-template>
         </div>
       </ng-template>
     </div>
   </div>
 </section>
-<app-spinner *ngIf="(loading$ | async) === true" appAutoSpinner [size]="75"></app-spinner>

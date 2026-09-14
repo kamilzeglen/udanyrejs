@@ -1,0 +1,167 @@
+@import '../../../scss/cruise-theme';
+@import '../../../scss/skeleton';
+
+:host {
+  display: block;
+}
+
+.skeleton-card {
+  display: grid;
+  grid-template-columns: 36% minmax(0, 1fr);
+  min-height: 292px;
+  overflow: hidden;
+  border: 1px solid $cruise-border;
+  border-radius: $cruise-radius;
+  background: $white;
+}
+
+.skeleton-image,
+.skeleton-line,
+.skeleton-button {
+  @include skeleton-surface;
+}
+
+.skeleton-image {
+  min-height: 292px;
+}
+
+.skeleton-line {
+  display: block;
+  width: 100%;
+  height: 14px;
+  border-radius: 4px;
+
+  &.short {
+    width: 80px;
+  }
+
+  &.medium {
+    width: 60%;
+  }
+
+  &.title {
+    height: 24px;
+  }
+
+  &.heading {
+    width: min(70%, 620px);
+    height: 38px;
+    margin: 12px 0 4px;
+  }
+
+  &.price {
+    width: 120px;
+    height: 30px;
+  }
+}
+
+.skeleton-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.skeleton-company {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 0 20px;
+}
+
+.skeleton-facts {
+  display: grid;
+  width: 70%;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.skeleton-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 18px;
+  border-top: 1px solid #edf1f2;
+}
+
+.skeleton-price {
+  display: grid;
+  gap: 8px;
+}
+
+.skeleton-button {
+  width: 116px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.skeleton-heading {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.details {
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 28px;
+  min-height: 410px;
+  border: 0;
+  background: transparent;
+
+  .skeleton-image {
+    border-radius: $cruise-radius;
+  }
+
+  .skeleton-content {
+    border: 1px solid $cruise-border;
+    border-radius: $cruise-radius;
+    background: $white;
+  }
+
+  .skeleton-company {
+    justify-content: flex-start;
+  }
+
+  .skeleton-bottom {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+
+    .skeleton-image {
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .skeleton-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .skeleton-image {
+    min-height: 0;
+    aspect-ratio: 16 / 10;
+  }
+
+  .skeleton-content {
+    padding: 20px;
+  }
+
+  .skeleton-company {
+    display: none;
+  }
+}

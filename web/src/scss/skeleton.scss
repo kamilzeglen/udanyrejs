@@ -1,0 +1,27 @@
+@mixin skeleton-surface {
+  position: relative;
+  overflow: hidden;
+  background: #e2edef;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(100deg, transparent 15%, rgba(255, 255, 255, 0.65) 50%, transparent 85%);
+    animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+      display: none;
+    }
+  }
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

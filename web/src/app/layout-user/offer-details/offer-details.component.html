@@ -8,14 +8,12 @@
   </header>
   <div class="offer-hero">
     <div class="image-container-offer">
-      <img
-        crossorigin="anonymous"
-        *ngIf="offer.imageFile?.name; else imagePlaceholder"
-        [src]="API_URL + '/offers/images/' + offer.imageFile.name"
-        alt="{{ offer.name }}"
-        class="offer-image"
-      />
-      <ng-template #imagePlaceholder><mat-icon class="image-placeholder">directions_boat</mat-icon></ng-template>
+      <app-offer-image
+        [image]="offer.imageFile"
+        [alt]="offer.name"
+        [priority]="true"
+        sizes="(max-width: 700px) calc(100vw - 32px), (max-width: 900px) calc(100vw - 384px), (max-width: 1280px) calc(100vw - 432px), 848px"
+      ></app-offer-image>
     </div>
     <aside class="booking-panel" aria-label="Termin i cena rejsu">
       <span class="panel-label">Twój rejs</span>
@@ -107,6 +105,8 @@
         [src]="API_URL + '/ships/images/' + offer.ship.imageFile.name"
         alt="Zdjęcie statku - {{ offer.ship.name }}"
         class="ship-image"
+        loading="lazy"
+        decoding="async"
       />
     </div>
 
@@ -186,4 +186,6 @@
     </div>
   </div>
 </article>
-<app-spinner *ngIf="loading" appAutoSpinner [size]="75"></app-spinner>
+<section class="offer-details-wrapper" *ngIf="loading" aria-busy="true" aria-label="Ładowanie szczegółów rejsu">
+  <app-offer-skeleton variant="details"></app-offer-skeleton>
+</section>

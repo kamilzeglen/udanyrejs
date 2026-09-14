@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { defaultPagination, OfferFacade } from 'src/app/_state/offer';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, distinctUntilChanged, ReplaySubject, take, takeUntil } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SearchOffersPayload } from '@interfaces';
 import { CommonFacade } from '@state/common';
@@ -20,9 +20,11 @@ export class OfferListComponent implements OnInit, OnDestroy {
 
   public offers$ = this.offerFacade.offers$;
   public loading$ = this.offerFacade.loading$;
+  public loadError$ = this.offerFacade.loadError$;
   public pagination$ = this.offerFacade.pagination$;
 
   public page: number = 0;
+  public readonly skeletonItems = [0, 1, 2];
 
   public pageSize = defaultPagination.limit;
   public pageSizeOptions = [10, 25, 50];
@@ -61,35 +63,39 @@ export class OfferListComponent implements OnInit, OnDestroy {
     private readonly seoService: SeoService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
-  ) {
-    this.seoService.setPageMeta({
-      title: 'UdanyRejs - Oferty Rejsów',
-      description:
-        'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
-      path: this.router.url,
-    });
-  }
+  ) {}
 
   public ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      this.page = params['page'] ? Number(params['page']) - 1 : 0;
-    });
+    combineLatest([this.activatedRoute.paramMap, this.route.queryParamMap])
+      .pipe(
+        map(([paramMap, queryParamMap]) => {
+          const page = Number(queryParamMap.get('page'));
+          return {
+            category: paramMap.get('category'),
+            page: Number.isSafeInteger(page) && page > 0 ? page - 1 : 0,
+          };
+        }),
+        distinctUntilChanged(
+          (previous, current) => previous.category === current.category && previous.page === current.page,
+        ),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(({ category, page }) => {
+        this.page = page;
+        this.filters = { ...this.filters, category };
+        const path = category ? `/offers/${encodeURIComponent(category)}` : '/offers';
+        const title = category === 'promotions' ? 'UdanyRejs - Oferty Rejsów - Promocje' : 'UdanyRejs - Oferty Rejsów';
 
-    this.activatedRoute.paramMap.pipe(takeUntil(this.destroy$)).subscribe((paramMap) => {
-      const category = paramMap.get('category');
-      this.filters = { ...this.filters, category: paramMap.get('category') };
+        this.seoService.setPageMeta({
+          title,
+          description:
+            'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
+          path: page > 0 ? `${path}?page=${page + 1}` : path,
+        });
 
-      const title = category === 'promotions' ? 'UdanyRejs - Oferty Rejsów - Promocje' : 'UdanyRejs - Oferty Rejsów';
-      this.seoService.setPageMeta({
-        title,
-        description:
-          'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
-        path: this.router.url,
+        this.commonFacade.getCategories();
+        this.getOffers({ ...this.filters, offset: page * this.pageSize });
       });
-
-      this.commonFacade.getCategories();
-      this.getOffers(this.filters);
-    });
   }
 
   public ngOnDestroy(): void {
@@ -145,8 +151,12 @@ export class OfferListComponent implements OnInit, OnDestroy {
   }
 
   public pageChanged(page: PageEvent): void {
-    if (page.pageSize !== this.pageSize) {
-      this.pageSize = page.pageSize;
+    const pageSizeChanged = page.pageSize !== this.pageSize;
+    this.pageSize = page.pageSize;
+
+    if (page.pageIndex === this.page && pageSizeChanged) {
+      this.getOffers({ offset: page.pageIndex * this.pageSize, limit: page.pageSize });
+      return;
     }
 
     this.router.navigate([], {
@@ -154,7 +164,5 @@ export class OfferListComponent implements OnInit, OnDestroy {
       queryParams: { page: page.pageIndex + 1 },
       queryParamsHandling: 'merge',
     });
-
-    this.getOffers({ offset: page.pageIndex * this.pageSize, limit: page.pageSize });
   }
 }

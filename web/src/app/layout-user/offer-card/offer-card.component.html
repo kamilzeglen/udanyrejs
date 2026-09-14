@@ -1,57 +1,54 @@
 <a
   class="offer-card"
-  [routerLink]="['/offers/details', offer().id]"
-  [queryParams]="{ termId: offer().termId }"
-  [class.recommended]="offer().isRecommended"
+  [routerLink]="['/offers/details', offer.id]"
+  [queryParams]="{ termId: offer.termId }"
+  [class.recommended]="offer.isRecommended"
 >
   <div class="image-container">
-    <img
-      crossorigin="anonymous"
-      *ngIf="offer().imageFile && imageFailed === false; else imagePlaceholder"
-      [src]="API_URL + '/offers/images/' + offer().imageFile.name"
-      alt="{{ offer().name }}"
-      [attr.loading]="index() === 0 ? 'eager' : 'lazy'"
-      class="cruise-image"
-      (error)="imageFailed = true"
-    />
-    <ng-template #imagePlaceholder><mat-icon class="image-placeholder">directions_boat</mat-icon></ng-template>
+    <app-offer-image
+      [image]="offer.imageFile"
+      [alt]="offer.name"
+      [priority]="index === 0"
+      sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 1000px) calc((100vw - 64px) * 0.36), (max-width: 1400px) calc((100vw - 356px) * 0.36), 376px"
+    ></app-offer-image>
     <span class="ribbon-badge" *ngIf="isNew">Nowość</span>
     <div class="offer-badges">
-      <span class="offer-badge promotion" *ngIf="offer().isRecommended">Polecamy</span>
+      <span class="offer-badge promotion" *ngIf="offer.isRecommended">Polecamy</span>
     </div>
   </div>
   <div class="offer-content">
     <div class="company">
       <img
-        crossorigin="anonymous"
-        *ngIf="offer().company?.imageFile?.name && companyLogoFailed === false"
-        [src]="API_URL + '/companies/images/' + offer().company.imageFile.name"
-        alt="{{ offer().company.name }}"
+        *ngIf="offer.company?.imageFile?.name && companyLogoFailed === false"
+        [src]="API_URL + '/companies/images/' + offer.company.imageFile.name"
+        alt="{{ offer.company.name }}"
         class="company-logo"
+        width="128"
+        height="40"
+        [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+        decoding="async"
         (error)="companyLogoFailed = true"
       />
       <span
         *ngIf="
-          companyLogoFailed ||
-          offer().company?.imageFile?.name === null ||
-          offer().company?.imageFile?.name === undefined
+          companyLogoFailed || offer.company?.imageFile?.name === null || offer.company?.imageFile?.name === undefined
         "
-        >{{ offer().company?.name }}</span
+        >{{ offer.company?.name }}</span
       >
     </div>
-    <h2>{{ offer().name }}</h2>
+    <h2>{{ offer.name }}</h2>
     <div class="offer-facts">
       <p>
         <mat-icon>calendar_today</mat-icon
-        ><span>{{ offer().startDate | date: 'dd.MM.yyyy' }} – {{ offer().endDate | date: 'dd.MM.yyyy' }}</span>
+        ><span>{{ offer.startDate | date: 'dd.MM.yyyy' }} – {{ offer.endDate | date: 'dd.MM.yyyy' }}</span>
       </p>
       <p>
-        <mat-icon>directions_boat</mat-icon><span>{{ offer().ship.name }}</span>
+        <mat-icon>directions_boat</mat-icon><span>{{ offer.ship.name }}</span>
       </p>
     </div>
     <div class="offer-bottom">
       <div class="price">
-        <span>Cena od</span><strong>{{ offer().fromPrice / 100 | currency: 'EUR' : 'symbol' : '0.0' }}</strong>
+        <span>Cena od</span><strong>{{ offer.fromPrice / 100 | currency: 'EUR' : 'symbol' : '0.0' }}</strong>
       </div>
       <span class="view-offer">Zobacz rejs</span>
     </div>

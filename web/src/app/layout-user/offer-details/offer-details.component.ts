@@ -27,6 +27,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
 
   public offer: Offer;
   public loading: boolean = true;
+  private loadingFailed: boolean = false;
   public itineraryViewModel: {
     day: number;
     date: Date | null;
@@ -84,9 +85,20 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ offer }) => {
-      this.offer = offer;
+    this.offerFacade.getOfferError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.loading = false;
+      this.loadingFailed = true;
+    });
+
+    this.offerFacade.getOfferSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ offer }) => {
+      this.loading = false;
+
+      if (!offer) {
+        this.loadingFailed = true;
+        return;
+      }
+
+      this.offer = offer;
 
       this.termsViewModel = (offer.terms || [])
         .map((term) => ({
@@ -187,7 +199,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       offer,
       this.termsViewModel,
       this.API_URL,
-      environment.WEB_URL + this.router.url,
+      this.seoService.createCanonicalUrl(this.router.url),
     );
 
     this.seoService.setPageMeta({
