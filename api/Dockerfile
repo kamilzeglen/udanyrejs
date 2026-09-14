@@ -41,7 +41,7 @@ COPY /src/typeorm.ts ./src/
 EXPOSE 5006
 
 # Healthcheck sprawdza realny endpoint aplikacji (w tym połączenie z bazą, patrz /health)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
     CMD curl -f http://localhost:5006/health || exit 1
 
 # Uruchamianie aplikacji z migracjami

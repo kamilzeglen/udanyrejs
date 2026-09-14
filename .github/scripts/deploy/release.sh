@@ -49,7 +49,7 @@ for app in api web scraper; do
 done > "$RELEASE_DIR/previous.env"
 
 bash "$RELEASE_DIR/scripts/backup.sh"
-if "${compose[@]}" up -d --no-build --pull never --wait --wait-timeout 180 --force-recreate && bash "$RELEASE_DIR/scripts/verify.sh"; then
+if "${compose[@]}" up -d --no-build --pull never --wait --wait-timeout 300 --force-recreate && bash "$RELEASE_DIR/scripts/verify.sh"; then
   printf '%s\n' "$RELEASE_DIR" > .deploy/current.tmp
   mv .deploy/current.tmp .deploy/current
   printf '%s\n' "$RELEASE_DIR" > .deploy/latest-attempt
