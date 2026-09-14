@@ -345,8 +345,9 @@ export class OfferSyncService {
 
   // Wersja masowa uproszczona względem OfferSyncCron: wywołuje ten sam
   // syncOffer() dla każdej podanej oferty po kolei, ale BEZ opóźnienia
-  // między ofertami (SYNC_REQUEST_DELAY_MS w cronie) - akceptowalne dla
-  // ręcznego triggera na garstce zaznaczonych ofert, nie dla całej bazy.
+  // między ofertami (syncRequestDelayMs z ustawień, używane przez
+  // OfferSyncCron) - akceptowalne dla ręcznego triggera na garstce
+  // zaznaczonych ofert, nie dla całej bazy.
   public async syncOffers(offerIds: string[]): Promise<OfferBulkSyncResult> {
     const result: OfferBulkSyncResult = {
       syncedIds: [],

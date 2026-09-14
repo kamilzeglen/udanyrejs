@@ -30,6 +30,7 @@ import {
   OfferSyncService,
   OfferTermsBulkSyncResult,
 } from './offer-sync.service';
+import { OfferSyncCron } from './offer-sync.cron';
 import { OfferDiscoveryService } from './offer-discovery.service';
 import { DiscoverOffersDto } from '@modules/offer/dto/discover-offers.dto';
 import { BulkOfferIdsDto } from '@modules/offer/dto/bulk-offer-ids.dto';
@@ -48,6 +49,7 @@ export class OfferController {
     private readonly offerSyncService: OfferSyncService,
     private readonly offerDiscoveryService: OfferDiscoveryService,
     private readonly companyService: CompanyService,
+    private readonly offerSyncCron: OfferSyncCron,
   ) {}
 
   @Post('/search')
@@ -225,5 +227,15 @@ export class OfferController {
     @Body() bulkTermIdsDto: BulkTermIdsDto,
   ): Promise<OfferTermsBulkSyncResult> {
     return this.offerSyncService.syncTerms(bulkTermIdsDto.termIds);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/sync-now')
+  async syncNow(): Promise<{ started: boolean }> {
+    this.offerSyncCron.runFullSync().catch((error) => {
+      this.logger.error(`Manual full sync failed: ${(error as Error).message}`);
+    });
+
+    return { started: true };
   }
 }

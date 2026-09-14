@@ -17,6 +17,7 @@ import { CategoryModule } from '@modules/category/category.module';
 import { CabinTypeModule } from '@modules/cabin-type/cabin-type.module';
 import { DestinationModule } from '@modules/destination/destination.module';
 import { CityModule } from '@modules/city/city.module';
+import { SettingsModule } from '@modules/settings/settings.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { EmailModule } from '@modules/email/email.module';
@@ -113,6 +114,7 @@ import { envValidationSchema } from '@core/config/env.validation';
     CabinTypeModule,
     DestinationModule,
     CityModule,
+    SettingsModule,
     PdfFileModule,
     ShipModule,
     EmailModule,

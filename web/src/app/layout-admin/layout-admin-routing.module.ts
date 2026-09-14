@@ -20,6 +20,7 @@ import { AdminCabinTypeAddEditComponent } from './admin-cabin-type-add-edit/admi
 import { AdminOfferDiscoverTriggerComponent } from './admin-offer-discover-trigger/admin-offer-discover-trigger.component';
 import { AdminOfferDraftListComponent } from './admin-offer-draft-list/admin-offer-draft-list.component';
 import { AdminOfferDraftEditComponent } from './admin-offer-draft-edit/admin-offer-draft-edit.component';
+import { AdminSettingsComponent } from './admin-settings/admin-settings.component';
 
 const routes: Routes = [
   {
@@ -134,6 +135,10 @@ const routes: Routes = [
       {
         path: 'cabin-types/edit/:cabinTypeId',
         component: AdminCabinTypeAddEditComponent,
+      },
+      {
+        path: 'settings',
+        component: AdminSettingsComponent,
       },
     ],
   },

@@ -574,6 +574,7 @@ describe('OfferService', () => {
         limit: jest.fn().mockReturnThis(),
         offset: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
         getRawMany: jest.fn().mockResolvedValue([]),
         getRawOne: jest.fn().mockResolvedValue({ count: '0' }),
         getMany: jest.fn().mockResolvedValue([]),
@@ -588,6 +589,55 @@ describe('OfferService', () => {
       offset: 0,
       limit: 10,
     };
+
+    it('avoids multiplying rows by categories and destinations for an unfiltered search', async () => {
+      const idQuery = buildTermQueryBuilder();
+      const countQuery = buildTermQueryBuilder();
+      (service as any).offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery);
+
+      await service.searchOffers(baseSearchDto as any);
+
+      expect(idQuery.leftJoin).not.toHaveBeenCalled();
+      expect(countQuery.leftJoin).not.toHaveBeenCalled();
+      expect(idQuery.addOrderBy).toHaveBeenCalledWith('"termId"', 'ASC');
+    });
+
+    it('joins requested filters in both the page and count queries', async () => {
+      const idQuery = buildTermQueryBuilder();
+      const countQuery = buildTermQueryBuilder();
+      (service as any).offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery);
+      (service as any).categoryService.findOneByUrl = jest
+        .fn()
+        .mockResolvedValue({ id: 'category-1' });
+
+      await service.searchOffers({
+        ...baseSearchDto,
+        category: 'summer',
+        destinationIdList: ['destination-1'],
+      } as any);
+
+      for (const query of [idQuery, countQuery]) {
+        expect(query.leftJoin).toHaveBeenCalledWith(
+          'term.categories',
+          'category',
+        );
+        expect(query.leftJoin).toHaveBeenCalledWith(
+          'offer.destinations',
+          'destination',
+        );
+        expect(query.where).toHaveBeenCalledWith(
+          expect.stringContaining('category.id = :categoryId'),
+          expect.objectContaining({
+            categoryId: 'category-1',
+            destinationIdList: ['destination-1'],
+          }),
+        );
+      }
+    });
 
     it('returns one row per matching term, not one row per offer', async () => {
       const offerTermRepository = (service as any).offerTermRepository;
@@ -905,6 +955,123 @@ describe('OfferService', () => {
         deletedIds: ['offer-1', 'offer-3'],
         failedIds: ['offer-missing'],
       });
+    });
+  });
+
+  describe('cleanupPastTerms', () => {
+    function buildDeleteBuilder() {
+      return {
+        delete: jest.fn().mockReturnThis(),
+        from: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        execute: jest.fn().mockResolvedValue(undefined),
+      };
+    }
+
+    function buildOffersWithoutTermsBuilder(result: unknown[]) {
+      return {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(result),
+      };
+    }
+
+    it('does nothing and does not open a transaction when there are no past terms', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      });
+
+      const result = await service.cleanupPastTerms();
+
+      expect(result).toEqual({ deletedTermsCount: 0, deletedOffersCount: 0 });
+      expect(dataSource.transaction).not.toHaveBeenCalled();
+    });
+
+    it('deletes past terms but keeps the offer when it still has other terms', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'term-1', offerId: 'offer-1', pdfFile: null },
+          ]),
+      });
+      transactionManager.createQueryBuilder.mockImplementation(
+        (entityClass?: unknown) =>
+          entityClass
+            ? buildOffersWithoutTermsBuilder([])
+            : buildDeleteBuilder(),
+      );
+
+      const result = await service.cleanupPastTerms();
+
+      expect(dataSource.transaction).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ deletedTermsCount: 1, deletedOffersCount: 0 });
+    });
+
+    it('also deletes the offer, its image file included, when it has no terms left', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'term-1', offerId: 'offer-1', pdfFile: null },
+          ]),
+      });
+      transactionManager.createQueryBuilder.mockImplementation(
+        (entityClass?: unknown) =>
+          entityClass
+            ? buildOffersWithoutTermsBuilder([
+                { id: 'offer-1', imageFile: { path: 'offers/offer-1.png' } },
+              ])
+            : buildDeleteBuilder(),
+      );
+      const imageFileService = (service as any).imageFileService;
+      imageFileService.removeImageFile = jest.fn().mockResolvedValue(true);
+
+      const result = await service.cleanupPastTerms();
+
+      expect(result).toEqual({ deletedTermsCount: 1, deletedOffersCount: 1 });
+      expect(imageFileService.removeImageFile).toHaveBeenCalledWith(
+        'offers/offer-1.png',
+      );
+    });
+
+    it('removes the pdf file of every deleted term from disk after the transaction commits', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      offerTermRepository.createQueryBuilder.mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([
+          {
+            id: 'term-1',
+            offerId: 'offer-1',
+            pdfFile: { path: 'terms/term-1.pdf' },
+          },
+        ]),
+      });
+      transactionManager.createQueryBuilder.mockImplementation(
+        (entityClass?: unknown) =>
+          entityClass
+            ? buildOffersWithoutTermsBuilder([])
+            : buildDeleteBuilder(),
+      );
+      const pdfFileService = (service as any).pdfFileService;
+      pdfFileService.removePdfFile = jest.fn().mockResolvedValue(true);
+
+      await service.cleanupPastTerms();
+
+      expect(pdfFileService.removePdfFile).toHaveBeenCalledWith(
+        'terms/term-1.pdf',
+      );
     });
   });
 

@@ -206,8 +206,6 @@ export class OfferService {
     let idQueryBuilder = this.offerTermRepository
       .createQueryBuilder('term')
       .innerJoin('term.offer', 'offer')
-      .leftJoin('term.categories', 'category')
-      .leftJoin('offer.destinations', 'destination')
       .select('term.id', 'termId')
       .addSelect((subQuery) => {
         return subQuery
@@ -215,6 +213,14 @@ export class OfferService {
           .from(OfferTermPrice, 'price')
           .where('price.offerTermId = term.id');
       }, 'fromPrice');
+
+    if (category?.length && category !== 'recommended') {
+      idQueryBuilder.leftJoin('term.categories', 'category');
+    }
+
+    if (destinationIdList?.length > 0) {
+      idQueryBuilder.leftJoin('offer.destinations', 'destination');
+    }
 
     if (orderColumnAlias === 'orderValue') {
       idQueryBuilder = idQueryBuilder.addSelect(
@@ -236,7 +242,8 @@ export class OfferService {
         `"${orderColumnAlias}"`,
         orderDir.toUpperCase() as any,
         'NULLS LAST',
-      );
+      )
+      .addOrderBy('"termId"', 'ASC');
 
     const rawIdRows = await idQuery.getRawMany<{
       termId: string;
@@ -250,14 +257,21 @@ export class OfferService {
       ]),
     );
 
-    const countRow = await this.offerTermRepository
+    const countQuery = this.offerTermRepository
       .createQueryBuilder('term')
       .innerJoin('term.offer', 'offer')
-      .leftJoin('term.categories', 'category')
-      .leftJoin('offer.destinations', 'destination')
       .select('COUNT(DISTINCT term.id)', 'count')
-      .where(whereSql, whereParams)
-      .getRawOne<{ count: string }>();
+      .where(whereSql, whereParams);
+
+    if (category?.length && category !== 'recommended') {
+      countQuery.leftJoin('term.categories', 'category');
+    }
+
+    if (destinationIdList?.length > 0) {
+      countQuery.leftJoin('offer.destinations', 'destination');
+    }
+
+    const countRow = await countQuery.getRawOne<{ count: string }>();
     const count = Number(countRow.count);
 
     const pagination: PaginationResp = {
@@ -544,6 +558,81 @@ export class OfferService {
     }
 
     return { deletedIds, failedIds };
+  }
+
+  // Usuwa całkowicie terminy, które już minęły (endDate w przeszłości).
+  // Jeśli po usunięciu przeszłych terminów oferta nie ma już ŻADNEGO
+  // terminu (nawet nieaktywnego), usuwamy też samą ofertę - zgodnie z
+  // regułą "oferta z choć jednym pozostałym terminem musi zostać, usuwamy
+  // wtedy tylko sam termin".
+  async cleanupPastTerms(): Promise<{
+    deletedTermsCount: number;
+    deletedOffersCount: number;
+  }> {
+    const now = new Date();
+
+    const pastTerms = await this.offerTermRepository
+      .createQueryBuilder('term')
+      .leftJoinAndSelect('term.pdfFile', 'pdfFile')
+      .where('term.endDate < :now', { now })
+      .getMany();
+
+    if (pastTerms.length === 0) {
+      return { deletedTermsCount: 0, deletedOffersCount: 0 };
+    }
+
+    const pastTermIds = pastTerms.map((term) => term.id);
+    const offerIds = [...new Set(pastTerms.map((term) => term.offerId))];
+
+    const emptyOffers = await this.dataSource.transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from(OfferTerm)
+        .where('id IN (:...pastTermIds)', { pastTermIds })
+        .execute();
+
+      const offersWithoutTerms = await manager
+        .createQueryBuilder(Offer, 'offer')
+        .leftJoinAndSelect('offer.imageFile', 'imageFile')
+        .where('offer.id IN (:...offerIds)', { offerIds })
+        .andWhere(
+          'NOT EXISTS (SELECT 1 FROM offer_term term WHERE term."offerId" = offer.id)',
+        )
+        .getMany();
+
+      if (offersWithoutTerms.length > 0) {
+        await manager
+          .createQueryBuilder()
+          .delete()
+          .from(Offer)
+          .where('id IN (:...emptyOfferIds)', {
+            emptyOfferIds: offersWithoutTerms.map((offer) => offer.id),
+          })
+          .execute();
+      }
+
+      return offersWithoutTerms;
+    });
+
+    // Sprzątanie plików wykonujemy dopiero po zatwierdzonej transakcji SQL -
+    // ten sam powód co w removeOffer().
+    for (const term of pastTerms) {
+      if (term.pdfFile) {
+        await this.pdfFileService.removePdfFile(term.pdfFile.path);
+      }
+    }
+
+    for (const offer of emptyOffers) {
+      if (offer.imageFile) {
+        await this.imageFileService.removeImageFile(offer.imageFile.path);
+      }
+    }
+
+    return {
+      deletedTermsCount: pastTerms.length,
+      deletedOffersCount: emptyOffers.length,
+    };
   }
 
   async deactivateOffer(offerId: string, reqCreatedBy: User): Promise<boolean> {

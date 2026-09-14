@@ -1,0 +1,87 @@
+<div class="admin-settings">
+  <h1 class="title">Ustawienia</h1>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="submitForm()">
+    <mat-tab-group class="settings-tabs">
+      <mat-tab label="Scrapowanie">
+        <section class="section data-section">
+          <div class="form-group form-group-checkbox">
+            <label for="scrapingEnabled">
+              <input id="scrapingEnabled" formControlName="scrapingEnabled" type="checkbox" />
+              Scrapowanie włączone
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="scrapeHour">Godzina uruchomienia:</label>
+            <div class="time-inputs">
+              <input id="scrapeHour" formControlName="scrapeHour" type="number" min="0" max="23" />
+              <span>:</span>
+              <input id="scrapeMinute" formControlName="scrapeMinute" type="number" min="0" max="59" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="syncRequestDelaySeconds">Opóźnienie między ofertami (sekundy):</label>
+            <input id="syncRequestDelaySeconds" formControlName="syncRequestDelaySeconds" type="number" min="0" />
+          </div>
+        </section>
+
+        <section class="section status-section" *ngIf="viewModel$ | async as viewModel">
+          <h2>Status ostatniej synchronizacji</h2>
+
+          <p *ngIf="!viewModel.settings?.lastSyncStartedAt">Scraper jeszcze nie był uruchamiany.</p>
+
+          <ng-container *ngIf="viewModel.settings?.lastSyncStartedAt">
+            <p>Rozpoczęto: {{ viewModel.settings.lastSyncStartedAt | date: 'dd.MM.yyyy HH:mm' }}</p>
+            <p *ngIf="viewModel.settings.lastSyncFinishedAt">
+              Zakończono: {{ viewModel.settings.lastSyncFinishedAt | date: 'dd.MM.yyyy HH:mm' }}
+            </p>
+            <p>Status: {{ viewModel.statusLabel }}</p>
+            <p *ngIf="viewModel.settings.lastSyncSummary">{{ viewModel.settings.lastSyncSummary }}</p>
+          </ng-container>
+
+          <div class="status-actions">
+            <button (click)="refreshStatus()" type="button">Odśwież status</button>
+            <button
+              (click)="runSyncNow()"
+              mat-raised-button
+              color="primary"
+              type="button"
+              [disabled]="viewModel.runDisabled"
+            >
+              Uruchom teraz
+            </button>
+          </div>
+        </section>
+      </mat-tab>
+
+      <mat-tab label="Czyszczenie terminów">
+        <section class="section data-section">
+          <div class="form-group form-group-checkbox">
+            <label for="termCleanupEnabled">
+              <input id="termCleanupEnabled" formControlName="termCleanupEnabled" type="checkbox" />
+              Automatyczne usuwanie przeszłych terminów włączone
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="cleanupHour">Godzina uruchomienia:</label>
+            <div class="time-inputs">
+              <input id="cleanupHour" formControlName="cleanupHour" type="number" min="0" max="23" />
+              <span>:</span>
+              <input id="cleanupMinute" formControlName="cleanupMinute" type="number" min="0" max="59" />
+            </div>
+          </div>
+
+          <p class="hint">
+            Codziennie o wybranej godzinie usuwane są całkowicie terminy, których data zakończenia minęła. Oferta jest
+            usuwana razem z ostatnim terminem tylko wtedy, gdy nie ma już żadnego innego terminu.
+          </p>
+        </section>
+      </mat-tab>
+    </mat-tab-group>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="settingsForm.invalid">Zapisz ustawienia</button>
+  </form>
+</div>

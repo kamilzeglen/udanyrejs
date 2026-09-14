@@ -5,6 +5,7 @@ import { ScraperClientService } from '@core/scraper-client/scraper-client.servic
 import { AppException } from '@core/errors/app-exception';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { OfferSyncService } from './offer-sync.service';
+import { OfferSyncCron } from './offer-sync.cron';
 import { OfferDiscoveryService } from './offer-discovery.service';
 import { CompanyService } from '@modules/company/company.service';
 
@@ -24,6 +25,7 @@ describe('OfferController.scrapeOffer', () => {
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -74,6 +76,7 @@ describe('OfferController.syncOffer', () => {
         { provide: OfferSyncService, useValue: offerSyncService },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -137,6 +140,7 @@ describe('OfferController.removeOffers', () => {
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -183,6 +187,7 @@ describe('OfferController.syncOffers (bulk)', () => {
         { provide: OfferSyncService, useValue: offerSyncService },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -231,6 +236,7 @@ describe('OfferController.syncTerms (bulk, term-level)', () => {
         { provide: OfferSyncService, useValue: offerSyncService },
         { provide: OfferDiscoveryService, useValue: {} },
         { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -276,6 +282,7 @@ describe('OfferController.discoverOffers', () => {
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: companyService },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
@@ -305,6 +312,45 @@ describe('OfferController.discoverOffers', () => {
   });
 });
 
+describe('OfferController.syncNow', () => {
+  let controller: OfferController;
+  let offerSyncCron: { runFullSync: jest.Mock };
+
+  beforeEach(async () => {
+    offerSyncCron = { runFullSync: jest.fn().mockResolvedValue(undefined) };
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [OfferController],
+      providers: [
+        { provide: OfferService, useValue: {} },
+        { provide: ScraperClientService, useValue: { scrapeOffer: jest.fn() } },
+        { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
+        { provide: OfferDiscoveryService, useValue: {} },
+        { provide: CompanyService, useValue: {} },
+        { provide: OfferSyncCron, useValue: offerSyncCron },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    controller = moduleRef.get(OfferController);
+  });
+
+  it('starts the full sync without waiting for it and returns immediately', async () => {
+    const result = await controller.syncNow();
+
+    expect(result).toEqual({ started: true });
+    expect(offerSyncCron.runFullSync).toHaveBeenCalled();
+  });
+
+  it('does not let a failed background run reject the request', async () => {
+    offerSyncCron.runFullSync.mockRejectedValue(new Error('boom'));
+
+    await expect(controller.syncNow()).resolves.toEqual({ started: true });
+  });
+});
+
 describe('OfferController.listDiscoveryDrafts / getDiscoveryDraft / deleteDiscoveryDraft', () => {
   let controller: OfferController;
   let offerDiscoveryService: {
@@ -328,6 +374,7 @@ describe('OfferController.listDiscoveryDrafts / getDiscoveryDraft / deleteDiscov
         { provide: OfferSyncService, useValue: { syncOffer: jest.fn() } },
         { provide: OfferDiscoveryService, useValue: offerDiscoveryService },
         { provide: CompanyService, useValue: { findOneById: jest.fn() } },
+        { provide: OfferSyncCron, useValue: { runFullSync: jest.fn() } },
       ],
     })
       .overrideGuard(AuthGuard)
