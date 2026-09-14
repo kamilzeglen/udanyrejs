@@ -1,0 +1,59 @@
+@import '../../../scss/skeleton';
+
+:host {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.image-skeleton {
+  @include skeleton-surface;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+    color: #b7cdd2;
+  }
+}
+
+.offer-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 240ms ease-out;
+
+  &.is-loaded {
+    opacity: 1;
+  }
+}
+
+.image-placeholder {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #e2edef;
+  color: #5c707a;
+  font-size: 13px;
+
+  mat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-photo {
+    transition: none;
+  }
+}

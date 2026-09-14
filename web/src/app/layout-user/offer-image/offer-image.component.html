@@ -1,0 +1,21 @@
+<div class="image-skeleton" *ngIf="imageLoading" aria-hidden="true">
+  <mat-icon>directions_boat</mat-icon>
+</div>
+<img
+  *ngIf="source && imageFailed === false"
+  [attr.sizes]="sizes"
+  [attr.srcset]="sourceSet"
+  [src]="source"
+  [alt]="alt"
+  [attr.loading]="priority ? 'eager' : 'lazy'"
+  [attr.fetchpriority]="priority ? 'high' : 'auto'"
+  decoding="async"
+  class="offer-photo"
+  [class.is-loaded]="imageLoading === false"
+  (load)="onImageLoad()"
+  (error)="onImageError()"
+/>
+<div class="image-placeholder" *ngIf="source === null || imageFailed" role="img" [attr.aria-label]="alt">
+  <mat-icon aria-hidden="true">directions_boat</mat-icon>
+  <span>Zdjęcie niedostępne</span>
+</div>
