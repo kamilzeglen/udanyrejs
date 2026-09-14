@@ -24,7 +24,7 @@ export class Category {
   url: string;
 
   @Column({ nullable: true })
-  position: number;
+  position: number | null;
 
   @Column({ nullable: true })
   startDate: Date;

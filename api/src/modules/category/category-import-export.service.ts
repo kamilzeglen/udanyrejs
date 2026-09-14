@@ -126,7 +126,7 @@ export class CategoryImportExportService {
     const name = raw.name?.trim() ?? '';
     const url = raw.url?.trim() ?? '';
     const positionRaw = raw.position?.trim() ?? '';
-    const position = Number(positionRaw);
+    const position = positionRaw.length === 0 ? null : Number(positionRaw);
     const startDate = raw.startDate?.trim() ?? '';
     const endDate = raw.endDate?.trim() ?? '';
     const errors: string[] = [];
@@ -139,14 +139,14 @@ export class CategoryImportExportService {
       errors.push('Brak url');
     }
 
-    if (positionRaw.length === 0 || Number.isFinite(position) === false) {
+    if (positionRaw.length > 0 && Number.isFinite(position) === false) {
       errors.push('Brak lub nieprawidłowa pozycja');
     }
 
     this.validateDate(startDate, 'początkowej', 'początkowa', errors);
     this.validateDate(endDate, 'końcowej', 'końcowa', errors);
 
-    const id = await this.resolveId(raw.id, errors);
+    const id = await this.resolveId(raw.id, name, errors);
     let action: ImportRowResult['action'] = id ? 'update' : 'create';
     const isActive = this.parseBoolean(raw.isActive, 'isActive', true, errors);
     const isVisible = this.parseBoolean(
@@ -202,6 +202,7 @@ export class CategoryImportExportService {
 
   private async resolveId(
     rawId: string | undefined,
+    name: string,
     errors: string[],
   ): Promise<string | undefined> {
     const id = rawId?.trim();
@@ -217,12 +218,17 @@ export class CategoryImportExportService {
 
     const existing = await this.categoryService.findOneByID(id);
 
-    if (existing === null || existing === undefined) {
-      errors.push('Rekord o podanym id nie istnieje');
+    if (existing) {
+      return existing.id;
+    }
+
+    if (name.length === 0) {
       return undefined;
     }
 
-    return existing.id;
+    const existingByName = await this.categoryService.findOneByName(name);
+
+    return existingByName?.id;
   }
 
   private parseBoolean(

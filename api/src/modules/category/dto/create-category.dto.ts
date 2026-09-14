@@ -14,7 +14,8 @@ export class CreateCategoryDto {
   url: string;
 
   @IsNumber()
-  position: number;
+  @IsOptional()
+  position: number | null;
 
   @IsDateString()
   startDate: Date;

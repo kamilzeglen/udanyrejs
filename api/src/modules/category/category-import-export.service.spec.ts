@@ -63,6 +63,115 @@ describe('CategoryImportExportService', () => {
     expect(categoryService.createCategory).not.toHaveBeenCalled();
   });
 
+  it('matches a category exported from another server by name', async () => {
+    const targetCategoryId = '5f3cc7a0-d5ef-45cf-985e-0b123fac2bf4';
+    const user = { email: 'admin@udanyrejs.pl' } as any;
+    const categoryService = {
+      findOneByID: jest.fn().mockResolvedValue(null),
+      findOneByName: jest.fn().mockResolvedValue({ id: targetCategoryId }),
+      updateCategory: jest.fn().mockResolvedValue({ id: targetCategoryId }),
+    };
+    const service = new CategoryImportExportService(
+      {} as any,
+      categoryService as any,
+    );
+
+    const result = await service.preview(
+      Buffer.from(
+        `id,name,url,position,startDate,endDate,isActive,isVisible\n${CATEGORY_ID},Zima,winter,1,2026-12-01,2027-02-28,true,true\n`,
+      ),
+    );
+
+    expect(result).toEqual({
+      toCreate: 0,
+      toUpdate: 1,
+      errors: 0,
+      rows: [
+        {
+          rowRef: 'row-0',
+          action: 'update',
+          label: 'Zima',
+          errors: [],
+        },
+      ],
+    });
+
+    const confirmResult = await service.confirm(
+      Buffer.from(
+        `id,name,url,position,startDate,endDate,isActive,isVisible\n${CATEGORY_ID},Zima,winter,1,2026-12-01,2027-02-28,true,true\n`,
+      ),
+      user,
+    );
+
+    expect(confirmResult).toEqual({
+      created: [],
+      updated: ['row-0'],
+      failed: [],
+    });
+    expect(categoryService.updateCategory).toHaveBeenCalledWith(
+      targetCategoryId,
+      expect.objectContaining({ name: 'Zima' }),
+      user,
+    );
+  });
+
+  it('creates a category that only exists on the source server', async () => {
+    const categoryService = {
+      findOneByID: jest.fn().mockResolvedValue(null),
+      findOneByName: jest.fn().mockResolvedValue(null),
+    };
+    const service = new CategoryImportExportService(
+      {} as any,
+      categoryService as any,
+    );
+
+    const result = await service.preview(
+      Buffer.from(
+        `id,name,url,position,startDate,endDate,isActive,isVisible\n${CATEGORY_ID},Nowa,nowa,3,2026-01-01,2026-01-31,true,true\n`,
+      ),
+    );
+
+    expect(result.errors).toBe(0);
+    expect(result.toCreate).toBe(1);
+    expect(result.rows[0].action).toBe('create');
+  });
+
+  it('accepts an exported category with a null position', async () => {
+    const queryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([
+        {
+          id: CATEGORY_ID,
+          name: 'Jesień',
+          url: 'autumn',
+          position: null,
+          startDate: new Date('2026-09-01T00:00:00.000Z'),
+          endDate: new Date('2026-11-30T00:00:00.000Z'),
+          isActive: true,
+          isVisible: true,
+        },
+      ]),
+    };
+    const categoryService = {
+      findOneByID: jest.fn().mockResolvedValue({ id: CATEGORY_ID }),
+    };
+    const service = new CategoryImportExportService(
+      { createQueryBuilder: jest.fn().mockReturnValue(queryBuilder) } as any,
+      categoryService as any,
+    );
+    const csv = await service.exportToCsv();
+
+    const result = await service.preview(Buffer.from(csv));
+
+    expect(result.errors).toBe(0);
+    expect(result.rows[0]).toEqual({
+      rowRef: 'row-0',
+      action: 'update',
+      label: 'Jesień',
+      errors: [],
+    });
+  });
+
   it('reports missing required fields in column order', async () => {
     const service = new CategoryImportExportService(
       {} as any,
@@ -78,7 +187,6 @@ describe('CategoryImportExportService', () => {
     expect(result.rows[0].errors).toEqual([
       'Brak nazwy',
       'Brak url',
-      'Brak lub nieprawidłowa pozycja',
       'Brak daty początkowej',
       'Brak daty końcowej',
     ]);
