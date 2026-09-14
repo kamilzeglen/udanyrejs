@@ -86,6 +86,47 @@ describe('CityService.findOrCreateByName', () => {
     );
   });
 
+  it('stores coordinates when a city is created manually', async () => {
+    await service.createCity(
+      {
+        name: 'Gdynia',
+        latitude: 54.5189,
+        longitude: 18.5305,
+      },
+      { email: 'admin@udanyrejs.pl' } as any,
+    );
+
+    expect(cityRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Gdynia',
+        latitude: 54.5189,
+        longitude: 18.5305,
+      }),
+    );
+  });
+
+  it('clears both coordinates when null values are submitted during editing', async () => {
+    const city = {
+      id: 'city-1',
+      name: 'Gdynia',
+      latitude: 54.5189,
+      longitude: 18.5305,
+    };
+    cityRepository.createQueryBuilder.mockReturnValue(
+      buildQueryBuilderMock(city),
+    );
+
+    const result = await service.updateCity(
+      'city-1',
+      { latitude: null, longitude: null },
+      { email: 'admin@udanyrejs.pl' } as any,
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({ latitude: null, longitude: null }),
+    );
+  });
+
   it('re-fetches the winner instead of failing when two requests create the same city concurrently', async () => {
     cityRepository.createQueryBuilder
       .mockReturnValueOnce(buildQueryBuilderMock(null))

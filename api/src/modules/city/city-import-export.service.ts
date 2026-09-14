@@ -53,12 +53,21 @@ export class CityImportExportService {
       id: city.id,
       name: city.name,
       isActive: String(city.isActive),
+      latitude: city.latitude ?? '',
+      longitude: city.longitude ?? '',
       destinationNames: (city.destinations ?? [])
         .map((destination) => destination.name)
         .join(';'),
     }));
 
-    return stringifyCsv(rows, ['id', 'name', 'isActive', 'destinationNames']);
+    return stringifyCsv(rows, [
+      'id',
+      'name',
+      'isActive',
+      'latitude',
+      'longitude',
+      'destinationNames',
+    ]);
   }
 
   async preview(buffer: Buffer): Promise<ImportPreviewResult> {
@@ -164,9 +173,13 @@ export class CityImportExportService {
     const id = await this.resolveId(raw.id, errors);
     let action: ImportRowResult['action'] = id ? 'update' : 'create';
     const isActive = this.parseBoolean(raw.isActive, 'isActive', true, errors);
+    const latitude = this.parseCoordinate(raw.latitude, 'latitude', errors);
+    const longitude = this.parseCoordinate(raw.longitude, 'longitude', errors);
     const dto = plainToInstance(CreateCityDto, {
       name,
       destinations: destinationIds,
+      latitude,
+      longitude,
     });
 
     this.appendDtoErrors(dto, errors);
@@ -267,6 +280,28 @@ export class CityImportExportService {
 
       return defaultValue;
     }
+  }
+
+  private parseCoordinate(
+    value: string | undefined,
+    fieldName: string,
+    errors: string[],
+  ): number | undefined {
+    const normalizedValue = value?.trim();
+
+    if (normalizedValue === undefined || normalizedValue.length === 0) {
+      return undefined;
+    }
+
+    const coordinate = Number(normalizedValue);
+
+    if (Number.isFinite(coordinate)) {
+      return coordinate;
+    }
+
+    errors.push(`Nieprawidłowa wartość ${fieldName}`);
+
+    return undefined;
   }
 
   private appendDtoErrors(dto: CreateCityDto, errors: string[]): void {

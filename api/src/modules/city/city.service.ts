@@ -48,6 +48,8 @@ export class CityService {
 
     const city = this.cityRepository.create({
       name: createCityDto.name,
+      latitude: createCityDto.latitude,
+      longitude: createCityDto.longitude,
       destinations,
       createdBy,
     });
@@ -84,6 +86,14 @@ export class CityService {
       city.destinations = updateCityDto.destinations.length
         ? await this.destinationService.findByIds(updateCityDto.destinations)
         : [];
+    }
+
+    if (updateCityDto.latitude !== undefined) {
+      city.latitude = updateCityDto.latitude;
+    }
+
+    if (updateCityDto.longitude !== undefined) {
+      city.longitude = updateCityDto.longitude;
     }
 
     city.updatedBy = updatedBy;

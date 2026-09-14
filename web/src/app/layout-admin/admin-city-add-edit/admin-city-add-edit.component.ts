@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ReplaySubject, take, takeUntil } from 'rxjs';
 import { City } from '@interfaces';
 import { CommonFacade } from '@state/common';
@@ -7,6 +7,19 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { RouterFacade } from '@state/router';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
+
+const coordinatesPairValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const latitude = control.get('latitude')?.value;
+  const longitude = control.get('longitude')?.value;
+  const hasLatitude = latitude !== null && latitude !== '';
+  const hasLongitude = longitude !== null && longitude !== '';
+
+  if (hasLatitude === hasLongitude) {
+    return null;
+  }
+
+  return { coordinatesPair: true };
+};
 
 @Component({
   selector: 'app-admin-city-add-edit',
@@ -37,10 +50,15 @@ export class AdminCityAddEditComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.isInitializing = true;
 
-    this.cityForm = this.fb.group({
-      name: ['', Validators.required],
-      destinations: [''],
-    });
+    this.cityForm = this.fb.group(
+      {
+        name: ['', Validators.required],
+        latitude: [null, [Validators.min(-90), Validators.max(90)]],
+        longitude: [null, [Validators.min(-180), Validators.max(180)]],
+        destinations: [''],
+      },
+      { validators: coordinatesPairValidator },
+    );
 
     this.commonFacade.getCitySuccess$.pipe(take(1)).subscribe(({ city }) => {
       this.editingCity = city;
@@ -53,6 +71,8 @@ export class AdminCityAddEditComponent implements OnInit, OnDestroy {
       if (this.editingCity) {
         this.cityForm.patchValue({
           name: this.editingCity.name,
+          latitude: this.editingCity.latitude,
+          longitude: this.editingCity.longitude,
           destinations: this.editingCity.destinations?.map((destination) => destination.id) ?? [],
         });
       }
@@ -107,10 +127,20 @@ export class AdminCityAddEditComponent implements OnInit, OnDestroy {
     }
 
     const payload = { ...this.cityForm.value };
+    payload.latitude = payload.latitude === '' ? null : payload.latitude;
+    payload.longitude = payload.longitude === '' ? null : payload.longitude;
+
     for (const key in payload) {
-      if (payload[key] === '' || payload[key] === null) {
+      const isCoordinate = key === 'latitude' || key === 'longitude';
+
+      if (isCoordinate === false && (payload[key] === '' || payload[key] === null)) {
         delete payload[key];
       }
+    }
+
+    if (this.mode === 'ADD' && payload.latitude === null) {
+      delete payload.latitude;
+      delete payload.longitude;
     }
 
     if (this.mode === 'ADD') {

@@ -183,6 +183,24 @@
     justify-self: center;
   }
 
+  .coordinates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .coordinates-error {
+    color: $negative;
+    margin: -10px 0 20px;
+  }
+
+  @media (max-width: 600px) {
+    .coordinates {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
   .current-file {
     display: flex;
     padding: 5px;

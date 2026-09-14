@@ -15,6 +15,8 @@ describe('CityImportExportService', () => {
           id: CITY_ID,
           name: 'Barcelona',
           isActive: true,
+          latitude: 41.3851,
+          longitude: 2.1734,
           destinations: [{ name: 'Morze Śródziemne' }, { name: 'Hiszpania' }],
         },
       ]),
@@ -28,12 +30,63 @@ describe('CityImportExportService', () => {
     const csv = await service.exportToCsv();
 
     expect(csv).toBe(
-      `id,name,isActive,destinationNames\n${CITY_ID},Barcelona,true,Morze Śródziemne;Hiszpania\n`,
+      `id,name,isActive,latitude,longitude,destinationNames\n${CITY_ID},Barcelona,true,41.3851,2.1734,Morze Śródziemne;Hiszpania\n`,
     );
     expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
       'city.destinations',
       'destinations',
     );
+  });
+
+  it('imports a complete coordinate pair', async () => {
+    const user = { email: 'admin@udanyrejs.pl' } as any;
+    const cityService = {
+      findOneByID: jest.fn(),
+      createCity: jest.fn().mockResolvedValue({ id: CITY_ID }),
+      bulkActivateCities: jest.fn().mockResolvedValue({
+        updatedIds: [CITY_ID],
+        failedIds: [],
+      }),
+    };
+    const service = new CityImportExportService(
+      {} as any,
+      cityService as any,
+      { findOneByName: jest.fn() } as any,
+    );
+
+    await service.confirm(
+      Buffer.from(
+        'id,name,isActive,latitude,longitude,destinationNames\n,Barcelona,true,41.3851,2.1734,\n',
+      ),
+      user,
+    );
+
+    expect(cityService.createCity).toHaveBeenCalledWith(
+      {
+        name: 'Barcelona',
+        latitude: 41.3851,
+        longitude: 2.1734,
+        destinations: [],
+      },
+      user,
+    );
+  });
+
+  it('rejects a CSV row with an incomplete coordinate pair', async () => {
+    const service = new CityImportExportService(
+      {} as any,
+      { findOneByID: jest.fn() } as any,
+      { findOneByName: jest.fn() } as any,
+    );
+
+    const result = await service.preview(
+      Buffer.from(
+        'id,name,isActive,latitude,longitude,destinationNames\n,Barcelona,true,41.3851,,\n',
+      ),
+    );
+
+    expect(result.errors).toBe(1);
+    expect(result.rows[0].errors).toContain('Nieprawidłowa wartość latitude');
   });
 
   it('resolves every destination name and previews a create without writing', async () => {

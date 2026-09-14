@@ -24,6 +24,30 @@ export class City {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({
+    type: 'decimal',
+    precision: 9,
+    scale: 6,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) => (value === null ? null : Number(value)),
+    },
+  })
+  latitude: number | null;
+
+  @Column({
+    type: 'decimal',
+    precision: 9,
+    scale: 6,
+    nullable: true,
+    transformer: {
+      to: (value: number | null) => value,
+      from: (value: string | null) => (value === null ? null : Number(value)),
+    },
+  })
+  longitude: number | null;
+
   @ManyToMany(() => Destination, { eager: true })
   @JoinTable({
     name: 'city_destinations',
