@@ -6,6 +6,7 @@ import { User } from './user';
 export interface Ship {
   id: string;
   name: string;
+  isActive: boolean;
   description: string;
   yearBuilt: number;
   length: number;

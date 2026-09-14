@@ -4,6 +4,7 @@ import { User } from './user';
 export interface Company {
   id: string;
   name: string;
+  isActive: boolean;
   key: string;
   description: string;
   priceIncludes: string[];

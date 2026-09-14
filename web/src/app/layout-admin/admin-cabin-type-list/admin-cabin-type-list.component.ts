@@ -37,7 +37,7 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
 
   public deviceInfo: AllDeviceInfo;
 
-  public allColumns: string[] = ['select', 'id', 'name', 'offersCount', 'actions'];
+  public allColumns: string[] = ['select', 'id', 'name', 'offersCount', 'isActive', 'actions'];
 
   public columnsToDisplay: string[];
 
@@ -83,6 +83,42 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
       this.snackService.showError(
         'Nie udało się usunąć rodzaju kabiny — sprawdź, czy żadna oferta z niej nie korzysta',
       );
+    });
+
+    this.commonFacade.bulkDeleteCabinTypesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ deletedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Usunięto', deletedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getAllCabinTypes();
+      });
+
+    this.commonFacade.bulkDeleteCabinTypesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych rodzajów kabin');
+    });
+
+    this.commonFacade.bulkActivateCabinTypesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Aktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getAllCabinTypes();
+      });
+
+    this.commonFacade.bulkActivateCabinTypesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się aktywować zaznaczonych rodzajów kabin');
+    });
+
+    this.commonFacade.bulkDeactivateCabinTypesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Dezaktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getAllCabinTypes();
+      });
+
+    this.commonFacade.bulkDeactivateCabinTypesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się dezaktywować zaznaczonych rodzajów kabin');
     });
 
     this.commonFacade.getAllCabinTypes();
@@ -140,6 +176,74 @@ export class AdminCabinTypeListComponent implements OnInit, OnDestroy {
     }
 
     this.selection.selectMany(ids);
+  }
+
+  public bulkDeleteSelectedCabinTypes(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz trwale usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'y rodzaj kabiny' : 'e rodzaje kabin'}? Tej operacji nie można cofnąć.`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeleteCabinTypes({ ids });
+        });
+    });
+  }
+
+  public bulkActivateSelectedCabinTypes(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz aktywować ${ids.length} zaznaczon${ids.length === 1 ? 'y rodzaj kabiny' : 'e rodzaje kabin'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkActivateCabinTypes({ ids });
+        });
+    });
+  }
+
+  public bulkDeactivateSelectedCabinTypes(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz dezaktywować ${ids.length} zaznaczon${ids.length === 1 ? 'y rodzaj kabiny' : 'e rodzaje kabin'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeactivateCabinTypes({ ids });
+        });
+    });
+  }
+
+  private buildBulkResultMessage(action: string, successCount: number, failedCount: number): string {
+    if (failedCount === 0) {
+      return `${action} ${successCount} rodzaj(e/ów) kabin.`;
+    }
+
+    return `${action} ${successCount} rodzaj(e/ów) kabin, ${failedCount} nie udało się przetworzyć.`;
   }
 
   private buildViewModel(groups: CabinTypesGroup[], selectedIds: Set<string>): CabinTypeListViewModel {

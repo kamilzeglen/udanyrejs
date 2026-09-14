@@ -32,7 +32,7 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
   public destinations$ = this.commonFacade.destinations$;
   public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = ['select', 'id', 'name', 'offerCount', 'actions', 'updatedAt', 'createdAt'];
+  public allColumns: string[] = ['select', 'id', 'name', 'offerCount', 'isActive', 'actions', 'updatedAt', 'createdAt'];
 
   public columnsToDisplay: string[];
 
@@ -62,6 +62,42 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
     this.commonFacade.deleteDestinationSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto kategorie');
       this.commonFacade.getDestinations();
+    });
+
+    this.commonFacade.bulkDeleteDestinationsSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ deletedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Usunięto', deletedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getDestinations();
+      });
+
+    this.commonFacade.bulkDeleteDestinationsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych kierunków');
+    });
+
+    this.commonFacade.bulkActivateDestinationsSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Aktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getDestinations();
+      });
+
+    this.commonFacade.bulkActivateDestinationsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się aktywować zaznaczonych kierunków');
+    });
+
+    this.commonFacade.bulkDeactivateDestinationsSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Dezaktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getDestinations();
+      });
+
+    this.commonFacade.bulkDeactivateDestinationsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się dezaktywować zaznaczonych kierunków');
     });
 
     this.commonFacade.getDestinations();
@@ -103,10 +139,10 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['select', 'id', 'name', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'isActive', 'actions', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['select', 'id', 'name', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'isActive', 'actions', 'createdAt'];
     }
     return [];
   }
@@ -121,6 +157,74 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
     }
 
     this.selection.selectMany(ids);
+  }
+
+  public bulkDeleteSelectedDestinations(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz trwale usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'y kierunek' : 'e kierunki'}? Tej operacji nie można cofnąć.`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeleteDestinations({ ids });
+        });
+    });
+  }
+
+  public bulkActivateSelectedDestinations(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz aktywować ${ids.length} zaznaczon${ids.length === 1 ? 'y kierunek' : 'e kierunki'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkActivateDestinations({ ids });
+        });
+    });
+  }
+
+  public bulkDeactivateSelectedDestinations(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz dezaktywować ${ids.length} zaznaczon${ids.length === 1 ? 'y kierunek' : 'e kierunki'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeactivateDestinations({ ids });
+        });
+    });
+  }
+
+  private buildBulkResultMessage(action: string, successCount: number, failedCount: number): string {
+    if (failedCount === 0) {
+      return `${action} ${successCount} kierunek(ów).`;
+    }
+
+    return `${action} ${successCount} kierunek(ów), ${failedCount} nie udało się przetworzyć.`;
   }
 
   private buildViewModel(destinations: Destination[], selectedIds: Set<string>): DestinationListViewModel {

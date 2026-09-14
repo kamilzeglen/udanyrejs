@@ -7,6 +7,9 @@
     <div class="selection-toolbar" [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'">
       <span>{{ viewModel.selectedCount }} zaznaczonych</span>
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
+      <button type="button" (click)="bulkActivateSelectedCategories()">Aktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeactivateSelectedCategories()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeleteSelectedCategories()">Usuń trwale zaznaczone</button>
     </div>
 
     <table mat-table [dataSource]="viewModel.rows" matSort>

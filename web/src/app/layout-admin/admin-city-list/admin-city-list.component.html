@@ -7,6 +7,9 @@
     <div class="selection-toolbar" [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'">
       <span>{{ viewModel.selectedCount }} zaznaczonych</span>
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
+      <button type="button" (click)="bulkActivateSelectedCities()">Aktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeactivateSelectedCities()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeleteSelectedCities()">Usuń trwale zaznaczone</button>
     </div>
 
     <table mat-table [dataSource]="viewModel.rows" matSort>
@@ -41,6 +44,14 @@
       <ng-container matColumnDef="destinationNames">
         <th mat-header-cell *matHeaderCellDef>Regiony</th>
         <td mat-cell *matCellDef="let element">{{ element.destinationNames }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef>Aktywne</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon *ngIf="element.isActive" style="color: green">checked</mat-icon>
+          <mat-icon *ngIf="!element.isActive" style="color: red">unchecked</mat-icon>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="actions">

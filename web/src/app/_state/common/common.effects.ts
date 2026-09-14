@@ -92,6 +92,54 @@ export class CommonEffects {
     ),
   );
 
+  bulkDeleteCompanies$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteCompanies),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteCompanies(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteCompaniesSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteCompaniesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateCompanies$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateCompanies),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateCompanies(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateCompaniesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateCompaniesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateCompanies$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateCompanies),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateCompanies(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateCompaniesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateCompaniesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   getShips$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getShips),
@@ -188,6 +236,54 @@ export class CommonEffects {
     ),
   );
 
+  bulkDeleteShips$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteShips),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteShips(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteShipsSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteShipsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateShips$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateShips),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateShips(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateShipsSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateShipsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateShips$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateShips),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateShips(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateShipsSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateShipsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   getCategory$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getCategory),
@@ -262,6 +358,54 @@ export class CommonEffects {
           }),
           catchError((errorMessage) => {
             return of(commonActions.deleteCategoryError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeleteCategories$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteCategories),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteCategories(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteCategoriesSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteCategoriesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateCategories$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateCategories),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateCategories(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateCategoriesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateCategoriesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateCategories$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateCategories),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateCategories(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateCategoriesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateCategoriesError({ errorMessage }));
           }),
         );
       }),
@@ -348,6 +492,54 @@ export class CommonEffects {
     ),
   );
 
+  bulkDeleteDestinations$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteDestinations),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteDestinations(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteDestinationsSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteDestinationsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateDestinations$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateDestinations),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateDestinations(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateDestinationsSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateDestinationsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateDestinations$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateDestinations),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateDestinations(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateDestinationsSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateDestinationsError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
   getCities$ = createEffect(() =>
     this.actions$.pipe(
       ofType(commonActions.getCities),
@@ -422,6 +614,54 @@ export class CommonEffects {
           }),
           catchError((errorMessage) => {
             return of(commonActions.deleteCityError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeleteCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteCities),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteCities(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteCitiesSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteCitiesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateCities),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateCities(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateCitiesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateCitiesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateCities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateCities),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateCities(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateCitiesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateCitiesError({ errorMessage }));
           }),
         );
       }),
@@ -518,6 +758,54 @@ export class CommonEffects {
           }),
           catchError((errorMessage) => {
             return of(commonActions.deleteCabinTypeError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeleteCabinTypes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeleteCabinTypes),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeleteCabinTypes(payload).pipe(
+          map(({ deletedIds, failedIds }) => {
+            return commonActions.bulkDeleteCabinTypesSuccess({ deletedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeleteCabinTypesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkActivateCabinTypes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkActivateCabinTypes),
+      switchMap(({ payload }) => {
+        return this.http.bulkActivateCabinTypes(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkActivateCabinTypesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkActivateCabinTypesError({ errorMessage }));
+          }),
+        );
+      }),
+    ),
+  );
+
+  bulkDeactivateCabinTypes$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(commonActions.bulkDeactivateCabinTypes),
+      switchMap(({ payload }) => {
+        return this.http.bulkDeactivateCabinTypes(payload).pipe(
+          map(({ updatedIds, failedIds }) => {
+            return commonActions.bulkDeactivateCabinTypesSuccess({ updatedIds, failedIds });
+          }),
+          catchError((errorMessage) => {
+            return of(commonActions.bulkDeactivateCabinTypesError({ errorMessage }));
           }),
         );
       }),

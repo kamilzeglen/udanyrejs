@@ -39,6 +39,7 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
     'name',
     'key',
     'image',
+    'isActive',
     'description',
     'actions',
     'updatedAt',
@@ -73,6 +74,42 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
     this.commonFacade.deleteCompanySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto firmę');
       this.commonFacade.getCompanies();
+    });
+
+    this.commonFacade.bulkDeleteCompaniesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ deletedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Usunięto', deletedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCompanies();
+      });
+
+    this.commonFacade.bulkDeleteCompaniesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych firm');
+    });
+
+    this.commonFacade.bulkActivateCompaniesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Aktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCompanies();
+      });
+
+    this.commonFacade.bulkActivateCompaniesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się aktywować zaznaczonych firm');
+    });
+
+    this.commonFacade.bulkDeactivateCompaniesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Dezaktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCompanies();
+      });
+
+    this.commonFacade.bulkDeactivateCompaniesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się dezaktywować zaznaczonych firm');
     });
 
     this.commonFacade.getCompanies();
@@ -114,12 +151,80 @@ export class AdminCompanyListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['select', 'id', 'name', 'image', 'description', 'createdAt', 'expand'];
+      return ['select', 'id', 'name', 'image', 'isActive', 'description', 'createdAt', 'expand'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['select', 'id', 'name', 'image', 'createdAt', 'expand'];
+      return ['select', 'id', 'name', 'image', 'isActive', 'createdAt', 'expand'];
     }
     return [];
+  }
+
+  public bulkDeleteSelectedCompanies(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz trwale usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'ą firmę' : 'e firmy'}? Tej operacji nie można cofnąć.`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeleteCompanies({ ids });
+        });
+    });
+  }
+
+  public bulkActivateSelectedCompanies(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz aktywować ${ids.length} zaznaczon${ids.length === 1 ? 'ą firmę' : 'e firmy'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkActivateCompanies({ ids });
+        });
+    });
+  }
+
+  public bulkDeactivateSelectedCompanies(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz dezaktywować ${ids.length} zaznaczon${ids.length === 1 ? 'ą firmę' : 'e firmy'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeactivateCompanies({ ids });
+        });
+    });
+  }
+
+  private buildBulkResultMessage(action: string, successCount: number, failedCount: number): string {
+    if (failedCount === 0) {
+      return `${action} ${successCount} firm.`;
+    }
+
+    return `${action} ${successCount} firm, ${failedCount} nie udało się przetworzyć.`;
   }
 
   public toggleSelectAll(rows: CompanyRow[]): void {

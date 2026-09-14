@@ -30,6 +30,45 @@ export const deleteCompany = createAction('[Common] Delete Company', props<{ pay
 export const deleteCompanySuccess = createAction('[Common] Delete Company Success');
 export const deleteCompanyError = createAction('[Common] Delete Company Error', props<{ errorMessage: string }>());
 
+export const bulkDeleteCompanies = createAction(
+  '[Common] Bulk Delete Companies',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeleteCompaniesSuccess = createAction(
+  '[Common] Bulk Delete Companies Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteCompaniesError = createAction(
+  '[Common] Bulk Delete Companies Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkActivateCompanies = createAction(
+  '[Common] Bulk Activate Companies',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkActivateCompaniesSuccess = createAction(
+  '[Common] Bulk Activate Companies Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateCompaniesError = createAction(
+  '[Common] Bulk Activate Companies Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateCompanies = createAction(
+  '[Common] Bulk Deactivate Companies',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateCompaniesSuccess = createAction(
+  '[Common] Bulk Deactivate Companies Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateCompaniesError = createAction(
+  '[Common] Bulk Deactivate Companies Error',
+  props<{ errorMessage: string }>(),
+);
+
 export const getShips = createAction('[Common] Get Ships', props<{ companyId: string }>());
 export const getShipsSuccess = createAction('[Common] Get Ships Success', props<{ ships: Ship[] }>());
 export const getShipsError = createAction('[Common] Get Ships Error', props<{ errorMessage: string }>());
@@ -58,6 +97,36 @@ export const updateShipError = createAction('[Common] Update Ship Error', props<
 export const deleteShip = createAction('[Common] Delete Ship', props<{ payload: { id: string } }>());
 export const deleteShipSuccess = createAction('[Common] Delete Ship Success');
 export const deleteShipError = createAction('[Common] Delete Ship Error', props<{ errorMessage: string }>());
+
+export const bulkDeleteShips = createAction('[Common] Bulk Delete Ships', props<{ payload: { ids: string[] } }>());
+export const bulkDeleteShipsSuccess = createAction(
+  '[Common] Bulk Delete Ships Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteShipsError = createAction('[Common] Bulk Delete Ships Error', props<{ errorMessage: string }>());
+
+export const bulkActivateShips = createAction('[Common] Bulk Activate Ships', props<{ payload: { ids: string[] } }>());
+export const bulkActivateShipsSuccess = createAction(
+  '[Common] Bulk Activate Ships Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateShipsError = createAction(
+  '[Common] Bulk Activate Ships Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateShips = createAction(
+  '[Common] Bulk Deactivate Ships',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateShipsSuccess = createAction(
+  '[Common] Bulk Deactivate Ships Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateShipsError = createAction(
+  '[Common] Bulk Deactivate Ships Error',
+  props<{ errorMessage: string }>(),
+);
 
 export const getCategory = createAction('[Common] Get Category', props<{ payload: { id: string } }>());
 export const getCategorySuccess = createAction('[Common] Get Category Success', props<{ category: Category }>());
@@ -88,6 +157,45 @@ export const updateCategoryError = createAction('[Common] Update Category Error'
 export const deleteCategory = createAction('[Common] Delete Category', props<{ payload: { id: string } }>());
 export const deleteCategorySuccess = createAction('[Common] Delete Category Success');
 export const deleteCategoryError = createAction('[Common] Delete Category Error', props<{ errorMessage: string }>());
+
+export const bulkDeleteCategories = createAction(
+  '[Common] Bulk Delete Categories',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeleteCategoriesSuccess = createAction(
+  '[Common] Bulk Delete Categories Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteCategoriesError = createAction(
+  '[Common] Bulk Delete Categories Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkActivateCategories = createAction(
+  '[Common] Bulk Activate Categories',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkActivateCategoriesSuccess = createAction(
+  '[Common] Bulk Activate Categories Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateCategoriesError = createAction(
+  '[Common] Bulk Activate Categories Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateCategories = createAction(
+  '[Common] Bulk Deactivate Categories',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateCategoriesSuccess = createAction(
+  '[Common] Bulk Deactivate Categories Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateCategoriesError = createAction(
+  '[Common] Bulk Deactivate Categories Error',
+  props<{ errorMessage: string }>(),
+);
 
 export const getDestination = createAction('[Common] Get Destination', props<{ payload: { id: string } }>());
 export const getDestinationSuccess = createAction(
@@ -144,6 +252,45 @@ export const deleteDestinationError = createAction(
   props<{ errorMessage: string }>(),
 );
 
+export const bulkDeleteDestinations = createAction(
+  '[Common] Bulk Delete Destinations',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeleteDestinationsSuccess = createAction(
+  '[Common] Bulk Delete Destinations Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteDestinationsError = createAction(
+  '[Common] Bulk Delete Destinations Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkActivateDestinations = createAction(
+  '[Common] Bulk Activate Destinations',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkActivateDestinationsSuccess = createAction(
+  '[Common] Bulk Activate Destinations Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateDestinationsError = createAction(
+  '[Common] Bulk Activate Destinations Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateDestinations = createAction(
+  '[Common] Bulk Deactivate Destinations',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateDestinationsSuccess = createAction(
+  '[Common] Bulk Deactivate Destinations Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateDestinationsError = createAction(
+  '[Common] Bulk Deactivate Destinations Error',
+  props<{ errorMessage: string }>(),
+);
+
 export const getCity = createAction('[Common] Get City', props<{ payload: { id: string } }>());
 export const getCitySuccess = createAction('[Common] Get City Success', props<{ city: City }>());
 export const getCityError = createAction('[Common] Get City Error', props<{ errorMessage: string }>());
@@ -166,6 +313,42 @@ export const updateCityError = createAction('[Common] Update City Error', props<
 export const deleteCity = createAction('[Common] Delete City', props<{ payload: { id: string } }>());
 export const deleteCitySuccess = createAction('[Common] Delete City Success');
 export const deleteCityError = createAction('[Common] Delete City Error', props<{ errorMessage: string }>());
+
+export const bulkDeleteCities = createAction('[Common] Bulk Delete Cities', props<{ payload: { ids: string[] } }>());
+export const bulkDeleteCitiesSuccess = createAction(
+  '[Common] Bulk Delete Cities Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteCitiesError = createAction(
+  '[Common] Bulk Delete Cities Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkActivateCities = createAction(
+  '[Common] Bulk Activate Cities',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkActivateCitiesSuccess = createAction(
+  '[Common] Bulk Activate Cities Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateCitiesError = createAction(
+  '[Common] Bulk Activate Cities Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateCities = createAction(
+  '[Common] Bulk Deactivate Cities',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateCitiesSuccess = createAction(
+  '[Common] Bulk Deactivate Cities Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateCitiesError = createAction(
+  '[Common] Bulk Deactivate Cities Error',
+  props<{ errorMessage: string }>(),
+);
 
 export const getCabinTypes = createAction('[Common] Get Cabin Types', props<{ companyId: string }>());
 export const getCabinTypesSuccess = createAction(
@@ -204,3 +387,42 @@ export const updateCabinTypeError = createAction('[Common] Update Cabin Type Err
 export const deleteCabinType = createAction('[Common] Delete Cabin Type', props<{ payload: { id: string } }>());
 export const deleteCabinTypeSuccess = createAction('[Common] Delete Cabin Type Success');
 export const deleteCabinTypeError = createAction('[Common] Delete Cabin Type Error', props<{ errorMessage: string }>());
+
+export const bulkDeleteCabinTypes = createAction(
+  '[Common] Bulk Delete Cabin Types',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeleteCabinTypesSuccess = createAction(
+  '[Common] Bulk Delete Cabin Types Success',
+  props<{ deletedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeleteCabinTypesError = createAction(
+  '[Common] Bulk Delete Cabin Types Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkActivateCabinTypes = createAction(
+  '[Common] Bulk Activate Cabin Types',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkActivateCabinTypesSuccess = createAction(
+  '[Common] Bulk Activate Cabin Types Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkActivateCabinTypesError = createAction(
+  '[Common] Bulk Activate Cabin Types Error',
+  props<{ errorMessage: string }>(),
+);
+
+export const bulkDeactivateCabinTypes = createAction(
+  '[Common] Bulk Deactivate Cabin Types',
+  props<{ payload: { ids: string[] } }>(),
+);
+export const bulkDeactivateCabinTypesSuccess = createAction(
+  '[Common] Bulk Deactivate Cabin Types Success',
+  props<{ updatedIds: string[]; failedIds: string[] }>(),
+);
+export const bulkDeactivateCabinTypesError = createAction(
+  '[Common] Bulk Deactivate Cabin Types Error',
+  props<{ errorMessage: string }>(),
+);

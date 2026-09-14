@@ -7,6 +7,9 @@
     <div class="selection-toolbar" [style.visibility]="viewModel.selectedCount > 0 ? 'visible' : 'hidden'">
       <span>{{ viewModel.selectedCount }} zaznaczonych</span>
       <button type="button" (click)="selection.clear()">Odznacz wszystko</button>
+      <button type="button" (click)="bulkActivateSelectedCabinTypes()">Aktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeactivateSelectedCabinTypes()">Dezaktywuj zaznaczone</button>
+      <button type="button" (click)="bulkDeleteSelectedCabinTypes()">Usuń trwale zaznaczone</button>
     </div>
 
     <div class="company-group" *ngFor="let group of viewModel.groups">
@@ -45,6 +48,14 @@
           <ng-container matColumnDef="offersCount">
             <th mat-header-cell *matHeaderCellDef>Liczba ofert</th>
             <td mat-cell *matCellDef="let element">{{ element.offersCount ?? 0 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>Aktywny</th>
+            <td mat-cell *matCellDef="let element">
+              <mat-icon *ngIf="element.isActive" style="color: green">checked</mat-icon>
+              <mat-icon *ngIf="!element.isActive" style="color: red">unchecked</mat-icon>
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="actions">

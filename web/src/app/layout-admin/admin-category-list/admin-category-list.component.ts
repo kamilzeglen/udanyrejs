@@ -78,6 +78,42 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
       this.commonFacade.getCategories();
     });
 
+    this.commonFacade.bulkDeleteCategoriesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ deletedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Usunięto', deletedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCategories();
+      });
+
+    this.commonFacade.bulkDeleteCategoriesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych kategorii');
+    });
+
+    this.commonFacade.bulkActivateCategoriesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Aktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCategories();
+      });
+
+    this.commonFacade.bulkActivateCategoriesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się aktywować zaznaczonych kategorii');
+    });
+
+    this.commonFacade.bulkDeactivateCategoriesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Dezaktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCategories();
+      });
+
+    this.commonFacade.bulkDeactivateCategoriesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się dezaktywować zaznaczonych kategorii');
+    });
+
     this.commonFacade.getCategories();
   }
 
@@ -135,6 +171,74 @@ export class AdminCategoryListComponent implements OnInit, OnDestroy {
     }
 
     this.selection.selectMany(ids);
+  }
+
+  public bulkDeleteSelectedCategories(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz trwale usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'ą kategorię' : 'e kategorie'}? Tej operacji nie można cofnąć.`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeleteCategories({ ids });
+        });
+    });
+  }
+
+  public bulkActivateSelectedCategories(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz aktywować ${ids.length} zaznaczon${ids.length === 1 ? 'ą kategorię' : 'e kategorie'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkActivateCategories({ ids });
+        });
+    });
+  }
+
+  public bulkDeactivateSelectedCategories(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz dezaktywować ${ids.length} zaznaczon${ids.length === 1 ? 'ą kategorię' : 'e kategorie'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeactivateCategories({ ids });
+        });
+    });
+  }
+
+  private buildBulkResultMessage(action: string, successCount: number, failedCount: number): string {
+    if (failedCount === 0) {
+      return `${action} ${successCount} kategorii.`;
+    }
+
+    return `${action} ${successCount} kategorii, ${failedCount} nie udało się przetworzyć.`;
   }
 
   private buildViewModel(categories: Category[], selectedIds: Set<string>): CategoryListViewModel {

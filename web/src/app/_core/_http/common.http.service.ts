@@ -49,6 +49,23 @@ export class CommonHttpService {
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
   }
 
+  public bulkDeleteCompanies(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/company/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateCompanies(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/company/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateCompanies(payload: {
+    ids: string[];
+  }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/company/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
   // =========
   // Ships
   // =========
@@ -83,6 +100,21 @@ export class CommonHttpService {
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
   }
 
+  public bulkDeleteShips(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/ship/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateShips(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/ship/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateShips(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/ship/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
   // =========
   // Category
   // =========
@@ -110,6 +142,23 @@ export class CommonHttpService {
   public deleteCategory(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/category/` + payload.id;
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
+  }
+
+  public bulkDeleteCategories(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/category/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateCategories(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/category/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateCategories(payload: {
+    ids: string[];
+  }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/category/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
   }
 
   // =========
@@ -141,6 +190,25 @@ export class CommonHttpService {
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
   }
 
+  public bulkDeleteDestinations(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/destination/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateDestinations(payload: {
+    ids: string[];
+  }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/destination/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateDestinations(payload: {
+    ids: string[];
+  }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/destination/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
   // =========
   // City
   // =========
@@ -168,6 +236,21 @@ export class CommonHttpService {
   public deleteCity(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/city/` + payload.id;
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
+  }
+
+  public bulkDeleteCities(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/city/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateCities(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/city/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateCities(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/city/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
   }
 
   // =========
@@ -206,6 +289,23 @@ export class CommonHttpService {
   public removeCabinType(payload: { id: string }): Observable<boolean> {
     const url = `${this.API_URL}/cabin-type/` + payload.id;
     return this.invalidateDictionaries(this.http.delete<boolean>(url));
+  }
+
+  public bulkDeleteCabinTypes(payload: { ids: string[] }): Observable<{ deletedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/cabin-type/bulk-delete`;
+    return this.invalidateDictionaries(this.http.post<{ deletedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkActivateCabinTypes(payload: { ids: string[] }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/cabin-type/bulk-activate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
+  }
+
+  public bulkDeactivateCabinTypes(payload: {
+    ids: string[];
+  }): Observable<{ updatedIds: string[]; failedIds: string[] }> {
+    const url = `${this.API_URL}/cabin-type/bulk-deactivate`;
+    return this.invalidateDictionaries(this.http.post<{ updatedIds: string[]; failedIds: string[] }>(url, payload));
   }
 
   private getCachedDictionary<T>(url: string): Observable<T> {

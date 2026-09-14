@@ -30,6 +30,12 @@ export class CommonFacade {
   public updateShipSuccess$ = this.actions.pipe(ofType(commonActions.updateShipSuccess));
   public updateShipError$ = this.actions.pipe(ofType(commonActions.updateShipError));
   public deleteShipSuccess$ = this.actions.pipe(ofType(commonActions.deleteShipSuccess));
+  public bulkDeleteShipsSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteShipsSuccess));
+  public bulkDeleteShipsError$ = this.actions.pipe(ofType(commonActions.bulkDeleteShipsError));
+  public bulkActivateShipsSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateShipsSuccess));
+  public bulkActivateShipsError$ = this.actions.pipe(ofType(commonActions.bulkActivateShipsError));
+  public bulkDeactivateShipsSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeactivateShipsSuccess));
+  public bulkDeactivateShipsError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateShipsError));
 
   public getCompanySuccess$ = this.actions.pipe(ofType(commonActions.getCompanySuccess));
   public getCompanyError$ = this.actions.pipe(ofType(commonActions.getCompanyError));
@@ -41,6 +47,12 @@ export class CommonFacade {
   public updateCompanyError$ = this.actions.pipe(ofType(commonActions.updateCompanyError));
   public deleteCompanySuccess$ = this.actions.pipe(ofType(commonActions.deleteCompanySuccess));
   public deleteCompanyError$ = this.actions.pipe(ofType(commonActions.deleteCompanyError));
+  public bulkDeleteCompaniesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteCompaniesSuccess));
+  public bulkDeleteCompaniesError$ = this.actions.pipe(ofType(commonActions.bulkDeleteCompaniesError));
+  public bulkActivateCompaniesSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateCompaniesSuccess));
+  public bulkActivateCompaniesError$ = this.actions.pipe(ofType(commonActions.bulkActivateCompaniesError));
+  public bulkDeactivateCompaniesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCompaniesSuccess));
+  public bulkDeactivateCompaniesError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCompaniesError));
 
   public getCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.getCategoriesSuccess));
   public getCategoriesError$ = this.actions.pipe(ofType(commonActions.getCategoriesError));
@@ -52,6 +64,12 @@ export class CommonFacade {
   public updateCategoryError$ = this.actions.pipe(ofType(commonActions.updateCategoryError));
   public deleteCategorySuccess$ = this.actions.pipe(ofType(commonActions.deleteCategorySuccess));
   public deleteCategoryError$ = this.actions.pipe(ofType(commonActions.deleteCategoryError));
+  public bulkDeleteCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteCategoriesSuccess));
+  public bulkDeleteCategoriesError$ = this.actions.pipe(ofType(commonActions.bulkDeleteCategoriesError));
+  public bulkActivateCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateCategoriesSuccess));
+  public bulkActivateCategoriesError$ = this.actions.pipe(ofType(commonActions.bulkActivateCategoriesError));
+  public bulkDeactivateCategoriesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCategoriesSuccess));
+  public bulkDeactivateCategoriesError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCategoriesError));
 
   public getDestinationsSuccess$ = this.actions.pipe(ofType(commonActions.getDestinationsSuccess));
   public getDestinationsError$ = this.actions.pipe(ofType(commonActions.getDestinationsError));
@@ -63,6 +81,14 @@ export class CommonFacade {
   public updateDestinationError$ = this.actions.pipe(ofType(commonActions.updateDestinationError));
   public deleteDestinationSuccess$ = this.actions.pipe(ofType(commonActions.deleteDestinationSuccess));
   public deleteDestinationError$ = this.actions.pipe(ofType(commonActions.deleteDestinationError));
+  public bulkDeleteDestinationsSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteDestinationsSuccess));
+  public bulkDeleteDestinationsError$ = this.actions.pipe(ofType(commonActions.bulkDeleteDestinationsError));
+  public bulkActivateDestinationsSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateDestinationsSuccess));
+  public bulkActivateDestinationsError$ = this.actions.pipe(ofType(commonActions.bulkActivateDestinationsError));
+  public bulkDeactivateDestinationsSuccess$ = this.actions.pipe(
+    ofType(commonActions.bulkDeactivateDestinationsSuccess),
+  );
+  public bulkDeactivateDestinationsError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateDestinationsError));
 
   public getCitiesSuccess$ = this.actions.pipe(ofType(commonActions.getCitiesSuccess));
   public getCitiesError$ = this.actions.pipe(ofType(commonActions.getCitiesError));
@@ -74,6 +100,12 @@ export class CommonFacade {
   public updateCityError$ = this.actions.pipe(ofType(commonActions.updateCityError));
   public deleteCitySuccess$ = this.actions.pipe(ofType(commonActions.deleteCitySuccess));
   public deleteCityError$ = this.actions.pipe(ofType(commonActions.deleteCityError));
+  public bulkDeleteCitiesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteCitiesSuccess));
+  public bulkDeleteCitiesError$ = this.actions.pipe(ofType(commonActions.bulkDeleteCitiesError));
+  public bulkActivateCitiesSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateCitiesSuccess));
+  public bulkActivateCitiesError$ = this.actions.pipe(ofType(commonActions.bulkActivateCitiesError));
+  public bulkDeactivateCitiesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCitiesSuccess));
+  public bulkDeactivateCitiesError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCitiesError));
 
   public getLogsSuccess$ = this.actions.pipe(ofType(commonActions.getLogsSuccess));
   public getLogsError$ = this.actions.pipe(ofType(commonActions.getLogsError));
@@ -88,6 +120,12 @@ export class CommonFacade {
   public updateCabinTypeError$ = this.actions.pipe(ofType(commonActions.updateCabinTypeError));
   public deleteCabinTypeSuccess$ = this.actions.pipe(ofType(commonActions.deleteCabinTypeSuccess));
   public deleteCabinTypeError$ = this.actions.pipe(ofType(commonActions.deleteCabinTypeError));
+  public bulkDeleteCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeleteCabinTypesSuccess));
+  public bulkDeleteCabinTypesError$ = this.actions.pipe(ofType(commonActions.bulkDeleteCabinTypesError));
+  public bulkActivateCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.bulkActivateCabinTypesSuccess));
+  public bulkActivateCabinTypesError$ = this.actions.pipe(ofType(commonActions.bulkActivateCabinTypesError));
+  public bulkDeactivateCabinTypesSuccess$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCabinTypesSuccess));
+  public bulkDeactivateCabinTypesError$ = this.actions.pipe(ofType(commonActions.bulkDeactivateCabinTypesError));
 
   constructor(
     private store: Store<AppState>,
@@ -114,6 +152,18 @@ export class CommonFacade {
     this.store.dispatch(commonActions.deleteCompany({ payload }));
   }
 
+  public bulkDeleteCompanies(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteCompanies({ payload }));
+  }
+
+  public bulkActivateCompanies(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateCompanies({ payload }));
+  }
+
+  public bulkDeactivateCompanies(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateCompanies({ payload }));
+  }
+
   public getShips(companyId: string): void {
     this.store.dispatch(commonActions.getShips({ companyId }));
   }
@@ -138,6 +188,18 @@ export class CommonFacade {
     this.store.dispatch(commonActions.deleteShip({ payload }));
   }
 
+  public bulkDeleteShips(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteShips({ payload }));
+  }
+
+  public bulkActivateShips(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateShips({ payload }));
+  }
+
+  public bulkDeactivateShips(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateShips({ payload }));
+  }
+
   public getCategory(payload: { id: string }): void {
     this.store.dispatch(commonActions.getCategory({ payload }));
   }
@@ -156,6 +218,18 @@ export class CommonFacade {
 
   public deleteCategory(payload: { id: string }): void {
     this.store.dispatch(commonActions.deleteCategory({ payload }));
+  }
+
+  public bulkDeleteCategories(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteCategories({ payload }));
+  }
+
+  public bulkActivateCategories(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateCategories({ payload }));
+  }
+
+  public bulkDeactivateCategories(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateCategories({ payload }));
   }
 
   // categories === null oznacza "jeszcze nie pobrano" - dopiero wtedy dociągamy dane.
@@ -193,6 +267,18 @@ export class CommonFacade {
     this.store.dispatch(commonActions.deleteDestination({ payload }));
   }
 
+  public bulkDeleteDestinations(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteDestinations({ payload }));
+  }
+
+  public bulkActivateDestinations(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateDestinations({ payload }));
+  }
+
+  public bulkDeactivateDestinations(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateDestinations({ payload }));
+  }
+
   public getCities(): void {
     this.store.dispatch(commonActions.getCities());
   }
@@ -211,6 +297,18 @@ export class CommonFacade {
 
   public deleteCity(payload: { id: string }): void {
     this.store.dispatch(commonActions.deleteCity({ payload }));
+  }
+
+  public bulkDeleteCities(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteCities({ payload }));
+  }
+
+  public bulkActivateCities(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateCities({ payload }));
+  }
+
+  public bulkDeactivateCities(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateCities({ payload }));
   }
 
   public getLogs(): void {
@@ -235,5 +333,17 @@ export class CommonFacade {
 
   public deleteCabinType(payload: { id: string }): void {
     this.store.dispatch(commonActions.deleteCabinType({ payload }));
+  }
+
+  public bulkDeleteCabinTypes(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeleteCabinTypes({ payload }));
+  }
+
+  public bulkActivateCabinTypes(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkActivateCabinTypes({ payload }));
+  }
+
+  public bulkDeactivateCabinTypes(payload: { ids: string[] }): void {
+    this.store.dispatch(commonActions.bulkDeactivateCabinTypes({ payload }));
   }
 }

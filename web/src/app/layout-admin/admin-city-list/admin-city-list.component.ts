@@ -46,7 +46,16 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
   );
   public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = ['select', 'id', 'name', 'destinationNames', 'actions', 'updatedAt', 'createdAt'];
+  public allColumns: string[] = [
+    'select',
+    'id',
+    'name',
+    'destinationNames',
+    'isActive',
+    'actions',
+    'updatedAt',
+    'createdAt',
+  ];
 
   public columnsToDisplay: string[];
 
@@ -76,6 +85,40 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
     this.commonFacade.deleteCitySuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto miasto');
       this.commonFacade.getCities();
+    });
+
+    this.commonFacade.bulkDeleteCitiesSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ deletedIds, failedIds }) => {
+      this.snackService.showInfo(this.buildBulkResultMessage('Usunięto', deletedIds.length, failedIds.length));
+      this.selection.clear();
+      this.commonFacade.getCities();
+    });
+
+    this.commonFacade.bulkDeleteCitiesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się usunąć zaznaczonych miast');
+    });
+
+    this.commonFacade.bulkActivateCitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Aktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCities();
+      });
+
+    this.commonFacade.bulkActivateCitiesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się aktywować zaznaczonych miast');
+    });
+
+    this.commonFacade.bulkDeactivateCitiesSuccess$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ updatedIds, failedIds }) => {
+        this.snackService.showInfo(this.buildBulkResultMessage('Dezaktywowano', updatedIds.length, failedIds.length));
+        this.selection.clear();
+        this.commonFacade.getCities();
+      });
+
+    this.commonFacade.bulkDeactivateCitiesError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.snackService.showError('Nie udało się dezaktywować zaznaczonych miast');
     });
 
     this.commonFacade.getCities();
@@ -115,10 +158,10 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['select', 'id', 'name', 'destinationNames', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'destinationNames', 'isActive', 'actions', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
-      return ['select', 'id', 'name', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'isActive', 'actions', 'createdAt'];
     }
     return [];
   }
@@ -133,6 +176,74 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
     }
 
     this.selection.selectMany(ids);
+  }
+
+  public bulkDeleteSelectedCities(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz trwale usunąć ${ids.length} zaznaczon${ids.length === 1 ? 'e miasto' : 'e miasta'}? Tej operacji nie można cofnąć.`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeleteCities({ ids });
+        });
+    });
+  }
+
+  public bulkActivateSelectedCities(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz aktywować ${ids.length} zaznaczon${ids.length === 1 ? 'e miasto' : 'e miasta'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkActivateCities({ ids });
+        });
+    });
+  }
+
+  public bulkDeactivateSelectedCities(): void {
+    this.selection.selectedIds$.pipe(take(1)).subscribe((selectedIds) => {
+      const ids = Array.from(selectedIds);
+
+      this.confirmationModalService
+        .open({
+          message: `Jesteś pewny że chcesz dezaktywować ${ids.length} zaznaczon${ids.length === 1 ? 'e miasto' : 'e miasta'}?`,
+        })
+        .afterClosed()
+        .pipe(take(1))
+        .subscribe((res) => {
+          if (!res) {
+            return;
+          }
+
+          this.commonFacade.bulkDeactivateCities({ ids });
+        });
+    });
+  }
+
+  private buildBulkResultMessage(action: string, successCount: number, failedCount: number): string {
+    if (failedCount === 0) {
+      return `${action} ${successCount} miast.`;
+    }
+
+    return `${action} ${successCount} miast, ${failedCount} nie udało się przetworzyć.`;
   }
 
   private buildViewModel(cities: CityRow[], selectedIds: Set<string>): CityListViewModel {

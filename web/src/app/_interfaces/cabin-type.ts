@@ -4,6 +4,7 @@ import { User } from './user';
 export interface CabinType {
   id: string;
   name: string;
+  isActive: boolean;
   company: Company;
   companyId: string;
   createdBy: User;
