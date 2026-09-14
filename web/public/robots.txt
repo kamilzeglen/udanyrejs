@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://udanyrejs.kamilzeglen.pl/sitemap.xml

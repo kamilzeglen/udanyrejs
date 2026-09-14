@@ -29,6 +29,56 @@ describe('SeoService', () => {
     expect(titleService.getTitle()).toBe('UdanyRejs - O nas');
   });
 
+  it('clears images and structured data when navigating away from an offer', () => {
+    service.setPageMeta({
+      title: 'Rejs',
+      description: 'opis',
+      path: '/offers/details/1',
+      image: 'https://example.com/1.jpg',
+    });
+    service.setStructuredData({ '@type': 'TouristTrip', name: 'Rejs' });
+
+    service.setPageMeta({ title: 'Kontakt', description: 'opis', path: '/contact' });
+
+    expect(metaService.getTag('property="og:image"')).toBeNull();
+    expect(metaService.getTag('name="twitter:image"')).toBeNull();
+    expect(metaService.getTag('name="twitter:card"').content).toBe('summary');
+    expect(document.querySelector('script[type="application/ld+json"]')).toBeNull();
+  });
+
+  it('canonicalizes offer variants without tracking parameters or fragments', () => {
+    service.setPageMeta({
+      title: 'Rejs',
+      description: 'opis',
+      path: '/offers/details/1?termId=2&utm_source=facebook#prices',
+    });
+
+    expect(document.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(
+      `${environment.WEB_URL}/offers/details/1`,
+    );
+    expect(metaService.getTag('property="og:url"').content).toBe(`${environment.WEB_URL}/offers/details/1`);
+  });
+
+  it('keeps distinct pagination URLs and canonicalizes the duplicate offers homepage', () => {
+    service.setPageMeta({ title: 'Rejsy', description: 'opis', path: '/offers?page=2&utm_source=facebook' });
+    expect(document.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(`${environment.WEB_URL}/?page=2`);
+
+    service.setPageMeta({ title: 'Rejsy', description: 'opis', path: '/offers?page=1' });
+    expect(document.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(`${environment.WEB_URL}/`);
+  });
+
+  it('keeps category pagination and removes invalid page numbers', () => {
+    service.setPageMeta({ title: 'Rejsy', description: 'opis', path: '/offers/promotions?page=3' });
+    expect(document.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(
+      `${environment.WEB_URL}/offers/promotions?page=3`,
+    );
+
+    service.setPageMeta({ title: 'Rejsy', description: 'opis', path: '/offers/promotions?page=-1' });
+    expect(document.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(
+      `${environment.WEB_URL}/offers/promotions`,
+    );
+  });
+
   it('sets meta description', () => {
     service.setPageMeta({ title: 'UdanyRejs - O nas', description: 'opis firmy', path: '/about-us' });
 

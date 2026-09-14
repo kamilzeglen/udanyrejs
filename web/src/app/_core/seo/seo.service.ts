@@ -22,7 +22,8 @@ export class SeoService {
   ) {}
 
   public setPageMeta(config: PageSeoConfig): void {
-    const url = `${environment.WEB_URL}${config.path}`;
+    const url = this.createCanonicalUrl(config.path);
+    this.clearStructuredData();
 
     this.titleService.setTitle(config.title);
     this.metaService.updateTag({ name: 'description', content: config.description });
@@ -38,14 +39,36 @@ export class SeoService {
     this.metaService.updateTag({ property: 'og:type', content: 'website' });
     this.metaService.updateTag({ property: 'og:site_name', content: SITE_NAME });
 
-    this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+    this.metaService.updateTag({ name: 'twitter:card', content: config.image ? 'summary_large_image' : 'summary' });
     this.metaService.updateTag({ name: 'twitter:title', content: config.title });
     this.metaService.updateTag({ name: 'twitter:description', content: config.description });
 
     if (config.image) {
       this.metaService.updateTag({ property: 'og:image', content: config.image });
       this.metaService.updateTag({ name: 'twitter:image', content: config.image });
+      return;
     }
+
+    this.metaService.removeTag('property="og:image"');
+    this.metaService.removeTag('name="twitter:image"');
+  }
+
+  public createCanonicalUrl(path: string): string {
+    const url = new URL(path, environment.WEB_URL);
+    const page = Number(url.searchParams.get('page'));
+    const isOfferList = url.pathname === '/' || /^\/offers(?:\/[^/]+)?$/.test(url.pathname);
+    url.search = '';
+    url.hash = '';
+
+    if (url.pathname === '/offers') {
+      url.pathname = '/';
+    }
+
+    if (isOfferList && Number.isSafeInteger(page) && page > 1) {
+      url.searchParams.set('page', String(page));
+    }
+
+    return url.href;
   }
 
   public setStructuredData(data: object): void {
