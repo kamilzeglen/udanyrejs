@@ -14,6 +14,7 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { Destination } from '@modules/destination/destination.entity';
 import { CreateDestinationDto } from '@modules/destination/dto/create-destination.dto';
 import { UpdateDestinationDto } from '@modules/destination/dto/update-destination.dto';
+import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
 
 @Controller('destination')
 export class DestinationController {
@@ -65,6 +66,42 @@ export class DestinationController {
   ): Promise<boolean> {
     return await this.destinationService.removeDestination(
       destinationID,
+      req.user,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-delete')
+  async removeDestinations(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    return await this.destinationService.removeDestinations(
+      bulkIdsDto.ids,
+      req.user,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-activate')
+  async bulkActivateDestinations(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.destinationService.bulkActivateDestinations(
+      bulkIdsDto.ids,
+      req.user,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-deactivate')
+  async bulkDeactivateDestinations(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.destinationService.bulkDeactivateDestinations(
+      bulkIdsDto.ids,
       req.user,
     );
   }

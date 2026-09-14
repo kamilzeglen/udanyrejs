@@ -160,4 +160,76 @@ export class CityService {
 
     return true;
   }
+
+  async removeCities(
+    cityIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const cityId of cityIds) {
+      try {
+        await this.removeCity(cityId, reqCreatedBy);
+        deletedIds.push(cityId);
+      } catch {
+        failedIds.push(cityId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateCities(
+    cityIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(cityIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateCities(
+    cityIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(cityIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    cityIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingCities = await this.cityRepository
+      .createQueryBuilder('city')
+      .select('city.id')
+      .where('city.id IN (:...cityIds)', { cityIds })
+      .getMany();
+
+    const existingIds = existingCities.map((city) => city.id);
+    const failedIds = cityIds.filter((cityId) => !existingIds.includes(cityId));
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.cityRepository
+      .createQueryBuilder()
+      .update(City)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' miasta (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
 }

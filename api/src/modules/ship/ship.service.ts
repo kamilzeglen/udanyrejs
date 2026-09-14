@@ -122,4 +122,76 @@ export class ShipService {
 
     return true;
   }
+
+  async removeShips(
+    shipIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const shipId of shipIds) {
+      try {
+        await this.removeShip(shipId, reqCreatedBy);
+        deletedIds.push(shipId);
+      } catch {
+        failedIds.push(shipId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateShips(
+    shipIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(shipIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateShips(
+    shipIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(shipIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    shipIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingShips = await this.shipRepository
+      .createQueryBuilder('ship')
+      .select('ship.id')
+      .where('ship.id IN (:...shipIds)', { shipIds })
+      .getMany();
+
+    const existingIds = existingShips.map((ship) => ship.id);
+    const failedIds = shipIds.filter((shipId) => !existingIds.includes(shipId));
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.shipRepository
+      .createQueryBuilder()
+      .update(Ship)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' statki (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
 }

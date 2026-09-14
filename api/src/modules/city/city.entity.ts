@@ -21,6 +21,9 @@ export class City {
   @Column({ unique: true })
   name: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @ManyToMany(() => Destination, { eager: true })
   @JoinTable({
     name: 'city_destinations',

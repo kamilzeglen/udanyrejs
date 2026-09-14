@@ -131,6 +131,80 @@ export class CabinTypeService {
     return true;
   }
 
+  async removeCabinTypes(
+    cabinTypeIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const cabinTypeId of cabinTypeIds) {
+      try {
+        await this.removeCabinType(cabinTypeId, reqCreatedBy);
+        deletedIds.push(cabinTypeId);
+      } catch {
+        failedIds.push(cabinTypeId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateCabinTypes(
+    cabinTypeIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(cabinTypeIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateCabinTypes(
+    cabinTypeIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(cabinTypeIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    cabinTypeIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingCabinTypes = await this.cabinTypeRepository
+      .createQueryBuilder('cabinType')
+      .select('cabinType.id')
+      .where('cabinType.id IN (:...cabinTypeIds)', { cabinTypeIds })
+      .getMany();
+
+    const existingIds = existingCabinTypes.map((cabinType) => cabinType.id);
+    const failedIds = cabinTypeIds.filter(
+      (cabinTypeId) => !existingIds.includes(cabinTypeId),
+    );
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.cabinTypeRepository
+      .createQueryBuilder()
+      .update(CabinType)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' rodzaje kabin (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
+
   private async countOffersUsingCabinType(
     cabinTypeId: string,
   ): Promise<number> {

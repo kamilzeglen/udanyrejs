@@ -119,4 +119,78 @@ export class CompanyService {
 
     return true;
   }
+
+  async removeCompanies(
+    companyIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const companyId of companyIds) {
+      try {
+        await this.removeCompany(companyId, reqCreatedBy);
+        deletedIds.push(companyId);
+      } catch {
+        failedIds.push(companyId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateCompanies(
+    companyIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(companyIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateCompanies(
+    companyIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(companyIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    companyIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingCompanies = await this.companyRepository
+      .createQueryBuilder('company')
+      .select('company.id')
+      .where('company.id IN (:...companyIds)', { companyIds })
+      .getMany();
+
+    const existingIds = existingCompanies.map((company) => company.id);
+    const failedIds = companyIds.filter(
+      (companyId) => !existingIds.includes(companyId),
+    );
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.companyRepository
+      .createQueryBuilder()
+      .update(Company)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' armatorów (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
 }

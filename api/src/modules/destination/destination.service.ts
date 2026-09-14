@@ -120,4 +120,80 @@ export class DestinationService {
 
     return true;
   }
+
+  async removeDestinations(
+    destinationIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const destinationId of destinationIds) {
+      try {
+        await this.removeDestination(destinationId, reqCreatedBy);
+        deletedIds.push(destinationId);
+      } catch {
+        failedIds.push(destinationId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateDestinations(
+    destinationIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(destinationIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateDestinations(
+    destinationIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(destinationIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    destinationIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingDestinations = await this.destinationRepository
+      .createQueryBuilder('destination')
+      .select('destination.id')
+      .where('destination.id IN (:...destinationIds)', { destinationIds })
+      .getMany();
+
+    const existingIds = existingDestinations.map(
+      (destination) => destination.id,
+    );
+    const failedIds = destinationIds.filter(
+      (destinationId) => !existingIds.includes(destinationId),
+    );
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.destinationRepository
+      .createQueryBuilder()
+      .update(Destination)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' kierunki (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
 }

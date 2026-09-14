@@ -14,6 +14,7 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { City } from '@modules/city/city.entity';
 import { CreateCityDto } from '@modules/city/dto/create-city.dto';
 import { UpdateCityDto } from '@modules/city/dto/update-city.dto';
+import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
 
 @Controller('city')
 export class CityController {
@@ -55,5 +56,35 @@ export class CityController {
     @Req() req: { user: any },
   ): Promise<boolean> {
     return await this.cityService.removeCity(cityId, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-delete')
+  async removeCities(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    return await this.cityService.removeCities(bulkIdsDto.ids, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-activate')
+  async bulkActivateCities(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.cityService.bulkActivateCities(bulkIdsDto.ids, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-deactivate')
+  async bulkDeactivateCities(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.cityService.bulkDeactivateCities(
+      bulkIdsDto.ids,
+      req.user,
+    );
   }
 }

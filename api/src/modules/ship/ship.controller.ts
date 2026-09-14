@@ -14,6 +14,7 @@ import { AuthGuard } from '@core/guards/auth.guard';
 import { UpdateShipDto } from '@modules/ship/dto/update-ship.dto';
 import { CreateShipDto } from '@modules/ship/dto/create-ship.dto';
 import { Ship } from '@modules/ship/ship.entity';
+import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
 
 @Controller('ship')
 export class ShipController {
@@ -59,5 +60,32 @@ export class ShipController {
     @Req() req: { user: any },
   ): Promise<boolean> {
     return await this.shipService.removeShip(shipId, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-delete')
+  async removeShips(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    return await this.shipService.removeShips(bulkIdsDto.ids, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-activate')
+  async bulkActivateShips(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.shipService.bulkActivateShips(bulkIdsDto.ids, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-deactivate')
+  async bulkDeactivateShips(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.shipService.bulkDeactivateShips(bulkIdsDto.ids, req.user);
   }
 }

@@ -20,6 +20,9 @@ export class CabinType {
   @Column()
   name: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @ManyToOne(() => Company, { nullable: false })
   @JoinColumn()
   company: Company;

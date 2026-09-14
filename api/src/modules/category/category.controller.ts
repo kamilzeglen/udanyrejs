@@ -14,6 +14,7 @@ import { Category } from '@modules/category/category.entity';
 import { AuthGuard } from '@core/guards/auth.guard';
 import { UpdateCategoryDto } from '@modules/category/dto/update-category.dto';
 import { CreateCategoryDto } from '@modules/category/dto/create-category.dto';
+import { BulkIdsDto } from '@core/dto/bulk-ids.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -64,5 +65,41 @@ export class CategoryController {
     @Req() req: { user: any },
   ): Promise<boolean> {
     return await this.categoryService.removeCategory(categoryID, req.user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-delete')
+  async removeCategories(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    return await this.categoryService.removeCategories(
+      bulkIdsDto.ids,
+      req.user,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-activate')
+  async bulkActivateCategories(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.categoryService.bulkActivateCategories(
+      bulkIdsDto.ids,
+      req.user,
+    );
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('/bulk-deactivate')
+  async bulkDeactivateCategories(
+    @Body() bulkIdsDto: BulkIdsDto,
+    @Req() req: { user: any },
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return await this.categoryService.bulkDeactivateCategories(
+      bulkIdsDto.ids,
+      req.user,
+    );
   }
 }

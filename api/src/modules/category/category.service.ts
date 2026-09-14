@@ -136,4 +136,78 @@ export class CategoryService {
 
     return true;
   }
+
+  async removeCategories(
+    categoryIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ deletedIds: string[]; failedIds: string[] }> {
+    const deletedIds: string[] = [];
+    const failedIds: string[] = [];
+
+    for (const categoryId of categoryIds) {
+      try {
+        await this.removeCategory(categoryId, reqCreatedBy);
+        deletedIds.push(categoryId);
+      } catch {
+        failedIds.push(categoryId);
+      }
+    }
+
+    return { deletedIds, failedIds };
+  }
+
+  async bulkActivateCategories(
+    categoryIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(categoryIds, true, reqCreatedBy);
+  }
+
+  async bulkDeactivateCategories(
+    categoryIds: string[],
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    return this.bulkSetActive(categoryIds, false, reqCreatedBy);
+  }
+
+  private async bulkSetActive(
+    categoryIds: string[],
+    isActive: boolean,
+    reqCreatedBy: User,
+  ): Promise<{ updatedIds: string[]; failedIds: string[] }> {
+    const existingCategories = await this.categoryRepository
+      .createQueryBuilder('category')
+      .select('category.id')
+      .where('category.id IN (:...categoryIds)', { categoryIds })
+      .getMany();
+
+    const existingIds = existingCategories.map((category) => category.id);
+    const failedIds = categoryIds.filter(
+      (categoryId) => !existingIds.includes(categoryId),
+    );
+
+    if (existingIds.length === 0) {
+      return { updatedIds: [], failedIds };
+    }
+
+    const updatedBy = await this.userService.findOneByEmail(reqCreatedBy.email);
+
+    await this.categoryRepository
+      .createQueryBuilder()
+      .update(Category)
+      .set({ isActive, updatedBy })
+      .where('id IN (:...existingIds)', { existingIds })
+      .execute();
+
+    await this.logService.createLog(
+      (isActive ? 'Aktywowano' : 'Dezaktywowano') +
+        ' kategorie (' +
+        existingIds.length +
+        '): ' +
+        existingIds.join(', '),
+      reqCreatedBy.email,
+    );
+
+    return { updatedIds: existingIds, failedIds };
+  }
 }
