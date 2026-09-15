@@ -39,7 +39,7 @@ export class AdminCategoryAddEditComponent implements OnInit, OnDestroy {
     this.categoryForm = this.fb.group({
       name: ['', Validators.required],
       url: ['', Validators.required],
-      position: ['', Validators.required],
+      position: [null],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       isActive: [false],
@@ -110,10 +110,18 @@ export class AdminCategoryAddEditComponent implements OnInit, OnDestroy {
     }
 
     const payload = { ...this.categoryForm.value };
+    payload.position = payload.position === '' ? null : payload.position;
+
     for (const key in payload) {
-      if (payload[key] === '' || payload[key] === null) {
+      const isPosition = key === 'position';
+
+      if (isPosition === false && (payload[key] === '' || payload[key] === null)) {
         delete payload[key];
       }
+    }
+
+    if (this.mode === 'ADD' && payload.position === null) {
+      delete payload.position;
     }
 
     if (this.mode === 'ADD') {

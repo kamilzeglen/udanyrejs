@@ -4,7 +4,7 @@ export interface Category {
   id: string;
   name: string;
   url: string;
-  position: number;
+  position: number | null;
   startDate: Date;
   endDate: Date;
   isActive: boolean;
