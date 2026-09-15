@@ -68,7 +68,7 @@ describe('rejsy4you-extractor', () => {
     expect(raw.itineraryRows[2].cityText).toBe('Dzień na morzu');
 
     expect(raw.cabinGroupRows).toHaveLength(3);
-    expect(raw.cabinGroupRows[0].minPriceText).toContain('614.43');
+    expect(raw.cabinGroupRows[0].minPriceTexts[0]).toContain('614.43');
 
     expect(raw.otherTermLinks).toHaveLength(3);
     const sameRoute = raw.otherTermLinks.filter(
@@ -80,6 +80,28 @@ describe('rejsy4you-extractor', () => {
     );
     expect(sameRoute[0].startDateText).toBe('2026-10-18');
     expect(sameRoute[0].endDateText).toBe('2026-10-25');
+  });
+
+  it('extracts prices from every price column in a cabin group row', async () => {
+    await page.setContent(`
+      <table aria-describedby="legend">
+        <tr class="group">
+          <td>wewnętrzna</td>
+          <td><span class="group-min-price">–</span></td>
+          <td><span class="group-min-price">od €720</span></td>
+          <td><span class="group-min-price">od €680</span></td>
+        </tr>
+      </table>
+    `);
+
+    const raw = await extractRawOfferPage(page);
+
+    expect(raw.cabinGroupRows).toEqual([
+      {
+        labelText: 'wewnętrzna',
+        minPriceTexts: ['–', 'od €720', 'od €680'],
+      },
+    ]);
   });
 
   describe('extractRawListingPage', () => {

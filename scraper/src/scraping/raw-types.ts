@@ -8,7 +8,7 @@ export interface RawItineraryRow {
 
 export interface RawCabinGroupRow {
   labelText: string;
-  minPriceText: string;
+  minPriceTexts: string[];
 }
 
 export interface RawOtherTermLink {

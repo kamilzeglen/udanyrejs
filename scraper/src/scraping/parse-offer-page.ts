@@ -32,13 +32,15 @@ export function mapCabinGroupRows(rows: RawCabinGroupRow[]): CabinPrice[] {
   const prices: CabinPrice[] = [];
 
   for (const row of rows) {
-    const price = parseEuroPrice(row.minPriceText);
-    if (price === null) {
+    const rowPrices = row.minPriceTexts
+      .map((priceText) => parseEuroPrice(priceText))
+      .filter((price): price is number => price !== null);
+    if (rowPrices.length === 0) {
       continue;
     }
 
     const label = row.labelText.replace(/▸/g, '').trim();
-    prices.push({ label, price });
+    prices.push({ label, price: Math.min(...rowPrices) });
   }
 
   return prices;

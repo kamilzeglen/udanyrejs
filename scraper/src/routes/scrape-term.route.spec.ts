@@ -71,7 +71,9 @@ describe('POST /scrape-term', () => {
           departureText: '',
         },
       ],
-      cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €120' }],
+      cabinGroupRows: [
+        { labelText: '▸ wewnętrzna', minPriceTexts: ['od €120'] },
+      ],
       otherTermLinks: [
         {
           href: 'https://rejsy4you.pl/rejs/2_x_2',

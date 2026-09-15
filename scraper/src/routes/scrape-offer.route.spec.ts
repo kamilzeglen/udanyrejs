@@ -64,7 +64,7 @@ describe('POST /scrape-offer', () => {
           },
         ],
         cabinGroupRows: [
-          { labelText: '▸ wewnętrzna', minPriceText: 'od €100' },
+          { labelText: '▸ wewnętrzna', minPriceTexts: ['od €100'] },
         ],
         otherTermLinks: [
           {
@@ -83,7 +83,7 @@ describe('POST /scrape-offer', () => {
         pdfHref: 'https://rejsy4you.pl/pdf-2',
         itineraryRows: [],
         cabinGroupRows: [
-          { labelText: '▸ wewnętrzna', minPriceText: 'od €120' },
+          { labelText: '▸ wewnętrzna', minPriceTexts: ['od €120'] },
         ],
         otherTermLinks: [],
       });
@@ -150,7 +150,9 @@ describe('POST /scrape-offer', () => {
           departureText: '10:00',
         },
       ],
-      cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €100' }],
+      cabinGroupRows: [
+        { labelText: '▸ wewnętrzna', minPriceTexts: ['od €100'] },
+      ],
       otherTermLinks: [
         {
           href: 'https://rejsy4you.pl/rejs/2_x_2',
@@ -201,7 +203,7 @@ describe('POST /scrape-offer', () => {
           },
         ],
         cabinGroupRows: [
-          { labelText: '▸ wewnętrzna', minPriceText: 'od €100' },
+          { labelText: '▸ wewnętrzna', minPriceTexts: ['od €100'] },
         ],
         otherTermLinks: [
           {

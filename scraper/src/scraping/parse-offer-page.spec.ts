@@ -39,8 +39,8 @@ describe('slugToTitleCase', () => {
 describe('mapCabinGroupRows', () => {
   it('maps group rows to cabin prices, stripping the chevron glyph', () => {
     const result = mapCabinGroupRows([
-      { labelText: '▸ wewnętrzna', minPriceText: 'od €614.43' },
-      { labelText: '▸Suite (apartament)', minPriceText: 'od €1674.5' },
+      { labelText: '▸ wewnętrzna', minPriceTexts: ['od €614.43'] },
+      { labelText: '▸Suite (apartament)', minPriceTexts: ['od €1674.5'] },
     ]);
 
     expect(result).toEqual([
@@ -51,9 +51,20 @@ describe('mapCabinGroupRows', () => {
 
   it('skips a group whose price is unavailable', () => {
     const result = mapCabinGroupRows([
-      { labelText: '▸ wewnętrzna', minPriceText: '–' },
+      { labelText: '▸ wewnętrzna', minPriceTexts: ['–'] },
     ]);
     expect(result).toEqual([]);
+  });
+
+  it('uses the lowest available price from all columns in a group row', () => {
+    const row = {
+      labelText: '▸ wewnętrzna',
+      minPriceTexts: ['–', 'od €720', 'od €680'],
+    };
+
+    const result = mapCabinGroupRows([row]);
+
+    expect(result).toEqual([{ label: 'wewnętrzna', price: 680 }]);
   });
 });
 
@@ -83,8 +94,11 @@ describe('mapRawToScrapedOffer', () => {
       },
     ],
     cabinGroupRows: [
-      { labelText: '▸ wewnętrzna', minPriceText: 'od €614.43' },
-      { labelText: '▸ zewnętrzna z balkonem', minPriceText: 'od €1619.5' },
+      { labelText: '▸ wewnętrzna', minPriceTexts: ['od €614.43'] },
+      {
+        labelText: '▸ zewnętrzna z balkonem',
+        minPriceTexts: ['od €1619.5'],
+      },
     ],
     otherTermLinks: [
       {
@@ -196,7 +210,7 @@ describe('mapRawToScrapedTerm', () => {
         departureText: '17:00',
       },
     ],
-    cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceText: 'od €620' }],
+    cabinGroupRows: [{ labelText: '▸ wewnętrzna', minPriceTexts: ['od €620'] }],
     otherTermLinks: [
       {
         href: 'https://rejsy4you.pl/rejs/93098_hiszpania-francja-wlochy_208992',

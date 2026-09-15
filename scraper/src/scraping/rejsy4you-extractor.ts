@@ -61,9 +61,13 @@ export async function extractRawOfferPage(page: Page): Promise<RawOfferPage> {
       const cells = row.querySelectorAll('td');
       return {
         labelText: cells[0]?.textContent?.trim() ?? '',
-        minPriceText:
-          cells[1]?.querySelector('.group-min-price')?.textContent?.trim() ??
-          '',
+        minPriceTexts: Array.from(cells)
+          .slice(1)
+          .flatMap((cell) =>
+            Array.from(cell.querySelectorAll('.group-min-price')).map(
+              (price) => price.textContent?.trim() ?? '',
+            ),
+          ),
       };
     });
 
