@@ -65,6 +65,7 @@ export interface ScrapedTermPageResponse {
 export interface DiscoverOffersResponse {
   urls: string[];
   unmatchedNames: string[];
+  timeLimitReached?: boolean;
 }
 
 @Injectable()
@@ -123,11 +124,22 @@ export class ScraperClientService {
   public async discoverOffers(
     shipownerNames: string[],
     count: number,
+    maxDurationMs?: number,
   ): Promise<DiscoverOffersResponse> {
+    const body: {
+      shipownerNames: string[];
+      count: number;
+      maxDurationMs?: number;
+    } = { shipownerNames, count };
+
+    if (maxDurationMs !== undefined) {
+      body.maxDurationMs = maxDurationMs;
+    }
+
     const response = await firstValueFrom(
       this.httpService.post<DiscoverOffersResponse>(
         `${this.baseUrl}/discover-offers`,
-        { shipownerNames, count },
+        body,
         { headers: { 'X-Internal-Token': this.internalToken } },
       ),
     );

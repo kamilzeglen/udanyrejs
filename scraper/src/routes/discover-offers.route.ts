@@ -6,6 +6,7 @@ import { extractRawListingPage } from '../scraping/rejsy4you-extractor';
 import { findShipownerId } from '../scraping/rejsy4you-shipowners';
 
 const LISTING_BASE_URL = 'https://rejsy4you.pl/rejsy';
+const DEFAULT_DISCOVERY_DURATION_MS = 120_000;
 
 export function createDiscoverOffersRoute(
   config: ScraperConfig,
@@ -16,17 +17,23 @@ export function createDiscoverOffersRoute(
   router.post('/discover-offers', async (req, res) => {
     const shipownerNames = req.body?.shipownerNames;
     const count = req.body?.count;
+    const maxDurationMs =
+      req.body?.maxDurationMs ?? DEFAULT_DISCOVERY_DURATION_MS;
 
     const namesAreValid =
       Array.isArray(shipownerNames) &&
       shipownerNames.every((name) => typeof name === 'string');
     const countIsValid =
       typeof count === 'number' && Number.isInteger(count) && count > 0;
+    const maxDurationIsValid =
+      typeof maxDurationMs === 'number' &&
+      Number.isInteger(maxDurationMs) &&
+      maxDurationMs > 0;
 
-    if (!namesAreValid || !countIsValid) {
+    if (!namesAreValid || !countIsValid || !maxDurationIsValid) {
       res.status(400).json({
         message:
-          'shipownerNames (string[]) and count (positive integer) are required',
+          'shipownerNames (string[]), count and maxDurationMs (positive integers) are required',
       });
       return;
     }
@@ -52,9 +59,16 @@ export function createDiscoverOffersRoute(
     const pageByShipownerId = new Map<number, number>(
       matched.map((m) => [m.id, 1]),
     );
+    const deadline = Date.now() + maxDurationMs;
+    let timeLimitReached = false;
 
     while (collectedUrls.size < count && exhausted.size < matched.length) {
       for (const { id } of matched) {
+        if (Date.now() >= deadline) {
+          timeLimitReached = true;
+          break;
+        }
+
         if (collectedUrls.size >= count) {
           break;
         }
@@ -95,13 +109,17 @@ export function createDiscoverOffersRoute(
         raw.offerHrefs.forEach((href) => collectedUrls.add(href));
         pageByShipownerId.set(id, currentPage + 1);
       }
+
+      if (timeLimitReached) {
+        break;
+      }
     }
 
     const urls = Array.from(collectedUrls).slice(0, count);
     console.log(
       `[scraper] /discover-offers found ${urls.length} url(s), unmatched shipowners: ${unmatchedNames.join(', ') || 'none'}`,
     );
-    res.status(200).json({ urls, unmatchedNames });
+    res.status(200).json({ urls, unmatchedNames, timeLimitReached });
   });
 
   return router;

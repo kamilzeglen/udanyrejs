@@ -14,6 +14,8 @@ import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
 import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 
+const DISCOVERY_SEARCH_DURATION_MS = 120_000;
+
 @Injectable()
 export class OfferDiscoveryService {
   private readonly logger = new Logger(OfferDiscoveryService.name);
@@ -38,24 +40,91 @@ export class OfferDiscoveryService {
     count: number,
     actorEmail: string,
   ): Promise<void> {
-    const { urls, unmatchedNames } =
-      await this.scraperClientService.discoverOffers(companyNames, count);
+    const deadline = Date.now() + DISCOVERY_SEARCH_DURATION_MS;
+    const discoveredUrls = new Set<string>();
+    const loggedUnmatchedNames = new Set<string>();
+    const newUrls: string[] = [];
+    let requestedUrlCount = count;
+    let timeLimitReached = false;
 
-    for (const name of unmatchedNames) {
+    while (newUrls.length < count) {
+      const remainingDurationMs = deadline - Date.now();
+
+      if (remainingDurationMs <= 0) {
+        timeLimitReached = true;
+        break;
+      }
+
+      const discoveryResult = await this.scraperClientService.discoverOffers(
+        companyNames,
+        requestedUrlCount,
+        remainingDurationMs,
+      );
+
+      for (const name of discoveryResult.unmatchedNames) {
+        if (loggedUnmatchedNames.has(name)) {
+          continue;
+        }
+
+        loggedUnmatchedNames.add(name);
+        await this.logService.createLog(
+          `Discovery: nie znaleziono armatora "${name}" na rejsy4you.`,
+          actorEmail,
+        );
+      }
+
+      const unseenUrls: string[] = [];
+
+      for (const url of discoveryResult.urls) {
+        if (discoveredUrls.has(url)) {
+          continue;
+        }
+
+        discoveredUrls.add(url);
+        unseenUrls.push(url);
+      }
+
+      const newUrlsFromBatch = await this.filterOutExistingUrls(
+        unseenUrls,
+        actorEmail,
+      );
+      newUrls.push(...newUrlsFromBatch);
+
+      if (newUrls.length >= count) {
+        break;
+      }
+
+      if (discoveryResult.timeLimitReached) {
+        timeLimitReached = true;
+        break;
+      }
+
+      if (discoveryResult.urls.length < requestedUrlCount) {
+        break;
+      }
+
+      if (unseenUrls.length === 0) {
+        break;
+      }
+
+      requestedUrlCount += count;
+    }
+
+    const selectedNewUrls = newUrls.slice(0, count);
+
+    for (const url of selectedNewUrls) {
+      await this.discoverOneOffer(url, actorEmail);
+    }
+
+    if (timeLimitReached) {
       await this.logService.createLog(
-        `Discovery: nie znaleziono armatora "${name}" na rejsy4you.`,
+        `Discovery: zakończono wyszukiwanie po osiągnięciu limitu 2 minut.`,
         actorEmail,
       );
     }
 
-    const newUrls = await this.filterOutExistingUrls(urls, actorEmail);
-
-    for (const url of newUrls) {
-      await this.discoverOneOffer(url, actorEmail);
-    }
-
     await this.logService.createLog(
-      `Discovery zakończone: ${newUrls.length} nowych ofert dodanych do poczekalni (z ${urls.length} znalezionych).`,
+      `Discovery zakończone: ${selectedNewUrls.length} nowych ofert dodanych do poczekalni (z ${discoveredUrls.size} znalezionych).`,
       actorEmail,
     );
   }
