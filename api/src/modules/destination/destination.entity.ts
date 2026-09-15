@@ -23,7 +23,7 @@ export class Destination {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToMany(() => Offer, (offer) => offer.destinations, { cascade: true })
+  @ManyToMany(() => Offer, (offer) => offer.destinations)
   offers: Offer[];
 
   @ManyToOne(() => User, { nullable: true })

@@ -38,7 +38,7 @@ export class Category {
   @Column({ default: true })
   isVisible: boolean;
 
-  @ManyToMany(() => OfferTerm, (term) => term.categories, { cascade: true })
+  @ManyToMany(() => OfferTerm, (term) => term.categories)
   terms: OfferTerm[];
 
   // Nie jest kolumną - liczone przez CategoryService.findAll() na podstawie
