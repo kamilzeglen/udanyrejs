@@ -70,19 +70,32 @@ export class OfferListComponent implements OnInit, OnDestroy {
       .pipe(
         map(([paramMap, queryParamMap]) => {
           const page = Number(queryParamMap.get('page'));
+          const companyId = queryParamMap.get('company');
+          const destinationId = queryParamMap.get('destination');
           return {
             category: paramMap.get('category'),
+            companyId,
+            destinationId,
             page: Number.isSafeInteger(page) && page > 0 ? page - 1 : 0,
           };
         }),
         distinctUntilChanged(
-          (previous, current) => previous.category === current.category && previous.page === current.page,
+          (previous, current) =>
+            previous.category === current.category &&
+            previous.companyId === current.companyId &&
+            previous.destinationId === current.destinationId &&
+            previous.page === current.page,
         ),
         takeUntil(this.destroy$),
       )
-      .subscribe(({ category, page }) => {
+      .subscribe(({ category, companyId, destinationId, page }) => {
         this.page = page;
-        this.filters = { ...this.filters, category };
+        this.filters = {
+          ...this.filters,
+          category,
+          companyIdList: companyId ? [companyId] : [],
+          destinationIdList: destinationId ? [destinationId] : [],
+        };
         const path = category ? `/offers/${encodeURIComponent(category)}` : '/offers';
         const title = category === 'promotions' ? 'UdanyRejs - Oferty Rejsów - Promocje' : 'UdanyRejs - Oferty Rejsów';
 

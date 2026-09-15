@@ -62,6 +62,18 @@ describe('OfferListComponent navigation', () => {
     expect(setPageMeta.calls.mostRecent().args[0].path).toBe('/offers');
   });
 
+  it('applies the selected direction from the URL to the offer search', () => {
+    queryParamMap.next(convertToParamMap({ destination: 'destination-1' }));
+
+    expect(getOffers.calls.mostRecent().args[0].destinationIdList).toEqual(['destination-1']);
+  });
+
+  it('applies the selected carrier from the URL to the offer search', () => {
+    queryParamMap.next(convertToParamMap({ company: 'company-1' }));
+
+    expect(getOffers.calls.mostRecent().args[0].companyIdList).toEqual(['company-1']);
+  });
+
   it('does not reload the same page or keep subscriptions after destruction', () => {
     const calls = getOffers.calls.count();
     navigateToPage('1');

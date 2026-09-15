@@ -20,10 +20,74 @@
       <a routerLink="/offers" class="logo-container" aria-label="UdanyRejs — strona główna">
         <img src="/assets/logo.png" class="logo" alt="UdanyRejs" />
       </a>
-      <a routerLink="/about-us" class="nav-link desktop-link" routerLinkActive="active" ariaCurrentWhenActive="page"
-        >O nas</a
-      >
-      <a routerLink="/contact" class="nav-link" routerLinkActive="active" ariaCurrentWhenActive="page">Kontakt</a>
+      <div class="nav-menu desktop-link" [class.open]="activeMenu === 'destinations'" (mouseleave)="closeMenu()">
+        <div class="nav-menu-trigger">
+          <button
+            type="button"
+            class="nav-link nav-menu-label"
+            [class.active]="activeMenu === 'destinations'"
+            [attr.aria-expanded]="activeMenu === 'destinations'"
+            aria-controls="destinations-menu"
+            (click)="toggleMenu('destinations')"
+          >
+            Kierunki
+          </button>
+          <button
+            type="button"
+            class="nav-menu-toggle"
+            aria-label="Rozwiń kierunki"
+            aria-controls="destinations-menu"
+            [attr.aria-expanded]="activeMenu === 'destinations'"
+            (click)="toggleMenu('destinations')"
+          >
+            <mat-icon>expand_more</mat-icon>
+          </button>
+        </div>
+        <div id="destinations-menu" class="dropdown-menu">
+          <span class="dropdown-title">Popularne kierunki</span>
+          <a
+            *ngFor="let destination of destinationMenuItems$ | async"
+            routerLink="/offers"
+            [queryParams]="{ destination: destination.id }"
+            (click)="closeMenu()"
+            >{{ destination.name }}</a
+          >
+        </div>
+      </div>
+      <div class="nav-menu" [class.open]="activeMenu === 'companies'" (mouseleave)="closeMenu()">
+        <div class="nav-menu-trigger">
+          <button
+            type="button"
+            class="nav-link nav-menu-label"
+            [class.active]="activeMenu === 'companies'"
+            [attr.aria-expanded]="activeMenu === 'companies'"
+            aria-controls="companies-menu"
+            (click)="toggleMenu('companies')"
+          >
+            Armatorzy
+          </button>
+          <button
+            type="button"
+            class="nav-menu-toggle"
+            aria-label="Rozwiń armatorów"
+            aria-controls="companies-menu"
+            [attr.aria-expanded]="activeMenu === 'companies'"
+            (click)="toggleMenu('companies')"
+          >
+            <mat-icon>expand_more</mat-icon>
+          </button>
+        </div>
+        <div id="companies-menu" class="dropdown-menu">
+          <span class="dropdown-title">Popularni armatorzy</span>
+          <a
+            *ngFor="let company of companyMenuItems$ | async"
+            routerLink="/offers"
+            [queryParams]="{ company: company.id }"
+            (click)="closeMenu()"
+            >{{ company.name }}</a
+          >
+        </div>
+      </div>
     </div>
     <img src="/assets/wave-right.png" class="wave wave-right" alt="" aria-hidden="true" />
   </div>
