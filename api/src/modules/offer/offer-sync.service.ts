@@ -77,9 +77,9 @@ export class OfferSyncService {
   // OfferDiscoveryService i OfferController.scrapeOffer) od cyklicznej/
   // ręcznej synchronizacji: sync ma tylko ODŚWIEŻYĆ dane (cena, daty, PDF)
   // każdego JUŻ znanego terminu pojedynczym lekkim scrapeTerm (jedna strona,
-  // bez chodzenia po siblingach) i coś zaktualizować TYLKO gdy faktycznie się
-  // zmieniło - nie ma powodu za każdym razem od nowa ściągać PDF czy
-  // nadpisywać identycznych cen. Nowy termin (link nieznany z naszej bazy)
+  // bez chodzenia po siblingach). Ceny są nadpisywane tylko przy zmianie,
+  // natomiast dynamicznie generowany PDF jest pobierany przy każdym syncu.
+  // Nowy termin (link nieznany z naszej bazy)
   // dostaje pełny scrapeTerm tej JEDNEJ strony, bez uruchamiania całej
   // sekwencji na już istniejących terminach.
   public async syncOffer(offer: Offer): Promise<OfferSyncResult> {
@@ -257,7 +257,6 @@ export class OfferSyncService {
     let pdfUpdated = false;
     if (
       scraped.pdfUrl &&
-      term.pdfFile?.url !== scraped.pdfUrl &&
       (await this.tryUpdateTermPdf(term.id, scraped.pdfUrl))
     ) {
       pdfUpdated = true;

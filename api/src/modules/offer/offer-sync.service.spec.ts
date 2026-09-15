@@ -198,10 +198,13 @@ describe('OfferSyncService.syncOffer', () => {
     expect(offerService.updateTermDates).not.toHaveBeenCalled();
   });
 
-  it('does not redownload the PDF when its URL is unchanged from what is stored', async () => {
+  it('redownloads the PDF when its URL is unchanged because its content is generated dynamically', async () => {
     scraperClient.scrapeTerm.mockResolvedValue(
       scrapedTerm({ pdfUrl: 'https://rejsy4you.pl/pdf-1' }),
     );
+    pdfFileService.downloadPdfFromUrl.mockResolvedValue({
+      buffer: Buffer.from('updated-pdf'),
+    });
 
     const result = await service.syncOffer(
       buildOffer({
@@ -213,8 +216,14 @@ describe('OfferSyncService.syncOffer', () => {
       }),
     );
 
-    expect(pdfFileService.downloadPdfFromUrl).not.toHaveBeenCalled();
-    expect(result.pdfsUpdated).toBe(0);
+    expect(pdfFileService.updatePdfFile).toHaveBeenCalledWith(
+      'term-1',
+      'term',
+      { buffer: Buffer.from('updated-pdf') },
+      'SYSTEM',
+      'https://rejsy4you.pl/pdf-1',
+    );
+    expect(result.pdfsUpdated).toBe(1);
   });
 
   it('redownloads the PDF when its URL changed from what is stored', async () => {
