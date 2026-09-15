@@ -70,6 +70,7 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
   public bulkDeleting$ = this.offerFacade.bulkDeleting$;
   public bulkSyncing$ = this.offerFacade.bulkSyncing$;
   public bulkSyncingTerms$ = this.offerFacade.bulkSyncingTerms$;
+  public syncingTermId: string = null;
 
   public groupedOffers$ = this.offerFacade.offers$.pipe(map((offers) => (offers ? groupOffersByOfferId(offers) : [])));
 
@@ -127,12 +128,14 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     });
 
     this.offerFacade.syncTermsSuccess$.pipe(takeUntil(this.destroy$)).subscribe(({ result }) => {
+      this.syncingTermId = null;
       this.snackService.showInfo(this.buildBulkTermsSyncResultMessage(result));
       this.termSelection.clear();
       this.getOffers();
     });
 
     this.offerFacade.syncTermsError$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.syncingTermId = null;
       this.snackService.showError('Nie udało się zsynchronizować zaznaczonych terminów');
     });
 
@@ -287,6 +290,11 @@ export class AdminOfferListComponent implements OnInit, OnDestroy {
     this.termSelection.selectedIds$.pipe(take(1)).subscribe((selectedTermIds) => {
       this.offerFacade.syncTerms({ termIds: Array.from(selectedTermIds) });
     });
+  }
+
+  public syncTerm(termId: string): void {
+    this.syncingTermId = termId;
+    this.offerFacade.syncTerms({ termIds: [termId] });
   }
 
   private buildSyncResultMessage(result: OfferSyncResult): string {

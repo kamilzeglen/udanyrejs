@@ -269,6 +269,17 @@
                   </div>
                 </td>
                 <td>
+                  <button
+                    *ngIf="term.sourceUrl"
+                    type="button"
+                    class="term-action-button"
+                    [disabled]="bulkSyncingTerms$ | async"
+                    matTooltip="Synchronizuj tylko ten termin ze stroną źródłową"
+                    aria-label="Synchronizuj tylko ten termin"
+                    (click)="syncTerm(term.termId); $event.stopPropagation()"
+                  >
+                    <mat-icon [class.syncing]="syncingTermId === term.termId">sync</mat-icon>
+                  </button>
                   <a
                     class="icon-view-term"
                     [routerLink]="['/offers/details', group.offer.id]"

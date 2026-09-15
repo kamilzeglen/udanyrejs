@@ -108,6 +108,24 @@
     cursor: pointer;
   }
 
+  .term-action-button {
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: $primary-color;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    mat-icon.syncing {
+      animation: icon-sync-spin 1s linear infinite;
+    }
+  }
+
   .icon-edit {
     color: $neutral;
     cursor: pointer;
