@@ -59,6 +59,7 @@ export interface ScrapedTermPageResponse {
   endDate: string;
   cabinPrices: ScrapedCabinPrice[];
   pdfUrl: string | null;
+  imageUrl: string | null;
   siblingLinks: ScrapedSiblingLink[];
 }
 
@@ -102,12 +103,15 @@ export class ScraperClientService {
   // scrapeOffer) - używane do lekkiego odświeżenia już znanego terminu
   // (cena/daty/PDF) oraz do pobrania pełnych danych pojedynczego nowo
   // odkrytego terminu, patrz OfferSyncService.
-  public async scrapeTerm(url: string): Promise<ScrapedTermPageResponse> {
+  public async scrapeTerm(
+    url: string,
+    includeImage: boolean,
+  ): Promise<ScrapedTermPageResponse> {
     try {
       const response = await firstValueFrom(
         this.httpService.post<ScrapedTermPageResponse>(
           `${this.baseUrl}/scrape-term`,
-          { url },
+          { url, includeImage },
           { headers: { 'X-Internal-Token': this.internalToken } },
         ),
       );

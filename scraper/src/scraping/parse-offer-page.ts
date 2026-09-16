@@ -106,7 +106,10 @@ export function mapRawToScrapedOffer(
   };
 }
 
-export function mapRawToScrapedTerm(raw: RawOfferPage): ScrapedTermPageResult {
+export function mapRawToScrapedTerm(
+  raw: RawOfferPage,
+  includeImage: boolean,
+): ScrapedTermPageResult {
   const { startDate, endDate } = derivePrimaryTermDates(
     mapItineraryRows(raw.itineraryRows),
   );
@@ -116,6 +119,7 @@ export function mapRawToScrapedTerm(raw: RawOfferPage): ScrapedTermPageResult {
     endDate,
     cabinPrices: mapCabinGroupRows(raw.cabinGroupRows),
     pdfUrl: raw.pdfHref || null,
+    imageUrl: includeImage ? raw.ogImageContent || null : null,
     siblingLinks: raw.otherTermLinks
       .filter((link) => !link.isDifferentRoute)
       .map((link) => ({

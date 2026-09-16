@@ -40,7 +40,7 @@ export class ImageFileService {
     targetId: string,
     imageFileType: ImageFileType,
     file: Express.Multer.File,
-    requestUser: User,
+    requestUser: User | null,
     url?: string,
   ): Promise<ImageFile> {
     let uploadDir: string = './uploads/images';

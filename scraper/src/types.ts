@@ -39,5 +39,9 @@ export interface ScrapedTermPageResult {
   endDate: string;
   cabinPrices: CabinPrice[];
   pdfUrl: string | null;
+  // Zwracane tylko gdy wywołujący poprosi o to (includeImage) - oferta ma
+  // jedno zdjęcie ustawiane raz przy imporcie, więc lekki scrape-term nie
+  // ma po co za każdym razem go doklejać do wyniku, patrz OfferSyncService.
+  imageUrl: string | null;
   siblingLinks: ScrapedSiblingLink[];
 }

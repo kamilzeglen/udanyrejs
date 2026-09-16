@@ -100,6 +100,7 @@ describe('POST /scrape-term', () => {
       endDate: '2027-01-08',
       cabinPrices: [{ label: 'wewnętrzna', price: 120 }],
       pdfUrl: 'https://rejsy4you.pl/pdf-1',
+      imageUrl: null,
       siblingLinks: [
         {
           sourceUrl: 'https://rejsy4you.pl/rejs/2_x_2',
@@ -109,6 +110,34 @@ describe('POST /scrape-term', () => {
       ],
     });
     expect(queue.enqueue).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes the image URL only when the caller sets includeImage', async () => {
+    (extractor.extractRawOfferPage as jest.Mock).mockResolvedValueOnce({
+      titleText: 'Rejs testowy',
+      shipNameText: 'Testowiec',
+      companyHrefSlug: 'test-cruise-line',
+      ogImageContent: 'https://rejsy4you.pl/img.jpg',
+      pdfHref: 'https://rejsy4you.pl/pdf-1',
+      itineraryRows: [
+        {
+          dayText: '1',
+          dateText: '01.01.2027',
+          cityText: 'Gdynia',
+          arrivalText: '',
+          departureText: '10:00',
+        },
+      ],
+      cabinGroupRows: [],
+      otherTermLinks: [],
+    });
+
+    const response = await request(buildApp(queue))
+      .post('/scrape-term')
+      .send({ url: 'https://rejsy4you.pl/rejs/1_x_1', includeImage: true });
+
+    expect(response.status).toBe(200);
+    expect(response.body.imageUrl).toBe('https://rejsy4you.pl/img.jpg');
   });
 
   it('returns 404 when the page confirms the offer is gone (HTTP 404/410)', async () => {

@@ -14,7 +14,11 @@ import { OfferService } from './offer.service';
 import { CabinType } from '@modules/cabin-type/cabin-type.entity';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
 import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
-import { PdfFileType } from '../../interfaces/save-update-file-types';
+import { ImageFileService } from '@modules/image-file/image-file.service';
+import {
+  ImageFileType,
+  PdfFileType,
+} from '../../interfaces/save-update-file-types';
 import { findBestMatch } from '@core/utils/fuzzy-match.util';
 import { isSameDateRange } from '@core/utils/date-range.util';
 import {
@@ -57,6 +61,7 @@ interface TermSyncOutcome {
   status: 'deactivated' | 'skipped' | 'synced';
   reactivated: boolean;
   pdfUpdated: boolean;
+  imageUpdated: boolean;
 }
 
 @Injectable()
@@ -69,6 +74,7 @@ export class OfferSyncService {
     private readonly offerService: OfferService,
     private readonly cabinTypeService: CabinTypeService,
     private readonly pdfFileService: PdfFileService,
+    private readonly imageFileService: ImageFileService,
     private readonly logService: LogService,
   ) {}
 
@@ -99,6 +105,12 @@ export class OfferSyncService {
     let termsSkipped = 0;
     let pdfsUpdated = 0;
 
+    // Zdjęcie oferty jest stałe (ustawiane raz), więc w odróżnieniu od PDF
+    // dociągamy je tylko dopóki faktycznie go brakuje - gdy pierwszy termin
+    // w tym przebiegu je uzupełni, kolejne terminy tej samej oferty już go
+    // nie proszą ponownie.
+    let offerImageMissing = !offer.imageFile;
+
     const discoveredLinks = new Map<string, ScrapedSiblingLink>();
 
     // Faza 1: odśwież KAŻDY znany termin z linkiem źródłowym (aktywny albo
@@ -110,6 +122,7 @@ export class OfferSyncService {
         offer.companyId,
         cabinTypes,
         offer.id,
+        offerImageMissing,
         discoveredLinks,
       );
 
@@ -130,6 +143,10 @@ export class OfferSyncService {
       if (outcome.pdfUpdated) {
         pdfsUpdated++;
       }
+
+      if (outcome.imageUpdated) {
+        offerImageMissing = false;
+      }
     }
 
     // Faza 2: TYLKO naprawdę nowe terminy (link nieznany z naszej bazy,
@@ -142,7 +159,10 @@ export class OfferSyncService {
       }
 
       try {
-        const scraped = await this.scraperClientService.scrapeTerm(sourceUrl);
+        const scraped = await this.scraperClientService.scrapeTerm(
+          sourceUrl,
+          offerImageMissing,
+        );
         const newTermDto: OfferTermDto = {
           startDate: scraped.startDate,
           endDate: scraped.endDate,
@@ -161,6 +181,14 @@ export class OfferSyncService {
           (await this.tryUpdateTermPdf(newTerm.id, scraped.pdfUrl))
         ) {
           pdfsUpdated++;
+        }
+
+        if (
+          offerImageMissing &&
+          scraped.imageUrl &&
+          (await this.tryUpdateOfferImage(offer.id, scraped.imageUrl))
+        ) {
+          offerImageMissing = false;
         }
       } catch (error) {
         if (error instanceof ScrapedPageNotFoundError) {
@@ -208,18 +236,27 @@ export class OfferSyncService {
     companyId: string,
     cabinTypes: CabinType[],
     offerId: string,
+    offerImageMissing: boolean,
     discoveredLinks?: Map<string, ScrapedSiblingLink>,
   ): Promise<TermSyncOutcome> {
     let scraped: ScrapedTermPageResponse;
     try {
-      scraped = await this.scraperClientService.scrapeTerm(term.sourceUrl);
+      scraped = await this.scraperClientService.scrapeTerm(
+        term.sourceUrl,
+        offerImageMissing,
+      );
     } catch (error) {
       if (error instanceof ScrapedPageNotFoundError) {
         await this.offerService.setTermActive(term.id, false);
         this.logger.warn(
           `Termin "${term.id}" oferty "${offerId}" dezaktywowany - strona źródłowa potwierdziła 404/410 (oferta zdjęta ze strony).`,
         );
-        return { status: 'deactivated', reactivated: false, pdfUpdated: false };
+        return {
+          status: 'deactivated',
+          reactivated: false,
+          pdfUpdated: false,
+          imageUpdated: false,
+        };
       }
 
       // Niepowodzenie komunikacji ze scraperem (timeout, scraper padł, błąd
@@ -229,7 +266,12 @@ export class OfferSyncService {
       this.logger.warn(
         `Termin "${term.id}" oferty "${offerId}" pominięty w tej synchronizacji - strona źródłowa nie odpowiedziała: ${(error as Error).message}`,
       );
-      return { status: 'skipped', reactivated: false, pdfUpdated: false };
+      return {
+        status: 'skipped',
+        reactivated: false,
+        pdfUpdated: false,
+        imageUpdated: false,
+      };
     }
 
     let reactivated = false;
@@ -262,13 +304,22 @@ export class OfferSyncService {
       pdfUpdated = true;
     }
 
+    let imageUpdated = false;
+    if (
+      offerImageMissing &&
+      scraped.imageUrl &&
+      (await this.tryUpdateOfferImage(offerId, scraped.imageUrl))
+    ) {
+      imageUpdated = true;
+    }
+
     if (discoveredLinks) {
       for (const sibling of scraped.siblingLinks) {
         discoveredLinks.set(sibling.sourceUrl, sibling);
       }
     }
 
-    return { status: 'synced', reactivated, pdfUpdated };
+    return { status: 'synced', reactivated, pdfUpdated, imageUpdated };
   }
 
   // Sync na poziomie POJEDYNCZYCH zaznaczonych terminów - w odróżnieniu od
@@ -288,6 +339,11 @@ export class OfferSyncService {
     const terms = await this.offerService.findTermsByIds(termIds);
     const termById = new Map(terms.map((term) => [term.id, term]));
     const cabinTypesByCompany = new Map<string, CabinType[]>();
+    // Kilka zaznaczonych terminów może należeć do TEJ SAMEJ oferty - gdy
+    // pierwszemu z nich uda się uzupełnić brakujące zdjęcie oferty, kolejne
+    // nie mają już po co o nie prosić (offer.imageFile w term.offer to
+    // migawka sprzed tego przebiegu i się nie zaktualizuje).
+    const offersWithImageHandled = new Set<string>();
 
     for (const termId of termIds) {
       const term = termById.get(termId);
@@ -305,11 +361,15 @@ export class OfferSyncService {
         cabinTypesByCompany.set(term.offer.companyId, cabinTypes);
       }
 
+      const offerImageMissing =
+        !term.offer.imageFile && !offersWithImageHandled.has(term.offerId);
+
       const outcome = await this.syncKnownTerm(
         term,
         term.offer.companyId,
         cabinTypes,
         term.offerId,
+        offerImageMissing,
       );
 
       if (outcome.status === 'deactivated') {
@@ -328,6 +388,9 @@ export class OfferSyncService {
       }
       if (outcome.pdfUpdated) {
         result.pdfsUpdated++;
+      }
+      if (outcome.imageUpdated) {
+        offersWithImageHandled.add(term.offerId);
       }
     }
 
@@ -443,6 +506,28 @@ export class OfferSyncService {
     } catch (error) {
       this.logger.warn(
         `Nie udało się zaktualizować PDF terminu "${termId}": ${(error as Error).message}`,
+      );
+      return false;
+    }
+  }
+
+  private async tryUpdateOfferImage(
+    offerId: string,
+    imageUrl: string,
+  ): Promise<boolean> {
+    try {
+      const file = await this.imageFileService.downloadImageFromUrl(imageUrl);
+      await this.imageFileService.createImageFile(
+        offerId,
+        ImageFileType.OFFER,
+        file,
+        null,
+        imageUrl,
+      );
+      return true;
+    } catch (error) {
+      this.logger.warn(
+        `Nie udało się pobrać zdjęcia oferty "${offerId}": ${(error as Error).message}`,
       );
       return false;
     }

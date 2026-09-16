@@ -77,23 +77,27 @@ describe('ScraperClientService', () => {
     ).rejects.not.toBeInstanceOf(ScrapedPageNotFoundError);
   });
 
-  it('posts to /scrape-term with the internal token header', async () => {
+  it('posts to /scrape-term with the internal token header and includeImage flag', async () => {
     const response = {
       data: {
         startDate: '2026-10-04',
         endDate: '2026-10-11',
         cabinPrices: [],
         pdfUrl: null,
+        imageUrl: null,
         siblingLinks: [],
       },
     } as AxiosResponse;
     httpService.post.mockReturnValue(of(response));
 
-    const result = await service.scrapeTerm('https://rejsy4you.pl/rejs/1');
+    const result = await service.scrapeTerm(
+      'https://rejsy4you.pl/rejs/1',
+      true,
+    );
 
     expect(httpService.post).toHaveBeenCalledWith(
       'http://scraper:5010/scrape-term',
-      { url: 'https://rejsy4you.pl/rejs/1' },
+      { url: 'https://rejsy4you.pl/rejs/1', includeImage: true },
       { headers: { 'X-Internal-Token': 'secret-token' } },
     );
     expect(result).toEqual({
@@ -101,6 +105,7 @@ describe('ScraperClientService', () => {
       endDate: '2026-10-11',
       cabinPrices: [],
       pdfUrl: null,
+      imageUrl: null,
       siblingLinks: [],
     });
   });
@@ -113,7 +118,7 @@ describe('ScraperClientService', () => {
     httpService.post.mockReturnValue(throwError(() => notFoundError));
 
     await expect(
-      service.scrapeTerm('https://rejsy4you.pl/rejs/1'),
+      service.scrapeTerm('https://rejsy4you.pl/rejs/1', false),
     ).rejects.toThrow(ScrapedPageNotFoundError);
   });
 
@@ -126,7 +131,7 @@ describe('ScraperClientService', () => {
     httpService.post.mockReturnValue(throwError(() => serverError));
 
     await expect(
-      service.scrapeTerm('https://rejsy4you.pl/rejs/1'),
+      service.scrapeTerm('https://rejsy4you.pl/rejs/1', false),
     ).rejects.not.toBeInstanceOf(ScrapedPageNotFoundError);
   });
 

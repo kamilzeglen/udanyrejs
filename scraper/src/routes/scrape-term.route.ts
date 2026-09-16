@@ -37,6 +37,8 @@ export function createScrapeTermRoute(
       return;
     }
 
+    const includeImage = req.body?.includeImage === true;
+
     try {
       const raw = await queue.enqueue(async (page) => {
         const response = await page.goto(url, {
@@ -49,7 +51,7 @@ export function createScrapeTermRoute(
         return extractRawOfferPage(page);
       }, `scrape-term (${url})`);
 
-      const result = mapRawToScrapedTerm(raw);
+      const result = mapRawToScrapedTerm(raw, includeImage);
       console.log(
         `[scraper] /scrape-term completed for ${url}: ${result.cabinPrices.length} cabin(s), ${result.siblingLinks.length} sibling link(s)`,
       );

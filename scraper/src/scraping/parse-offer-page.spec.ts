@@ -228,7 +228,7 @@ describe('mapRawToScrapedTerm', () => {
   };
 
   it('derives its own dates from the itinerary and its own cabin prices/PDF', () => {
-    const result = mapRawToScrapedTerm(raw);
+    const result = mapRawToScrapedTerm(raw, false);
 
     expect(result.startDate).toBe('2026-10-04');
     expect(result.endDate).toBe('2026-10-05');
@@ -239,7 +239,7 @@ describe('mapRawToScrapedTerm', () => {
   });
 
   it('lists same-route sibling links but excludes different-route ones', () => {
-    const result = mapRawToScrapedTerm(raw);
+    const result = mapRawToScrapedTerm(raw, false);
 
     expect(result.siblingLinks).toEqual([
       {
@@ -249,5 +249,33 @@ describe('mapRawToScrapedTerm', () => {
         endDate: '2026-10-25',
       },
     ]);
+  });
+
+  it('omits the image URL when the caller does not ask for it, even if the page has one', () => {
+    const rawWithImage = {
+      ...raw,
+      ogImageContent: 'https://rejsy4you.pl/img.jpg',
+    };
+
+    const result = mapRawToScrapedTerm(rawWithImage, false);
+
+    expect(result.imageUrl).toBeNull();
+  });
+
+  it('includes the image URL when the caller asks for it', () => {
+    const rawWithImage = {
+      ...raw,
+      ogImageContent: 'https://rejsy4you.pl/img.jpg',
+    };
+
+    const result = mapRawToScrapedTerm(rawWithImage, true);
+
+    expect(result.imageUrl).toBe('https://rejsy4you.pl/img.jpg');
+  });
+
+  it('returns a null image URL when asked for it but the page has none', () => {
+    const result = mapRawToScrapedTerm(raw, true);
+
+    expect(result.imageUrl).toBeNull();
   });
 });

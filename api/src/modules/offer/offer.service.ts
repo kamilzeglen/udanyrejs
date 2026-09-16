@@ -811,6 +811,7 @@ export class OfferService {
     return await this.offerTermRepository
       .createQueryBuilder('term')
       .leftJoinAndSelect('term.offer', 'offer')
+      .leftJoinAndSelect('offer.imageFile', 'offerImageFile')
       .leftJoinAndSelect('term.prices', 'prices')
       .leftJoinAndSelect('term.pdfFile', 'pdfFile')
       .where('term.id IN (:...termIds)', { termIds })

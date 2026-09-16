@@ -10,6 +10,7 @@ import { LogService } from '@modules/log/log.service';
 import { OfferService } from './offer.service';
 import { CabinTypeService } from '@modules/cabin-type/cabin-type.service';
 import { PdfFileService } from '@modules/pdf-file/pdf-file.service';
+import { ImageFileService } from '@modules/image-file/image-file.service';
 
 describe('OfferSyncService.syncOffer', () => {
   let service: OfferSyncService;
@@ -26,6 +27,10 @@ describe('OfferSyncService.syncOffer', () => {
   let pdfFileService: {
     downloadPdfFromUrl: jest.Mock;
     updatePdfFile: jest.Mock;
+  };
+  let imageFileService: {
+    downloadImageFromUrl: jest.Mock;
+    createImageFile: jest.Mock;
   };
   let logService: { createLog: jest.Mock };
 
@@ -47,6 +52,10 @@ describe('OfferSyncService.syncOffer', () => {
       downloadPdfFromUrl: jest.fn(),
       updatePdfFile: jest.fn(),
     };
+    imageFileService = {
+      downloadImageFromUrl: jest.fn(),
+      createImageFile: jest.fn(),
+    };
     logService = { createLog: jest.fn() };
 
     const moduleRef = await Test.createTestingModule({
@@ -56,6 +65,7 @@ describe('OfferSyncService.syncOffer', () => {
         { provide: OfferService, useValue: offerService },
         { provide: CabinTypeService, useValue: cabinTypeService },
         { provide: PdfFileService, useValue: pdfFileService },
+        { provide: ImageFileService, useValue: imageFileService },
         { provide: LogService, useValue: logService },
       ],
     }).compile();
@@ -92,6 +102,7 @@ describe('OfferSyncService.syncOffer', () => {
       endDate: FAR_FUTURE_END,
       cabinPrices: [],
       pdfUrl: null,
+      imageUrl: null,
       siblingLinks: [],
       ...overrides,
     };
@@ -119,9 +130,11 @@ describe('OfferSyncService.syncOffer', () => {
     expect(scraperClient.scrapeTerm).toHaveBeenCalledTimes(2);
     expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
       'https://rejsy4you.pl/rejs/1',
+      true,
     );
     expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
       'https://rejsy4you.pl/rejs/2',
+      true,
     );
   });
 
@@ -254,6 +267,83 @@ describe('OfferSyncService.syncOffer', () => {
     expect(result.pdfsUpdated).toBe(1);
   });
 
+  it('asks the scraper for the image and saves it when the offer has none yet', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(
+      scrapedTerm({ imageUrl: 'https://rejsy4you.pl/img.jpg' }),
+    );
+    imageFileService.downloadImageFromUrl.mockResolvedValue({
+      buffer: Buffer.from('image'),
+    });
+
+    await service.syncOffer(buildOffer({ imageFile: null }));
+
+    expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
+      'https://rejsy4you.pl/rejs/1',
+      true,
+    );
+    expect(imageFileService.downloadImageFromUrl).toHaveBeenCalledWith(
+      'https://rejsy4you.pl/img.jpg',
+    );
+    expect(imageFileService.createImageFile).toHaveBeenCalledWith(
+      'offer-1',
+      'offer',
+      { buffer: Buffer.from('image') },
+      null,
+      'https://rejsy4you.pl/img.jpg',
+    );
+  });
+
+  it('does not ask the scraper for the image when the offer already has one', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+    await service.syncOffer(
+      buildOffer({ imageFile: { id: 'image-1' } as never }),
+    );
+
+    expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
+      'https://rejsy4you.pl/rejs/1',
+      false,
+    );
+    expect(imageFileService.downloadImageFromUrl).not.toHaveBeenCalled();
+  });
+
+  it('stops asking for the image once an earlier term in the same sync already filled it in', async () => {
+    scraperClient.scrapeTerm.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === 'https://rejsy4you.pl/rejs/1'
+          ? scrapedTerm({ imageUrl: 'https://rejsy4you.pl/img.jpg' })
+          : scrapedTerm({ startDate: '2099-02-01', endDate: '2099-02-08' }),
+      ),
+    );
+    imageFileService.downloadImageFromUrl.mockResolvedValue({
+      buffer: Buffer.from('image'),
+    });
+
+    await service.syncOffer(
+      buildOffer({ imageFile: null, terms: [buildTerm(), term2()] }),
+    );
+
+    expect(imageFileService.createImageFile).toHaveBeenCalledTimes(1);
+    expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
+      'https://rejsy4you.pl/rejs/2',
+      false,
+    );
+  });
+
+  it('does not fail the whole sync when saving the offer image fails', async () => {
+    scraperClient.scrapeTerm.mockResolvedValue(
+      scrapedTerm({ imageUrl: 'https://rejsy4you.pl/img.jpg' }),
+    );
+    imageFileService.downloadImageFromUrl.mockRejectedValue(
+      new Error('download failed'),
+    );
+
+    const result = await service.syncOffer(buildOffer({ imageFile: null }));
+
+    expect(result.termsSkipped).toBe(0);
+    expect(imageFileService.createImageFile).not.toHaveBeenCalled();
+  });
+
   it('discovers a new term found as a sibling link on a known term page, scraping only that one page', async () => {
     scraperClient.scrapeTerm.mockImplementation((url: string) => {
       if (url === 'https://rejsy4you.pl/rejs/1') {
@@ -361,6 +451,7 @@ describe('OfferSyncService.syncOffer', () => {
 
     expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
       'https://rejsy4you.pl/rejs/1',
+      true,
     );
   });
 
@@ -648,6 +739,54 @@ describe('OfferSyncService.syncOffer', () => {
       await service.syncTerms(['term-1', 'term-2']);
 
       expect(cabinTypeService.findAllByCompany).toHaveBeenCalledTimes(1);
+    });
+
+    it('only saves the offer image once when two selected terms belong to the same offer', async () => {
+      const term1 = buildTermWithOffer({
+        id: 'term-1',
+        sourceUrl: 'https://rejsy4you.pl/rejs/1',
+      });
+      const term2 = buildTermWithOffer({
+        id: 'term-2',
+        sourceUrl: 'https://rejsy4you.pl/rejs/2',
+      });
+      offerService.findTermsByIds.mockResolvedValue([term1, term2]);
+      scraperClient.scrapeTerm.mockResolvedValue(
+        scrapedTerm({ imageUrl: 'https://rejsy4you.pl/img.jpg' }),
+      );
+      imageFileService.downloadImageFromUrl.mockResolvedValue({
+        buffer: Buffer.from('image'),
+      });
+
+      await service.syncTerms(['term-1', 'term-2']);
+
+      expect(imageFileService.createImageFile).toHaveBeenCalledTimes(1);
+      expect(scraperClient.scrapeTerm).toHaveBeenNthCalledWith(
+        2,
+        'https://rejsy4you.pl/rejs/2',
+        false,
+      );
+    });
+
+    it("does not ask for the image when the term's offer already has one", async () => {
+      const term1 = {
+        ...buildTerm({ id: 'term-1' }),
+        offerId: 'offer-1',
+        offer: {
+          id: 'offer-1',
+          companyId: 'company-1',
+          imageFile: { id: 'image-1' },
+        },
+      } as unknown as OfferTerm & { offer: { companyId: string } };
+      offerService.findTermsByIds.mockResolvedValue([term1]);
+      scraperClient.scrapeTerm.mockResolvedValue(scrapedTerm());
+
+      await service.syncTerms(['term-1']);
+
+      expect(scraperClient.scrapeTerm).toHaveBeenCalledWith(
+        'https://rejsy4you.pl/rejs/1',
+        false,
+      );
     });
   });
 });
