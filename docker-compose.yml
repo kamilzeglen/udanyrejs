@@ -21,6 +21,7 @@ services:
             - ./files/OFFERS_IMAGES:/api/files/OFFERS_IMAGES
             - ./files/SHIPS_IMAGES:/api/files/SHIPS_IMAGES
             - ./files/COMPANIES_IMAGES:/api/files/COMPANIES_IMAGES
+            - ./files/DESTINATIONS_IMAGES:/api/files/DESTINATIONS_IMAGES
             - ./files/OFFERS_PDFS:/api/files/OFFERS_PDFS
         networks:
             - nginx-proxy-manager_default
