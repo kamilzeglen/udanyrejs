@@ -24,7 +24,7 @@
   <section class="landing-intro">
     <p class="landing-eyebrow">{{ entityType === 'destination' ? 'Kierunek rejsu' : 'Armator' }}</p>
     <h1 *ngIf="entity.imageFile?.name">{{ entity.name }}</h1>
-    <p class="landing-description" *ngIf="entity.description">{{ entity.description }}</p>
+    <div class="landing-description" *ngIf="entity.description" [innerHTML]="entity.description"></div>
   </section>
 
   <section class="landing-offers" [attr.aria-busy]="isLoading">

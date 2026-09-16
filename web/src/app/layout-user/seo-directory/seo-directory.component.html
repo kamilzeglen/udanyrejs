@@ -16,7 +16,7 @@
       <div class="directory-card-placeholder" *ngIf="!entity.imageUrl" aria-hidden="true"></div>
       <div class="directory-card-content">
         <h2>{{ entity.name }}</h2>
-        <p *ngIf="entity.description">{{ entity.description }}</p>
+        <div *ngIf="entity.description" [innerHTML]="entity.description"></div>
         <span>Zobacz rejsy</span>
       </div>
     </a>
