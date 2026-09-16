@@ -44,6 +44,7 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Disposition'],
   });
   logger.log(`APP port: ${APP_PORT}`);
   logger.log(`Allowing origin: ${WEB_URL}`);
