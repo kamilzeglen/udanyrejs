@@ -126,6 +126,7 @@ describe('OfferService', () => {
           provide: CityService,
           useValue: {
             findCoordinatesByIds: jest.fn().mockResolvedValue([]),
+            findAuditDetailsByIds: jest.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -689,6 +690,7 @@ describe('OfferService', () => {
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         distinct: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
@@ -787,10 +789,14 @@ describe('OfferService', () => {
           },
         ]),
       });
+      const activeTermsQuery = buildTermQueryBuilder({
+        getMany: jest.fn().mockResolvedValue([]),
+      });
       offerTermRepository.createQueryBuilder
         .mockReturnValueOnce(idQuery)
         .mockReturnValueOnce(countQuery)
-        .mockReturnValueOnce(hydrationQuery);
+        .mockReturnValueOnce(hydrationQuery)
+        .mockReturnValueOnce(activeTermsQuery);
 
       const result = await service.searchOffers(baseSearchDto as any);
 
@@ -802,6 +808,62 @@ describe('OfferService', () => {
         expect.objectContaining({ termId: 'term-2', fromPrice: 300000 }),
       );
       expect(result.pagination.all).toBe(2);
+    });
+
+    it('audits active terms outside the current page', async () => {
+      const offerTermRepository = (service as any).offerTermRepository;
+      const idQuery = buildTermQueryBuilder({
+        getRawMany: jest
+          .fn()
+          .mockResolvedValue([{ termId: 'term-visible', fromPrice: '285000' }]),
+      });
+      const countQuery = buildTermQueryBuilder({
+        getRawOne: jest.fn().mockResolvedValue({ count: '2' }),
+      });
+      const hydrationQuery = buildTermQueryBuilder({
+        getMany: jest.fn().mockResolvedValue([
+          {
+            id: 'term-visible',
+            offerId: 'offer-1',
+            isActive: true,
+            pdfFile: { id: 'pdf-visible' },
+            startDate: new Date('2027-01-10'),
+            endDate: new Date('2027-01-17'),
+            offer: {
+              id: 'offer-1',
+              name: 'Rejs A',
+              imageFile: { id: 'offer-image' },
+              company: { imageFile: { id: 'company-image' } },
+              ship: {
+                imageFile: { id: 'ship-image' },
+                description: 'Opis statku',
+              },
+            },
+          },
+        ]),
+      });
+      const activeTermsQuery = buildTermQueryBuilder({
+        getMany: jest.fn().mockResolvedValue([
+          {
+            offerId: 'offer-1',
+            isActive: true,
+            pdfFile: null,
+            startDate: new Date('2027-02-10'),
+            endDate: new Date('2027-02-17'),
+          },
+        ]),
+      });
+      offerTermRepository.createQueryBuilder
+        .mockReturnValueOnce(idQuery)
+        .mockReturnValueOnce(countQuery)
+        .mockReturnValueOnce(hydrationQuery)
+        .mockReturnValueOnce(activeTermsQuery);
+
+      const result = await service.searchOffers(baseSearchDto as any);
+
+      expect(result.data[0].completenessIssues).toEqual([
+        { code: 'term-pdf', label: 'Brak PDF: 10.02.2027–17.02.2027' },
+      ]);
     });
 
     it('paginates with limit/offset, not skip/take (TypeORM silently drops skip/take once a query has many-relation joins)', async () => {

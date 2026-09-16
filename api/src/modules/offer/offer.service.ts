@@ -34,6 +34,10 @@ import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
 import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 import { CityService } from '@modules/city/city.service';
+import {
+  getOfferCompletenessIssues,
+  OfferCompletenessIssue,
+} from './offer-completeness';
 
 @Injectable()
 export class OfferService {
@@ -175,6 +179,7 @@ export class OfferService {
         startDate: Date;
         endDate: Date;
         fromPrice: number;
+        completenessIssues?: OfferCompletenessIssue[];
       }
     >;
     pagination: PaginationResp;
@@ -353,7 +358,62 @@ export class OfferService {
         ),
       );
 
+    const activeTerms = await this.findActiveTermsByOfferIds(
+      Array.from(new Set(data.map((result) => result.id))),
+    );
+
+    await this.addCompletenessIssues(data, activeTerms);
+
     return { data, pagination };
+  }
+
+  private async addCompletenessIssues(
+    results: Array<
+      Partial<Offer> & { completenessIssues?: OfferCompletenessIssue[] }
+    >,
+    terms: OfferTerm[],
+  ): Promise<void> {
+    const cityIds = Array.from(
+      new Set(
+        results.flatMap((result) =>
+          (result.itinerary ?? [])
+            .map((itineraryDay) => itineraryDay.cityId)
+            .filter((cityId): cityId is string => Boolean(cityId)),
+        ),
+      ),
+    );
+    const cities = await this.cityService.findAuditDetailsByIds(cityIds);
+    const cityById = new Map(cities.map((city) => [city.id, city]));
+    const termsByOfferId = new Map<string, OfferTerm[]>();
+
+    for (const term of terms) {
+      const existingTerms = termsByOfferId.get(term.offerId) ?? [];
+      existingTerms.push(term);
+      termsByOfferId.set(term.offerId, existingTerms);
+    }
+
+    for (const result of results) {
+      result.completenessIssues = getOfferCompletenessIssues(
+        result as Offer,
+        termsByOfferId.get(result.id) ?? [],
+        cityById,
+      );
+    }
+  }
+
+  private async findActiveTermsByOfferIds(
+    offerIds: string[],
+  ): Promise<OfferTerm[]> {
+    if (offerIds.length === 0) {
+      return [];
+    }
+
+    return await this.offerTermRepository
+      .createQueryBuilder('term')
+      .leftJoinAndSelect('term.pdfFile', 'pdfFile')
+      .where('term.offerId IN (:...offerIds)', { offerIds })
+      .andWhere('term.isActive = :isActive', { isActive: true })
+      .getMany();
   }
 
   private resolveTermOrderBy(orderBy: string): string {
@@ -381,6 +441,7 @@ export class OfferService {
     pdfFile: OfferTerm['pdfFile'];
     sourceUrl: string;
     termIsActive: boolean;
+    completenessIssues?: OfferCompletenessIssue[];
   } {
     const offerFields: Partial<Offer> & { terms?: OfferTerm[] } = {
       ...term.offer,

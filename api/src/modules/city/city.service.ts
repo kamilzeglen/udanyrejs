@@ -42,6 +42,18 @@ export class CityService {
       .getMany();
   }
 
+  async findAuditDetailsByIds(cityIds: string[]): Promise<City[]> {
+    if (cityIds.length === 0) {
+      return [];
+    }
+
+    return await this.cityRepository
+      .createQueryBuilder('city')
+      .leftJoinAndSelect('city.destinations', 'destinations')
+      .where('city.id IN (:...cityIds)', { cityIds })
+      .getMany();
+  }
+
   async findOneByID(id: string): Promise<City> {
     return await this.cityRepository
       .createQueryBuilder('city')
