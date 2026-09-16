@@ -142,10 +142,116 @@
   white-space: nowrap;
 }
 
+.landing-not-found {
+  display: flex;
+  justify-content: center;
+  padding-top: 72px;
+  padding-bottom: 96px;
+}
+
+.not-found-card {
+  position: relative;
+  width: min(560px, 100%);
+  padding: 56px 48px;
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 82% 12%, rgba(32, 150, 157, 0.45), transparent 40%),
+    linear-gradient(132deg, #002f3c 0%, #005568 54%, #003542 100%);
+  box-shadow: 0 24px 52px rgba(0, 61, 77, 0.2);
+  color: #fff;
+  text-align: center;
+}
+
+.not-found-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #a9dce1;
+}
+
+.not-found-icon mat-icon {
+  width: 32px;
+  height: 32px;
+  font-size: 32px;
+}
+
+.not-found-code {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: clamp(3.6rem, 12vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.not-found-card h1 {
+  margin: 4px 0 14px;
+  color: #fff;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.not-found-message {
+  margin: 0 auto;
+  max-width: 38ch;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.not-found-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin-top: 32px;
+}
+
+.not-found-cta {
+  padding: 13px 26px;
+  border-radius: 999px;
+  background: #fff;
+  color: #003d4d;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.not-found-cta:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.not-found-secondary {
+  color: #a9dce1;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 @media (max-width: 700px) {
   .landing-page,
   .landing-not-found {
     padding: 28px 16px 48px;
+  }
+
+  .landing-not-found {
+    padding-top: 40px;
+  }
+
+  .not-found-card {
+    padding: 40px 24px;
+    border-radius: 18px;
   }
 
   .landing-hero {

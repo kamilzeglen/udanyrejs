@@ -53,6 +53,14 @@
 </section>
 
 <section class="landing-not-found" *ngIf="isNotFound">
-  <h1>Nie znaleziono strony</h1>
-  <a routerLink="/offers">Zobacz wszystkie rejsy</a>
+  <div class="not-found-card">
+    <span class="not-found-icon"><mat-icon>explore_off</mat-icon></span>
+    <p class="not-found-code">404</p>
+    <h1>Ta trasa zniknęła z mapy</h1>
+    <p class="not-found-message">Strona, której szukasz, nie istnieje albo została przeniesiona w inne miejsce.</p>
+    <div class="not-found-actions">
+      <a class="not-found-cta" routerLink="/offers">Zobacz wszystkie rejsy</a>
+      <a class="not-found-secondary" routerLink="/">Strona główna</a>
+    </div>
+  </div>
 </section>
