@@ -33,12 +33,21 @@
         <p class="landing-eyebrow">Wybierz swoją podróż</p>
         <h2>Aktualne rejsy</h2>
       </div>
-      <span *ngIf="offers.length > 0 && isLoading === false">{{ offers.length }} ofert</span>
+      <span *ngIf="offers.length > 0 && isLoading === false">{{ totalOffers }} ofert</span>
     </div>
     <p *ngIf="isLoading">Ładowanie ofert…</p>
     <div class="offer-items" *ngIf="offers.length > 0 && isLoading === false">
       <app-offer-card *ngFor="let offer of offers; index as index" [offer]="offer" [index]="index"></app-offer-card>
     </div>
+    <mat-paginator
+      *ngIf="offers.length > 0 && isLoading === false"
+      [hidePageSize]="true"
+      [length]="totalOffers"
+      [pageSize]="pageSize"
+      [pageIndex]="page"
+      (page)="pageChanged($event)"
+      aria-label="Strony ofert rejsów"
+    ></mat-paginator>
     <p *ngIf="offers.length === 0 && isLoading === false">Obecnie nie ma dostępnych ofert dla tej strony.</p>
   </section>
 </section>
