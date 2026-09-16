@@ -63,11 +63,19 @@ export async function extractRawOfferPage(page: Page): Promise<RawOfferPage> {
         labelText: cells[0]?.textContent?.trim() ?? '',
         minPriceTexts: Array.from(cells)
           .slice(1)
-          .flatMap((cell) =>
-            Array.from(cell.querySelectorAll('.group-min-price')).map(
-              (price) => price.textContent?.trim() ?? '',
-            ),
-          ),
+          .flatMap((cell) => {
+            const priceSpans = Array.from(
+              cell.querySelectorAll('.group-min-price'),
+            ).map((price) => price.textContent?.trim() ?? '');
+
+            if (priceSpans.length > 0) {
+              return priceSpans;
+            }
+
+            // Niektóre oferty (np. pakiety PREMIUM/ALL IN z przelotem) renderują
+            // cenę jako zwykły tekst komórki, bez <span class="group-min-price">.
+            return [cell.textContent?.trim() ?? ''];
+          }),
       };
     });
 

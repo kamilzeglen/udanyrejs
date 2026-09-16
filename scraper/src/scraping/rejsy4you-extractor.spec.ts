@@ -104,6 +104,28 @@ describe('rejsy4you-extractor', () => {
     ]);
   });
 
+  it('extracts prices rendered as plain text without a group-min-price span', async () => {
+    await page.setContent(`
+      <table aria-describedby="legend">
+        <tr class="group">
+          <td>wewnętrzna</td>
+          <td>-</td>
+          <td>-</td>
+          <td><br>✈️ od €1945</td>
+        </tr>
+      </table>
+    `);
+
+    const raw = await extractRawOfferPage(page);
+
+    expect(raw.cabinGroupRows).toEqual([
+      {
+        labelText: 'wewnętrzna',
+        minPriceTexts: ['-', '-', '✈️ od €1945'],
+      },
+    ]);
+  });
+
   describe('extractRawListingPage', () => {
     it('extracts one offer href per listing card', async () => {
       const listingHtml = fs.readFileSync(
