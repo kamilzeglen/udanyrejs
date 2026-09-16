@@ -18,7 +18,7 @@ describe('OfferRouteMapComponent', () => {
   it('renders one marker per distinct location', () => {
     fixture.detectChanges();
 
-    const markerCount = fixture.nativeElement.querySelectorAll('.leaflet-marker-icon').length;
+    const markerCount = fixture.nativeElement.querySelectorAll('.route-map-marker').length;
     expect(markerCount).toBe(2);
   });
 
@@ -36,7 +36,7 @@ describe('OfferRouteMapComponent', () => {
 
     fixture.detectChanges();
 
-    const markerCount = fixture.nativeElement.querySelectorAll('.leaflet-marker-icon').length;
+    const markerCount = fixture.nativeElement.querySelectorAll('.route-map-marker').length;
     expect(markerCount).toBe(1);
   });
 
@@ -56,6 +56,41 @@ describe('OfferRouteMapComponent', () => {
     expect(filters[2]).not.toBe('none');
     expect(filters[1]).toBe('none');
     expect(filters[0]).not.toBe(filters[2]);
+  });
+
+  it('renders one direction arrow per route segment', () => {
+    fixture.componentRef.setInput('stops', [
+      { day: 1, city: 'Civitavecchia', latitude: 42.09325, longitude: 11.79674 },
+      { day: 2, city: 'Livorno', latitude: 43.54427, longitude: 10.32615 },
+      { day: 3, city: 'Salerno', latitude: 40.67545, longitude: 14.79328 },
+    ]);
+
+    fixture.detectChanges();
+
+    const arrowPolygons = [
+      ...fixture.nativeElement.querySelectorAll('.route-map-arrow__glyph polygon'),
+    ] as SVGPolygonElement[];
+
+    expect(arrowPolygons.length).toBe(2);
+    arrowPolygons.forEach((polygon) => {
+      // rotate(kąt 12 12) - obrót wokół środka 24x24 ikony, czyli faktycznego
+      // punktu na linii trasy, nie wokół przypadkowego punktu wynikającego z box modelu.
+      const rotationMatch = (polygon.getAttribute('transform') ?? '').match(/rotate\((-?[\d.]+) 12 12\)/);
+      expect(rotationMatch).not.toBeNull();
+      expect(Number.isNaN(Number(rotationMatch?.[1]))).toBe(false);
+    });
+  });
+
+  it('skips the arrow for a segment between merged same-location stops', () => {
+    fixture.componentRef.setInput('stops', [
+      { day: 10, city: 'Stambuł', latitude: 41.00824, longitude: 28.97836 },
+      { day: 11, city: 'Stambuł', latitude: 41.00824, longitude: 28.97836 },
+    ]);
+
+    fixture.detectChanges();
+
+    const arrowCount = fixture.nativeElement.querySelectorAll('.route-map-arrow').length;
+    expect(arrowCount).toBe(0);
   });
 
   it('shows a single-day stop popup as "day. dzień — city"', () => {

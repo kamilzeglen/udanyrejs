@@ -1,6 +1,12 @@
 .route-map {
-  height: 360px;
+  height: 480px;
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
+}
+
+:host ::ng-deep {
+  .route-map-arrow__glyph {
+    display: block;
+  }
 }
