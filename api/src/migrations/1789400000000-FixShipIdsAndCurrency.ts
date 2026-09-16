@@ -222,15 +222,44 @@ export class FixShipIdsAndCurrency1789400000000 implements MigrationInterface {
   public readonly name = 'FixShipIdsAndCurrency1789400000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "offer" DROP CONSTRAINT "FK_0cd06080ca85eae7defcf236e17"`,
+    );
+
     for (const correction of SHIP_ID_CORRECTIONS) {
+      const existing: { id: string }[] = await queryRunner.query(
+        `SELECT "id" FROM "ship" WHERE "name" = $1`,
+        [correction.name],
+      );
+
+      if (existing.length === 0) {
+        continue;
+      }
+
+      const oldId = existing[0].id;
+
+      if (oldId !== correction.id) {
+        await queryRunner.query(
+          `UPDATE "offer" SET "shipId" = $2::uuid WHERE "shipId" = $1::uuid`,
+          [oldId, correction.id],
+        );
+        await queryRunner.query(
+          `UPDATE "ship" SET "id" = $2::uuid WHERE "id" = $1::uuid`,
+          [oldId, correction.id],
+        );
+      }
+
       await queryRunner.query(
         `UPDATE "ship"
-         SET "id" = $2::uuid,
-             "currency" = CASE WHEN "currency" IS NULL AND $3::varchar IS NOT NULL THEN $3::varchar ELSE "currency" END
-         WHERE "name" = $1`,
-        [correction.name, correction.id, correction.currency ?? null],
+         SET "currency" = $2::varchar
+         WHERE "id" = $1::uuid AND "currency" IS NULL AND $2::varchar IS NOT NULL`,
+        [correction.id, correction.currency ?? null],
       );
     }
+
+    await queryRunner.query(
+      `ALTER TABLE "offer" ADD CONSTRAINT "FK_0cd06080ca85eae7defcf236e17" FOREIGN KEY ("shipId") REFERENCES "ship"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(): Promise<void> {}
