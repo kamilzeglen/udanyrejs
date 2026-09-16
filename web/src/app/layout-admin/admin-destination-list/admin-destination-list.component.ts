@@ -36,7 +36,20 @@ export class AdminDestinationListComponent implements OnInit, OnDestroy {
   public destinations$ = this.commonFacade.destinations$;
   public loading$ = this.commonFacade.loading$;
 
-  public allColumns: string[] = ['select', 'id', 'name', 'offerCount', 'isActive', 'actions', 'updatedAt', 'createdAt'];
+  public allColumns: string[] = [
+    'select',
+    'id',
+    'name',
+    'offerCount',
+    'seoTitle',
+    'seoDescription',
+    'description',
+    'image',
+    'isActive',
+    'actions',
+    'updatedAt',
+    'createdAt',
+  ];
 
   public columnsToDisplay: string[];
 

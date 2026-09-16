@@ -53,20 +53,31 @@
         <td mat-cell *matCellDef="let element">{{ element.key }}</td>
       </ng-container>
 
-      <!-- Image Column -->
+      <ng-container matColumnDef="seoTitle">
+        <th mat-header-cell *matHeaderCellDef>Title SEO</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon *ngIf="element.seoTitle" style="color: green">checked</mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="seoDescription">
+        <th mat-header-cell *matHeaderCellDef>Description SEO</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon *ngIf="element.seoDescription" style="color: green">checked</mat-icon>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Opis</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon *ngIf="element.description" style="color: green">checked</mat-icon>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="image">
         <th mat-header-cell *matHeaderCellDef>Zdjęcie</th>
         <td mat-cell *matCellDef="let element">
           <mat-icon *ngIf="element.imageFileId" style="color: green">checked</mat-icon>
-          <mat-icon *ngIf="!element.imageFileId" style="color: red">unchecked</mat-icon>
-        </td>
-      </ng-container>
-
-      <!-- Description Column -->
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Opis</th>
-        <td mat-cell *matCellDef="let element" [innerHTML]="element.description">
-          {{ element.description ? '' : '-' }}
         </td>
       </ng-container>
 
