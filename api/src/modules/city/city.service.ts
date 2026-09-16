@@ -28,6 +28,20 @@ export class CityService {
       .getMany();
   }
 
+  async findCoordinatesByIds(
+    cityIds: string[],
+  ): Promise<Pick<City, 'id' | 'latitude' | 'longitude'>[]> {
+    if (cityIds.length === 0) {
+      return [];
+    }
+
+    return await this.cityRepository
+      .createQueryBuilder('city')
+      .select(['city.id', 'city.latitude', 'city.longitude'])
+      .where('city.id IN (:...cityIds)', { cityIds })
+      .getMany();
+  }
+
   async findOneByID(id: string): Promise<City> {
     return await this.cityRepository
       .createQueryBuilder('city')

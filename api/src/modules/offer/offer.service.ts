@@ -33,6 +33,7 @@ import { LogService } from '@modules/log/log.service';
 import { AppException } from '@core/errors/app-exception';
 import { API_ERRORS } from '@core/errors/api-errors';
 import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
+import { CityService } from '@modules/city/city.service';
 
 @Injectable()
 export class OfferService {
@@ -56,10 +57,11 @@ export class OfferService {
     private readonly cabinTypeService: CabinTypeService,
     private readonly logService: LogService,
     private readonly itineraryCityResolverService: ItineraryCityResolverService,
+    private readonly cityService: CityService,
   ) {}
 
   async findOneById(id: string): Promise<Offer> {
-    return await this.offerRepository
+    const offer = await this.offerRepository
       .createQueryBuilder('offer')
       .leftJoinAndSelect('offer.company', 'company')
       .leftJoinAndSelect('offer.ship', 'ship')
@@ -76,6 +78,41 @@ export class OfferService {
       .leftJoinAndSelect('offer.updatedBy', 'updatedBy')
       .where('offer.id = :id', { id })
       .getOne();
+
+    return await this.attachItineraryCoordinates(offer);
+  }
+
+  private async attachItineraryCoordinates(offer: Offer): Promise<Offer> {
+    if (!offer?.itinerary?.length) {
+      return offer;
+    }
+
+    const cityIds = [
+      ...new Set(
+        offer.itinerary
+          .map((day) => day.cityId)
+          .filter((cityId): cityId is string => Boolean(cityId)),
+      ),
+    ];
+
+    if (cityIds.length === 0) {
+      return offer;
+    }
+
+    const cities = await this.cityService.findCoordinatesByIds(cityIds);
+    const cityById = new Map(cities.map((city) => [city.id, city]));
+
+    offer.itinerary = offer.itinerary.map((day) => {
+      const city = day.cityId ? cityById.get(day.cityId) : undefined;
+
+      if (!city) {
+        return day;
+      }
+
+      return { ...day, latitude: city.latitude, longitude: city.longitude };
+    });
+
+    return offer;
   }
 
   async findOffersForSync(): Promise<Offer[]> {

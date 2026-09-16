@@ -18,6 +18,7 @@ import { User } from '@modules/user/user.entity';
 import { ItineraryCityResolverService } from '@modules/offer/itinerary-city-resolver.service';
 import { OfferTermPrice } from './offer-term-price.entity';
 import { In } from 'typeorm';
+import { CityService } from '@modules/city/city.service';
 
 describe('OfferService', () => {
   let service: OfferService;
@@ -119,6 +120,12 @@ describe('OfferService', () => {
           provide: ItineraryCityResolverService,
           useValue: {
             resolve: jest.fn((itinerary) => Promise.resolve(itinerary)),
+          },
+        },
+        {
+          provide: CityService,
+          useValue: {
+            findCoordinatesByIds: jest.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -546,6 +553,63 @@ describe('OfferService', () => {
           'termPrices.cabinType',
         ]),
       );
+    });
+
+    it('attaches city coordinates to itinerary stops resolved by cityId', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({
+          id: 'offer-1',
+          itinerary: [
+            {
+              day: 1,
+              city: 'Gdynia',
+              cityId: 'city-1',
+              arrivalTime: '08:00',
+              departureTime: '18:00',
+            },
+            {
+              day: 2,
+              city: 'Nieznane',
+              cityId: null,
+              arrivalTime: '08:00',
+              departureTime: '18:00',
+            },
+          ],
+        }),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      const cityService = (service as any).cityService;
+      cityService.findCoordinatesByIds.mockResolvedValue([
+        { id: 'city-1', latitude: 54.5189, longitude: 18.5305 },
+      ]);
+
+      const offer = await service.findOneById('offer-1');
+
+      expect(cityService.findCoordinatesByIds).toHaveBeenCalledWith(['city-1']);
+      expect(offer.itinerary[0]).toMatchObject({
+        latitude: 54.5189,
+        longitude: 18.5305,
+      });
+      expect(offer.itinerary[1].latitude).toBeUndefined();
+    });
+
+    it('returns the offer unchanged when it has no itinerary', async () => {
+      const offerRepository = (service as any).offerRepository;
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue({ id: 'offer-1' }),
+      };
+      offerRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      const cityService = (service as any).cityService;
+
+      const offer = await service.findOneById('offer-1');
+
+      expect(offer).toEqual({ id: 'offer-1' });
+      expect(cityService.findCoordinatesByIds).not.toHaveBeenCalled();
     });
   });
 

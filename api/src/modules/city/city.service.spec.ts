@@ -145,3 +145,59 @@ describe('CityService.findOrCreateByName', () => {
     expect(result).toEqual({ id: 'city-race-winner', name: 'Wyspy' });
   });
 });
+
+describe('CityService.findCoordinatesByIds', () => {
+  let service: CityService;
+  let cityRepository: { createQueryBuilder: jest.Mock };
+
+  beforeEach(async () => {
+    cityRepository = { createQueryBuilder: jest.fn() };
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        CityService,
+        { provide: getRepositoryToken(City), useValue: cityRepository },
+        { provide: UserService, useValue: {} },
+        { provide: DestinationService, useValue: {} },
+        { provide: LogService, useValue: {} },
+      ],
+    }).compile();
+
+    service = moduleRef.get(CityService);
+  });
+
+  it('selects only id, latitude and longitude for the requested city ids', async () => {
+    const queryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      getMany: jest
+        .fn()
+        .mockResolvedValue([
+          { id: 'city-1', latitude: 54.5189, longitude: 18.5305 },
+        ]),
+    };
+    cityRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+    const result = await service.findCoordinatesByIds(['city-1']);
+
+    expect(queryBuilder.select).toHaveBeenCalledWith([
+      'city.id',
+      'city.latitude',
+      'city.longitude',
+    ]);
+    expect(queryBuilder.where).toHaveBeenCalledWith(
+      'city.id IN (:...cityIds)',
+      { cityIds: ['city-1'] },
+    );
+    expect(result).toEqual([
+      { id: 'city-1', latitude: 54.5189, longitude: 18.5305 },
+    ]);
+  });
+
+  it('returns an empty array without querying when given no ids', async () => {
+    const result = await service.findCoordinatesByIds([]);
+
+    expect(result).toEqual([]);
+    expect(cityRepository.createQueryBuilder).not.toHaveBeenCalled();
+  });
+});
