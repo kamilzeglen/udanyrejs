@@ -1,0 +1,120 @@
+import { MigrationInterface, QueryRunner } from 'typeorm';
+
+export const CLASSIC_CITY_COORDINATES: Array<[string, number, number]> = [
+  ['A Coruna', 43.37135, -8.396],
+  ['Aarhus', 56.15674, 10.21076],
+  ['Ajaccio', 41.91886, 8.73812],
+  ['Alicante', 38.34517, -0.48149],
+  ['Bar Harbor', 44.38758, -68.2039],
+  ['Barcelona', 41.38879, 2.15899],
+  ['Bergen', 60.39299, 5.32415],
+  ['Bilbao', 43.26271, -2.92528],
+  ['Bodo', 67.2804, 14.4049],
+  ['Bora-Bora', -16.49956, -151.73714],
+  ['Boston', 42.35843, -71.05977],
+  ['Bronnoysund', 65.4749, 12.2129],
+  ['Cabo San Lucas', 22.89088, -109.91238],
+  ['Cannes', 43.55135, 7.01275],
+  ['Cape Liberty', 40.66871, -74.11431],
+  ['Charlotte Amalie', 18.3419, -64.9307],
+  ['Charlottetown', 46.23459, -63.1256],
+  ['Civitavecchia', 42.09325, 11.79674],
+  ['Coco Cay', 25.829, -77.923],
+  ['Cozumel', 20.50038, -86.94272],
+  ['Ensenada', 31.87149, -116.60071],
+  ['Filadelfia', 39.95258, -75.16522],
+  ['Fort Lauderdale', 26.12231, -80.14338],
+  ['Gangjeong', 33.2263, 126.5227],
+  ['Genua', 44.40565, 8.94626],
+  ['Goteborg', 57.70716, 11.96679],
+  ['Great Stirrup Cay', 25.82401, -77.90862],
+  ['Halifax', 44.64269, -63.57688],
+  ['Hamburg', 53.55073, 9.99302],
+  ['Hawr', 49.49346, 0.10785],
+  ['Heraklion', 35.32787, 25.14341],
+  ['Honolulu', 21.30694, -157.85834],
+  ['Ibiza', 38.90883, 1.43296],
+  ['Juneau', 58.30194, -134.41972],
+  ['Kadyks', 36.52672, -6.2891],
+  ['Kahului', 20.88933, -156.47293],
+  ['Katania', 37.49223, 15.07041],
+  ['Kilonia', 54.32133, 10.13489],
+  ['Kona', 19.63999, -155.9969],
+  ['Kusadasi', 37.8601, 27.2578],
+  ['La Goulette', 36.81919, 10.30646],
+  ['La Spezia', 44.103, 9.82375],
+  ['Leknes', 68.14746, 13.61151],
+  ['Livorno', 43.54427, 10.32615],
+  ['Lizbona', 38.72509, -9.1498],
+  ['Los Angeles', 34.05223, -118.24368],
+  ['Mahon', 39.88853, 4.26583],
+  ['Malaga', 36.72016, -4.42034],
+  ['Marsylia', 43.29695, 5.38107],
+  ['Mazatlan', 23.22163, -106.41885],
+  ['Mesyna', 38.19394, 15.55256],
+  ['Miami', 25.77427, -80.19366],
+  ['Molde', 62.73752, 7.15912],
+  ['Moorea', -17.53277, -149.82796],
+  ['Mykonos', 37.44529, 25.32872],
+  ['Nassau', 25.05823, -77.34306],
+  ['Nawiliwili', 21.95696, -159.35518],
+  ['Neapol', 40.85216, 14.26811],
+  ['Norfolk', 36.84681, -76.28522],
+  ['Nowy Jork', 40.71278, -74.00594],
+  ['Olbia', 40.92337, 9.49802],
+  ['Palermo', 38.1166, 13.3636],
+  ['Palma de Mallorca', 39.5696, 2.65016],
+  ['Papeete', -17.5347, -149.56844],
+  ['Pireus', 37.94203, 23.64619],
+  ['Port Canaveral', 28.4058, -80.6057],
+  ['Portland', 43.65737, -70.2589],
+  ['Pusan', 35.10168, 129.03004],
+  ['Quebec', 46.81388, -71.20798],
+  ['Raiatea', -16.79791, -151.40198],
+  ['Royal Naval Dockyard', 32.327, -64.835],
+  ['Rzeka Saguenay', 48.41675, -71.06573],
+  ['Saint John', 45.27076, -66.05616],
+  ['Salerno', 40.67545, 14.79328],
+  ['San Juan', 18.46633, -66.10572],
+  ['Seattle', 47.60621, -122.33207],
+  ['Sitka', 57.05315, -135.33089],
+  ['Skagway', 59.45833, -135.31389],
+  ['Sortland', 68.69569, 15.40498],
+  ['Southampton', 50.90395, -1.40428],
+  ['St. Croix', 17.7466, -64.7032],
+  ['Stambuł', 41.00824, 28.97836],
+  ['Sydney', 46.1351, -60.1831],
+  ['Szanghaj', 31.22222, 121.45806],
+  ['Tampa', 27.94752, -82.45843],
+  ['Tarragona', 41.11905, 1.24544],
+  ['Tromso', 69.6489, 18.9551],
+  ['Trondheim', 63.43049, 10.39506],
+  ['Valletta', 35.89968, 14.5148],
+  ['Vancouver', 49.24966, -123.11934],
+  ['Victoria', 48.42842, -123.36564],
+  ['Vigo', 42.23282, -8.72264],
+  ['Walencja', 39.47391, -0.37966],
+];
+
+export class BackfillClassicCityCoordinates1789340000000
+  implements MigrationInterface
+{
+  public readonly name = 'BackfillClassicCityCoordinates1789340000000';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    for (const [name, latitude, longitude] of CLASSIC_CITY_COORDINATES) {
+      await queryRunner.query(
+        `UPDATE "city" SET "latitude" = $1, "longitude" = $2 WHERE "name" = $3 AND ("latitude" IS NULL OR "longitude" IS NULL)`,
+        [latitude, longitude, name],
+      );
+    }
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    const names = CLASSIC_CITY_COORDINATES.map(([name]) => name);
+    await queryRunner.query(
+      `UPDATE "city" SET "latitude" = NULL, "longitude" = NULL WHERE "name" = ANY($1)`,
+      [names],
+    );
+  }
+}
