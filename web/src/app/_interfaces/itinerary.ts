@@ -5,4 +5,6 @@ export interface Itinerary {
   cityId?: string;
   arrivalTime: string;
   departureTime: string;
+  latitude?: number;
+  longitude?: number;
 }

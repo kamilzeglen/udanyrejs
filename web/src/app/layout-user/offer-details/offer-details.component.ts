@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { OfferFacade } from '@state/offer';
 import { AllDeviceInfo, Offer } from '@interfaces';
 import { computeItineraryDate } from '@core/utils/compute-itinerary-date.util';
+import { getMappableItineraryStops } from '@core/utils/get-mappable-itinerary-stops.util';
 import { environment } from '@environment';
 import { Location } from '@angular/common';
 import { DeviceInfoService } from '@shared/device-info/device-info.service';
@@ -34,6 +35,14 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     city: string;
     arrivalTime: string;
     departureTime: string;
+    latitude: number;
+    longitude: number;
+  }[] = [];
+  public mappableItineraryStops: {
+    day: number;
+    city: string;
+    latitude: number;
+    longitude: number;
   }[] = [];
 
   private loadedOfferId: string;
@@ -214,6 +223,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
   private recomputeItineraryViewModel(): void {
     if (!this.offer) {
       this.itineraryViewModel = [];
+      this.mappableItineraryStops = [];
       return;
     }
 
@@ -223,6 +233,7 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
     if (!Array.isArray(itineraryData)) {
       console.error('Itinerary is not a valid array:', this.offer.itinerary);
       this.itineraryViewModel = [];
+      this.mappableItineraryStops = [];
       return;
     }
 
@@ -232,6 +243,9 @@ export class OfferDetailsComponent implements OnInit, OnDestroy {
       city: day.city,
       arrivalTime: day.arrivalTime,
       departureTime: day.departureTime,
+      latitude: day.latitude,
+      longitude: day.longitude,
     }));
+    this.mappableItineraryStops = getMappableItineraryStops(this.itineraryViewModel);
   }
 }

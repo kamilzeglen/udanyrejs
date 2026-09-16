@@ -39,7 +39,12 @@ describe('OfferDetailsComponent loading failures', () => {
         { provide: Router, useValue: { url: '/offers/details/offer-1' } },
         {
           provide: SeoService,
-          useValue: { setPageMeta: (): void => undefined, clearStructuredData: (): void => undefined },
+          useValue: {
+            setPageMeta: (): void => undefined,
+            clearStructuredData: (): void => undefined,
+            createCanonicalUrl: (): string => '',
+            setStructuredData: (): void => undefined,
+          },
         },
         { provide: ShareStatsFacade, useValue: {} },
       ],
@@ -61,5 +66,29 @@ describe('OfferDetailsComponent loading failures', () => {
 
     expect(fixture.componentInstance.loading).toBeFalse();
     expect(fixture.componentInstance['loadingFailed']).toBeTrue();
+  });
+
+  it('keeps only itinerary stops with known coordinates for the route map', () => {
+    success.next({
+      offer: {
+        id: 'offer-1',
+        name: 'Rejs testowy',
+        terms: [],
+        itinerary: [
+          {
+            day: 1,
+            city: 'Gdynia',
+            latitude: 54.5189,
+            longitude: 18.5305,
+            arrivalTime: '08:00',
+            departureTime: '18:00',
+          },
+          { day: 2, city: 'Nieznane', arrivalTime: '08:00', departureTime: '18:00' },
+        ],
+      },
+    });
+
+    expect(fixture.componentInstance.mappableItineraryStops.length).toBe(1);
+    expect(fixture.componentInstance.mappableItineraryStops[0].city).toBe('Gdynia');
   });
 });

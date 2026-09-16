@@ -74,6 +74,7 @@
           </tbody>
         </table>
       </div>
+      <app-offer-route-map *ngIf="mappableItineraryStops.length" [stops]="mappableItineraryStops"></app-offer-route-map>
     </section>
     <section class="in-price-section" *ngIf="offer.company.priceIncludes && offer.company.priceExcludes">
       <div class="price-include">
