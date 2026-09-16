@@ -1,0 +1,197 @@
+.landing-page,
+.landing-not-found {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+
+.landing-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 300px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(32, 150, 157, 0.45), transparent 32%),
+    linear-gradient(132deg, #002f3c 0%, #005568 54%, #003542 100%);
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(0, 61, 77, 0.16);
+}
+
+.landing-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+.landing-hero.with-image::after {
+  display: none;
+}
+
+.landing-hero-content {
+  position: absolute;
+  z-index: 1;
+  width: min(690px, calc(100% - 64px));
+  padding: 48px;
+}
+
+.landing-eyebrow {
+  margin: 0 0 10px;
+  color: #0a7181;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.landing-hero .landing-eyebrow {
+  color: #a9dce1;
+}
+
+.landing-hero-content h1 {
+  max-width: 12ch;
+  margin: 0 0 20px;
+  color: #fff;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  line-height: 0.96;
+}
+
+.landing-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1rem, 1.6vw, 1.13rem);
+  line-height: 1.7;
+}
+
+.landing-intro {
+  margin: 28px 0 0;
+  padding: 4px 0 0;
+}
+
+.landing-intro h1 {
+  margin: 0 0 16px;
+  color: #003d4d;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.landing-intro .landing-description {
+  color: #395862;
+}
+
+.landing-hero.with-image {
+  min-height: 390px;
+  background: #dbe9ec;
+  box-shadow: 0 18px 42px rgba(0, 61, 77, 0.12);
+  clip-path: inset(0 round 20px);
+}
+
+.landing-hero.with-image img {
+  opacity: 1;
+}
+
+.company-landing-hero.with-image img {
+  padding: 36px 48px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.landing-offers {
+  margin-top: 48px;
+  padding: 36px;
+  border: 1px solid #dce8ea;
+  border-radius: 20px;
+  background: #f7fbfb;
+}
+
+.offer-items {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.landing-offers-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+
+.landing-offers-heading h2 {
+  margin: 0;
+  color: #003d4d;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.landing-offers-heading span {
+  padding-bottom: 5px;
+  color: #53717a;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .landing-page,
+  .landing-not-found {
+    padding: 28px 16px 48px;
+  }
+
+  .landing-hero {
+    min-height: 340px;
+    border-radius: 16px;
+  }
+
+  .landing-hero.with-image::after {
+    display: none;
+  }
+
+  .landing-hero-content {
+    width: 100%;
+    padding: 28px;
+  }
+
+  .landing-hero-content h1 {
+    margin-bottom: 16px;
+    font-size: clamp(2.6rem, 14vw, 4rem);
+  }
+
+  .landing-hero.with-image {
+    min-height: 260px;
+  }
+
+  .company-landing-hero.with-image img {
+    padding: 24px;
+  }
+
+  .landing-intro {
+    margin-top: 22px;
+  }
+
+  .landing-offers {
+    margin-top: 28px;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .landing-offers-heading {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .landing-offers-heading span {
+    display: block;
+    margin-top: 10px;
+  }
+}

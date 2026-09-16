@@ -1,0 +1,49 @@
+<section class="landing-page" *ngIf="entity && isNotFound === false">
+  <header
+    class="landing-hero"
+    [class.company-landing-hero]="entityType === 'company'"
+    [class.with-image]="entity.imageFile?.name"
+  >
+    <img
+      *ngIf="entity.imageFile?.name"
+      [src]="
+        apiUrl +
+        '/' +
+        (entityType === 'destination' ? 'destinations' : 'companies') +
+        '/images/' +
+        entity.imageFile.name
+      "
+      [alt]="entity.name"
+    />
+    <div class="landing-hero-content" *ngIf="!entity.imageFile?.name">
+      <p class="landing-eyebrow">{{ entityType === 'destination' ? 'Kierunek rejsu' : 'Armator' }}</p>
+      <h1>{{ entity.name }}</h1>
+    </div>
+  </header>
+
+  <section class="landing-intro">
+    <p class="landing-eyebrow">{{ entityType === 'destination' ? 'Kierunek rejsu' : 'Armator' }}</p>
+    <h1 *ngIf="entity.imageFile?.name">{{ entity.name }}</h1>
+    <p class="landing-description" *ngIf="entity.description">{{ entity.description }}</p>
+  </section>
+
+  <section class="landing-offers" [attr.aria-busy]="isLoading">
+    <div class="landing-offers-heading">
+      <div>
+        <p class="landing-eyebrow">Wybierz swoją podróż</p>
+        <h2>Aktualne rejsy</h2>
+      </div>
+      <span *ngIf="offers.length > 0 && isLoading === false">{{ offers.length }} ofert</span>
+    </div>
+    <p *ngIf="isLoading">Ładowanie ofert…</p>
+    <div class="offer-items" *ngIf="offers.length > 0 && isLoading === false">
+      <app-offer-card *ngFor="let offer of offers; index as index" [offer]="offer" [index]="index"></app-offer-card>
+    </div>
+    <p *ngIf="offers.length === 0 && isLoading === false">Obecnie nie ma dostępnych ofert dla tej strony.</p>
+  </section>
+</section>
+
+<section class="landing-not-found" *ngIf="isNotFound">
+  <h1>Nie znaleziono strony</h1>
+  <a routerLink="/offers">Zobacz wszystkie rejsy</a>
+</section>

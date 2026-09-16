@@ -92,6 +92,20 @@ describe('CommonHttpService dictionary cache', () => {
     http.expectNone(`${environment.API_URL}/destination/`);
   });
 
+  it('loads a public destination by its English slug', () => {
+    service.getPublicDestination({ slug: 'caribbean' }).subscribe();
+
+    http
+      .expectOne(`${environment.API_URL}/destination/public/caribbean`)
+      .flush({ id: 'destination-1', slug: 'caribbean' });
+  });
+
+  it('loads a public cruise line by its English slug', () => {
+    service.getPublicCompany({ slug: 'msc-cruises' }).subscribe();
+
+    http.expectOne(`${environment.API_URL}/company/public/msc-cruises`).flush({ id: 'company-1', slug: 'msc-cruises' });
+  });
+
   it('always fetches administrative logs', () => {
     service.getLogs().subscribe();
     http.expectOne(`${environment.API_URL}/log/`).flush([]);

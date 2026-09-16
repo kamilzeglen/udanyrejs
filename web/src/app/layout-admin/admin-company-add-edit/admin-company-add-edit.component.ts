@@ -44,6 +44,10 @@ export class AdminCompanyAddEditComponent implements OnInit, OnDestroy {
     this.companyForm = this.fb.group({
       name: ['', Validators.required],
       key: ['', Validators.required],
+      slug: ['', Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)],
+      seoTitle: ['', Validators.maxLength(255)],
+      seoDescription: ['', Validators.maxLength(500)],
+      showInMenu: [false],
       description: ['', Validators.required],
       priceIncludes: this.fb.array([], Validators.required),
       priceExcludes: this.fb.array([], Validators.required),

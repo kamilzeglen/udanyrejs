@@ -32,6 +32,7 @@ export class CompanyService {
   async findAll(): Promise<Company[]> {
     return await this.companyRepository
       .createQueryBuilder('company')
+      .leftJoinAndSelect('company.imageFile', 'imageFile')
       .where('company.isActive = :isActive', { isActive: true })
       .getMany();
   }
@@ -48,6 +49,21 @@ export class CompanyService {
       .createQueryBuilder('company')
       .where('company.id = :id', { id })
       .getOne();
+  }
+
+  async findPublicBySlug(slug: string): Promise<Company> {
+    const company = await this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.imageFile', 'imageFile')
+      .where('company.slug = :slug', { slug })
+      .andWhere('company.isActive = :isActive', { isActive: true })
+      .getOne();
+
+    if (!company) {
+      throw new AppException(API_ERRORS.COMPANY_NOT_FOUND, { slug });
+    }
+
+    return company;
   }
 
   async createCompany(

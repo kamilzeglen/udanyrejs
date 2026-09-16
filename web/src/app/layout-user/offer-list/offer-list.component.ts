@@ -104,6 +104,7 @@ export class OfferListComponent implements OnInit, OnDestroy {
           description:
             'Znajdź idealny rejs dla siebie! Przeglądaj naszą ofertę rejsów wycieczkowych po najpiękniejszych zakątkach świata.',
           path: page > 0 ? `${path}?page=${page + 1}` : path,
+          noIndex: Boolean(companyId || destinationId),
         });
 
         this.commonFacade.getCategories();

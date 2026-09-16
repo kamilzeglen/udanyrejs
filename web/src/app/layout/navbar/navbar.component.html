@@ -47,11 +47,11 @@
           <span class="dropdown-title">Popularne kierunki</span>
           <a
             *ngFor="let destination of destinationMenuItems$ | async"
-            routerLink="/offers"
-            [queryParams]="{ destination: destination.id }"
+            [routerLink]="['/destinations', destination.slug]"
             (click)="closeMenu()"
             >{{ destination.name }}</a
           >
+          <a class="show-all-menu-items" routerLink="/destinations" (click)="closeMenu()">Wszystkie kierunki</a>
         </div>
       </div>
       <div class="nav-menu" [class.open]="activeMenu === 'companies'" (mouseleave)="closeMenu()">
@@ -81,11 +81,11 @@
           <span class="dropdown-title">Popularni armatorzy</span>
           <a
             *ngFor="let company of companyMenuItems$ | async"
-            routerLink="/offers"
-            [queryParams]="{ company: company.id }"
+            [routerLink]="['/cruise-lines', company.slug]"
             (click)="closeMenu()"
             >{{ company.name }}</a
           >
+          <a class="show-all-menu-items" routerLink="/cruise-lines" (click)="closeMenu()">Wszyscy armatorzy</a>
         </div>
       </div>
     </div>

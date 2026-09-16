@@ -113,6 +113,7 @@ MAIL_SECURE=true
 OFFERS_IMAGES_PATH=./files/OFFERS_IMAGES
 SHIPS_IMAGES_PATH=./files/SHIPS_IMAGES
 COMPANIES_IMAGES_PATH=./files/COMPANIES_IMAGES
+DESTINATIONS_IMAGES_PATH=./files/DESTINATIONS_IMAGES
 OFFERS_PDFS_PATH=./files/OFFERS_PDFS
 ```
 
@@ -142,6 +143,7 @@ OFFERS_PDFS_PATH=./files/OFFERS_PDFS
 | `OFFERS_IMAGES_PATH` | Directory where offer images are stored. |
 | `SHIPS_IMAGES_PATH` | Directory where ship images are stored. |
 | `COMPANIES_IMAGES_PATH` | Directory where company images are stored. |
+| `DESTINATIONS_IMAGES_PATH` | Directory where destination images are stored. |
 | `OFFERS_PDFS_PATH` | Directory where offer PDF files are stored. |
 
 Never commit real `.env` files or production credentials to the repository.
@@ -262,6 +264,7 @@ For Docker deployments, set file paths inside `.env` to the container paths used
 OFFERS_IMAGES_PATH=/api/files/OFFERS_IMAGES
 SHIPS_IMAGES_PATH=/api/files/SHIPS_IMAGES
 COMPANIES_IMAGES_PATH=/api/files/COMPANIES_IMAGES
+DESTINATIONS_IMAGES_PATH=/api/files/DESTINATIONS_IMAGES
 OFFERS_PDFS_PATH=/api/files/OFFERS_PDFS
 ```
 

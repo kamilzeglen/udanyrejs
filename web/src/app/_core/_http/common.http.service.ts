@@ -38,6 +38,11 @@ export class CommonHttpService {
     return this.http.get<Company>(url);
   }
 
+  public getPublicCompany(payload: { slug: string }): Observable<Company> {
+    const url = `${this.API_URL}/company/public/` + encodeURIComponent(payload.slug);
+    return this.http.get<Company>(url);
+  }
+
   public createCompany(payload: { formData: Partial<Company> }): Observable<Company> {
     const url = `${this.API_URL}/company/`;
     return this.invalidateDictionaries(this.http.post<Company>(url, payload.formData));
@@ -176,6 +181,11 @@ export class CommonHttpService {
 
   public getDestination(payload: { id: string }): Observable<Destination> {
     const url = `${this.API_URL}/destination/details/` + payload.id;
+    return this.http.get<Destination>(url);
+  }
+
+  public getPublicDestination(payload: { slug: string }): Observable<Destination> {
+    const url = `${this.API_URL}/destination/public/` + encodeURIComponent(payload.slug);
     return this.http.get<Destination>(url);
   }
 

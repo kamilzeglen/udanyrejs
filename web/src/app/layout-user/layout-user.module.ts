@@ -12,6 +12,8 @@ import { RulesComponent } from './rules/rules.component';
 import { ShareStatsComponent } from './share-stats/share-stats.component';
 import { OfferImageComponent } from './offer-image/offer-image.component';
 import { OfferSkeletonComponent } from './offer-skeleton/offer-skeleton.component';
+import { SeoLandingPageComponent } from './seo-landing-page/seo-landing-page.component';
+import { SeoDirectoryComponent } from './seo-directory/seo-directory.component';
 
 const components = [
   OfferListComponent,
@@ -23,6 +25,8 @@ const components = [
   OfferFiltersComponent,
   RulesComponent,
   ShareStatsComponent,
+  SeoLandingPageComponent,
+  SeoDirectoryComponent,
 ];
 
 @NgModule({

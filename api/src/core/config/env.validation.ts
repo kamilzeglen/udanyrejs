@@ -32,6 +32,7 @@ export const envValidationSchema = Joi.object({
   OFFERS_IMAGES_PATH: Joi.string().required(),
   SHIPS_IMAGES_PATH: Joi.string().required(),
   COMPANIES_IMAGES_PATH: Joi.string().required(),
+  DESTINATIONS_IMAGES_PATH: Joi.string().required(),
   OFFERS_PDFS_PATH: Joi.string().required(),
 
   SCRAPER_URL: Joi.string().uri().required(),

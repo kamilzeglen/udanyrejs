@@ -10,6 +10,7 @@ import { User } from '@modules/user/user.entity';
 import { Offer } from '@modules/offer/offer.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Company } from '@modules/company/company.entity';
+import { Destination } from '@modules/destination/destination.entity';
 import axios from 'axios';
 import {
   detectImageExtension,
@@ -31,6 +32,8 @@ export class ImageFileService {
     private companyRepository: Repository<Company>,
     @InjectRepository(Ship)
     private shipRepository: Repository<Ship>,
+    @InjectRepository(Destination)
+    private destinationRepository: Repository<Destination>,
   ) {}
 
   async createImageFile(
@@ -47,6 +50,10 @@ export class ImageFileService {
 
     if (imageFileType === ImageFileType.COMPANY) {
       uploadDir = process.env.COMPANIES_IMAGES_PATH;
+    }
+
+    if (imageFileType === ImageFileType.DESTINATION) {
+      uploadDir = process.env.DESTINATIONS_IMAGES_PATH;
     }
 
     if (imageFileType === ImageFileType.SHIP) {
@@ -106,6 +113,21 @@ export class ImageFileService {
       });
     }
 
+    if (imageFileType === ImageFileType.DESTINATION) {
+      const target = await this.destinationRepository
+        .createQueryBuilder('destination')
+        .where('destination.id = :targetId', { targetId })
+        .getOne();
+      imageFileEntity = this.imageFileRepository.create({
+        name: fileName,
+        originalName: file.originalname,
+        path: filePath,
+        destination: target,
+        url: url || null,
+        createdBy: requestUser,
+      });
+    }
+
     if (imageFileType === ImageFileType.SHIP) {
       const target = await this.shipRepository
         .createQueryBuilder('ship')
@@ -149,6 +171,15 @@ export class ImageFileService {
         .where('company.id = :targetId', { targetId })
         .getOne();
       uploadDir = process.env.COMPANIES_IMAGES_PATH;
+    }
+
+    if (imageFileType === ImageFileType.DESTINATION) {
+      target = await this.destinationRepository
+        .createQueryBuilder('destination')
+        .leftJoinAndSelect('destination.imageFile', 'imageFile')
+        .where('destination.id = :targetId', { targetId })
+        .getOne();
+      uploadDir = process.env.DESTINATIONS_IMAGES_PATH;
     }
 
     if (imageFileType === ImageFileType.SHIP) {
@@ -213,6 +244,17 @@ export class ImageFileService {
           originalName: file.originalname,
           path: filePath,
           company: target,
+          url: url || null,
+          createdBy: requestUser,
+        });
+      }
+
+      if (imageFileType === ImageFileType.DESTINATION) {
+        newImageFile = this.imageFileRepository.create({
+          name: fileName,
+          originalName: file.originalname,
+          path: filePath,
+          destination: target,
           url: url || null,
           createdBy: requestUser,
         });

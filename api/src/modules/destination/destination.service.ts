@@ -22,6 +22,7 @@ export class DestinationService {
   async findAll(): Promise<Destination[]> {
     return await this.destinationRepository
       .createQueryBuilder('destination')
+      .leftJoinAndSelect('destination.imageFile', 'imageFile')
       .loadRelationCountAndMap('destination.offerCount', 'destination.offers')
       .getMany();
   }
@@ -31,6 +32,21 @@ export class DestinationService {
       .createQueryBuilder('destination')
       .where('destination.id = :id', { id })
       .getOne();
+  }
+
+  async findPublicBySlug(slug: string): Promise<Destination> {
+    const destination = await this.destinationRepository
+      .createQueryBuilder('destination')
+      .leftJoinAndSelect('destination.imageFile', 'imageFile')
+      .where('destination.slug = :slug', { slug })
+      .andWhere('destination.isActive = :isActive', { isActive: true })
+      .getOne();
+
+    if (!destination) {
+      throw new AppException(API_ERRORS.DESTINATION_NOT_FOUND, { slug });
+    }
+
+    return destination;
   }
 
   async findOneByName(name: string): Promise<Destination | null> {

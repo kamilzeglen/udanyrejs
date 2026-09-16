@@ -26,8 +26,20 @@ export class Company {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: false })
+  showInMenu: boolean;
+
   @Column({ type: 'varchar', length: 100, unique: true })
   key: string;
+
+  @Column({ type: 'varchar', length: 120, unique: true, nullable: true })
+  slug: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  seoTitle: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  seoDescription: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;

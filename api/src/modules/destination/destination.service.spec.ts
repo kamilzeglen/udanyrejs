@@ -4,6 +4,26 @@ import { DestinationService } from './destination.service';
 describe('DestinationService', () => {
   const requestUser = { email: 'admin@udanyrejs.pl' } as any;
 
+  it('findAll includes the image needed by directory cards', async () => {
+    const queryBuilder = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      loadRelationCountAndMap: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    };
+    const service = new DestinationService(
+      { createQueryBuilder: jest.fn().mockReturnValue(queryBuilder) } as any,
+      {} as any,
+      {} as any,
+    );
+
+    await service.findAll();
+
+    expect(queryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+      'destination.imageFile',
+      'imageFile',
+    );
+  });
+
   it('findOneByName uses a case-insensitive exact match', async () => {
     const destination = {
       id: 'c0f1129f-334d-4072-a55c-c9c6773ed6f7',
@@ -42,6 +62,33 @@ describe('DestinationService', () => {
     );
 
     await expect(service.findOneByName('Atlantyda')).resolves.toBeNull();
+  });
+
+  it('findPublicBySlug returns only an active destination with its image', async () => {
+    const destination = { id: 'destination-1', slug: 'caribbean' };
+    const queryBuilder = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(destination),
+    };
+    const service = new DestinationService(
+      { createQueryBuilder: jest.fn().mockReturnValue(queryBuilder) } as any,
+      {} as any,
+      {} as any,
+    );
+
+    await expect(service.findPublicBySlug('caribbean')).resolves.toEqual(
+      destination,
+    );
+    expect(queryBuilder.where).toHaveBeenCalledWith(
+      'destination.slug = :slug',
+      { slug: 'caribbean' },
+    );
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+      'destination.isActive = :isActive',
+      { isActive: true },
+    );
   });
 
   it('rejects an ambiguous case-insensitive name', async () => {

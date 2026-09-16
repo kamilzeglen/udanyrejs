@@ -5,7 +5,11 @@ export interface Company {
   id: string;
   name: string;
   isActive: boolean;
+  showInMenu: boolean;
   key: string;
+  slug?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   description: string;
   priceIncludes: string[];
   priceExcludes: string[];

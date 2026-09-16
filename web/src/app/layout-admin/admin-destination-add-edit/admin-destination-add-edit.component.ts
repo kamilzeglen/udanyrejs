@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReplaySubject, take, takeUntil } from 'rxjs';
+import { combineLatest, filter, map, merge, of, ReplaySubject, switchMap, take, takeUntil } from 'rxjs';
 import { Destination } from '@interfaces';
 import { CommonFacade } from '@state/common';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
@@ -8,6 +8,7 @@ import { RouterFacade } from '@state/router';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmationModalService } from '@shared/confirmation-modal/confirmation-modal.service';
 import { clearBackendError, setBackendErrorForKey } from '@core/utils/form-backend-error.util';
+import { ImageFileFacade } from '@state/imageFile';
 
 @Component({
   selector: 'app-admin-destination-add-edit',
@@ -23,6 +24,7 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
   public isInitializing: boolean = false;
 
   public destinationForm: FormGroup;
+  public imageFile: File;
 
   constructor(
     private readonly commonFacade: CommonFacade,
@@ -31,6 +33,7 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
     private readonly router: RouterFacade,
     private readonly activatedRoute: ActivatedRoute,
     private readonly confirmationModalService: ConfirmationModalService,
+    private readonly imageFileFacade: ImageFileFacade,
   ) {}
 
   public ngOnInit(): void {
@@ -38,6 +41,11 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
 
     this.destinationForm = this.fb.group({
       name: ['', Validators.required],
+      slug: ['', Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)],
+      seoTitle: ['', Validators.maxLength(255)],
+      seoDescription: ['', Validators.maxLength(500)],
+      description: [''],
+      showInMenu: [false],
     });
 
     this.commonFacade.getDestinationSuccess$.pipe(take(1)).subscribe(({ destination }) => {
@@ -65,10 +73,31 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.commonFacade.createDestinationSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie dodano region');
-      this.router.changeRoute({ linkParams: ['/admin/destinations'] });
-    });
+    this.commonFacade.createDestinationSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({ destination }) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.createImageFile(destination.id);
+          return combineLatest([
+            merge(
+              this.imageFileFacade.createImageFileSuccess$.pipe(map(() => true)),
+              this.imageFileFacade.createImageFileError$.pipe(map(() => false)),
+            ),
+          ]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined),
+      )
+      .subscribe(([imageResult]) => {
+        const message = imageResult
+          ? 'Pomyślnie dodano region'
+          : 'Region został dodany, ale nie udało się przesłać obrazu';
+        this.snackService.showInfo(message);
+        this.router.changeRoute({ linkParams: ['/admin/destinations'] });
+      });
 
     this.commonFacade.createDestinationError$.pipe(takeUntil(this.destroy$)).subscribe(({ errorMessage }) => {
       setBackendErrorForKey(this.destinationForm.controls.name, errorMessage, 'DESTINATION_NAME_DUPLICATE');
@@ -80,10 +109,31 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
       this.snackService.showError('Wystąpił błąd podczas aktualizowania regionu');
     });
 
-    this.commonFacade.updateDestinationSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.snackService.showInfo('Pomyślnie zaktualizowano region');
-      this.router.changeRoute({ linkParams: ['/admin/destinations'] });
-    });
+    this.commonFacade.updateDestinationSuccess$
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(({ destination }) => {
+          if (!this.imageFile) {
+            return of([true]);
+          }
+
+          this.updateImageFile(destination.id);
+          return combineLatest([
+            merge(
+              this.imageFileFacade.updateImageFileSuccess$.pipe(map(() => true)),
+              this.imageFileFacade.updateImageFileError$.pipe(map(() => false)),
+            ),
+          ]);
+        }),
+        filter(([imageResult]) => imageResult !== undefined),
+      )
+      .subscribe(([imageResult]) => {
+        const message = imageResult
+          ? 'Pomyślnie zaktualizowano region'
+          : 'Region został zaktualizowany, ale nie udało się przesłać obrazu';
+        this.snackService.showInfo(message);
+        this.router.changeRoute({ linkParams: ['/admin/destinations'] });
+      });
 
     this.commonFacade.deleteDestinationSuccess$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.snackService.showInfo('Pomyślnie usunięto region');
@@ -118,6 +168,27 @@ export class AdminDestinationAddEditComponent implements OnInit, OnDestroy {
       const id = this.editingDestination.id;
       this.commonFacade.updateDestination({ id, formData: payload });
     }
+  }
+
+  public onImageFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (file) {
+      this.imageFile = file;
+    }
+  }
+
+  private createImageFile(destinationId: string): void {
+    const formData = new FormData();
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.createImageFile({ imageFileType: 'destination', targetId: destinationId, file: formData });
+  }
+
+  private updateImageFile(destinationId: string): void {
+    const formData = new FormData();
+    formData.append('imageFile', this.imageFile);
+    this.imageFileFacade.updateImageFile({ imageFileType: 'destination', targetId: destinationId, file: formData });
   }
 
   public deleteDestination(): void {

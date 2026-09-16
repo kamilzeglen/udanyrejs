@@ -21,6 +21,25 @@
       </div>
 
       <div class="form-group">
+        <label for="slug">Slug URL po angielsku:</label>
+        <input id="slug" formControlName="slug" type="text" placeholder="msc-cruises" />
+      </div>
+
+      <div class="form-group">
+        <label for="seoTitle">Tytuł SEO:</label>
+        <input id="seoTitle" formControlName="seoTitle" type="text" />
+      </div>
+
+      <div class="form-group">
+        <label for="seoDescription">Opis SEO:</label>
+        <textarea id="seoDescription" formControlName="seoDescription" rows="3"></textarea>
+      </div>
+
+      <div class="form-group">
+        <mat-checkbox formControlName="showInMenu">Pokaż w menu „Armatorzy”</mat-checkbox>
+      </div>
+
+      <div class="form-group">
         <label for="description">Opis firmy: (HTML)</label>
         <textarea
           id="description"
@@ -68,13 +87,7 @@
       Usuń firmę
     </button>
 
-    <button
-      (click)="submitForm()"
-      mat-raised-button
-      color="primary"
-      type="submit"
-      [disabled]="companyForm.invalid || (!imageFile && !editingCompany?.imageFile?.name)"
-    >
+    <button (click)="submitForm()" mat-raised-button color="primary" type="submit" [disabled]="companyForm.invalid">
       {{ mode === 'ADD' ? 'Dodaj firme' : 'Zaktualizuj firme' }}
     </button>
   </form>

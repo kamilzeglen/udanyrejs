@@ -51,6 +51,11 @@ export class DestinationController {
     return await this.destinationService.findOneByID(destinationID);
   }
 
+  @Get('/public/:slug')
+  async getPublicBySlug(@Param('slug') slug: string): Promise<Destination> {
+    return this.destinationService.findPublicBySlug(slug);
+  }
+
   @UseGuards(AuthGuard)
   @Get('/export')
   async exportDestinations(

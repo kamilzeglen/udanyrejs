@@ -86,6 +86,11 @@ export class CompanyController {
     return await this.companyService.findOne(companyID);
   }
 
+  @Get('/public/:slug')
+  async getPublicBySlug(@Param('slug') slug: string): Promise<Company> {
+    return this.companyService.findPublicBySlug(slug);
+  }
+
   @UseGuards(AuthGuard)
   @Post('/')
   async createCompany(

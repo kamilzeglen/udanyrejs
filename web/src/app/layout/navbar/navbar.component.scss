@@ -97,6 +97,22 @@
   color: $primary-color;
   outline: none;
 }
+.show-all-menu-items {
+  display: block;
+  width: calc(100% - 4px);
+  margin: 6px 2px 2px;
+  padding: 10px;
+  border: 0;
+  border-top: 1px solid $cruise-border;
+  background: transparent;
+  color: $primary-color;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  @include cruise-focus;
+}
 .navbar-container {
   display: flex;
   align-items: flex-end;

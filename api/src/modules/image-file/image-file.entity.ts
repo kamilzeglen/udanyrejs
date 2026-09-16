@@ -12,6 +12,7 @@ import {
 import { Offer } from '@modules/offer/offer.entity';
 import { Ship } from '@modules/ship/ship.entity';
 import { Company } from '@modules/company/company.entity';
+import { Destination } from '@modules/destination/destination.entity';
 import { User } from '@modules/user/user.entity';
 
 @Entity()
@@ -39,6 +40,11 @@ export class ImageFile {
 
   @OneToOne(() => Company, (company) => company.imageFile, { nullable: true })
   company: Company;
+
+  @OneToOne(() => Destination, (destination) => destination.imageFile, {
+    nullable: true,
+  })
+  destination: Destination;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn()

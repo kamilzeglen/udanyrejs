@@ -24,6 +24,7 @@ import { EmailModule } from '@modules/email/email.module';
 import { TerminusModule } from '@nestjs/terminus';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LogModule } from '@modules/log/log.module';
+import { SitemapModule } from '@modules/sitemap/sitemap.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { envValidationSchema } from '@core/config/env.validation';
@@ -101,6 +102,10 @@ import { envValidationSchema } from '@core/config/env.validation';
           rootPath: process.env.COMPANIES_IMAGES_PATH,
           serveRoot: '/companies/images',
         },
+        {
+          rootPath: process.env.DESTINATIONS_IMAGES_PATH,
+          serveRoot: '/destinations/images',
+        },
       ],
     }),
     TerminusModule,
@@ -119,6 +124,7 @@ import { envValidationSchema } from '@core/config/env.validation';
     ShipModule,
     EmailModule,
     LogModule,
+    SitemapModule,
   ],
   controllers: [AppController],
   providers: [

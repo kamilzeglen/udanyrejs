@@ -17,17 +17,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   public destinationMenuItems$ = this.commonFacade.destinations$.pipe(
     map((destinations) =>
       (destinations ?? [])
-        .filter((destination) => destination.isActive)
-        .sort((first, second) => first.name.localeCompare(second.name, 'pl'))
-        .slice(0, 8),
+        .filter((destination) => destination.isActive && destination.showInMenu && Boolean(destination.slug))
+        .sort((first, second) => first.name.localeCompare(second.name, 'pl')),
     ),
   );
   public companyMenuItems$ = this.commonFacade.companies$.pipe(
     map((companies) =>
       (companies ?? [])
-        .filter((company) => company.isActive)
-        .sort((first, second) => first.name.localeCompare(second.name, 'pl'))
-        .slice(0, 8),
+        .filter((company) => company.isActive && company.showInMenu && Boolean(company.slug))
+        .sort((first, second) => first.name.localeCompare(second.name, 'pl')),
     ),
   );
 
