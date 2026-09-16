@@ -7,6 +7,7 @@ import {
   requireImportFile,
   parseExportIds,
 } from '@core/import-export/import-upload.util';
+import { buildExportFilename } from '@core/import-export/export-filename.util';
 import {
   ImportConfirmResult,
   ImportPreviewResult,
@@ -44,7 +45,7 @@ export class CompanyController {
     response.setHeader('Content-Type', 'application/zip');
     response.setHeader(
       'Content-Disposition',
-      'attachment; filename="companies.zip"',
+      `attachment; filename="${buildExportFilename('companies.zip')}"`,
     );
     response.send(buffer);
   }

@@ -20,6 +20,7 @@ import {
   parseExportIds,
   requireImportFile,
 } from '@core/import-export/import-upload.util';
+import { buildExportFilename } from '@core/import-export/export-filename.util';
 import {
   ImportConfirmResult,
   ImportPreviewResult,
@@ -67,7 +68,7 @@ export class CabinTypeController {
     response.setHeader('Content-Type', 'text/csv; charset=utf-8');
     response.setHeader(
       'Content-Disposition',
-      'attachment; filename="cabin-types.csv"',
+      `attachment; filename="${buildExportFilename('cabin-types.csv')}"`,
     );
     response.send(csv);
   }

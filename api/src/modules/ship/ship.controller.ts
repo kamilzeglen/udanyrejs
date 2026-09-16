@@ -7,6 +7,7 @@ import {
   requireImportFile,
   parseExportIds,
 } from '@core/import-export/import-upload.util';
+import { buildExportFilename } from '@core/import-export/export-filename.util';
 import {
   ImportConfirmResult,
   ImportPreviewResult,
@@ -44,7 +45,7 @@ export class ShipController {
     response.setHeader('Content-Type', 'application/zip');
     response.setHeader(
       'Content-Disposition',
-      'attachment; filename="ships.zip"',
+      `attachment; filename="${buildExportFilename('ships.zip')}"`,
     );
     response.send(buffer);
   }

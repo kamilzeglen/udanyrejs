@@ -50,6 +50,7 @@ import {
   requireImportFile,
   zipUploadOptions,
 } from '@core/import-export/import-upload.util';
+import { buildExportFilename } from '@core/import-export/export-filename.util';
 import {
   ImportConfirmResult,
   ImportPreviewResult,
@@ -136,7 +137,7 @@ export class OfferController {
     response.setHeader('Content-Type', 'application/zip');
     response.setHeader(
       'Content-Disposition',
-      'attachment; filename="offers.zip"',
+      `attachment; filename="${buildExportFilename('offers.zip')}"`,
     );
     response.send(zipBuffer);
   }
