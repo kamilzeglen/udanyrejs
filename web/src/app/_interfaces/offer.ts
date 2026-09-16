@@ -28,6 +28,12 @@ export interface Offer {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date;
+  completenessIssues?: OfferCompletenessIssue[];
+}
+
+export interface OfferCompletenessIssue {
+  code: string;
+  label: string;
 }
 
 export interface OfferBulkSyncResult {

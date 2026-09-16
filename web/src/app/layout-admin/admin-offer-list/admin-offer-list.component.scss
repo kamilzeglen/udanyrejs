@@ -78,8 +78,64 @@
     margin-bottom: 8px;
   }
 
+  mat-expansion-panel-header {
+    height: auto;
+    min-height: 56px;
+  }
+
+  .offer-grid-row {
+    display: grid;
+    grid-template-columns: 32px minmax(250px, 2.2fr) minmax(160px, 1.2fr) minmax(160px, 1.2fr) 90px 100px 80px;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    margin-right: 0;
+  }
+
+  .offer-grid-cell {
+    min-width: 0;
+  }
+
+  .offer-name-cell {
+    color: $primary-color;
+    font-weight: 600;
+  }
+
+  .offer-company-cell,
+  .offer-ship-cell {
+    color: $neutral;
+    font-size: 13px;
+  }
+
+  .offer-terms-cell,
+  .offer-clicks-cell,
+  .offer-completeness-cell {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .offer-completeness-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: $negative;
+    font-size: 13px;
+    font-weight: 700;
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+
+  .incomplete-group {
+    border: 2px solid $negative;
+  }
+
   .offer-select-checkbox {
-    margin-right: 12px;
+    margin: 0;
   }
 
   .offer-panel-content {
@@ -316,6 +372,92 @@
     &:hover {
       border-color: $primary-color;
       color: $primary-color;
+    }
+  }
+}
+
+.offer-grid-column-labels {
+  display: grid;
+  grid-template-columns: 32px minmax(250px, 2.2fr) minmax(160px, 1.2fr) minmax(160px, 1.2fr) 90px 100px 80px;
+  gap: 12px;
+  margin: 0 68px 6px 44px;
+  color: $neutral;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+
+  span:nth-last-child(-n + 3) {
+    text-align: center;
+  }
+}
+
+@media (max-width: 1100px) {
+  .offer-grid-column-labels {
+    display: none;
+  }
+
+  .offer-groups {
+    .offer-grid-row {
+      grid-template-columns: 32px minmax(180px, 1.5fr) minmax(130px, 1fr) minmax(130px, 1fr);
+      grid-template-areas:
+        'selection name name name'
+        'selection company ship terms'
+        'selection clicks completeness completeness';
+      row-gap: 6px;
+      padding: 10px 0;
+    }
+
+    .offer-select-checkbox {
+      grid-area: selection;
+    }
+
+    .offer-name-cell {
+      grid-area: name;
+    }
+
+    .offer-company-cell {
+      grid-area: company;
+    }
+
+    .offer-ship-cell {
+      grid-area: ship;
+    }
+
+    .offer-terms-cell {
+      grid-area: terms;
+    }
+
+    .offer-clicks-cell {
+      grid-area: clicks;
+      text-align: left;
+    }
+
+    .offer-completeness-cell {
+      grid-area: completeness;
+      justify-content: flex-start;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .offer-groups {
+    .offer-grid-row {
+      grid-template-columns: 32px minmax(0, 1fr);
+      grid-template-areas:
+        'selection name'
+        'selection company'
+        'selection ship'
+        'selection terms'
+        'selection clicks'
+        'selection completeness';
+    }
+
+    .offer-terms-cell,
+    .offer-clicks-cell,
+    .offer-completeness-cell {
+      text-align: left;
+      justify-content: flex-start;
     }
   }
 }

@@ -77,32 +77,52 @@
       </div>
     </div>
 
+    <div class="offer-grid-column-labels" aria-hidden="true">
+      <span></span>
+      <span>Rejs</span>
+      <span>Armator</span>
+      <span>Statek</span>
+      <span>Terminy</span>
+      <span>Kliknięcia</span>
+      <span>Braki</span>
+    </div>
+
     <mat-accordion class="offer-groups" multi="true">
       <mat-expansion-panel
         *ngFor="let group of viewModel.groups; trackBy: trackByOfferId"
         [class.inactive-group]="!group.hasActiveTerm"
+        [class.incomplete-group]="group.offer.completenessIssues?.length > 0"
       >
         <mat-expansion-panel-header>
-          <mat-panel-title>
+          <mat-panel-title class="offer-grid-row">
             <mat-checkbox
               class="offer-select-checkbox"
               [checked]="group.selected"
               (change)="toggleOfferSelection(group)"
               (click)="$event.stopPropagation()"
             ></mat-checkbox>
-            {{ group.offer.name }}
+            <span class="offer-grid-cell offer-name-cell">{{ group.offer.name }}</span>
+            <span class="offer-grid-cell offer-company-cell">{{ group.offer.company.name }}</span>
+            <span class="offer-grid-cell offer-ship-cell">{{ group.offer.ship.name }}</span>
+            <span class="offer-grid-cell offer-terms-cell">
+              {{ group.terms.length }} {{ group.terms.length === 1 ? 'termin' : 'terminów' }}
+            </span>
+            <span class="offer-grid-cell offer-clicks-cell">
+              {{
+                group.totalShareStats.webClicks +
+                  group.totalShareStats.facebookClicks +
+                  group.totalShareStats.instagramClicks +
+                  group.totalShareStats.tiktokClicks
+              }}
+            </span>
+            <span class="offer-grid-cell offer-completeness-cell">
+              <ng-container *ngIf="group.offer.completenessIssues?.length > 0; else noCompletenessIssues">
+                <mat-icon>warning</mat-icon>
+                {{ group.offer.completenessIssues.length }}
+              </ng-container>
+              <ng-template #noCompletenessIssues>—</ng-template>
+            </span>
           </mat-panel-title>
-          <mat-panel-description>
-            {{ group.offer.company.name }} / {{ group.offer.ship.name }} — {{ group.terms.length }}
-            {{ group.terms.length === 1 ? 'termin' : 'terminów' }} — Łącznie:
-            {{
-              group.totalShareStats.webClicks +
-                group.totalShareStats.facebookClicks +
-                group.totalShareStats.instagramClicks +
-                group.totalShareStats.tiktokClicks
-            }}
-            kliknięć
-          </mat-panel-description>
         </mat-expansion-panel-header>
 
         <div class="offer-panel-content">
@@ -183,6 +203,16 @@
                 >
                   <mat-icon>{{ group.termsWithSourceCount > 0 ? 'check_circle' : 'cancel' }}</mat-icon>
                   Link źródłowy ({{ group.termsWithSourceCount }}/{{ group.terms.length }})
+                </span>
+              </div>
+            </div>
+
+            <div class="status-group" *ngIf="group.offer.completenessIssues?.length > 0">
+              <span class="status-group-label">Braki do uzupełnienia</span>
+              <div class="asset-status">
+                <span class="asset-chip missing" *ngFor="let issue of group.offer.completenessIssues">
+                  <mat-icon>cancel</mat-icon>
+                  {{ issue.label }}
                 </span>
               </div>
             </div>
