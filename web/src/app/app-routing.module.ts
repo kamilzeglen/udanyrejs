@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ErrorComponent } from './layout/error/error.component';
+import { NotFoundComponent } from '@shared/not-found/not-found.component';
 
 const routes: Routes = [
   {
@@ -15,7 +16,7 @@ const routes: Routes = [
         path: 'admin',
         loadChildren: () => import('./layout-admin/layout-admin.module').then((m) => m.LayoutAdminModule),
       },
-      { path: '**', redirectTo: 'offers' },
+      { path: '**', component: NotFoundComponent },
     ],
   },
 ];

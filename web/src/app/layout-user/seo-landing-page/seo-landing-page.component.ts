@@ -144,12 +144,6 @@ export class SeoLandingPageComponent implements OnInit, OnDestroy {
   private setNotFound(): void {
     this.isNotFound = true;
     this.isLoading = false;
-    this.seoService.setPageMeta({
-      title: 'Nie znaleziono strony | UdanyRejs',
-      description: 'Ta strona nie jest już dostępna.',
-      path: this.activatedRoute.snapshot.url.join('/'),
-      noIndex: true,
-    });
   }
 
   private getImagePath(entity: LandingEntity): string | undefined {

@@ -11,6 +11,7 @@ import { AutoSpinnerDirective } from '@shared/_directive/auto-spinner.directive'
 import { SubMenuComponent } from '../layout/sub-menu/sub-menu.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
+import { NotFoundComponent } from '@shared/not-found/not-found.component';
 
 const components = [
   SnackBarComponent,
@@ -18,6 +19,7 @@ const components = [
   SpinnerComponent,
   SubMenuComponent,
   ImportModalComponent,
+  NotFoundComponent,
 ];
 
 const basicModules = [RouterModule, FormsModule, CommonModule, ReactiveFormsModule, NgSelectModule];
