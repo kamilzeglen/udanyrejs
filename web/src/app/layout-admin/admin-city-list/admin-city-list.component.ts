@@ -12,9 +12,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImportModalComponent } from '@shared/import-modal/import-modal.component';
 import { ImportExportFacade } from '@state/importExport';
 import { triggerFileDownload } from '@core/utils/trigger-file-download.util';
+import { hasCityCoordinates } from '@core/utils/has-city-coordinates.util';
 
 export interface CityRow extends City {
   destinationNames: string;
+  hasCoordinates: boolean;
 }
 
 interface SelectableCityRow extends CityRow {
@@ -45,6 +47,7 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
         destinationNames: city.destinations?.length
           ? city.destinations.map((destination) => destination.name).join(', ')
           : '-',
+        hasCoordinates: hasCityCoordinates(city),
       })),
     ),
   );
@@ -55,6 +58,7 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
     'id',
     'name',
     'destinationNames',
+    'hasCoordinates',
     'isActive',
     'actions',
     'updatedAt',
@@ -182,7 +186,7 @@ export class AdminCityListComponent implements OnInit, OnDestroy {
       return this.allColumns;
     }
     if (this.deviceInfo.deviceTypeDetected === 'TABLET') {
-      return ['select', 'id', 'name', 'destinationNames', 'isActive', 'actions', 'createdAt'];
+      return ['select', 'id', 'name', 'destinationNames', 'hasCoordinates', 'isActive', 'actions', 'createdAt'];
     }
     if (this.deviceInfo.deviceTypeDetected === 'PHONE') {
       return ['select', 'id', 'name', 'isActive', 'actions', 'createdAt'];

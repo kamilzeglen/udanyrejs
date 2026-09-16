@@ -49,6 +49,14 @@
         <td mat-cell *matCellDef="let element">{{ element.destinationNames }}</td>
       </ng-container>
 
+      <ng-container matColumnDef="hasCoordinates">
+        <th mat-header-cell *matHeaderCellDef>Koordynaty</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-icon *ngIf="element.hasCoordinates" style="color: green">checked</mat-icon>
+          <mat-icon *ngIf="element.hasCoordinates === false" style="color: red">unchecked</mat-icon>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="isActive">
         <th mat-header-cell *matHeaderCellDef>Aktywne</th>
         <td mat-cell *matCellDef="let element">
